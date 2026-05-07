@@ -1,5 +1,3 @@
-# ProjectCCL8_Cozy
-
 # :feet: 바탕화면 방치형 클리커 게임 (가제)
 
 ## 1. :star2: 프로젝트 개요
