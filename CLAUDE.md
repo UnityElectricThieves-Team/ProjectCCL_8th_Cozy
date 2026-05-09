@@ -68,10 +68,14 @@ ProjectCCL_8th_Cozy/
 - **디렉토리 구조가 크게 바뀌면 함께 업데이트할 것.** 오래된 CLAUDE.md는 잘못된 정보보다 위험합니다.
 - **간결하게.** 한 디렉토리당 한 화면을 넘기지 않는 것이 이상적.
 
+### 현재 존재하는 서브 CLAUDE.md
+
+- [Project_Cozy/Assets/Scripts/Platform/CLAUDE.md](Project_Cozy/Assets/Scripts/Platform/CLAUDE.md) — OS 의존(Win32) 코드 격리 레이어의 책임 / 컨벤션.
+- [Project_Cozy/Assets/Characters/CLAUDE.md](Project_Cozy/Assets/Characters/CLAUDE.md) — 캐릭터 에셋 폴더 구조, 그림자 공통화, **프리팹 콜로케이션 컨벤션**(프리팹은 사용하는 자산과 같은 폴더에 둔다).
+
 ### 생성 후보 (코드/에셋이 채워지면 추가)
 
-- `Project_Cozy/Assets/Scripts/CLAUDE.md` — 스크립트 아키텍처, 폴더 구조(Runtime / Editor / Tests 등), 주요 시스템(별 클릭 / 친밀도 / 변신 / 다중 모니터 / 클릭 투과)의 위치.
-- `Project_Cozy/Assets/Characters/CLAUDE.md` — 캐릭터 에셋 명명 규칙, 스프라이트 사이즈, 픽셀화 파이프라인, 그림자 공통화 규칙.
+- `Project_Cozy/Assets/Scripts/CLAUDE.md` — 스크립트 아키텍처와 주요 시스템(별 클릭 / 친밀도 / 변신 / 다중 모니터 / 클릭 투과)의 위치.
 - `Project_Cozy/Assets/Scenes/CLAUDE.md` — 씬 구성과 진입점.
 
 ---
@@ -105,9 +109,9 @@ ProjectCCL_8th_Cozy/
 
 ### 4.3 데스크톱 펫 특수 사항
 
-- **Win32 / WinAPI 호출은 별도 어댑터 클래스에 격리.** 코어 게임 로직과 OS 의존을 섞지 말 것 (테스트 가능성 + 미래의 macOS 포팅 여지).
+- **Win32 / WinAPI 호출은 별도 어댑터 클래스에 격리.** 코어 게임 로직과 OS 의존을 섞지 말 것.
 - **클릭 투과(click-through), Always-on-top, 다중 모니터 코드는 한 곳에 모을 것.** 여러 곳에 흩어지면 디버깅 지옥.
-- **유저 환경 설정**(볼륨, 투명도, Boss Key 등)은 `ScriptableObject` + `JsonUtility`로 직렬화.
+- **유저 환경 설정**(볼륨, 투명도, Boss Key 등)은 한 곳에서 일괄 직렬화. 구체 방식(`ScriptableObject` / `JsonUtility` / `PlayerPrefs` 등)은 구현 시점에 결정.
 
 ### 4.4 성능 가이드라인 (최우선 원칙)
 
