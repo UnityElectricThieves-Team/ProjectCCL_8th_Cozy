@@ -37,6 +37,9 @@
 # Visual Studio cache directory
 .vs/
 
+# VSCode workspace settings (개인 IDE 설정 — 팀 표준 필요해지면 부분 추적으로 전환)
+.vscode/
+
 # Gradle cache directory
 .gradle/
 
@@ -104,3 +107,13 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /Project_Cozy/[Aa]ssets/[Ss]ceneDependencyCache*
+
+# OS-specific noise
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Claude Code 작업물 (팀 합의 후 재검토 — Docs/TODO.md 참조)
+.claude/
+CLAUDE.local.md
