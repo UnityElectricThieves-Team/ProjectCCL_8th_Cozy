@@ -23,6 +23,7 @@ borderless 창의 외형 / 거동 관리.
 포커스 상태와 무관한 입력 수집.
 
 - `GlobalKeyboardHook.cs` — `WH_KEYBOARD_LL` + `InputSystem.onAnyButtonPress` 결합. 포커스 유무에 따라 두 경로가 상호 배타적으로 fire.
+- `InputSystem_Actions.inputactions` — Unity New Input System 액션 매핑 에셋. 입력 처리 코드와 함께 두기 위해 `Assets/` 루트에서 이쪽으로 이동.
 
 ## 작성 컨벤션
 
