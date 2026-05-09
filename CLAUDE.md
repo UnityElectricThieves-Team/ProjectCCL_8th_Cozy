@@ -26,9 +26,7 @@
 ### 관련 문서
 
 - [README.md](README.md) — 게임 기획서
-- [Docs/GameDesign.md](Docs/GameDesign.md) — 게임 디자인 문서
-- [Docs/온보딩.md](Docs/온보딩.md) — 신규 개발자 환경 셋업 (Git LFS, UnityYAMLMerge 등)
-- [Docs/TODO.md](Docs/TODO.md) — 보류된 결정사항 / 추후 논의 필요 항목
+- [Docs/](Docs/) — 게임 디자인, 일정, 온보딩 등 보조 문서 모음. 파일 목록은 디렉토리에서 직접 확인.
 
 ---
 
@@ -38,8 +36,7 @@
 ProjectCCL_8th_Cozy/
 ├── CLAUDE.md                    # 이 문서 (AI/개발자 진입점)
 ├── README.md                    # 프로젝트 기획서
-├── Docs/
-│   └── GameDesign.md            # 게임 디자인 문서
+├── Docs/                        # 게임 디자인 / 일정 / 온보딩 등 보조 문서
 └── Project_Cozy/                # Unity 프로젝트 루트
     ├── Assets/
     │   ├── Characters/          # 캐릭터(동물/소녀) 스프라이트, 애니메이션, 프리팹
