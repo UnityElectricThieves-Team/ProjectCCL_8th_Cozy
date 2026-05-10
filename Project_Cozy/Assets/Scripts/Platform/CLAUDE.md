@@ -22,7 +22,8 @@ borderless 창의 외형 / 거동 관리.
 ### Input/
 포커스 상태와 무관한 입력 수집.
 
-- `GlobalKeyboardHook.cs` — `WH_KEYBOARD_LL` + `InputSystem.onAnyButtonPress` 결합. 포커스 유무에 따라 두 경로가 상호 배타적으로 fire.
+- `GlobalKeyboardHook.cs` — `WH_KEYBOARD_LL` + `InputSystem.onAnyButtonPress` 결합. 포커스 유무에 따라 두 경로가 상호 배타적으로 fire. 입력 키를 `UnityEngine.InputSystem.Key`로 정규화해 `KeyPressed(Key)`로 보고 — 현재 keydown만, 모디파이어/조합키/keyup 미지원(필요 시 KeyEvent 형태로 확장).
+- `Win32KeyMap.cs` — Win32 가상 키코드 → `UnityEngine.InputSystem.Key` 매핑. 순수 로직(`UnityEngine` 의존 없음 → EditMode 테스트 가능). LL 훅 경로에서 vkCode를 `Key`로 바꿀 때 쓴다.
 - `InputSystem_Actions.inputactions` — Unity New Input System 액션 매핑 에셋. 입력 처리 코드와 함께 두기 위해 `Assets/` 루트에서 이쪽으로 이동.
 
 ## 작성 컨벤션
