@@ -70,12 +70,12 @@ ProjectCCL_8th_Cozy/
 
 ### 현재 존재하는 서브 CLAUDE.md
 
+- [Project_Cozy/Assets/Scripts/CLAUDE.md](Project_Cozy/Assets/Scripts/CLAUDE.md) — 스크립트 레이어 구조(`Platform` / `Gameplay` / `Animation` / `UI`)와 의존 방향, 현재 파일 목록.
 - [Project_Cozy/Assets/Scripts/Platform/CLAUDE.md](Project_Cozy/Assets/Scripts/Platform/CLAUDE.md) — OS 의존(Win32) 코드 격리 레이어의 책임 / 컨벤션.
 - [Project_Cozy/Assets/Characters/CLAUDE.md](Project_Cozy/Assets/Characters/CLAUDE.md) — 캐릭터 에셋 폴더 구조, 그림자 공통화, **프리팹 콜로케이션 컨벤션**(프리팹은 사용하는 자산과 같은 폴더에 둔다).
 
 ### 생성 후보 (코드/에셋이 채워지면 추가)
 
-- `Project_Cozy/Assets/Scripts/CLAUDE.md` — 스크립트 아키텍처와 주요 시스템(별 클릭 / 친밀도 / 변신 / 다중 모니터 / 클릭 투과)의 위치.
 - `Project_Cozy/Assets/Scenes/CLAUDE.md` — 씬 구성과 진입점.
 
 ---
