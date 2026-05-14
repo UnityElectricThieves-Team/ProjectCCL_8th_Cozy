@@ -3,17 +3,17 @@ using UnityEngine;
 public class PerformanceSettings : MonoBehaviour
 {
     [Header("General")]
-    [SerializeField] private bool disableVSync = true;
+    [SerializeField] private bool _disableVSync = true;
 
     [Header("Frame Rate")]
-    [SerializeField] private int foregroundTargetFps = 60;
-    [SerializeField] private int backgroundTargetFps = 30;
+    [SerializeField] private int _foregroundTargetFps = 60;
+    [SerializeField] private int _backgroundTargetFps = 30;
 
     private void Awake()
     {
         Application.runInBackground = true;
 
-        if (disableVSync)
+        if (_disableVSync)
         {
             QualitySettings.vSyncCount = 0;
         }
@@ -28,7 +28,7 @@ public class PerformanceSettings : MonoBehaviour
 
     private void ApplyTargetFps(bool hasFocus)
     {
-        var target = hasFocus ? foregroundTargetFps : backgroundTargetFps;
+        var target = hasFocus ? _foregroundTargetFps : _backgroundTargetFps;
         Application.targetFrameRate = Mathf.Max(15, target);
     }
 }

@@ -6,18 +6,18 @@ using UnityEngine;
 public class WindowAspectFitter : MonoBehaviour
 {
     [Header("Aspect Ratio")]
-    [SerializeField] private int aspectWidth = 32;
-    [SerializeField] private int aspectHeight = 3;
+    [SerializeField] private int _aspectWidth = 32;
+    [SerializeField] private int _aspectHeight = 3;
 
     [Header("Position")]
-    [SerializeField] private bool dockToBottom = true;
-    [SerializeField] private bool centerHorizontally = true;
+    [SerializeField] private bool _dockToBottom = true;
+    [SerializeField] private bool _centerHorizontally = true;
 
     [Header("Safety")]
-    [SerializeField] private bool clampToWorkAreaHeight = true;
-    [SerializeField] private bool applyOnStart = true;
-    [SerializeField] private bool reapplyOnFocus = true;
-    [SerializeField] private bool debugLogs;
+    [SerializeField] private bool _clampToWorkAreaHeight = true;
+    [SerializeField] private bool _applyOnStart = true;
+    [SerializeField] private bool _reapplyOnFocus = true;
+    [SerializeField] private bool _debugLogs;
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetActiveWindow();
@@ -43,40 +43,40 @@ public class WindowAspectFitter : MonoBehaviour
     [DllImport("user32.dll", EntryPoint = "SetWindowLong", SetLastError = true)]
     private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
 
-    private const uint MonitorDefaultToNearest = 2;
-    private const uint SwpNoZOrder = 0x0004;
-    private const uint SwpNoActivate = 0x0010;
-    private const uint SwpFrameChanged = 0x0020;
-    private static readonly IntPtr HwndTop = IntPtr.Zero;
-    private const int GwlStyle = -16;
-    private const long WsCaption = 0x00C00000L;
-    private const long WsThickFrame = 0x00040000L;
-    private const long WsMinimizeBox = 0x00020000L;
-    private const long WsMaximizeBox = 0x00010000L;
-    private const long WsSysMenu = 0x00080000L;
+    private const uint MONITOR_DEFAULT_TO_NEAREST = 2;
+    private const uint SWP_NOZORDER = 0x0004;
+    private const uint SWP_NOACTIVATE = 0x0010;
+    private const uint SWP_FRAMECHANGED = 0x0020;
+    private static readonly IntPtr HWND_TOP = IntPtr.Zero;
+    private const int GWL_STYLE = -16;
+    private const long WS_CAPTION = 0x00C00000L;
+    private const long WS_THICKFRAME = 0x00040000L;
+    private const long WS_MINIMIZEBOX = 0x00020000L;
+    private const long WS_MAXIMIZEBOX = 0x00010000L;
+    private const long WS_SYSMENU = 0x00080000L;
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct Rect
+    private struct NativeRect
     {
-        public int left;
-        public int top;
-        public int right;
-        public int bottom;
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     private struct MonitorInfo
     {
-        public int cbSize;
-        public Rect rcMonitor;
-        public Rect rcWork;
-        public uint dwFlags;
+        public int CbSize;
+        public NativeRect RcMonitor;
+        public NativeRect RcWork;
+        public uint DwFlags;
     }
 
     private void Start()
     {
 #if UNITY_STANDALONE_WIN && !UNITY_EDITOR
-        if (applyOnStart)
+        if (_applyOnStart)
         {
             StartCoroutine(ApplyAfterWindowReady());
         }
@@ -86,7 +86,7 @@ public class WindowAspectFitter : MonoBehaviour
     private void OnApplicationFocus(bool hasFocus)
     {
 #if UNITY_STANDALONE_WIN && !UNITY_EDITOR
-        if (hasFocus && reapplyOnFocus)
+        if (hasFocus && _reapplyOnFocus)
         {
             ApplyNow();
         }
@@ -105,38 +105,38 @@ public class WindowAspectFitter : MonoBehaviour
 
         SetBorderlessStyle(hwnd);
 
-        var monitor = MonitorFromWindow(hwnd, MonitorDefaultToNearest);
-        var monitorInfo = new MonitorInfo { cbSize = Marshal.SizeOf(typeof(MonitorInfo)) };
+        var monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULT_TO_NEAREST);
+        var monitorInfo = new MonitorInfo { CbSize = Marshal.SizeOf(typeof(MonitorInfo)) };
         if (!GetMonitorInfo(monitor, ref monitorInfo))
         {
             return;
         }
 
-        var workWidth = monitorInfo.rcWork.right - monitorInfo.rcWork.left;
-        var workHeight = monitorInfo.rcWork.bottom - monitorInfo.rcWork.top;
+        var workWidth = monitorInfo.RcWork.Right - monitorInfo.RcWork.Left;
+        var workHeight = monitorInfo.RcWork.Bottom - monitorInfo.RcWork.Top;
 
-        var safeAspectWidth = Mathf.Max(1, aspectWidth);
-        var safeAspectHeight = Mathf.Max(1, aspectHeight);
+        var safeAspectWidth = Mathf.Max(1, _aspectWidth);
+        var safeAspectHeight = Mathf.Max(1, _aspectHeight);
         var targetHeight = Mathf.RoundToInt((float)workWidth * safeAspectHeight / safeAspectWidth);
 
-        if (clampToWorkAreaHeight && targetHeight > workHeight)
+        if (_clampToWorkAreaHeight && targetHeight > workHeight)
         {
             targetHeight = workHeight;
         }
 
         var targetWidth = workWidth;
 
-        var x = centerHorizontally
-            ? monitorInfo.rcWork.left + (workWidth - targetWidth) / 2
-            : monitorInfo.rcWork.left;
+        var x = _centerHorizontally
+            ? monitorInfo.RcWork.Left + (workWidth - targetWidth) / 2
+            : monitorInfo.RcWork.Left;
 
-        var y = dockToBottom
-            ? monitorInfo.rcWork.bottom - targetHeight
-            : monitorInfo.rcWork.top;
+        var y = _dockToBottom
+            ? monitorInfo.RcWork.Bottom - targetHeight
+            : monitorInfo.RcWork.Top;
 
-        SetWindowPos(hwnd, HwndTop, x, y, targetWidth, targetHeight, SwpNoZOrder | SwpNoActivate | SwpFrameChanged);
+        SetWindowPos(hwnd, HWND_TOP, x, y, targetWidth, targetHeight, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 
-        if (debugLogs)
+        if (_debugLogs)
         {
             Debug.Log($"WindowAspectFitter applied: {targetWidth}x{targetHeight}, x={x}, y={y}");
         }
@@ -156,25 +156,25 @@ public class WindowAspectFitter : MonoBehaviour
     private static IntPtr GetWindowStyle(IntPtr hWnd)
     {
         return IntPtr.Size == 8
-            ? GetWindowLongPtr64(hWnd, GwlStyle)
-            : new IntPtr(GetWindowLong32(hWnd, GwlStyle));
+            ? GetWindowLongPtr64(hWnd, GWL_STYLE)
+            : new IntPtr(GetWindowLong32(hWnd, GWL_STYLE));
     }
 
     private static void SetWindowStyle(IntPtr hWnd, IntPtr style)
     {
         if (IntPtr.Size == 8)
         {
-            SetWindowLongPtr64(hWnd, GwlStyle, style);
+            SetWindowLongPtr64(hWnd, GWL_STYLE, style);
             return;
         }
 
-        SetWindowLong32(hWnd, GwlStyle, style.ToInt32());
+        SetWindowLong32(hWnd, GWL_STYLE, style.ToInt32());
     }
 
     private static void SetBorderlessStyle(IntPtr hWnd)
     {
         var currentStyle = GetWindowStyle(hWnd).ToInt64();
-        var newStyle = currentStyle & ~WsCaption & ~WsThickFrame & ~WsMinimizeBox & ~WsMaximizeBox & ~WsSysMenu;
+        var newStyle = currentStyle & ~WS_CAPTION & ~WS_THICKFRAME & ~WS_MINIMIZEBOX & ~WS_MAXIMIZEBOX & ~WS_SYSMENU;
         SetWindowStyle(hWnd, new IntPtr(newStyle));
     }
 }
