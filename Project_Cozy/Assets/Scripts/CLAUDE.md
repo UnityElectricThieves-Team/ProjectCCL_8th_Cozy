@@ -28,6 +28,8 @@
 - `Interaction/InputInteractionManager.cs` — 마우스 위치 → 콜라이더 → sortingLayer/sortingOrder 가장 높은 인터랙터블에 라우팅. 포인터-정지 시 재스캔 스킵 최적화 내장.
 - `Interaction/MoonClickIdle2D.cs` — 별(가제) 컴포넌트. K키로 Active → 클릭 시 prefab 리스트의 다음 1개 스폰.
 - `Interaction/InputInteractionTestProbe.cs` — 인터페이스 3개 구현, `Debug.Log`만 하는 시연/테스트용.
+- `Interaction/OpaquePixelHover.cs` — IHoverable을 받아 sprite 픽셀 알파를 검사 → 불투명일 때만 UnityEvent 발사. 테스트용 sprite의 Read/Write 필요.
+- `Interaction/PettingReactionTestProbe.cs` — "쓰다듬" 시각 반응 (틴트 + 스케일). OpaquePixelHover의 UnityEvent에 연결되는 테스트용 반응 컴포넌트.
 - `PerformanceSetting/PerformanceSettings.cs` — VSync OFF + foreground/background `targetFrameRate` 전환.
 - `PerformanceSetting/WindowAspectFitter.cs` — Win32로 윈도우 크기·종횡비·하단 도킹 강제. *`BorderlessWindow`와 같은 HWND를 만지므로 한 씬에 둘 다 둘 때 적용 순서 주의.*
 - `Animation/SpriteAnimator.cs` — 프레임 배열을 fps마다 순환. `IsPlaying` / `Play` / `Stop` / `Toggle`.
