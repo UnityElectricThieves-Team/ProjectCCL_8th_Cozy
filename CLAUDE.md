@@ -70,13 +70,16 @@ ProjectCCL_8th_Cozy/
 
 ### 현재 존재하는 서브 CLAUDE.md
 
-- [Project_Cozy/Assets/Scripts/CLAUDE.md](Project_Cozy/Assets/Scripts/CLAUDE.md) — 스크립트 레이어 구조(`Platform` / `Gameplay` / `Animation` / `UI`)와 의존 방향, 현재 파일 목록.
+- [Project_Cozy/Assets/Scripts/CLAUDE.md](Project_Cozy/Assets/Scripts/CLAUDE.md) — 스크립트 레이어 구조(`Platform` / `Interaction` / `PerformanceSetting` / `Animation` / `Character` / `Gameplay` / `UI`)와 의존 방향, 현재 파일 목록.
 - [Project_Cozy/Assets/Scripts/Platform/CLAUDE.md](Project_Cozy/Assets/Scripts/Platform/CLAUDE.md) — OS 의존(Win32) 코드 격리 레이어의 책임 / 컨벤션.
+- [Project_Cozy/Assets/Scripts/Interaction/CLAUDE.md](Project_Cozy/Assets/Scripts/Interaction/CLAUDE.md) — 마우스 입력 라우팅 + 인터랙터블 인터페이스 계약(`IHoverable` / `IClickable` / `IShiftRightClickable`).
+- [Project_Cozy/Assets/Scripts/PerformanceSetting/CLAUDE.md](Project_Cozy/Assets/Scripts/PerformanceSetting/CLAUDE.md) — 프레임 레이트·윈도우 종횡비 등 런타임 정책. *`BorderlessWindow`와 HWND 공유 주의*.
+- [Project_Cozy/Assets/Scripts/Character/CLAUDE.md](Project_Cozy/Assets/Scripts/Character/CLAUDE.md) — 캐릭터 단일 개체의 자율 거동·친밀도 상태 머신.
 - [Project_Cozy/Assets/Characters/CLAUDE.md](Project_Cozy/Assets/Characters/CLAUDE.md) — 캐릭터 에셋 폴더 구조, 그림자 공통화, **프리팹 콜로케이션 컨벤션**(프리팹은 사용하는 자산과 같은 폴더에 둔다).
 
 ### 생성 후보 (코드/에셋이 채워지면 추가)
 
-- `Project_Cozy/Assets/Scenes/CLAUDE.md` — 씬 구성과 진입점.
+- `Project_Cozy/Assets/Scenes/CLAUDE.md` — 씬 구성과 진입점(`SampleScene` = Platform 인프라 동작 확인, `PerformanceSystemScene` = 캐릭터/달/인터랙션 통합 테스트).
 
 ---
 
