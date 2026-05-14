@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>랜덤 Idle/Walk. 발–콜라이더 정렬은 <see cref="LateUpdate"/>의 <see cref="SnapFeet"/> (테스트 펫과 동일 패턴).</summary>
+/// <summary>랜덤 Idle/Walk.</summary>
 public sealed class SpriteRandomIdleWalk2D : MonoBehaviour
 {
     private enum Phase
@@ -18,10 +18,6 @@ public sealed class SpriteRandomIdleWalk2D : MonoBehaviour
     [SerializeField] private Vector2 _walkDurationRange = new Vector2(3f, 5f);
 
     const float MIN_PHASE_SECONDS = 0.05f;
-
-    [SerializeField] private bool _snapFeetToCollider = true;
-    [SerializeField] private Collider2D _feetCollider;
-    [SerializeField] private float _feetPaddingWorld;
 
     private int _visualStateHash;
     private Phase _phase;
@@ -55,14 +51,6 @@ public sealed class SpriteRandomIdleWalk2D : MonoBehaviour
             transform.position += new Vector3(_walkDirection * _walkSpeed * Time.deltaTime, 0f, 0f);
     }
 
-    private void LateUpdate()
-    {
-        if (_spriteRenderer == null)
-            return;
-
-        SnapFeet();
-    }
-
     private void AdvancePhase()
     {
         if (_phase == Phase.Idle)
@@ -93,28 +81,6 @@ public sealed class SpriteRandomIdleWalk2D : MonoBehaviour
     {
         if (_animator != null)
             _animator.SetInteger(_visualStateHash, value);
-    }
-
-    private void SnapFeet()
-    {
-        if (!_snapFeetToCollider || _spriteRenderer.sprite == null)
-            return;
-
-        Collider2D col = _feetCollider != null ? _feetCollider : GetComponentInParent<CapsuleCollider2D>();
-        if (col == null)
-            return;
-
-        Transform spriteTransform = _spriteRenderer.transform;
-        Transform colliderTransform = col.transform;
-        if (spriteTransform == colliderTransform || !spriteTransform.IsChildOf(colliderTransform))
-            return;
-
-        Bounds spriteBounds = _spriteRenderer.bounds;
-        Bounds colliderBounds = col.bounds;
-        Vector3 w = spriteTransform.position;
-        float pad = _feetPaddingWorld;
-        w.y += colliderBounds.min.y + pad - spriteBounds.min.y;
-        spriteTransform.position = w;
     }
 
     private static float RandomInRange(Vector2 range)

@@ -408,6 +408,75 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2089598932
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2089598934}
+  - component: {fileID: 2089598933}
+  m_Layer: 0
+  m_Name: InputInteractionManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2089598933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089598932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a12cb82a5942c184b940e82b3ac242c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputInteractionManager
+  targetCamera: {fileID: 519420031}
+  interactableLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  maxOverlapHits: 5
+  debugLogs: 0
+  _skipRescanWhenPointerUnchanged: 1
+--- !u!4 &2089598934
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089598932}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.53818, y: -0.76101, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2119259127 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3665602860445646210, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
+  m_PrefabInstance: {fileID: 1227215789321378275}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2119259134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2119259127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3a9c2e1b0f4a8e9c5d7123456789ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputInteractionTestProbe
+  logPrefix: Test
 --- !u!1001 &1227215789321378275
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -460,10 +529,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6159019188825564112, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
+      propertyPath: _feetPaddingWorld
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6159019188825564112, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
+      propertyPath: _snapFeetToCollider
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3665602860445646210, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2119259134}
   m_SourcePrefab: {fileID: 100100000, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -472,4 +552,5 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 247215047}
+  - {fileID: 2089598934}
   - {fileID: 1227215789321378275}

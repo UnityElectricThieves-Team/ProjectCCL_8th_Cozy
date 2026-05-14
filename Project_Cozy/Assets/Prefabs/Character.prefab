@@ -11,7 +11,9 @@ GameObject:
   - component: {fileID: 5674471977538228551}
   - component: {fileID: 3006926096313057090}
   - component: {fileID: 6641026816306123103}
+  - component: {fileID: 5278008911444764584}
   - component: {fileID: 6159019188825564112}
+  - component: {fileID: 8227738767149179167}
   m_Layer: 0
   m_Name: Character
   m_TagString: Untagged
@@ -115,6 +117,43 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!70 &5278008911444764584
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3665602860445646210}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Size: {x: 0.32, y: 0.32}
+  m_Direction: 0
 --- !u!114 &6159019188825564112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133,6 +172,16 @@ MonoBehaviour:
   _walkSpeed: 0.2
   _idleDurationRange: {x: 1, y: 2}
   _walkDurationRange: {x: 3, y: 5}
-  _snapFeetToCollider: 1
-  _feetCollider: {fileID: 0}
-  _feetPaddingWorld: 0
+--- !u!114 &8227738767149179167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3665602860445646210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d3a9c2e1b0f4a8e9c5d7123456789ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputInteractionTestProbe
+  logPrefix: Test
