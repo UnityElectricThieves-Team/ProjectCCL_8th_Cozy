@@ -459,24 +459,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2119259127 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3665602860445646210, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
-  m_PrefabInstance: {fileID: 1227215789321378275}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2119259134
-MonoBehaviour:
+--- !u!1001 &1035822760696841448
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2119259127}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d3a9c2e1b0f4a8e9c5d7123456789ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InputInteractionTestProbe
-  logPrefix: Test
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1184718661192847762, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 6663cbdc5f5240c44b11fa60dc8f3f05, type: 2}
+    - target: {fileID: 1220948977446733458, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1220948977446733458, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1220948977446733458, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1220948977446733458, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1220948977446733458, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1220948977446733458, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1220948977446733458, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1220948977446733458, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1220948977446733458, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1220948977446733458, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8430567564375317691, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
+      propertyPath: m_Name
+      value: Moon
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 1b84ca3cfb5779b44babc2d944bff09f, type: 3}
 --- !u!1001 &1227215789321378275
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -529,21 +572,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6159019188825564112, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
-      propertyPath: _feetPaddingWorld
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6159019188825564112, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
-      propertyPath: _snapFeetToCollider
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3665602860445646210, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2119259134}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -554,3 +586,4 @@ SceneRoots:
   - {fileID: 247215047}
   - {fileID: 2089598934}
   - {fileID: 1227215789321378275}
+  - {fileID: 1035822760696841448}
