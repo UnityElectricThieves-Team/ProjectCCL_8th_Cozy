@@ -53,7 +53,7 @@ Characters/
 
 - 동물 폴더: 소문자 단수형 (`cat`, `dog`, `mouse`)
 - 프리팹: `<animal>.prefab` / 변신체는 `<animal>_furry.prefab`
-- 스프라이트 시트: `<animal>_<action>.png` (예: `cat_walk.png`)
+- 스프라이트 시트: `<animal>_<action>.png` (예: `cat_walk.png`) — `<action>` 후보 목록은 [Animation_List.md](../../../Docs/Animation_List.md) 참조.
 
 ## 새 캐릭터 추가 체크리스트
 

@@ -7,6 +7,7 @@
 - 한 캐릭터의 *상태 머신*과 *내부 수치*를 관리한다 — Idle/Walk 페이즈, 친밀도 누적·소진, 만점 시 Special 시각 전환 등.
 - 마우스/키 입력 자체는 다루지 않는다 — 입력은 [Interaction/CLAUDE.md](../Interaction/CLAUDE.md)의 인터페이스(`IHoverable` 등)를 통해 호출만 받는다.
 - 캐릭터 *에셋*(스프라이트·애니메이션·프리팹) 자체는 [Characters/](../../Characters/CLAUDE.md)에. 이 폴더는 *코드만*.
+- 자율 거동·상호작용 규칙은 [AI_Logic.md](../../../../Docs/AI_Logic.md), 액션 명세는 [Animation_List.md](../../../../Docs/Animation_List.md) 참조.
 
 ## 현재 들어 있는 것
 
@@ -15,6 +16,7 @@
   - `IHoverable.OnHoverEnter`마다 친밀도 += `_affinityPerHoverEnter`. 최대 도달 시 Animator의 `VisualState`를 Special_Idle/Special_Walk로 자동 전환 (퍼리 변신의 시드).
   - `IShiftRightClickable.OnShiftRightClick`으로 친밀도 0 리셋 — [README.md](../../../../README.md) §2의 변신 해제 조작과 일치.
   - 만점 진입·해제 시 현재 페이즈의 남은 시간을 재추첨해 시각 변화가 즉시 반영되도록.
+  - 현재 친밀도는 `IHoverable.OnHoverEnter`-only로 누적하는 임시 단순화 — 정식 Petting 판정 룰(좌클릭 / hover+좌우 흔들기)은 [AI_Logic.md](../../../../Docs/AI_Logic.md).
 
 > 현재 이 컴포넌트가 부착된 `Character.prefab`은 `Assets/Prefabs/`에 있다. [Characters/CLAUDE.md](../../Characters/CLAUDE.md)의 *프리팹 콜로케이션 컨벤션*(프리팹은 사용하는 에셋과 같은 폴더에 둔다)과 어긋나므로, 정식 캐릭터로 승격될 때 `Characters/animals/<이름>/` 또는 `Characters/_test/<이름>/`로 이전 후보.
 
