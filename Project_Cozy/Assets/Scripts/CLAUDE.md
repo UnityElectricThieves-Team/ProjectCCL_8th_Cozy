@@ -22,7 +22,7 @@
 - `Platform/Window/WindowResizeHandler.cs` — 마우스 드래그 리사이즈(WndProc 서브클래싱).
 - `Platform/Window/HitTestCalculator.cs` — 마우스 좌표 → `ResizeHitZone` 판정(순수 C#, EditMode 테스트 가능).
 - `Platform/Window/ResizeHitZone.cs` — `ResizeHitZone` enum + Win32 NCHITTEST 코드 매핑.
-- `Platform/Input/GlobalKeyboardHook.cs` — 포커스 무관 키 입력 → `KeyPressed(Key)` 이벤트. 현재 keydown만, 모디파이어/조합키/keyup 미지원.
+- `Platform/Input/GlobalKeyInput.cs` — 포커스 무관 전역 키 입력 소스. 두 OS 경로(WH_KEYBOARD_LL + InputSystem.onAnyButtonPress)를 단일 이벤트 `KeyPressed(Key)`로 추상화. 현재 keydown만, 모디파이어/조합키/keyup 미지원. (이전 명칭: `GlobalKeyboardHook` — `[MovedFrom]`으로 호환)
 - `Platform/Input/Win32KeyMap.cs` — Win32 vkCode → `UnityEngine.InputSystem.Key` 매핑(순수 로직, EditMode 테스트 가능).
 - `Interaction/InteractionInterfaces.cs` — `IHoverable` / `IClickable` / `IShiftRightClickable` 3개 계약.
 - `Interaction/InputInteractionManager.cs` — 마우스 위치 → 콜라이더 → sortingLayer/sortingOrder 가장 높은 인터랙터블에 라우팅. 포인터-정지 시 재스캔 스킵 최적화 내장.
@@ -34,7 +34,7 @@
 - `PerformanceSetting/WindowAspectFitter.cs` — Win32로 윈도우 크기·종횡비·하단 도킹 강제. *`BorderlessWindow`와 같은 HWND를 만지므로 한 씬에 둘 다 둘 때 적용 순서 주의.*
 - `Animation/SpriteAnimator.cs` — 프레임 배열을 fps마다 순환. `IsPlaying` / `Play` / `Stop` / `Toggle`.
 - `Character/CharacterAffinity2D.cs` — Idle/Walk 자율 거동 + `IHoverable`로 친밀도 누적, 만점 시 Special 시각 전환, `Shift+우클릭`으로 리셋.
-- `Gameplay/KeyCounter.cs` — `GlobalKeyboardHook` 구독, 키 입력 횟수 누적(`Count` / `CountChanged`). ※ README §2의 "별 클릭 수" 진척 메커니즘과는 별개.
+- `Gameplay/KeyCounter.cs` — `GlobalKeyInput` 구독, 키 입력 횟수 누적(`Count` / `CountChanged`). ※ README §2의 "별 클릭 수" 진척 메커니즘과는 별개.
 - `Gameplay/AnimatorKeyToggle.cs` — 지정 키(기본 `Space`)가 눌리면 `SpriteAnimator` 재생/정지 토글.
 - `UI/KeyCountLabel.cs` — `KeyCounter` 값을 TMP 라벨에 표시.
 

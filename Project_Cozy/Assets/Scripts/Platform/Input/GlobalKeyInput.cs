@@ -5,11 +5,12 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;  // KeyControl
 using UnityEngine.InputSystem.Utilities; // .Call() extension method
+using UnityEngine.Scripting.APIUpdating;
 
 /// <summary>
-/// 포커스 상태와 무관하게 키 입력을 감지한다.
+/// 포커스 상태와 무관한 전역 키 입력 소스. 두 OS-level 구현을 단일 이벤트(<see cref="KeyPressed"/>)로 통합한 추상화 컴포넌트.
 ///
-/// 두 경로를 합쳐서 사용한다 (포커스 상태에 따라 어느 한쪽만 fire되어 상호 배타적):
+/// 내부적으로 두 경로를 합쳐서 사용한다 (포커스 상태에 따라 어느 한쪽만 fire되어 상호 배타적):
 ///   1) WH_KEYBOARD_LL 훅 — 게임 창이 포커스를 잃은 상태에서 들어오는 키 입력
 ///   2) InputSystem.onAnyButtonPress — 게임 창이 포커스를 가진 상태에서 들어오는 키 입력 (키마다 개별 fire)
 ///
@@ -19,8 +20,12 @@ using UnityEngine.InputSystem.Utilities; // .Call() extension method
 /// 어느 경로로 들어왔든 입력 키를 <see cref="Key"/>로 정규화해 <see cref="KeyPressed"/>(Key)로 보고한다.
 /// LL 훅의 Win32 vkCode는 <see cref="Win32KeyMap"/>로 변환하고, 매핑되지 않는 키는 <c>Key.None</c>으로 보고하되 이벤트 자체는 발생시킨다(입력 횟수 카운트는 항상 유효).
 /// 현재는 keydown만 보고하며 모디파이어/조합키/keyup은 다루지 않는다 — 필요 시 풍부한 KeyEvent 형태로 확장.
+///
+/// 클래스명 이력: 과거에는 <c>GlobalKeyboardHook</c> 였다. 이름이 구현 디테일(WH_KEYBOARD_LL "hook")을 노출해
+/// 소비자가 추상화를 인식하기 어렵다는 이유로 <c>GlobalKeyInput</c>으로 개명 — <see cref="MovedFromAttribute"/>로 prefab/씬의 missing script 자동 매핑.
 /// </summary>
-public class GlobalKeyboardHook : MonoBehaviour
+[MovedFrom(false, sourceClassName: "GlobalKeyboardHook")]
+public class GlobalKeyInput : MonoBehaviour
 {
     const int WH_KEYBOARD_LL = 13;
     const int WM_KEYDOWN     = 0x0100;
@@ -62,9 +67,9 @@ public class GlobalKeyboardHook : MonoBehaviour
 #if !UNITY_EDITOR
         _proc   = HookCallback;
         _hookId = SetHook(_proc);
-        Debug.Log("[GlobalKeyboardHook] LL 훅 등록 완료. hookId=" + _hookId);
+        Debug.Log("[GlobalKeyInput] LL 훅 등록 완료. hookId=" + _hookId);
 #else
-        Debug.Log("[GlobalKeyboardHook] Editor 모드: LL 훅 스킵 (Input System 경로는 Editor에서도 동작)");
+        Debug.Log("[GlobalKeyInput] Editor 모드: LL 훅 스킵 (Input System 경로는 Editor에서도 동작)");
 #endif
 
         // InputSystem.onAnyButtonPress.Call(action)은 IDisposable을 반환한다.
@@ -102,7 +107,7 @@ public class GlobalKeyboardHook : MonoBehaviour
         {
             UnhookWindowsHookEx(_hookId);
             _hookId = IntPtr.Zero;
-            Debug.Log("[GlobalKeyboardHook] 훅 해제 완료");
+            Debug.Log("[GlobalKeyInput] 훅 해제 완료");
         }
 #endif
     }
