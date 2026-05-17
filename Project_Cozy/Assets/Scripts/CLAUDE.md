@@ -36,6 +36,7 @@
 - `Character/CharacterAffinity2D.cs` — Idle/Walk 자율 거동 + `IHoverable`로 친밀도 누적, 만점 시 Special 시각 전환, `Shift+우클릭`으로 리셋.
 - `Gameplay/KeyCounter.cs` — `GlobalKeyInput` 구독, 키 입력 횟수 누적(`Count` / `CountChanged`). ※ README §2의 "별 클릭 수" 진척 메커니즘과는 별개.
 - `Gameplay/AnimatorKeyToggle.cs` — 지정 키(기본 `Space`)가 눌리면 `SpriteAnimator` 재생/정지 토글.
+- `Character/SleepController.cs` — 씬 전역 수면 정책(*씬-레벨 캐릭터 조정자*). `GlobalKeyInput`(OS-wide 키) + `Mouse.current`(창 포커스 한정) 무입력을 추적해 임계 시간 도달 시 씬의 모든 `CharacterBasicAI2D`를 일괄 Sleep/WakeUp.
 - `UI/KeyCountLabel.cs` — `KeyCounter` 값을 TMP 라벨에 표시.
 
 ## 컨벤션
