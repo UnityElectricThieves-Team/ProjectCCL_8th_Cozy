@@ -14,8 +14,8 @@
 - `InputInteractionManager.cs` — 마우스 위치 → 월드좌표 → `Physics2D.OverlapPointNonAlloc` → sortingLayer/sortingOrder가 가장 높은 콜라이더에 라우팅. 마우스 픽셀 변화 없으면 재스캔 스킵하는 최적화 내장(`_skipRescanWhenPointerUnchanged`).
 - `MoonClickIdle2D.cs` — 별(가제) 컴포넌트. `K`키로 Active 진입 → 클릭 시 prefab 리스트의 다음 1개 스폰 → 다시 Idle. 한 번 다 쓰면 더 이상 스폰 안 함.
 - `InputInteractionTestProbe.cs` — 3개 인터페이스를 모두 구현하고 `Debug.Log`만 하는 시연/테스트용. 인터랙터블 셋업이 맞는지 확인할 때 GameObject에 부착.
-- `OpaquePixelHover.cs` — `IHoverable`을 받아 sprite 픽셀 알파를 검사한 뒤, *불투명 영역에서만* UnityEvent(`_onOpaqueHoverEnter` / `_onOpaqueHoverExit`)로 다시 발사. 사용 조건은 같은 GameObject에 `Collider2D` + sprite 텍스처의 `Read/Write Enabled = true`.
-- `PettingReactionTestProbe.cs` — "쓰다듬" 시각 반응 (틴트 + 스케일, 각각 끄기 가능). Awake 시 기준 스케일을 캡처해 *배수*로 적용 → 씬에서 키워놓은 크기를 보존. `OpaquePixelHover`의 UnityEvent에서 호출되는 *테스트 전용* — 본편 캐릭터 쓰다듬 반응이 구현되면 폐기 후보.
+- `OpaqueHoverable.cs` — `IHoverable`을 받아 sprite 픽셀 알파를 검사한 뒤, *불투명 영역에서만* UnityEvent(`_onOpaqueHoverEnter` / `_onOpaqueHoverExit`)로 다시 발사. 사용 조건은 같은 GameObject에 `Collider2D` + sprite 텍스처의 `Read/Write Enabled = true`.
+- `PettingReactionTestProbe.cs` — "쓰다듬" 시각 반응 (틴트 + 스케일, 각각 끄기 가능). Awake 시 기준 스케일을 캡처해 *배수*로 적용 → 씬에서 키워놓은 크기를 보존. `OpaqueHoverable`의 UnityEvent에서 호출되는 *테스트 전용* — 본편 캐릭터 쓰다듬 반응이 구현되면 폐기 후보.
 
 ## 컨벤션
 
@@ -27,4 +27,4 @@
 
 ## 추후 후보 (지금은 만들지 않음)
 
-- 키보드 인터랙터블 계약 — 현재 키 입력은 `Platform/Input/GlobalKeyboardHook`가 *전역*으로 처리하고, 매니저는 마우스만. 통합 검토는 본편 통합 시점.
+- 키보드 인터랙터블 계약 — 현재 키 입력은 `Platform/Input/GlobalKeyInput`이 *전역 이벤트*로 처리하고, 매니저는 마우스만. 통합 검토는 본편 통합 시점.

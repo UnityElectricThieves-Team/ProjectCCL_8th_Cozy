@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// "쓰다듬" 시각 반응 (테스트용). <see cref="OpaquePixelHover"/>의 UnityEvent에서 호출되어
+/// "쓰다듬" 시각 반응 (테스트용). <see cref="OpaqueHoverable"/>의 UnityEvent에서 호출되어
 /// SpriteRenderer 색 틴트 + Transform 스케일을 토글한다. Tint / Scale 각각 인스펙터 체크박스로 끌 수 있다.
 ///
 /// 실제 게임 캐릭터의 쓰다듬 반응(친밀도 누적, Animator 전이 등)은 별도 컴포넌트로 구현될 예정 —
-/// 이 컴포넌트는 OpaquePixelHover의 동작 확인이 끝나면 폐기 후보.
+/// 이 컴포넌트는 OpaqueHoverable의 동작 확인이 끝나면 폐기 후보.
 /// </summary>
 public sealed class PettingReactionTestProbe : MonoBehaviour
 {
@@ -37,7 +37,7 @@ public sealed class PettingReactionTestProbe : MonoBehaviour
         _baseScale = _scaleTarget.localScale;
     }
 
-    /// <summary>OpaquePixelHover의 onOpaqueHoverEnter 이벤트에 연결.</summary>
+    /// <summary>OpaqueHoverable의 onOpaqueHoverEnter 이벤트에 연결.</summary>
     public void OnPetEnter()
     {
         if (_enableTint && _spriteRenderer != null) _spriteRenderer.color = _onColor;
@@ -45,7 +45,7 @@ public sealed class PettingReactionTestProbe : MonoBehaviour
         Debug.Log($"[{name}] 쓰다듬 시작", this);
     }
 
-    /// <summary>OpaquePixelHover의 onOpaqueHoverExit 이벤트에 연결.</summary>
+    /// <summary>OpaqueHoverable의 onOpaqueHoverExit 이벤트에 연결.</summary>
     public void OnPetExit()
     {
         if (_enableTint && _spriteRenderer != null) _spriteRenderer.color = _offColor;

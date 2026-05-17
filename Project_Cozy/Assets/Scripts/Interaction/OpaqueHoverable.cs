@@ -11,7 +11,7 @@ using UnityEngine.InputSystem;
 /// 검사 대상 sprite 텍스처는 임포트 설정에서 <b>Read/Write Enabled</b>가 켜져 있어야 한다 (GetPixel용).
 /// </summary>
 [DisallowMultipleComponent]
-public sealed class OpaquePixelHover : MonoBehaviour, IHoverable
+public sealed class OpaqueHoverable : MonoBehaviour, IHoverable
 {
     [SerializeField] private SpriteRenderer _spriteRenderer;
     [SerializeField, Tooltip("비우면 Awake 시 Camera.main으로 폴백.")] private Camera _camera;
@@ -131,7 +131,7 @@ public sealed class OpaquePixelHover : MonoBehaviour, IHoverable
         if (GetComponent<Collider2D>() == null)
         {
             Debug.LogWarning(
-                $"[{nameof(OpaquePixelHover)}] '{name}' needs a Collider2D on this GameObject for InputInteractionManager to find it.",
+                $"[{nameof(OpaqueHoverable)}] '{name}' needs a Collider2D on this GameObject for InputInteractionManager to find it.",
                 this);
         }
     }
