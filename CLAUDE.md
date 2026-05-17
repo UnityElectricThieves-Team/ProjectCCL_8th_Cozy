@@ -109,6 +109,20 @@ ProjectCCL_8th_Cozy/
 - **2D 한정.** `SpriteRenderer`, `Rigidbody2D`, `Collider2D`, `Physics2D` 사용. 3D 컴포넌트 금지.
 - **할당(Allocation) 주의.** 매 프레임 호출되는 코드에서 `new`, LINQ, 박싱, `string` 연결 금지. 핫 패스에선 캐싱 / `StringBuilder` / `List<T>` 재사용.
 - **`.meta` 파일은 항상 함께 커밋.** 빠지면 다른 팀원의 프로젝트가 깨집니다.
+- **메소드 명명 — 의미적 접두사 (권장).** 호출의 *의도와 거절 가능성*이 대소문자만으로는 안 드러나는 경우, 다음 접두사로 표현하면 호출자가 시그너처만 보고도 동작을 예측할 수 있다.
+
+  | 접두사 | 반환 | 의미 | 예 |
+  |---|---|---|---|
+  | `Try*` | `bool` (+ `out` 매개변수) | 시도 — 성공/실패가 반환값에 실림. 호출자가 결과를 검사 | `TryGetGroundBelow(out Vector2 hit)` |
+  | `Request*` | `void` | 외부 요청 — 수신자가 자기 컨텍스트(현재 상태 등)를 보고 *조건부 수행 또는 무시*. 호출자는 결과를 모름 | `RequestSleep()` (Sleep/Fall/Land 중이면 무시) |
+  | `On*` | `void` | 이벤트 핸들러 / 콜백 — 외부 발화에 반응 | `OnHoverEnter()`, `OnClick()` |
+  | `Is*` / `Has*` | `bool` | 상태 질의 (side-effect 없음) | `IsAtOrBelowGround()` |
+
+  원칙은 두 가지다:
+  1. **항상 작동하는 내부 전환엔 직접 명령형.** State 머신 같은 *내부 API*는 `ChangeState(Sleep)`처럼 *효과 보장*. 외부 노출 안 함.
+  2. **거절 가능한 외부 API엔 `Try*` 또는 `Request*`.** 호출자가 결과를 알아야 하면 `Try*` (bool 반환), 모르거나 신경 안 써도 되면 `Request*`. 결과가 *중요하지 않은데도* `Try*`로 두면 호출 측이 `if (TrySleep()) {}` 같은 *불필요한 분기*를 강제받는다.
+
+  참고로 `Try*`는 .NET 공식 가이드라인의 표준 패턴(`TryParse`, `TryGetValue`)이고, `Request*`는 게임 엔진/액터 모델 등에서 비공식적으로 자주 쓰이는 컨벤션이다. *유일한 정답은 아니며*, 위 표는 본 프로젝트 안에서 일관성을 위한 *권장*이다.
 
 ### 4.3 데스크톱 펫 특수 사항
 

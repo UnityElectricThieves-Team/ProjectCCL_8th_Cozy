@@ -10,7 +10,7 @@
 | `Interaction/` | 마우스 입력 라우팅 + 인터랙터블 인터페이스 계약. 게임 객체가 `IHoverable` / `IClickable` / `IShiftRightClickable`을 구현하면 매니저가 자동 라우팅. | (없음) — 자세한 컨벤션은 [Interaction/CLAUDE.md](Interaction/CLAUDE.md) |
 | `PerformanceSetting/` | 프레임 레이트·윈도우 종횡비 등 런타임 *정책*. Win32 일부 직접 호출. | (없음) — 자세한 컨벤션은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) |
 | `Animation/` | 스프라이트 애니메이션 등 순수 표현 컴포넌트. 게임 로직·OS를 모른다. | (없음) |
-| `Character/` | 캐릭터 단일 개체의 자율 거동·친밀도. 입력 계약을 *구현*해 매니저로부터 호출을 받는다. | `Interaction/`, `Animation/` — 자세한 컨벤션은 [Character/CLAUDE.md](Character/CLAUDE.md) |
+| `Character/` | 캐릭터 단일 개체의 자율 거동·친밀도 + 씬-레벨 캐릭터 조정자(예: SleepController). 입력 계약을 *구현*하거나 입력 추상화 소스를 *구독*한다. | `Interaction/`, `Animation/`, `Platform/Input/` — 자세한 컨벤션은 [Character/CLAUDE.md](Character/CLAUDE.md) |
 | `Gameplay/` | 게임 로직. `Platform/`의 인프라를 *소비*한다 (별 클릭 · 변신 등은 채워지는 중). | `Platform/`, `Animation/`, `Interaction/` |
 | `UI/` | HUD·메뉴 표시. TextMeshPro 사용. | `Gameplay/`, `Character/` |
 
@@ -34,10 +34,13 @@
 - `PerformanceSetting/WindowAspectFitter.cs` — Win32로 윈도우 크기·종횡비·하단 도킹 강제. *`BorderlessWindow`와 같은 HWND를 만지므로 한 씬에 둘 다 둘 때 적용 순서 주의.*
 - `Animation/SpriteAnimator.cs` — 프레임 배열을 fps마다 순환. `IsPlaying` / `Play` / `Stop` / `Toggle`.
 - `Character/CharacterAffinity2D.cs` — Idle/Walk 자율 거동 + `IHoverable`로 친밀도 누적, 만점 시 Special 시각 전환, `Shift+우클릭`으로 리셋.
+- `Character/CharacterBasicAI2D.cs` — Idle/Walk/Sleep/WakeUp/Fall/Land 6-상태 자율 거동(State Pattern). `RequestSleep/WakeUp/Fall`로 외부 트리거 수신, `StateChanged` 이벤트 노출. 바닥 충돌은 Raycast 사전 검사(`TryGetGroundBelow`).
+- `Character/States/` — `BaseCharacterState`(abstract) + `IdleState`/`WalkState`/`SleepState`/`WakeUpState`/`FallState`/`LandState`. 순수 C# 클래스, owner가 6개 인스턴스를 재사용.
 - `Gameplay/KeyCounter.cs` — `GlobalKeyInput` 구독, 키 입력 횟수 누적(`Count` / `CountChanged`). ※ README §2의 "별 클릭 수" 진척 메커니즘과는 별개.
 - `Gameplay/AnimatorKeyToggle.cs` — 지정 키(기본 `Space`)가 눌리면 `SpriteAnimator` 재생/정지 토글.
 - `Character/SleepController.cs` — 씬 전역 수면 정책(*씬-레벨 캐릭터 조정자*). `GlobalKeyInput`(OS-wide 키) + `Mouse.current`(창 포커스 한정) 무입력을 추적해 임계 시간 도달 시 씬의 모든 `CharacterBasicAI2D`를 일괄 Sleep/WakeUp.
 - `UI/KeyCountLabel.cs` — `KeyCounter` 값을 TMP 라벨에 표시.
+- `UI/CharacterStateLabel.cs` — `CharacterBasicAI2D.StateChanged`를 구독해 현재 상태 이름을 TMP 라벨에 표시(테스트용).
 
 ## 컨벤션
 
