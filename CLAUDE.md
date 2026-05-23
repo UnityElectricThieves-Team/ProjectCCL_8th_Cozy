@@ -18,10 +18,12 @@
 | 항목 | 값 |
 |---|---|
 | Engine | Unity **6000.3.10f1** (Unity 6) |
-| Render Pipeline | URP 2D |
+| Render Pipeline | URP 2D (17.3) |
 | Input | New Input System (1.18) |
 | 주요 2D 패키지 | 2D Animation, Aseprite Importer, PSD Importer, SpriteShape, Tilemap Extras |
-| 빌드 타겟 | Windows 데스크톱 |
+| 빌드 타겟 | Windows x86_64 (추후 확장 가능) |
+
+> 정확한 패키지/Editor 버전은 [Project_Cozy/Packages/manifest.json](Project_Cozy/Packages/manifest.json), [Project_Cozy/ProjectSettings/ProjectVersion.txt](Project_Cozy/ProjectSettings/ProjectVersion.txt) 참조.
 
 ### 관련 문서
 
