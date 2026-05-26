@@ -2,6 +2,12 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
+/// <deprecated>
+/// 씬 전역 일괄 sleep 정책. 개체별 정책인 <see cref="CharacterSleepPolicy"/>로 대체됨.
+/// 코드/씬 인스턴스는 그대로 유지되나 신규 코드에서는 본 클래스를 쓰지 않는다.
+/// 씬에 본 컴포넌트와 <see cref="CharacterSleepPolicy"/>가 동시에 살아 있으면 RequestSleep/WakeUp이
+/// 양쪽에서 호출되어 개체 정책이 무력화될 수 있음 — 마이그레이션 시 씬 인스턴스 비활성화 권장.
+/// </deprecated>
 /// <summary>
 /// 씬 전역 수면 정책. 일정 시간 무입력이면 씬의 모든 <see cref="CharacterBasicAI2D"/>를 Sleep시키고,
 /// 다시 입력이 들어오면 일괄 WakeUp 시킨다 (AI_Logic.md "수면 및 방치 모드").
