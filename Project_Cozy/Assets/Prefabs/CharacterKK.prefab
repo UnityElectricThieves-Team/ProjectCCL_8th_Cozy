@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2843509638916326727}
   - component: {fileID: 5854474183181269298}
+  - component: {fileID: -286430554562765407}
   m_Layer: 0
   m_Name: CharacterKK
   m_TagString: Untagged
@@ -26,8 +27,8 @@ Transform:
   m_GameObject: {fileID: 2249430935833052887}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.4976, y: 2.34438, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4326145103118088703}
@@ -61,6 +62,24 @@ MonoBehaviour:
   _spriteRenderer: {fileID: 5591664294296824350}
   _visualCollider: {fileID: 0}
   _logStateChanges: 1
+--- !u!114 &-286430554562765407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2249430935833052887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ce504699189fe84488b4e19cde963de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterSleepPolicy
+  _character: {fileID: 5854474183181269298}
+  _outFocusKey: {fileID: 0}
+  _outFocusMouse: {fileID: 0}
+  _idleThresholdSeconds: 30
+  _sleepCheckInterval: 5
+  _sleepProbabilityPerCheck: 0.3
 --- !u!1 &5691119776310040808
 GameObject:
   m_ObjectHideFlags: 0
@@ -400,8 +419,8 @@ Transform:
   m_GameObject: {fileID: 7770905970032606799}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -0.2, z: 0}
+  m_LocalScale: {x: 1, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2843509638916326727}
