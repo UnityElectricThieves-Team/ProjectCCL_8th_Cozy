@@ -10,7 +10,7 @@
 | `Interaction/` | 마우스 입력 라우팅 + 인터랙터블 인터페이스 계약. 게임 객체가 `IHoverable` / `IClickable` / `IShiftRightClickable`을 구현하면 매니저가 자동 라우팅. | (없음) — 자세한 컨벤션은 [Interaction/CLAUDE.md](Interaction/CLAUDE.md) |
 | `PerformanceSetting/` | 프레임 레이트·윈도우 종횡비 등 런타임 *정책*. Win32 일부 직접 호출. | (없음) — 자세한 컨벤션은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) |
 | `Animation/` | 스프라이트 애니메이션 등 순수 표현 컴포넌트. 게임 로직·OS를 모른다. | (없음) |
-| `Character/` | 캐릭터 단일 개체의 자율 거동·친밀도 + 씬-레벨 캐릭터 조정자(예: SleepController). 입력 계약을 *구현*하거나 입력 추상화 소스를 *구독*한다. | `Interaction/`, `Animation/`, `Platform/Input/` — 자세한 컨벤션은 [Character/CLAUDE.md](Character/CLAUDE.md) |
+| `Character/` | 캐릭터 단일 개체의 자율 거동·친밀도 + 개체별 정책 컴포넌트(예: CharacterSleepPolicy). 씬-레벨 일괄 조정자도 같은 폴더 컨벤션. 입력 계약을 *구현*하거나 입력 추상화 소스를 *구독*한다. | `Interaction/`, `Animation/`, `Platform/Input/` — 자세한 컨벤션은 [Character/CLAUDE.md](Character/CLAUDE.md) |
 | `Gameplay/` | 게임 로직. `Platform/`의 인프라를 *소비*한다 (별 클릭 · 변신 등은 채워지는 중). | `Platform/`, `Animation/`, `Interaction/` |
 | `UI/` | HUD·메뉴 표시. TextMeshPro 사용. | `Gameplay/`, `Character/` |
 
@@ -23,10 +23,13 @@
 - `Platform/Window/HitTestCalculator.cs` — 마우스 좌표 → `ResizeHitZone` 판정(순수 C#, EditMode 테스트 가능).
 - `Platform/Window/ResizeHitZone.cs` — `ResizeHitZone` enum + Win32 NCHITTEST 코드 매핑.
 - `Platform/Input/GlobalKeyInput.cs` — 포커스 무관 전역 키 입력 소스. 두 OS 경로(WH_KEYBOARD_LL + InputSystem.onAnyButtonPress)를 단일 이벤트 `KeyPressed(Key)`로 추상화. 현재 keydown만, 모디파이어/조합키/keyup 미지원. (이전 명칭: `GlobalKeyboardHook` — `[MovedFrom]`으로 호환)
+- `Platform/Input/OutFocusKeyHook.cs` — OutFocus 키 입력만 `KeyPressed(Key)` 이벤트로 노출. WH_KEYBOARD_LL + `Application.isFocused == false` 게이트.
+- `Platform/Input/OutFocusMouseHook.cs` — OutFocus 마우스 down 3종을 `ButtonPressed(MouseButton)` 이벤트로 노출. WH_MOUSE_LL + 동일 게이트.
 - `Platform/Input/Win32KeyMap.cs` — Win32 vkCode → `UnityEngine.InputSystem.Key` 매핑(순수 로직, EditMode 테스트 가능).
 - `Interaction/InteractionInterfaces.cs` — `IHoverable` / `IClickable` / `IShiftRightClickable` 3개 계약.
 - `Interaction/InputInteractionManager.cs` — 마우스 위치 → 콜라이더 → sortingLayer/sortingOrder 가장 높은 인터랙터블에 라우팅. 포인터-정지 시 재스캔 스킵 최적화 내장.
-- `Interaction/MoonClickIdle2D.cs` — 별(가제) 컴포넌트. K키로 Active → 클릭 시 prefab 리스트의 다음 1개 스폰.
+- `Interaction/MoonClickIdle2D.cs` — 별(가제) 컴포넌트. K키로 Active → 클릭 시 prefab 리스트의 다음 1개 스폰. 같은 GameObject에 `DraggableObject2D`가 있으면 스폰은 mouse up 시점·드래그 아니었을 때만 발생.
+- `Interaction/DraggableObject2D.cs` — 마우스 좌클릭 드래그로 transform 위치를 갱신. `PressEnded(bool wasDrag)` 이벤트로 드래그/클릭 분리 신호를 `MoonClickIdle2D` 같은 `IClickable` 측에 공급.
 - `Interaction/InputInteractionTestProbe.cs` — 인터페이스 3개 구현, `Debug.Log`만 하는 시연/테스트용.
 - `Interaction/OpaqueHoverable.cs` — IHoverable을 받아 sprite 픽셀 알파를 검사 → 불투명일 때만 UnityEvent 발사. 테스트용 sprite의 Read/Write 필요.
 - `Interaction/PettingReactionTestProbe.cs` — "쓰다듬" 시각 반응 (틴트 + 스케일). OpaqueHoverable의 UnityEvent에 연결되는 테스트용 반응 컴포넌트.
@@ -36,10 +39,11 @@
 - `Character/CharacterAffinity2D.cs` — Idle/Walk 자율 거동 + `IHoverable`로 친밀도 누적, 만점 시 Special 시각 전환, `Shift+우클릭`으로 리셋.
 - `Character/CharacterBasicAI2D.cs` — Idle/Walk/Sleep/WakeUp/Fall/Land 6-상태 자율 거동(State Pattern). `RequestSleep/WakeUp/Fall`로 외부 트리거 수신, `StateChanged` 이벤트 노출. 바닥 충돌은 Raycast 사전 검사(`TryGetGroundBelow`).
 - `Character/States/` — `BaseCharacterState`(abstract) + `IdleState`/`WalkState`/`SleepState`/`WakeUpState`/`FallState`/`LandState`. 순수 C# 클래스, owner가 6개 인스턴스를 재사용.
-- `Gameplay/KeyCounter.cs` — `GlobalKeyInput` 구독, 키 입력 횟수 누적(`Count` / `CountChanged`). ※ README §2의 "별 클릭 수" 진척 메커니즘과는 별개.
+- `Gameplay/InputCounter.cs` — 입력 4채널(InFocus 키: `InputSystem.onAnyButtonPress` / OutFocus 키: `OutFocusKeyHook` / InFocus 마우스: `Mouse.current` 폴링 / OutFocus 마우스: `OutFocusMouseHook`)을 단일 `Count`로 합산. 이벤트 없음 — 소비자(`DebugCounterLabel` 등)는 매 프레임 폴링. ※ README §2의 "별 클릭 수" 진척 메커니즘과는 별개.
 - `Gameplay/AnimatorKeyToggle.cs` — 지정 키(기본 `Space`)가 눌리면 `SpriteAnimator` 재생/정지 토글.
-- `Character/SleepController.cs` — 씬 전역 수면 정책(*씬-레벨 캐릭터 조정자*). `GlobalKeyInput`(OS-wide 키) + `Mouse.current`(창 포커스 한정) 무입력을 추적해 임계 시간 도달 시 씬의 모든 `CharacterBasicAI2D`를 일괄 Sleep/WakeUp.
-- `UI/KeyCountLabel.cs` — `KeyCounter` 값을 TMP 라벨에 표시.
+- `Character/SleepController.cs` — **[deprecated]** 씬 전역 일괄 수면 정책. `CharacterSleepPolicy`(개체별)로 대체. 코드/씬 인스턴스 유지 — 신규 코드 사용 금지.
+- `Character/CharacterSleepPolicy.cs` — 캐릭터 개체별 수면 정책. 무입력 임계(`_idleThresholdSeconds`) 후 주기(`_sleepCheckInterval`)로 확률(`_sleepProbabilityPerCheck`) 검사 → `RequestSleep` 시도. 입력 감지 시 즉시 `RequestWakeUp`. 입력 4채널 구독: InFocus(`InputSystem.onAnyButtonPress` + `Mouse.current`) + OutFocus(`OutFocusKeyHook` + `OutFocusMouseHook`).
+- `UI/DebugCounterLabel.cs` — `InputCounter.Count`를 매 프레임 폴링해 TMP 라벨에 표시. 디버그 전용.
 - `UI/CharacterStateLabel.cs` — `CharacterBasicAI2D.StateChanged`를 구독해 현재 상태 이름을 TMP 라벨에 표시(테스트용).
 
 ## 컨벤션
