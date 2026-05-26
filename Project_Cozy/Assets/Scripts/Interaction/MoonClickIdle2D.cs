@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// 테스트용 달: <b>K</b>로 Animator Active(1). Active에서 좌클릭 시 리스트에서 <b>다음 한 개</b>만 생성(한 번 순서대로만, 끝나면 더 이상 스폰 없음) 후 Idle(0).
 /// <see cref="InputInteractionManager"/>에 잡히려면 이 오브젝트에 <see cref="Collider2D"/>가 있어야 합니다.
+/// 같은 GameObject에 <see cref="DraggableObject2D"/>가 있으면 드래그가 아니었을 때(mouse up 시점)에만 스폰한다.
 /// </summary>
 public sealed class MoonClickIdle2D : MonoBehaviour, IClickable
 {
@@ -25,12 +26,27 @@ public sealed class MoonClickIdle2D : MonoBehaviour, IClickable
     private int _stateHash;
     private int _spawnIndex;
 
+    private DraggableObject2D _draggable;
+    private bool _spawnPending;
+
     private void Awake()
     {
         if (_animator == null)
             _animator = GetComponent<Animator>();
 
         _stateHash = Animator.StringToHash(_stateParameter);
+
+        _draggable = GetComponent<DraggableObject2D>();
+    }
+
+    private void OnEnable()
+    {
+        if (_draggable != null) _draggable.PressEnded += OnPressEnded;
+    }
+
+    private void OnDisable()
+    {
+        if (_draggable != null) _draggable.PressEnded -= OnPressEnded;
     }
 
     private void Update()
@@ -54,8 +70,27 @@ public sealed class MoonClickIdle2D : MonoBehaviour, IClickable
         if (_animator.GetInteger(_stateHash) != StateActive)
             return;
 
-        SpawnNextPrefabInList();
+        if (_draggable != null)
+        {
+            // 드래그가 아니었음이 확정되는 mouse up 시점(OnPressEnded)에 스폰.
+            _spawnPending = true;
+            return;
+        }
 
+        DoSpawn();
+    }
+
+    private void OnPressEnded(bool wasDrag)
+    {
+        if (!_spawnPending) return;
+        _spawnPending = false;
+        if (wasDrag) return;
+        DoSpawn();
+    }
+
+    private void DoSpawn()
+    {
+        SpawnNextPrefabInList();
         _animator.SetInteger(_stateHash, StateIdle);
         Debug.Log($"[{name}] Active(1) → Idle(0) (click)", this);
     }
