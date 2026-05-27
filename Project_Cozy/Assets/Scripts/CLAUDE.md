@@ -40,6 +40,8 @@
 - `Character/CharacterBasicAI2D.cs` — Idle/Walk/Sleep/WakeUp/Fall/Land 6-상태 자율 거동(State Pattern). `RequestSleep/WakeUp/Fall`로 외부 트리거 수신, `StateChanged` 이벤트 노출. 바닥 충돌은 Raycast 사전 검사(`TryGetGroundBelow`).
 - `Character/States/` — `BaseCharacterState`(abstract) + `IdleState`/`WalkState`/`SleepState`/`WakeUpState`/`FallState`/`LandState`. 순수 C# 클래스, owner가 6개 인스턴스를 재사용.
 - `Gameplay/InputCounter.cs` — 입력 4채널(InFocus 키: `InputSystem.onAnyButtonPress` / OutFocus 키: `OutFocusKeyHook` / InFocus 마우스: `Mouse.current` 폴링 / OutFocus 마우스: `OutFocusMouseHook`)을 단일 `Count`로 합산. 이벤트 없음 — 소비자(`DebugCounterLabel` 등)는 매 프레임 폴링. ※ README §2의 "별 클릭 수" 진척 메커니즘과는 별개.
+- `Gameplay/StarInputThreshold.cs` — Star의 `InputCounter.Count`가 `_threshold`(기본 100)에 도달하는 순간 `UnityEvent`를 1회 발사. 매 프레임 폴링. 구체 반응(애니메이션·색감·파티클 등)은 인스펙터에서 UnityEvent로 연결.
+- `Gameplay/SpriteTintHighlight.cs` — `Apply()` 호출 시 지정 `SpriteRenderer`의 tint 색을 지정 색으로 바꿔 강조하고 info 로그를 찍는 UnityEvent 핸들러. 현재는 `StarInputThreshold` 도달 반응(테스트용)으로 사용.
 - `Gameplay/AnimatorKeyToggle.cs` — 지정 키(기본 `Space`)가 눌리면 `SpriteAnimator` 재생/정지 토글.
 - `Character/SleepController.cs` — **[deprecated]** 씬 전역 일괄 수면 정책. `CharacterSleepPolicy`(개체별)로 대체. 코드/씬 인스턴스 유지 — 신규 코드 사용 금지.
 - `Character/CharacterSleepPolicy.cs` — 캐릭터 개체별 수면 정책. 무입력 임계(`_idleThresholdSeconds`) 후 주기(`_sleepCheckInterval`)로 확률(`_sleepProbabilityPerCheck`) 검사 → `RequestSleep` 시도. 입력 감지 시 즉시 `RequestWakeUp`. 입력 4채널 구독: InFocus(`InputSystem.onAnyButtonPress` + `Mouse.current`) + OutFocus(`OutFocusKeyHook` + `OutFocusMouseHook`).

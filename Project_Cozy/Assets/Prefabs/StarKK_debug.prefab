@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3482029326163519364}
   - component: {fileID: 69298481166661928}
   - component: {fileID: 6640454653594696276}
+  - component: {fileID: 9125199333884267906}
   m_Layer: 0
   m_Name: DebugTextBox
   m_TagString: Untagged
@@ -34,7 +35,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.5}
   m_SizeDelta: {x: 20, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &69298481166661928
@@ -181,6 +182,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 69298481166661928}
   m_maskType: 0
+--- !u!114 &9125199333884267906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7190858640189619522}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edd7327874aba9f429260bad149095f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DebugCounterLabel
+  _counter: {fileID: 2708224029027776394}
+  _label: {fileID: 6640454653594696276}
 --- !u!1001 &2326663848653538178
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -189,6 +204,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 481527574325633056, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
+      propertyPath: _counter
+      value: 
+      objectReference: {fileID: 2708224029027776394}
     - target: {fileID: 7859011345529533797, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -255,8 +274,46 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9155273892098886920, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3482029326163519364}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3295008406798715168, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5103294471841611477}
   m_SourcePrefab: {fileID: 100100000, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
+--- !u!1 &1005359078095260322 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3295008406798715168, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
+  m_PrefabInstance: {fileID: 2326663848653538178}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5103294471841611477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1005359078095260322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d816c9b6eb06f34c8576c9607123ba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteTintHighlight
+  _spriteRenderer: {fileID: 5573531503502145255}
+  _color: {r: 1, g: 0.8, b: 0.2, a: 1}
+--- !u!114 &2708224029027776394 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 422339006158369800, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
+  m_PrefabInstance: {fileID: 2326663848653538178}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3f2a1b04d8e5f6a9b0c1d2e3f4a5b6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputCounter
+--- !u!212 &5573531503502145255 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7859011345529533797, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
+  m_PrefabInstance: {fileID: 2326663848653538178}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6865712791669083786 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9155273892098886920, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}

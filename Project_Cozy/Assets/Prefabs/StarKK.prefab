@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4332621742721930244}
   - component: {fileID: 7859011345529533797}
+  - component: {fileID: 5757877174430948555}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -91,6 +92,20 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &5757877174430948555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3295008406798715168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d816c9b6eb06f34c8576c9607123ba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteTintHighlight
+  _spriteRenderer: {fileID: 0}
+  _color: {r: 1, g: 0.8, b: 0.2, a: 1}
 --- !u!1 &8446774666974173646
 GameObject:
   m_ObjectHideFlags: 0
@@ -101,6 +116,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9155273892098886920}
   - component: {fileID: 422339006158369800}
+  - component: {fileID: 481527574325633056}
   m_Layer: 0
   m_Name: StarKK
   m_TagString: Untagged
@@ -138,3 +154,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InputCounter
   _outFocusKey: {fileID: 0}
   _outFocusMouse: {fileID: 0}
+--- !u!114 &481527574325633056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8446774666974173646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f27a56294746d634fa6d04edd23d1251, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StarInputThreshold
+  _counter: {fileID: 0}
+  _threshold: 100
+  _onThresholdReached:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5757877174430948555}
+        m_TargetAssemblyTypeName: SpriteTintHighlight, Assembly-CSharp
+        m_MethodName: Apply
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2

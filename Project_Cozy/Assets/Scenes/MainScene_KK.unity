@@ -828,10 +828,6 @@ PrefabInstance:
       propertyPath: _outFocusMouse
       value: 
       objectReference: {fileID: 87928705}
-    - target: {fileID: 3482029326163519364, guid: a3881950c509bef4dab5902f906eb2a1, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0.5
-      objectReference: {fileID: 0}
     - target: {fileID: 6156702989965810252, guid: a3881950c509bef4dab5902f906eb2a1, type: 3}
       propertyPath: m_Name
       value: StarKK_debug
@@ -882,52 +878,8 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7190858640189619522, guid: a3881950c509bef4dab5902f906eb2a1, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1915672447}
-    - targetCorrespondingSourceObject: {fileID: 7190858640189619522, guid: a3881950c509bef4dab5902f906eb2a1, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: a3881950c509bef4dab5902f906eb2a1, type: 3}
---- !u!114 &1833014510 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2708224029027776394, guid: a3881950c509bef4dab5902f906eb2a1, type: 3}
-  m_PrefabInstance: {fileID: 962398301}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3f2a1b04d8e5f6a9b0c1d2e3f4a5b6c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InputCounter
---- !u!1 &1915672443 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7190858640189619522, guid: a3881950c509bef4dab5902f906eb2a1, type: 3}
-  m_PrefabInstance: {fileID: 962398301}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1915672445 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6640454653594696276, guid: a3881950c509bef4dab5902f906eb2a1, type: 3}
-  m_PrefabInstance: {fileID: 962398301}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1915672443}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshPro
---- !u!114 &1915672447
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1915672443}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: edd7327874aba9f429260bad149095f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DebugCounterLabel
-  _counter: {fileID: 1833014510}
-  _label: {fileID: 1915672445}
 --- !u!1 &2089598932
 GameObject:
   m_ObjectHideFlags: 0
