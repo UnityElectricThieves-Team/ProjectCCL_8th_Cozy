@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-이 문서는 Project Cozy 저장소에서 작업하는 모든 사람과 AI(Claude Code)를 위한 가이드입니다.
+이 문서는 Project Cozy 저장소에서 작업하는 모든 사람과 AI(Claude Code)를 위한 가이드입니다. 세션 시작 시 항상 로드되므로 **어떤 작업이든 알아야 하는 것만** 담습니다.
+
+세부 규칙은 `.claude/rules/`로 분리되어 있고, 문서 운영 원칙은 [.claude/rules/docs-conventions.md](.claude/rules/docs-conventions.md)에 있습니다.
 
 ---
 
@@ -41,10 +43,10 @@ ProjectCCL_8th_Cozy/
 │   ├── Planning/                # 기획
 │   ├── Development/             # 개발
 │   └── Art/                     # 아트
+├── .claude/rules/               # 작업 맥락에 따라 자동 로드되는 규칙
 └── Project_Cozy/                # Unity 프로젝트 루트
     ├── Assets/
     │   ├── Characters/          # 캐릭터(동물/소녀) 스프라이트, 애니메이션, 프리팹
-    │   │   └── animals/
     │   ├── Scenes/              # Unity 씬 (.unity)
     │   ├── Scripts/             # 게임 로직 C# 코드
     │   └── Settings/            # URP / 렌더 파이프라인 설정
@@ -68,145 +70,26 @@ ProjectCCL_8th_Cozy/
 
 ---
 
-## 4. 서브 디렉토리 CLAUDE.md
+## 4. 컨텍스트는 3층으로 나뉘어 있습니다
 
-토큰 절약과 정확한 컨텍스트 전달을 위해, 주요 서브 디렉토리에는 별도의 `CLAUDE.md`를 둘 수 있습니다. **루트 CLAUDE.md만 모든 정보를 담으려 하면 비대해지고, 정작 작업 중인 디렉토리의 컨벤션이 묻힙니다.**
+| 층 | 위치 | 로드 시점 |
+|---|---|---|
+| 루트 가이드 | `CLAUDE.md` (이 문서) | 세션 시작 시 항상 |
+| 영역 오리엔테이션 | 서브 디렉토리 `CLAUDE.md` | 해당 디렉토리 진입 시 |
+| 규칙 (do/don't) | `.claude/rules/*.md` | `paths` 매칭되는 파일 Read 시 |
 
-### 서브 CLAUDE.md 작성 원칙
+### 서브 디렉토리 CLAUDE.md
+- [Project_Cozy/Assets/Scripts/Platform/CLAUDE.md](Project_Cozy/Assets/Scripts/Platform/CLAUDE.md) — OS 의존(Win32) 코드 격리 레이어
+- [Project_Cozy/Assets/Characters/CLAUDE.md](Project_Cozy/Assets/Characters/CLAUDE.md) — 캐릭터 에셋 폴더 구조, 프리팹 콜로케이션
 
-- **해당 디렉토리의 책임과 역할을 명시할 것.** 단순 파일 목록이 아니라:
-  - 이 디렉토리가 **무엇을 담당하는가**
-  - **각 파일/하위 폴더의 역할은 무엇인가**
-  - **새 파일을 추가할 때의 컨벤션은 무엇인가**
-- **루트 CLAUDE.md와 중복하지 말 것.** 서브 CLAUDE.md는 해당 디렉토리에 한정된 정보만 담습니다.
-- **디렉토리 구조가 크게 바뀌면 함께 업데이트할 것.** 오래된 CLAUDE.md는 잘못된 정보보다 위험합니다.
-- **간결하게.** 한 디렉토리당 한 화면을 넘기지 않는 것이 이상적.
+### .claude/rules/ 인덱스
+- `behavioral-guidelines.md`, `git-workflow.md` — paths 없음, 항상 로드
+- `docs-conventions.md` — 문서 작업 시
+- `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/project-settings.md`, `unity/platform.md`, `unity/characters.md` — 해당 파일 작업 시
 
-### 현재 존재하는 서브 CLAUDE.md
+운영 원칙(언제 새 파일을 만들고, 어디에 적을지)은 [.claude/rules/docs-conventions.md](.claude/rules/docs-conventions.md) 참고.
 
-- [Project_Cozy/Assets/Scripts/Platform/CLAUDE.md](Project_Cozy/Assets/Scripts/Platform/CLAUDE.md) — OS 의존(Win32) 코드 격리 레이어의 책임 / 컨벤션.
-- [Project_Cozy/Assets/Characters/CLAUDE.md](Project_Cozy/Assets/Characters/CLAUDE.md) — 캐릭터 에셋 폴더 구조, 그림자 공통화, **프리팹 콜로케이션 컨벤션**(프리팹은 사용하는 자산과 같은 폴더에 둔다).
+### 합의 필요 — 비어있는 항목
 
-### 생성 후보 (코드/에셋이 채워지면 추가)
-
-- `Project_Cozy/Assets/Scripts/CLAUDE.md` — 스크립트 아키텍처와 주요 시스템(별 클릭 / 친밀도 / 변신 / 다중 모니터 / 클릭 투과)의 위치.
-- `Project_Cozy/Assets/Scenes/CLAUDE.md` — 씬 구성과 진입점.
-
----
-
-## 5. CLAUDE.md 운영 규칙
-
-이 프로젝트의 모든 CLAUDE.md 파일이 따라야 할 공통 규칙입니다.
-
-### 위치
-- 프로젝트 루트 1개
-- 필요 시 `Project_Cozy/Assets/` 내 서브 디렉토리에 추가
-- 자명한 폴더(파일 1-2개)에는 생략 가능
-- `Project_Cozy/` 내부 규칙: _(적어주세요)_
-
-### 내용 원칙
-- 그 폴더의 안내 (무엇이 있고, 무엇부터 읽어야 하는지)
-- 그 폴더의 작업 규칙
-- 사람과 AI 둘 다 읽는 문서로 작성
-
-### 단일 진실 원천
-- 동일 정보를 여러 CLAUDE.md에 중복 적지 않음
-- 하위 폴더의 동적 정보(파일 목록 등)는 그 폴더 CLAUDE.md에만
-- ROOT CLAUDE.md는 구조와 진입점만
-
-### 업데이트
-- 폴더 구조 변경 시 함께 업데이트
-- outdated된 CLAUDE.md는 잘못된 정보보다 위험 — 정기 점검
-
----
-
-## 6. 공통 컨벤션
-
-### 6.1 파일/폴더 명명
-
-- 영문 사용 (한글 파일명 지양 — git 호환성)
-- 각 단어 첫 글자 대문자, 단어 사이는 붙여서 (예: `Planning/`, `GameConcept.md`, `CharacterDesign.md`)
-- 본문은 한국어 OK, 파일명만 영문
-
-### 6.2 Git 워크플로우
-
-_합의 필요_
-
----
-
-## 7. AI 작업 시 공통 규칙
-
-_합의 필요_
-
----
-
-## 8. Behavioral Guidelines
-
-일반적인 LLM 코딩 실수를 줄이기 위한 행동 지침. 위의 프로젝트 규칙과 함께 적용합니다.
-
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
-
-Tradeoff: These guidelines bias toward caution over speed. For trivial tasks, use judgment.
-
-### 8.1 Think Before Coding
-
-Don't assume. Don't hide confusion. Surface tradeoffs.
-
-Before implementing:
-
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-### 8.2 Simplicity First
-
-Minimum code that solves the problem. Nothing speculative.
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-### 8.3 Surgical Changes
-
-Touch only what you must. Clean up only your own mess.
-
-When editing existing code:
-
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-### 8.4 Goal-Driven Execution
-
-Define success criteria. Loop until verified.
-
-Transform tasks into verifiable goals:
-
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
-These guidelines are working if: fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+- §6.2 Git 워크플로우 → `.claude/rules/git-workflow.md` (placeholder)
+- §7 AI 작업 시 공통 규칙 → 아직 없음 (`.claude/rules/ai-common.md` 후보)
