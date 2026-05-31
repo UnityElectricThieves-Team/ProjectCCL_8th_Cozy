@@ -1,7 +1,8 @@
 # CLAUDE.md
 
-이 문서는 Project Cozy 저장소에서 작업하는 모든 사람과 AI(Claude Code)를 위한 진입점입니다.
-세부 규칙은 `.claude/rules/`에서 관리합니다.
+이 문서는 Project Cozy 저장소에서 작업하는 모든 사람과 AI(Claude Code)를 위한 가이드입니다. 세션 시작 시 항상 로드되므로 **어떤 작업이든 알아야 하는 것만** 담습니다.
+
+세부 규칙은 `.claude/rules/`로 분리되어 있고, 문서 운영 원칙은 [.claude/rules/docs-conventions.md](.claude/rules/docs-conventions.md)에 있습니다.
 
 ---
 
@@ -42,10 +43,10 @@ ProjectCCL_8th_Cozy/
 │   ├── Planning/                # 기획
 │   ├── Development/             # 개발
 │   └── Art/                     # 아트
+├── .claude/rules/               # 작업 맥락에 따라 자동 로드되는 규칙
 └── Project_Cozy/                # Unity 프로젝트 루트
     ├── Assets/
     │   ├── Characters/          # 캐릭터(동물/소녀) 스프라이트, 애니메이션, 프리팹
-    │   │   └── animals/
     │   ├── Scenes/              # Unity 씬 (.unity)
     │   ├── Scripts/             # 게임 로직 C# 코드
     │   └── Settings/            # URP / 렌더 파이프라인 설정
@@ -66,3 +67,29 @@ ProjectCCL_8th_Cozy/
 - **기획 작업** → `Docs/Planning/`
 - **개발 작업** → `Docs/Development/`
 - **아트 작업** → `Docs/Art/`
+
+---
+
+## 4. 컨텍스트는 3층으로 나뉘어 있습니다
+
+| 층 | 위치 | 로드 시점 |
+|---|---|---|
+| 루트 가이드 | `CLAUDE.md` (이 문서) | 세션 시작 시 항상 |
+| 영역 오리엔테이션 | 서브 디렉토리 `CLAUDE.md` | 해당 디렉토리 진입 시 |
+| 규칙 (do/don't) | `.claude/rules/*.md` | `paths` 매칭되는 파일 Read 시 |
+
+### 서브 디렉토리 CLAUDE.md
+- [Project_Cozy/Assets/Scripts/Platform/CLAUDE.md](Project_Cozy/Assets/Scripts/Platform/CLAUDE.md) — OS 의존(Win32) 코드 격리 레이어
+- [Project_Cozy/Assets/Characters/CLAUDE.md](Project_Cozy/Assets/Characters/CLAUDE.md) — 캐릭터 에셋 폴더 구조, 프리팹 콜로케이션
+
+### .claude/rules/ 인덱스
+- `behavioral-guidelines.md`, `git-workflow.md` — paths 없음, 항상 로드
+- `docs-conventions.md` — 문서 작업 시
+- `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/project-settings.md`, `unity/platform.md`, `unity/characters.md` — 해당 파일 작업 시
+
+운영 원칙(언제 새 파일을 만들고, 어디에 적을지)은 [.claude/rules/docs-conventions.md](.claude/rules/docs-conventions.md) 참고.
+
+### 합의 필요 — 비어있는 항목
+
+- §6.2 Git 워크플로우 → `.claude/rules/git-workflow.md` (placeholder)
+- §7 AI 작업 시 공통 규칙 → 아직 없음 (`.claude/rules/ai-common.md` 후보)
