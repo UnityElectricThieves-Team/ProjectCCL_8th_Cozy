@@ -1,30 +1,27 @@
 using UnityEngine;
 
-/// <summary>
-/// 단순 자유낙하. OnEnter에서 수직 속도 0으로 시작, 매 프레임 owner.Gravity로 가속.
-/// 발 아래 짧은 raycast가 ground 레이어에 hit하면 그 hit 위치로 클램프하고 Land(착지)로 전환.
-/// </summary>
+/// <summary>자유낙하 — OnEnter에서 v_y = 0, 매 프레임 -gravity*dt. ground hit 시 SnapToGround 후 Land.</summary>
 public sealed class FallState : BaseCharacterState
 {
-    public override CharacterStateId Id => CharacterStateId.Fall;
+    public override CharacterState Id => CharacterState.Fall;
     public override string Name => "Fall";
 
     private float _velocityY;
 
-    public override void OnEnter(CharacterBasicAI2D owner)
+    public override void OnEnter(IStateOwner owner)
     {
         _velocityY = 0f;
     }
 
-    public override void Tick(CharacterBasicAI2D owner, float dt)
+    public override void Tick(IStateOwner owner, float dt)
     {
         _velocityY -= owner.Gravity * dt;
         owner.ApplyVerticalDelta(_velocityY * dt);
 
-        if (owner.IsFootOnGround(out Vector2 hitPoint))
+        if (owner.IsFootOnGround(out var hitPoint))
         {
             owner.SnapToGround(hitPoint);
-            owner.ChangeState(CharacterStateId.Land);
+            owner.ChangeState(CharacterState.Land);
         }
     }
 }
