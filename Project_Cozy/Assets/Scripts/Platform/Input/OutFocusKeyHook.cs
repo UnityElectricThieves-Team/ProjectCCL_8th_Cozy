@@ -13,8 +13,22 @@ using UnityEngine.InputSystem;
 /// 포커스 무관 통합 입력 소스는 <see cref="GlobalKeyInput"/> 쪽. 본 컴포넌트는 *OutFocus 전용*이라는 의미를 이름과 동작에서 일치시킨 별개 추상화.
 /// 현재 keydown만, 모디파이어/조합키/keyup 미지원.
 /// </summary>
+[DefaultExecutionOrder(-100)]
 public class OutFocusKeyHook : MonoBehaviour
 {
+    /// <summary>씬 단일 인스턴스. WH_KEYBOARD_LL이 OS-wide라 씬당 1개만 존재해야 정상. 중복 부착 시 두 번째는 Awake에서 자기 컴포넌트만 Destroy.</summary>
+    public static OutFocusKeyHook Instance { get; private set; }
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+        Instance = this;
+    }
+
     const int WH_KEYBOARD_LL = 13;
     const int WM_KEYDOWN     = 0x0100;
     const int WM_SYSKEYDOWN  = 0x0104;
@@ -56,7 +70,11 @@ public class OutFocusKeyHook : MonoBehaviour
     }
 
     void OnDisable()         => Unhook();
-    void OnDestroy()         => Unhook();
+    void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+        Unhook();
+    }
     void OnApplicationQuit() => Unhook();
 
     void Update()

@@ -14,8 +14,22 @@ using UnityEngine.InputSystem.LowLevel; // MouseButton (Left/Right/Middle/Forwar
 ///
 /// 키보드 쪽 <see cref="OutFocusKeyHook"/>과 평행한 추상화 — OutFocus 전용임을 이름과 동작에서 일치시킨다.
 /// </summary>
+[DefaultExecutionOrder(-100)]
 public class OutFocusMouseHook : MonoBehaviour
 {
+    /// <summary>씬 단일 인스턴스. WH_MOUSE_LL이 OS-wide라 씬당 1개만 존재해야 정상. 중복 부착 시 두 번째는 Awake에서 자기 컴포넌트만 Destroy.</summary>
+    public static OutFocusMouseHook Instance { get; private set; }
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+        Instance = this;
+    }
+
     const int WH_MOUSE_LL    = 14;
     const int WM_LBUTTONDOWN = 0x0201;
     const int WM_RBUTTONDOWN = 0x0204;
@@ -57,7 +71,11 @@ public class OutFocusMouseHook : MonoBehaviour
     }
 
     void OnDisable()         => Unhook();
-    void OnDestroy()         => Unhook();
+    void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+        Unhook();
+    }
     void OnApplicationQuit() => Unhook();
 
     void Update()
