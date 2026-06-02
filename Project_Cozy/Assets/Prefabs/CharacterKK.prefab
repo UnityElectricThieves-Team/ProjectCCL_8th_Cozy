@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2843509638916326727}
-  - component: {fileID: 5854474183181269298}
-  - component: {fileID: -286430554562765407}
+  - component: {fileID: -194812744603331188}
+  - component: {fileID: 5990119214145366604}
   m_Layer: 0
   m_Name: CharacterKK
   m_TagString: Untagged
@@ -35,7 +35,29 @@ Transform:
   - {fileID: 724841922947246909}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5854474183181269298
+--- !u!95 &-194812744603331188
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2249430935833052887}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 45eb79c2c6de7b847ad467e5698dae3f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5990119214145366604
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,42 +66,42 @@ MonoBehaviour:
   m_GameObject: {fileID: 2249430935833052887}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 379dcb5d020913d408d88f36958b5314, type: 3}
+  m_Script: {fileID: 11500000, guid: 4b1acfa07210b604fa95943bdded477a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterBasicAI2D
-  _idleDurationRange: {x: 1.5, y: 2}
-  _walkDurationRange: {x: 3, y: 5}
-  _wakeUpDuration: 0.6
-  _landDuration: 0.4
-  _walkSpeed: 1.5
+  m_EditorClassIdentifier: Assembly-CSharp::BaseCharacterController
+  _animator: {fileID: -194812744603331188}
+  _spriteRenderer: {fileID: 5591664294296824350}
+  _visualCollider: {fileID: 5684865512778039783}
   _gravity: 12
   _groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
-  _footOffset: {x: 0, y: 0}
   _groundProbeDistance: 500
   _groundContactThreshold: 1
-  _spriteRenderer: {fileID: 5591664294296824350}
-  _visualCollider: {fileID: 0}
-  _logStateChanges: 1
---- !u!114 &-286430554562765407
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2249430935833052887}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ce504699189fe84488b4e19cde963de, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterSleepPolicy
-  _character: {fileID: 5854474183181269298}
-  _outFocusKey: {fileID: 0}
-  _outFocusMouse: {fileID: 0}
-  _idleThresholdSeconds: 30
-  _sleepCheckInterval: 5
-  _sleepProbabilityPerCheck: 0.3
+  _footOffset: {x: 0, y: 0}
+  _state:
+    _idleDurationRange: {x: 1, y: 2}
+    _walkDurationRange: {x: 3, y: 5}
+    _wakeUpDuration: 0.6
+    _landDuration: 0.4
+    _walkSpeed: 1.5
+    _runSpeed: 3.5
+    _outFocusKey: {fileID: 0}
+    _outFocusMouse: {fileID: 0}
+    _idleThresholdSeconds: 3
+    _sleepCheckInterval: 5
+    _sleepProbabilityPerCheck: 0.3
+    _logStateChanges: 1
+  _visual:
+    _visualStateParameter: VisualState
+    _animalOverride: {fileID: 0}
+    _girlOverride: {fileID: 0}
+    _startForm: 0
+    _startState: 0
+  _affinity:
+    _maxAffinity: 100
+    _affinityPerHoverEnter: 10
+    _humanTransformThreshold: 1000
 --- !u!1 &5691119776310040808
 GameObject:
   m_ObjectHideFlags: 0
@@ -92,10 +114,10 @@ GameObject:
   - component: {fileID: 5591664294296824350}
   - component: {fileID: 5684865512778039783}
   - component: {fileID: 996106129911498342}
-  - component: {fileID: 1265253130994174018}
   - component: {fileID: 4528180928151775974}
   - component: {fileID: 4900367801020888988}
   - component: {fileID: 3454434006092565042}
+  - component: {fileID: 3200586724842295907}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -244,38 +266,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26c792d1856c192448a2a8b1743c79a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PolygonColliderSpriteSync
---- !u!114 &1265253130994174018
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5691119776310040808}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4a3b2c15e9f6a7b0c1d2e3f4a5b6c7d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
-  _frames:
-  - {fileID: -5728686177044832811, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: -5786164333596270976, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: 5546440197654754675, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: -716424211456008518, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: -5292413800997781641, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: -7253148436187668049, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: 8575041284972176386, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: 3604655966176598788, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: -6630629338061711003, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: -8491821694155768140, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: 8303107455315256833, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: -7266015010218627371, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: -5455066603935629110, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: -1347183766120132532, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: 3310116166248368309, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: 7601917565207802943, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  - {fileID: -8288679156529735154, guid: b1f24b3bc2e2f1d4b858657ad5c115a0, type: 3}
-  _fps: 12
-  _playOnEnable: 0
 --- !u!114 &4528180928151775974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -294,18 +284,6 @@ MonoBehaviour:
   _onOpaqueHoverEnter:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5854474183181269298}
-        m_TargetAssemblyTypeName: CharacterBasicAI2D, Assembly-CSharp
-        m_MethodName: RequestPet
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 4900367801020888988}
         m_TargetAssemblyTypeName: PettingReactionTestProbe, Assembly-CSharp
         m_MethodName: OnPetEnter
@@ -318,12 +296,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  _onOpaqueHoverExit:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5854474183181269298}
-        m_TargetAssemblyTypeName: CharacterBasicAI2D, Assembly-CSharp
-        m_MethodName: RequestUnpet
+      - m_Target: {fileID: 5990119214145366604}
+        m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
+        m_MethodName: OnHover
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -333,9 +308,24 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _onOpaqueHoverExit:
+    m_PersistentCalls:
+      m_Calls:
       - m_Target: {fileID: 4900367801020888988}
         m_TargetAssemblyTypeName: PettingReactionTestProbe, Assembly-CSharp
         m_MethodName: OnPetExit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 5990119214145366604}
+        m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
+        m_MethodName: OnHoverEnd
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -380,8 +370,8 @@ MonoBehaviour:
   _onClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5854474183181269298}
-        m_TargetAssemblyTypeName: CharacterBasicAI2D, Assembly-CSharp
+      - m_Target: {fileID: 5990119214145366604}
+        m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
         m_MethodName: RequestGrab
         m_Mode: 1
         m_Arguments:
@@ -392,6 +382,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3200586724842295907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5691119776310040808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd9dad4a7eb3bc44a723a02d0b0583c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterInteractionRelay
+  _owner: {fileID: 0}
 --- !u!1 &7770905970032606799
 GameObject:
   m_ObjectHideFlags: 0

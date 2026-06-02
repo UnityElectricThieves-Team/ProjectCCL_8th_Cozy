@@ -194,7 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29b68e4fe0130214ba36acc26dfe54a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterStateLabel
-  _character: {fileID: 5198119130855097980}
+  _character: {fileID: 0}
   _label: {fileID: 7165708878953224964}
   _visual: {fileID: 2672225038502397617}
   _yOffset: 0.2
@@ -259,7 +259,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1265253130994174018, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 2843509638916326727, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
@@ -277,14 +278,3 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2843509638916326727, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
   m_PrefabInstance: {fileID: 1809365746383404878}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5198119130855097980 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5854474183181269298, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
-  m_PrefabInstance: {fileID: 1809365746383404878}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 379dcb5d020913d408d88f36958b5314, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterBasicAI2D
