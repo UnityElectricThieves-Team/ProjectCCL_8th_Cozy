@@ -2,13 +2,13 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// <see cref="CharacterBasicAI2D"/>의 현재 상태 이름을 머리 위 TextMeshPro 라벨에 표시.
+/// <see cref="BaseCharacterController"/>의 현재 상태 이름을 머리 위 TextMeshPro 라벨에 표시.
 /// 부모 계층에서 캐릭터를 자동 탐색하므로 prefab variant 안에 그대로 배치하면 동작.
 /// 매 프레임 Visual 상단 위로 위치를 갱신하고, 부모 스케일을 역보정해 항상 자연 크기로 보이게 한다.
 /// </summary>
 public sealed class CharacterStateLabel : MonoBehaviour
 {
-    [SerializeField] private CharacterBasicAI2D _character;
+    [SerializeField] private BaseCharacterController _character;
     [SerializeField] private TMP_Text _label;
     [SerializeField, Tooltip("위치 기준이 되는 Visual. 비우면 캐릭터 transform 아래의 'Visual' 자식 자동 탐색.")]
     private Transform _visual;
@@ -22,7 +22,7 @@ public sealed class CharacterStateLabel : MonoBehaviour
     private void Awake()
     {
         if (_label == null) _label = GetComponent<TMP_Text>();
-        if (_character == null) _character = GetComponentInParent<CharacterBasicAI2D>();
+        if (_character == null) _character = GetComponentInParent<BaseCharacterController>();
         if (_visual == null && _character != null) _visual = _character.transform.Find("Visual");
         if (_visual != null) _visualRenderer = _visual.GetComponent<SpriteRenderer>();
     }
@@ -31,16 +31,16 @@ public sealed class CharacterStateLabel : MonoBehaviour
     {
         if (_character == null || _label == null)
         {
-            Debug.LogError($"[{nameof(CharacterStateLabel)}] CharacterBasicAI2D 또는 TMP_Text 참조가 없습니다.", this);
+            Debug.LogError($"[{nameof(CharacterStateLabel)}] BaseCharacterController 또는 TMP_Text 참조가 없습니다.", this);
             return;
         }
-        _character.StateChanged += Refresh;
-        Refresh(_character.CurrentStateId);
+        _character.State.StateChanged += Refresh;
+        Refresh(_character.State.CurrentStateId);
     }
 
     private void OnDisable()
     {
-        if (_character != null) _character.StateChanged -= Refresh;
+        if (_character != null) _character.State.StateChanged -= Refresh;
     }
 
     private void LateUpdate()
@@ -64,5 +64,5 @@ public sealed class CharacterStateLabel : MonoBehaviour
             s.z != 0f ? 1f / s.z : 1f);
     }
 
-    private void Refresh(CharacterStateId id) => _label.text = _character.CurrentStateName;
+    private void Refresh(CharacterState id) => _label.text = _character.State.CurrentStateName;
 }
