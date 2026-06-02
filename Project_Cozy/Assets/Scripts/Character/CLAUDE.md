@@ -21,7 +21,8 @@ GameObject "Character.prefab"
 └─ [MonoBehaviour] BaseCharacterController   ← 단일 사용자 정의 컴포넌트 (non-sealed)
     ├─ [SerializeField] StateModule    _state         (nested, [Serializable])
     ├─ [SerializeField] VisualModule   _visual        (nested, [Serializable])
-    └─ [SerializeField] AffinityModule _affinity      (nested, [Serializable])
+    ├─ [SerializeField] AffinityModule _affinity      (nested, [Serializable])
+    └─ [SerializeField] ScaleModule    _scale         (nested, [Serializable])
 
 자식 Visual GameObject
 ├─ SpriteRenderer
@@ -50,6 +51,9 @@ Int 값은 [BaseAnimatorController.controller](../../Assets/Animations/Animation
 - **`Modules/StateModule.cs`** — State 머신 + Sleep 정책 + SpecialMode 분기. 11 State 인스턴스 + `Request*` API + 잠금 가드(`IsLockedState`) + 입력 4채널 구독(InFocus·OutFocus). `RegisterState(IState)` 확장점.
 - **`Modules/VisualModule.cs`** — Animator 단일 진입점. `Play(state)` / `PlayOneShot(state)` / `SetFacing` / `SetForm`. OneShot은 float timer 기반 (UniTask 미사용).
 - **`Modules/AffinityModule.cs`** — 친밀도 수치 + 이벤트 (`AffinityChanged`/`SpecialActivated`/`SpecialReleased`/`HumanTransformAvailable`). 시각 직접 제어 금지.
+- **`Modules/ScaleModule.cs`** — 루트 `transform.localScale = _baseScale * User * Extra` 갱신. `ScaleMultiplierSettings.Character.Changed` 구독 + 호버 강조 같은 일시 `ExtraMultiplier` 슬롯 제공.
+- **`ScaleMultiplier.cs` / `ScaleMultiplierSettings.cs`** — 직렬화 단위 + 종합 ScriptableObject. UI(`CharacterSizeSelector`)가 `Character.Value`를 set하면 `ScaleModule`이 구독해 적용.
+- **`PettingReaction.cs`** — 자식 Visual에 부착되는 쓰다듬 시각 반응. `OpaqueHoverable` UnityEvent 수신 → tint 자체 처리 + `controller.Scale.ExtraMultiplier`로 일시 스케일 위임. Scale 책임이 분리되어 multiplier와 충돌 없음.
 - **`States/BaseCharacterState.cs`** — abstract. `OnEnter(IStateOwner)` / `Tick(IStateOwner, dt)` / `OnExit(IStateOwner)`.
 - **`States/{Idle, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, SpecialIdle, SpecialWalk}State.cs`** — 11개 State 클래스. `RunState`는 `WalkState` 상속(속도만 다름). `Special{Idle,Walk}State`는 `IdleState`/`WalkState` 상속(enum만 다름). `Transform`/`Interact`는 OneShot이라 State 클래스 없이 `VisualModule.PlayOneShot` 직접 호출.
 - **민준 프로토 (`<deprecated_for_develop_kk>` 주석, `Prototype.Minjun` namespace 격리)** — `CharacterAnimator.cs`/`CharacterBrain.cs`/`VisualState.cs`. develop-kk 시스템에서 직접 사용 안 함. develop 머지 시 재논의.

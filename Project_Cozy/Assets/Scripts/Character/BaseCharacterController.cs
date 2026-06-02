@@ -28,6 +28,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     [SerializeField] private StateModule _state = new StateModule();
     [SerializeField] private VisualModule _visual = new VisualModule();
     [SerializeField] private AffinityModule _affinity = new AffinityModule();
+    [SerializeField] private ScaleModule _scale = new ScaleModule();
 
     public Animator Animator => _animator;
     public SpriteRenderer SpriteRenderer => _spriteRenderer;
@@ -36,6 +37,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public StateModule State => _state;
     public VisualModule Visual => _visual;
     public AffinityModule Affinity => _affinity;
+    public ScaleModule Scale => _scale;
 
     // ===== IStateOwner: 정책 수치 (StateModule에 위임) =====
     public float WalkSpeed => _state.WalkSpeed;
@@ -79,6 +81,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         _state.Bind(this);
         _visual.Bind(this);
         _affinity.Bind(this);
+        _scale.Bind(this);
 
         RegisterExtraStates(_state);
 
@@ -96,6 +99,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     protected virtual void OnEnable()
     {
         _state.Subscribe();
+        _scale.Subscribe();
     }
 
     protected virtual void Update()
@@ -108,6 +112,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     protected virtual void OnDisable()
     {
         _state.Unsubscribe();
+        _scale.Unsubscribe();
     }
 
     protected virtual void OnDestroy()

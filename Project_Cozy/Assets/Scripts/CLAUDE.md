@@ -35,7 +35,6 @@
 - `Interaction/DraggableObject2D.cs` — 마우스 좌클릭 드래그로 transform 위치 갱신.
 - `Interaction/InputInteractionTestProbe.cs` — 인터페이스 3개 구현, `Debug.Log`만 하는 시연/테스트용.
 - `Interaction/OpaqueHoverable.cs` — IHoverable. sprite 픽셀 알파 검사 → 불투명일 때만 UnityEvent 발사.
-- `Interaction/PettingReactionTestProbe.cs` — "쓰다듬" 시각 반응(tint + scale). OpaqueHoverable UnityEvent listener.
 - `Interaction/ClickableEvent.cs` — IClickable. 클릭 시 UnityEvent 발사.
 
 ### PerformanceSetting/
@@ -46,13 +45,17 @@
 - `Animation/SpriteAnimator.cs` — 프레임 배열을 fps마다 순환. `IsPlaying` / `Play` / `Stop` / `Toggle`. **캐릭터 외 사용처 전용** (별·달 등). 새 `BaseCharacterController` 시스템엔 사용 금지.
 
 ### Character/  ⭐ 새 통합 구조
-- `Character/BaseCharacterController.cs` — 캐릭터 메인 컴포넌트(non-sealed, IStateOwner 구현). 3 module 보유 + Ground/중력/물리.
+- `Character/BaseCharacterController.cs` — 캐릭터 메인 컴포넌트(non-sealed, IStateOwner 구현). 4 module 보유 + Ground/중력/물리.
 - `Character/CharacterState.cs` — 통합 13-state enum + `CharacterForm` enum(Animal/Girl).
 - `Character/IStateOwner.cs` — State 클래스가 의존할 owner 인터페이스.
 - `Character/CharacterInteractionRelay.cs` — 자식 Visual에 부착, IShiftRightClickable만 책임 (친밀도 리셋).
+- `Character/PettingReaction.cs` — 쓰다듬 시각 반응. 자식 Visual에 부착. OpaqueHoverable UnityEvent 수신 → tint 자체 처리 + `BaseCharacterController.Scale.ExtraMultiplier`로 일시 스케일 위임.
+- `Character/ScaleMultiplier.cs` — 직렬화 가능한 배수 단위(`Value` + `Changed` 이벤트).
+- `Character/ScaleMultiplierSettings.cs` — 게임 내 모든 ScaleMultiplier를 모은 ScriptableObject. 현재 `Character` 하나, 향후 UI/Background 확장.
 - `Character/Modules/StateModule.cs` — State 머신 + Sleep 정책 + SpecialMode 분기 + `IsLockedState` 가드. 11 State 등록 + `Request*` API.
 - `Character/Modules/VisualModule.cs` — Animator 단일 진입점(`Play`/`PlayOneShot`(float timer)/`SetFacing`/`SetForm`).
 - `Character/Modules/AffinityModule.cs` — 친밀도 수치 + 4 이벤트(`AffinityChanged`/`SpecialActivated`/`SpecialReleased`/`HumanTransformAvailable`).
+- `Character/Modules/ScaleModule.cs` — `_baseScale * User * Extra` 곱셈으로 루트 `transform.localScale` 갱신. `ScaleMultiplierSettings.Character.Changed` 구독.
 - `Character/States/BaseCharacterState.cs` — abstract state 베이스.
 - `Character/States/{Idle, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, SpecialIdle, SpecialWalk}State.cs` — 11개 State 클래스. `Run`/`Special*`은 `Walk`/`Idle` 상속.
 
@@ -68,6 +71,7 @@
 ### UI/
 - `UI/DebugCounterLabel.cs` — `InputCounter.Count`를 매 프레임 폴링해 TMP 라벨에 표시.
 - `UI/CharacterStateLabel.cs` — `BaseCharacterController.State.StateChanged`를 구독해 현재 상태 이름을 TMP 라벨에 표시(테스트용).
+- `UI/CharacterSizeSelector.cs` — 5개 Button으로 `ScaleMultiplierSettings.Character.Value`를 set. 인스펙터에서 buttons/values 배열 할당.
 
 ## 컨벤션
 

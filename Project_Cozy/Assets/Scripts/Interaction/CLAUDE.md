@@ -16,7 +16,6 @@
 - `DraggableObject2D.cs` — 마우스 좌클릭 드래그로 transform 위치를 갱신. 매니저 라우팅 대신 자체로 `Mouse.current`를 폴링하고 자기 `Collider2D.OverlapPoint`로 press 시작을 판정. `PressEnded(bool wasDrag)` 이벤트로 드래그/클릭 분리 신호를 같은 GameObject의 `IClickable` 측에 공급.
 - `InputInteractionTestProbe.cs` — 3개 인터페이스를 모두 구현하고 `Debug.Log`만 하는 시연/테스트용. 인터랙터블 셋업이 맞는지 확인할 때 GameObject에 부착.
 - `OpaqueHoverable.cs` — `IHoverable`을 받아 sprite 픽셀 알파를 검사한 뒤, *불투명 영역에서만* UnityEvent(`_onOpaqueHoverEnter` / `_onOpaqueHoverExit`)로 다시 발사. 사용 조건은 같은 GameObject에 `Collider2D` + sprite 텍스처의 `Read/Write Enabled = true`.
-- `PettingReactionTestProbe.cs` — "쓰다듬" 시각 반응 (틴트 + 스케일, 각각 끄기 가능). Awake 시 기준 스케일을 캡처해 *배수*로 적용 → 씬에서 키워놓은 크기를 보존. `OpaqueHoverable`의 UnityEvent에서 호출되는 *테스트 전용* — 본편 캐릭터 쓰다듬 반응이 구현되면 폐기 후보.
 
 ## 컨벤션
 
