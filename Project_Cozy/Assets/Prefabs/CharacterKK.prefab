@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4326145103118088703}
@@ -102,6 +102,9 @@ MonoBehaviour:
     _maxAffinity: 100
     _affinityPerHoverEnter: 10
     _humanTransformThreshold: 1000
+  _scale:
+    _settings: {fileID: 11400000, guid: f969c08165cf55b468e1f3a4f2c83e7b, type: 2}
+    _baseScale: {x: 1, y: 1, z: 1}
 --- !u!1 &5691119776310040808
 GameObject:
   m_ObjectHideFlags: 0
@@ -115,9 +118,9 @@ GameObject:
   - component: {fileID: 5684865512778039783}
   - component: {fileID: 996106129911498342}
   - component: {fileID: 4528180928151775974}
-  - component: {fileID: 4900367801020888988}
   - component: {fileID: 3454434006092565042}
   - component: {fileID: 3200586724842295907}
+  - component: {fileID: 3402326961030724237}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -237,7 +240,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 8, y: 8}
     newSize: {x: 0.32, y: 0.32}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -284,18 +287,6 @@ MonoBehaviour:
   _onOpaqueHoverEnter:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 4900367801020888988}
-        m_TargetAssemblyTypeName: PettingReactionTestProbe, Assembly-CSharp
-        m_MethodName: OnPetEnter
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 5990119214145366604}
         m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
         m_MethodName: OnHover
@@ -308,12 +299,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  _onOpaqueHoverExit:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 4900367801020888988}
-        m_TargetAssemblyTypeName: PettingReactionTestProbe, Assembly-CSharp
-        m_MethodName: OnPetExit
+      - m_Target: {fileID: 3402326961030724237}
+        m_TargetAssemblyTypeName: PettingReaction, Assembly-CSharp
+        m_MethodName: OnPetEnter
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -323,6 +311,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _onOpaqueHoverExit:
+    m_PersistentCalls:
+      m_Calls:
       - m_Target: {fileID: 5990119214145366604}
         m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
         m_MethodName: OnHoverEnd
@@ -335,26 +326,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &4900367801020888988
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5691119776310040808}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90f51797004301f4c89e52b71c759923, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PettingReactionTestProbe
-  _spriteRenderer: {fileID: 0}
-  _scaleTarget: {fileID: 0}
-  _enableTint: 1
-  _onColor: {r: 1, g: 0.9, b: 0.5, a: 1}
-  _offColor: {r: 1, g: 1, b: 1, a: 1}
-  _enableScale: 1
-  _onScale: 1.1
-  _offScale: 1
+      - m_Target: {fileID: 3402326961030724237}
+        m_TargetAssemblyTypeName: PettingReaction, Assembly-CSharp
+        m_MethodName: OnPetExit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &3454434006092565042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -395,6 +378,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterInteractionRelay
   _owner: {fileID: 0}
+--- !u!114 &3402326961030724237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5691119776310040808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f394968f1f01d24591749a7f5a7369a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PettingReaction
+  _spriteRenderer: {fileID: 5591664294296824350}
+  _controller: {fileID: 5990119214145366604}
+  _enableTint: 1
+  _onColor: {r: 1, g: 0.9, b: 0.5, a: 1}
+  _offColor: {r: 1, g: 1, b: 1, a: 1}
+  _enableScale: 1
+  _onScale: 1.1
+  _offScale: 1
 --- !u!1 &7770905970032606799
 GameObject:
   m_ObjectHideFlags: 0
