@@ -24,8 +24,15 @@ public class InputCounter : MonoBehaviour
 
     private IDisposable _anyButtonSubscription;
 
-    /// <summary>지금까지 누적된 입력 횟수.</summary>
+    /// <summary>지금까지 누적된 입력 횟수 — 기획 용어로는 '스폰 기운'.</summary>
     public int Count { get; private set; }
+
+    /// <summary>스폰 기운 차감. 음수로 가지 않도록 0에서 클램프.</summary>
+    public void ReduceSpawnEnergy(int amount)
+    {
+        if (amount <= 0) return;
+        Count = Mathf.Max(0, Count - amount);
+    }
 
     private void OnEnable()
     {

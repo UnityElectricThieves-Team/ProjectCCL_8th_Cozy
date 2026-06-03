@@ -48,6 +48,8 @@ public sealed class StarClickCharacterSpawner : MonoBehaviour, IClickable
 
         var instance = Object.Instantiate(_characterPrefab, pos, Quaternion.identity, _spawnParent);
         _aliveCharacters.Add(instance);
+
+        counter.ReduceSpawnEnergy(_starThreshold.Threshold);
     }
 
     private void PruneDestroyed()
