@@ -16,7 +16,7 @@ using UnityEngine;
 /// TODO: WndProc 서브클래싱 인프라와 리사이즈 응용을 분리할지 — 두 번째 메시지 소비자(예: WM_DISPLAYCHANGE,
 /// WM_DPICHANGED) 등장 시점에 검토. 그때 WndProc 라우터를 별도 컴포넌트로 추출하면 자연스러움.
 /// </summary>
-[RequireComponent(typeof(BorderlessWindow))]
+[RequireComponent(typeof(OverlayWindow))]
 public class WindowResizeHandler : MonoBehaviour
 {
     // === Win32 메시지 ID (winuser.h) ===
@@ -74,10 +74,14 @@ public class WindowResizeHandler : MonoBehaviour
     [Header("Resize Hot Zones (px)")]
     [SerializeField] int edgeThicknessPx = 6;  // 변 핫존 두께
     [SerializeField] int cornerSizePx    = 12; // 모서리 핫존 크기
+    [SerializeField] int captionHeightPx = 32; // 상단 이동 핸들 높이
+    [SerializeField] int captionWidthPx  = 260; // 상단 이동 핸들 너비(중앙). 0이면 전체 폭
 
     [Header("Window Size Limits (px)")]
     [SerializeField] Vector2Int minSize = new Vector2Int(200, 200);
-    [SerializeField] Vector2Int maxSize = new Vector2Int(1920, 1080);
+    [SerializeField] Vector2Int maxSize = new Vector2Int(int.MaxValue, int.MaxValue);
+    [SerializeField, Tooltip("켜면 maxSize 무시하고 주 모니터 해상도를 최대치로 사용")]
+    bool maxSizeIsScreen = true;
 
     public int EdgeThicknessPx { get; private set; }
     public int CornerSizePx    { get; private set; }
@@ -103,7 +107,16 @@ public class WindowResizeHandler : MonoBehaviour
     // 인스턴스 설정값을 static 콜백에서 읽기 위한 미러. 단일 인스턴스 가정.
     static int _sEdgeThickness;
     static int _sCornerSize;
+    static int _sCaptionHeight;
+    static int _sCaptionWidth;
     static int _sMinW, _sMinH, _sMaxW, _sMaxH;
+
+    // 편집 모드 게이트 — false면 NCHITTEST가 항상 HTCLIENT를 반환해 리사이즈/이동을 비활성.
+    // (평상시엔 ColorKey 투명/클릭 통과가 거동을 지배하고, 편집 모드에서만 리사이즈가 켜진다.)
+    static bool _editEnabled;
+
+    /// <summary>편집(영역 수정) 모드 on/off. OverlayWindowController가 호출.</summary>
+    public void SetEditEnabled(bool on) => _editEnabled = on;
 
     // WndProc 스레드 → 메인 스레드 호버 전달용 큐. (Win32 메시지 펌프는 보통 메인 스레드와 같지만,
     //  Unity API 호출은 항상 Update에서 하는 게 안전하므로 큐로 격리한다.)
@@ -129,17 +142,24 @@ public class WindowResizeHandler : MonoBehaviour
 
         _sEdgeThickness = edgeThicknessPx;
         _sCornerSize    = cornerSizePx;
+        _sCaptionHeight = captionHeightPx;
+        _sCaptionWidth  = captionWidthPx;
         _sMinW = minSize.x; _sMinH = minSize.y;
         _sMaxW = maxSize.x; _sMaxH = maxSize.y;
+        if (maxSizeIsScreen)
+        {
+            _sMaxW = Win32WindowApi.GetSystemMetrics(Win32WindowApi.SM_CXSCREEN);
+            _sMaxH = Win32WindowApi.GetSystemMetrics(Win32WindowApi.SM_CYSCREEN);
+        }
 
 #if !UNITY_EDITOR
-        var manager = GetComponent<BorderlessWindow>();
+        var manager = GetComponent<OverlayWindow>();
         _hwnd = manager.Hwnd;
 
         // Guard
         if (_hwnd == IntPtr.Zero)
         {
-            Debug.LogError("[WindowResizeHandler] HWND를 얻지 못함 — BorderlessWindow.Awake 실행 순서 확인");
+            Debug.LogError("[WindowResizeHandler] HWND를 얻지 못함 — OverlayWindow.Awake 실행 순서 확인");
             return;
         }
 
@@ -218,6 +238,13 @@ public class WindowResizeHandler : MonoBehaviour
 
     static IntPtr HandleNCHitTest(IntPtr lParam)
     {
+        // 편집 모드가 아니면 리사이즈/이동 비활성 — 항상 HTCLIENT(거동은 ColorKey/클릭 통과가 지배).
+        if (!_editEnabled)
+        {
+            _hoverQueue.Enqueue(ResizeHitZone.None);
+            return (IntPtr)ResizeHitZoneExtensions.HTCLIENT;
+        }
+
         // lParam 인코딩: 하위 16비트 = X(스크린 좌표), 상위 16비트 = Y.
         // 멀티 모니터에서 좌상단 모니터 외 영역은 음수 좌표가 가능하므로 signed short로 캐스트해야 한다.
         long lp = lParam.ToInt64();
@@ -230,7 +257,7 @@ public class WindowResizeHandler : MonoBehaviour
         var zone = HitTestCalculator.Calculate(
             mouseX, mouseY,
             rect.Left, rect.Top, rect.Right, rect.Bottom,
-            _sEdgeThickness, _sCornerSize);
+            _sEdgeThickness, _sCornerSize, _sCaptionHeight, _sCaptionWidth);
 
         // 메인 스레드에 호버 상태 전달 (UI 페이드용)
         _hoverQueue.Enqueue(zone);
@@ -248,3 +275,4 @@ public class WindowResizeHandler : MonoBehaviour
         Marshal.StructureToPtr(info, lParam, false);
     }
 }
+           
