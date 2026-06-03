@@ -71,7 +71,7 @@
 ### UI/
 - `UI/DebugCounterLabel.cs` — `InputCounter.Count`를 매 프레임 폴링해 TMP 라벨에 표시.
 - `UI/CharacterStateLabel.cs` — `BaseCharacterController.State.StateChanged`를 구독해 현재 상태 이름을 TMP 라벨에 표시(테스트용).
-- `UI/CharacterSizeSelector.cs` — 5개 Button으로 `ScaleMultiplierSettings.Character.Value`를 set. 인스펙터에서 buttons/values 배열 할당.
+- `UI/CharacterScaleClicker.cs` — `IClickable`. 자식 GameObject당 1 옵션. 클릭 시 `ScaleMultiplierSettings.Character.Value`를 `_value`로 set. Start에서 부모 layout rebuild 후 `BoxCollider2D.size`를 RectTransform.rect에 자동 핏. RectTransform + BoxCollider2D `[RequireComponent]`.
 
 ## 컨벤션
 
