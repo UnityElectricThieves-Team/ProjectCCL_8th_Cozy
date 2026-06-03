@@ -196,9 +196,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterStateLabel
   _character: {fileID: 0}
   _label: {fileID: 7165708878953224964}
-  _visual: {fileID: 2672225038502397617}
-  _xOffset: 0.05
-  _yOffset: 0
 --- !u!1001 &1809365746383404878
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -268,11 +265,6 @@ PrefabInstance:
       addedObject: {fileID: 7047669146926671936}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
---- !u!4 &2672225038502397617 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4326145103118088703, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
-  m_PrefabInstance: {fileID: 1809365746383404878}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4497412109091535369 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2843509638916326727, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}

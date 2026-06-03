@@ -11,6 +11,9 @@ public class StarInputThreshold : MonoBehaviour
     [SerializeField, Min(1)] private int _threshold = 100;
     [SerializeField] private UnityEvent _onThresholdReached;
 
+    public InputCounter Counter => _counter;
+    public int Threshold => _threshold;
+
     private bool _fired;
 
     private void Awake()

@@ -208,6 +208,14 @@ PrefabInstance:
       propertyPath: _counter
       value: 
       objectReference: {fileID: 2708224029027776394}
+    - target: {fileID: 1014223607452180181, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.x
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 1014223607452180181, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.y
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 7859011345529533797, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -274,30 +282,8 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9155273892098886920, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3482029326163519364}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3295008406798715168, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5103294471841611477}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
---- !u!1 &1005359078095260322 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3295008406798715168, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
-  m_PrefabInstance: {fileID: 2326663848653538178}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5103294471841611477
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1005359078095260322}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d816c9b6eb06f34c8576c9607123ba3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpriteTintHighlight
-  _spriteRenderer: {fileID: 5573531503502145255}
-  _color: {r: 1, g: 0.8, b: 0.2, a: 1}
 --- !u!114 &2708224029027776394 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 422339006158369800, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
@@ -309,11 +295,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3f2a1b04d8e5f6a9b0c1d2e3f4a5b6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputCounter
---- !u!212 &5573531503502145255 stripped
-SpriteRenderer:
-  m_CorrespondingSourceObject: {fileID: 7859011345529533797, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
-  m_PrefabInstance: {fileID: 2326663848653538178}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6865712791669083786 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9155273892098886920, guid: 59f8b888929cabf45affd97f0f103c20, type: 3}
