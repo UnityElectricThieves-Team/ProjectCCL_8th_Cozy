@@ -18,10 +18,11 @@ public static class HitTestCalculator
     /// <param name="winBottom">창의 아래쪽 스크린 Y (= Top + Height)</param>
     /// <param name="edgeThicknessPx">변 핫존의 두께. 이 거리 이내로 마우스가 들어오면 변/모서리 후보.</param>
     /// <param name="cornerSizePx">모서리 핫존의 한 변 길이. 보통 edgeThicknessPx보다 크게 둬서 모서리 잡기를 쉽게 한다.</param>
+    /// <param name="captionHeightPx">상단 이동(Caption) 바의 두께. 0이면 이동 바 없음. 변/모서리 핫존보다 우선순위가 낮다.</param>
     public static ResizeHitZone Calculate(
         int mouseX, int mouseY,
         int winLeft, int winTop, int winRight, int winBottom,
-        int edgeThicknessPx, int cornerSizePx)
+        int edgeThicknessPx, int cornerSizePx, int captionHeightPx = 0, int captionWidthPx = 0)
     {
         // Guard: 창 밖이면 즉시 None
         if (mouseX < winLeft || mouseX >= winRight || mouseY < winTop || mouseY >= winBottom)
@@ -52,6 +53,17 @@ public static class HitTestCalculator
         if (nearRight)  return ResizeHitZone.Right;
         if (nearTop)    return ResizeHitZone.Top;
         if (nearBottom) return ResizeHitZone.Bottom;
+
+        // 상단 중앙 이동 핸들 — 변/모서리가 아니고, 상단 captionHeightPx 이내 + 중앙 captionWidthPx 폭.
+        // captionWidthPx <= 0이면 전체 폭(하위 호환).
+        if (captionHeightPx > 0 && mouseY < winTop + captionHeightPx)
+        {
+            if (captionWidthPx <= 0) return ResizeHitZone.Caption;
+            int centerX = (winLeft + winRight) / 2;
+            int half = captionWidthPx / 2;
+            if (mouseX >= centerX - half && mouseX <= centerX + half)
+                return ResizeHitZone.Caption;
+        }
 
         return ResizeHitZone.None;
     }

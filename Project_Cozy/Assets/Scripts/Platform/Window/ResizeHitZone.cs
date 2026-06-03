@@ -19,6 +19,9 @@ public enum ResizeHitZone
     TopRight,
     BottomLeft,
     BottomRight,
+
+    /// <summary>이동(드래그) 영역 — NCHITTEST에서 HTCAPTION(2) 반환. 편집 모드 상단 바.</summary>
+    Caption,
 }
 
 /// <summary>
@@ -32,6 +35,7 @@ public static class ResizeHitZoneExtensions
     // === Win32 NCHITTEST 반환 코드 (winuser.h) ===
     // OS 정의값이라 변경 불가. 우리는 단순히 매핑만 한다.
     public const int HTCLIENT      = 1;
+    public const int HTCAPTION     = 2;
     public const int HTLEFT        = 10;
     public const int HTRIGHT       = 11;
     public const int HTTOP         = 12;
@@ -53,6 +57,7 @@ public static class ResizeHitZoneExtensions
             case ResizeHitZone.TopRight:    return HTTOPRIGHT;
             case ResizeHitZone.BottomLeft:  return HTBOTTOMLEFT;
             case ResizeHitZone.BottomRight: return HTBOTTOMRIGHT;
+            case ResizeHitZone.Caption:     return HTCAPTION;
             default:                        return HTCLIENT;
         }
     }
