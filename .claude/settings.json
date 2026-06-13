@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "Write-Output 'SessionStart: invoke the /sync-develop-docs skill now to check whether origin/develop has new commits to merge into the current branch.'",
+            "shell": "powershell",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
