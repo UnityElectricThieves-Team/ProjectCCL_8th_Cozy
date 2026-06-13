@@ -2,7 +2,7 @@
 
 ## 변경 이력
 - 260528: 초안 작성
-- 260603: Progress_Numeric_Balance.md 기준 수치·메커닉 정합화 (변신 트리거·Gift Drop 폼·수면 진입 시간), 좌클릭 입력 분리 (Petting / 2초 홀드 = Grab)
+- 260603: Progress_Numeric_Balance.md 기준 수치·메커닉 정합화 (변신 트리거·Gift Drop 폼·수면 진입 시간), 좌클릭 입력 분리 (Petting / 2초 홀드 = Grab) test
 
 ---
 
