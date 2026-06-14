@@ -1562,7 +1562,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33d9638007cf86842a5548fb3e11f270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSpawner
-  characterPrefab: {fileID: 3665602860445646210, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
+  characterPrefab: {fileID: 2249430935833052887, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
   spawnPoint: {x: 0, y: 0, z: 0}
   spawnSpread: 10
 --- !u!4 &872194211
