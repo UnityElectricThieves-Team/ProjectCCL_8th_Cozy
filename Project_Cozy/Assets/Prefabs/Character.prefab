@@ -73,6 +73,7 @@ MonoBehaviour:
   _spriteRenderer: {fileID: 5591664294296824350}
   _visualCollider: {fileID: 5684865512778039783}
   _gravity: 12
+  _floorY: -3
   _groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -240,7 +241,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 8, y: 8}
+    oldSize: {x: 16, y: 16}
     newSize: {x: 0.32, y: 0.32}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

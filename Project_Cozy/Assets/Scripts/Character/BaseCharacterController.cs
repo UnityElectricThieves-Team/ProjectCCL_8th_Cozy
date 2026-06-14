@@ -17,9 +17,13 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     [Header("Ground & Gravity")]
     [Tooltip("아래 가속도. FallState가 매 프레임 -gravity*dt로 적용.")]
     [SerializeField] private float _gravity = 12f;
-    [Tooltip("ground로 간주할 레이어.")]
+    [Tooltip("바닥 수평선의 y좌표. 발이 이 높이에 닿으면 착지. (Ground 콜라이더 비의존)")]
+    [SerializeField] private float _floorY = 0f;
+    [Tooltip("[미사용] 현재 y=_floorY 평면 사용. Ground 콜라이더 재도입 시 사용.")]
     [SerializeField] private LayerMask _groundLayerMask;
+    [Tooltip("[미사용] 현재 y=_floorY 평면 사용. Ground 콜라이더 재도입 시 사용.")]
     [SerializeField] private float _groundProbeDistance = 100f;
+    [Tooltip("발이 바닥(y=_floorY)에 닿았다고 보는 허용 오차.")]
     [SerializeField] private float _groundContactThreshold = 0.1f;
     [Tooltip("SR/Collider 미설정 시 폴백 발 오프셋.")]
     [SerializeField] private Vector2 _footOffset = Vector2.zero;
@@ -209,40 +213,25 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     public bool TryGetGroundBelow(out Vector2 hitPoint)
     {
-        var hit = Physics2D.Raycast(FootWorldPosition, Vector2.down, _groundProbeDistance, _groundLayerMask);
-        if (hit.collider == null)
-        {
-            hitPoint = default;
-            return false;
-        }
-        hitPoint = hit.point;
+        // 무한 수평 바닥(y=_floorY): 발 바로 아래 바닥점은 항상 존재.
+        var foot = FootWorldPosition;
+        hitPoint = new Vector2(foot.x, _floorY);
         return true;
     }
 
     public bool IsFootOnGround(out Vector2 hitPoint)
     {
-        if (!TryGetGroundBelow(out hitPoint)) return false;
-        var distance = Mathf.Max(0f, FootWorldPosition.y - hitPoint.y);
-        return distance <= _groundContactThreshold;
+        var foot = FootWorldPosition;
+        hitPoint = new Vector2(foot.x, _floorY);
+        // 발이 바닥선(허용오차 내)에 닿았거나 그 아래로 파묻혔으면 접지.
+        return foot.y <= _floorY + _groundContactThreshold;
     }
 
     public bool IsFootBelowGround(out Vector2 groundTop)
     {
         var foot = FootWorldPosition;
-        var inside = Physics2D.OverlapPoint(foot, _groundLayerMask);
-        if (inside != null)
-        {
-            groundTop = new Vector2(foot.x, inside.bounds.max.y);
-            return true;
-        }
-        var hit = Physics2D.Raycast(foot, Vector2.up, _groundProbeDistance, _groundLayerMask);
-        if (hit.collider != null)
-        {
-            groundTop = new Vector2(foot.x, hit.collider.bounds.max.y);
-            return true;
-        }
-        groundTop = default;
-        return false;
+        groundTop = new Vector2(foot.x, _floorY);
+        return foot.y < _floorY;
     }
 
     public void SnapToGround(Vector2 hitPoint)
@@ -258,7 +247,10 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         var foot = FootWorldPosition;
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(foot, 0.03f);
-        Gizmos.DrawLine(foot, foot + Vector2.down * _groundProbeDistance);
+        // 바닥선(y=_floorY)과 발→바닥 거리 표시.
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(new Vector3(foot.x - 1f, _floorY, 0f), new Vector3(foot.x + 1f, _floorY, 0f));
+        Gizmos.DrawLine(new Vector3(foot.x, foot.y, 0f), new Vector3(foot.x, _floorY, 0f));
     }
 #endif
 }
