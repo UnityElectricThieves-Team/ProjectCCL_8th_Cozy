@@ -12,15 +12,19 @@
 
 ```
 Characters/
-├── animals/
+├── animals/                    # 정식 동물 (한 동물 = 폴더 하나)
 │   ├── cat/
 │   │   ├── cat.prefab          # 동물 형태 프리팹
 │   │   ├── cat_furry.prefab    # 퍼리(소녀) 변신 프리팹
 │   │   ├── sprites/
 │   │   └── animations/
 │   └── dog/
-└── _common/
-    └── shadow.png              # 공통 둥근 그림자
+├── _common/
+│   └── shadow.png              # 공통 둥근 그림자
+└── _test/                      # 테스트/프로토타입용 임시 캐릭터 픽스처 — 자유롭게 삭제 가능
+    └── rabbit/                 #   (아트 파이프라인 표준 전 단계 에셋. 정식 동물은 animals/ 로.)
+        ├── rabbit.prefab
+        └── sprites/
 ```
 
 ## 컨벤션
@@ -34,6 +38,7 @@ Characters/
   - 캐릭터 단위로 추가/삭제가 폴더 하나만 건드리면 되어, [README.md:67](../../../README.md#L67)의 운영 정책(*"인기 없는 캐릭터는 과감히 삭제"*)과 잘 맞는다.
   - 에셋 ↔ 프리팹 참조 깨짐을 추적하기 쉽다.
 - 예외: 여러 캐릭터가 공유하는 자산(공통 그림자 등)은 `_common/`.
+- 예외: 테스트/프로토타입용 임시 캐릭터 픽스처는 `_test/<name>/` (예: `_test/rabbit/`). 아직 아트 파이프라인 표준(픽셀화 등)을 거치지 않은 에셋도 여기 둔다. 정식 동물로 승격할 때 `animals/`로 옮기고 표준을 적용한다. `_test/`는 언제든 통째로 삭제 가능.
 
 이 규칙은 캐릭터 외 영역(UI, 이펙트 등)에도 동일하게 적용한다. 새 자산 카테고리가 추가되면 그 폴더의 CLAUDE.md에 같은 원칙을 적는다.
 
@@ -48,7 +53,7 @@ Characters/
 
 - 동물 폴더: 소문자 단수형 (`cat`, `dog`, `mouse`)
 - 프리팹: `<animal>.prefab` / 변신체는 `<animal>_furry.prefab`
-- 스프라이트 시트: `<animal>_<action>.png` (예: `cat_walk.png`)
+- 스프라이트 시트: `<animal>_<action>.png` (예: `cat_walk.png`) — `<action>` 후보 목록은 [Animation_List.md](../../../Docs/Animation_List.md) 참조.
 
 ## 새 캐릭터 추가 체크리스트
 

@@ -1,4 +1,13 @@
+// <deprecated_for_develop_kk>
+// develop-kk 시스템에서는 사용하지 않습니다. develop 머지 시 재논의.
+// 새 자율 거동은 ./Modules/StateModule.cs 참조.
+// namespace로 격리해 사용자 코드와의 컴파일 충돌 회피.
+// </deprecated_for_develop_kk>
+
 using UnityEngine;
+
+namespace Prototype.Minjun
+{
 
 /// <summary>
 /// 자율 AI 레이어. Idle ↔ Walk/Run 사이클만 담당.
@@ -158,3 +167,6 @@ public sealed class CharacterBrain : MonoBehaviour
         return Mathf.Max(MIN_PHASE_SECONDS, Random.Range(min, max));
     }
 }
+
+}
+

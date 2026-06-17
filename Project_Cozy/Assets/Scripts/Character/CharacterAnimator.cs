@@ -1,7 +1,16 @@
+// <deprecated_for_develop_kk>
+// develop-kk 시스템에서는 사용하지 않습니다. develop 머지 시 재논의.
+// 새 시각 게이트는 ./Modules/VisualModule.cs 참조.
+// namespace로 격리해 사용자 코드와의 컴파일 충돌 회피.
+// </deprecated_for_develop_kk>
+
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+
+namespace Prototype.Minjun
+{
 
 /// <summary>
 /// 캐릭터의 시각 상태(<see cref="VisualState"/>)와 폼(<see cref="CharacterForm"/>)을 관리.
@@ -185,3 +194,6 @@ public sealed class CharacterAnimator : MonoBehaviour
             _animator.runtimeAnimatorController = ov;
     }
 }
+
+}
+

@@ -92,6 +92,9 @@ public class WindowResizeHandler : MonoBehaviour
     public ResizeHitZone CurrentHover { get; private set; } = ResizeHitZone.None;
     public event Action<ResizeHitZone> HoverChanged;
 
+    /// <summary>창 크기가 바뀌면 메인 스레드에서 발행. CameraFitter 등 화면-월드 연동 구독용.</summary>
+    public event Action Resized;
+
     // === 서브클래싱 상태 (static — GC 수거 방지) ===
     // WndProc 콜백으로 등록한 델리게이트는 OS 측에서 함수 포인터로만 들고 있다.
     // C# 측의 인스턴스 참조가 사라지면 GC가 수거하고, OS가 그 함수를 호출하는 순간 액세스 위반.
@@ -121,6 +124,9 @@ public class WindowResizeHandler : MonoBehaviour
     // WndProc 스레드 → 메인 스레드 호버 전달용 큐. (Win32 메시지 펌프는 보통 메인 스레드와 같지만,
     //  Unity API 호출은 항상 Update에서 하는 게 안전하므로 큐로 격리한다.)
     static readonly ConcurrentQueue<ResizeHitZone> _hoverQueue = new ConcurrentQueue<ResizeHitZone>();
+
+    // 직전 프레임의 화면 크기. Update에서 변화를 감지해 Resized를 발행한다(전부 메인 스레드).
+    Vector2Int _lastScreenSize;
 
     void Start()
     {
@@ -184,6 +190,14 @@ public class WindowResizeHandler : MonoBehaviour
                 CurrentHover = zone;
                 HoverChanged?.Invoke(zone);
             }
+        }
+
+        // 화면 크기가 바뀌면 Resized 발행 (창 리사이즈/모드전환/에디터 Game뷰 변경 모두 Screen에 반영됨).
+        var screenSize = new Vector2Int(Screen.width, Screen.height);
+        if (screenSize != _lastScreenSize)
+        {
+            _lastScreenSize = screenSize;
+            Resized?.Invoke();
         }
     }
 
