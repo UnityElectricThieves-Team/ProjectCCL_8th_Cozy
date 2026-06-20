@@ -1,0 +1,1135 @@
+fileFormatVersion: 2
+guid: ee4c3246c2c6370448592475ba89ef4c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1805863595141494948
+    second: white-animal-cat-sprite-sheet_0
+  - first:
+      213: -1651096931240067171
+    second: white-animal-cat-sprite-sheet_1
+  - first:
+      213: 7920582316784662898
+    second: white-animal-cat-sprite-sheet_2
+  - first:
+      213: 8884338219024961981
+    second: white-animal-cat-sprite-sheet_3
+  - first:
+      213: -81958170486891061
+    second: white-animal-cat-sprite-sheet_4
+  - first:
+      213: 6223888218676149076
+    second: white-animal-cat-sprite-sheet_5
+  - first:
+      213: -3630634770807708459
+    second: white-animal-cat-sprite-sheet_6
+  - first:
+      213: -7376486845833556160
+    second: white-animal-cat-sprite-sheet_7
+  - first:
+      213: 4322311414737316367
+    second: white-animal-cat-sprite-sheet_8
+  - first:
+      213: -761183061578815850
+    second: white-animal-cat-sprite-sheet_9
+  - first:
+      213: 5237584264528071623
+    second: white-animal-cat-sprite-sheet_10
+  - first:
+      213: -3534130569122981403
+    second: white-animal-cat-sprite-sheet_11
+  - first:
+      213: -5673928108972426961
+    second: white-animal-cat-sprite-sheet_12
+  - first:
+      213: 1384670703527737843
+    second: white-animal-cat-sprite-sheet_13
+  - first:
+      213: 6016159734368918870
+    second: white-animal-cat-sprite-sheet_14
+  - first:
+      213: -788186197560267596
+    second: white-animal-cat-sprite-sheet_15
+  - first:
+      213: 6036494300404748848
+    second: white-animal-cat-sprite-sheet_16
+  - first:
+      213: -3613887070761422622
+    second: white-animal-cat-sprite-sheet_17
+  - first:
+      213: 271324684354047265
+    second: white-animal-cat-sprite-sheet_18
+  - first:
+      213: 7605999586914275207
+    second: white-animal-cat-sprite-sheet_19
+  - first:
+      213: 1660401918844050107
+    second: white-animal-cat-sprite-sheet_20
+  - first:
+      213: 7562316357547425040
+    second: white-animal-cat-sprite-sheet_21
+  - first:
+      213: 4850040999504981244
+    second: white-animal-cat-sprite-sheet_22
+  - first:
+      213: 6187194762866659473
+    second: white-animal-cat-sprite-sheet_23
+  - first:
+      213: 6337361356230092579
+    second: white-animal-cat-sprite-sheet_24
+  - first:
+      213: -5182513132475745073
+    second: white-animal-cat-sprite-sheet_25
+  - first:
+      213: 5648736936084657560
+    second: white-animal-cat-sprite-sheet_26
+  - first:
+      213: 2990912582986663558
+    second: white-animal-cat-sprite-sheet_27
+  - first:
+      213: 4489509158837351086
+    second: white-animal-cat-sprite-sheet_28
+  - first:
+      213: -1743024187699674457
+    second: white-animal-cat-sprite-sheet_29
+  - first:
+      213: 6391867241571081832
+    second: white-animal-cat-sprite-sheet_30
+  - first:
+      213: -952958918485810150
+    second: white-animal-cat-sprite-sheet_31
+  - first:
+      213: 3518823668175939435
+    second: white-animal-cat-sprite-sheet_32
+  - first:
+      213: 3663475098751757463
+    second: white-animal-cat-sprite-sheet_33
+  - first:
+      213: 4816403672907309790
+    second: white-animal-cat-sprite-sheet_34
+  - first:
+      213: 1876629468419701491
+    second: white-animal-cat-sprite-sheet_35
+  - first:
+      213: -8981399039377801225
+    second: white-animal-cat-sprite-sheet_36
+  - first:
+      213: 3601041154661856620
+    second: white-animal-cat-sprite-sheet_37
+  - first:
+      213: 3663294642604301966
+    second: white-animal-cat-sprite-sheet_38
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_0
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 2067
+        width: 140
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5708cac0a840f6e0800000000000000
+      internalID: -1805863595141494948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_1
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 2067
+        width: 134
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9fb2b3c6102619e0800000000000000
+      internalID: -1651096931240067171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_2
+      rect:
+        serializedVersion: 2
+        x: 577
+        y: 2067
+        width: 140
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 279b03ee6af8bed60800000000000000
+      internalID: 7920582316784662898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_3
+      rect:
+        serializedVersion: 2
+        x: 831
+        y: 2067
+        width: 144
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db1d869f9828b4b70800000000000000
+      internalID: 8884338219024961981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_4
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 1811
+        width: 184
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcd10b96a73dcdef0800000000000000
+      internalID: -81958170486891061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_5
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 1811
+        width: 186
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45b3eebfb51bf5650800000000000000
+      internalID: 6223888218676149076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_6
+      rect:
+        serializedVersion: 2
+        x: 553
+        y: 1813
+        width: 182
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d423d079e46d9dc0800000000000000
+      internalID: -3630634770807708459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_7
+      rect:
+        serializedVersion: 2
+        x: 807
+        y: 1813
+        width: 184
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04fcfb7cb4471a990800000000000000
+      internalID: -7376486845833556160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_8
+      rect:
+        serializedVersion: 2
+        x: 1057
+        y: 1811
+        width: 192
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0aa804c45febfb30800000000000000
+      internalID: 4322311414737316367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_9
+      rect:
+        serializedVersion: 2
+        x: 1315
+        y: 1811
+        width: 192
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 696ec85d90cbf65f0800000000000000
+      internalID: -761183061578815850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_10
+      rect:
+        serializedVersion: 2
+        x: 20
+        y: 1557
+        width: 215
+        height: 140
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7cb0f508323afa840800000000000000
+      internalID: 5237584264528071623
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_11
+      rect:
+        serializedVersion: 2
+        x: 273
+        y: 1557
+        width: 215
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e95395d8fe34fec0800000000000000
+      internalID: -3534130569122981403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_12
+      rect:
+        serializedVersion: 2
+        x: 535
+        y: 1557
+        width: 215
+        height: 128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f29389752782241b0800000000000000
+      internalID: -5673928108972426961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_13
+      rect:
+        serializedVersion: 2
+        x: 791
+        y: 1557
+        width: 215
+        height: 140
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f939a62ba6573310800000000000000
+      internalID: 1384670703527737843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_14
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 1299
+        width: 146
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65d51174761bd7350800000000000000
+      internalID: 6016159734368918870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_15
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 1299
+        width: 144
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4bced8d44dccf05f0800000000000000
+      internalID: -788186197560267596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_16
+      rect:
+        serializedVersion: 2
+        x: 567
+        y: 1299
+        width: 158
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0329b40659fe5c350800000000000000
+      internalID: 6036494300404748848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_17
+      rect:
+        serializedVersion: 2
+        x: 833
+        y: 1299
+        width: 148
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e073e83bd4e8ddc0800000000000000
+      internalID: -3613887070761422622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_18
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 1043
+        width: 144
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12dc7b5ec50f3c300800000000000000
+      internalID: 271324684354047265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_19
+      rect:
+        serializedVersion: 2
+        x: 299
+        y: 1045
+        width: 194
+        height: 214
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78f0bc37350fd8960800000000000000
+      internalID: 7605999586914275207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_20
+      rect:
+        serializedVersion: 2
+        x: 569
+        y: 1043
+        width: 164
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bba931d7fbeea0710800000000000000
+      internalID: 1660401918844050107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_21
+      rect:
+        serializedVersion: 2
+        x: 833
+        y: 1045
+        width: 160
+        height: 216
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01d7dba09aeb2f860800000000000000
+      internalID: 7562316357547425040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_22
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 799
+        width: 178
+        height: 216
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfc2399a79ece4340800000000000000
+      internalID: 4850040999504981244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_23
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 807
+        width: 174
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19013dc0bd45dd550800000000000000
+      internalID: 6187194762866659473
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_24
+      rect:
+        serializedVersion: 2
+        x: 565
+        y: 787
+        width: 140
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 327e163a394d2f750800000000000000
+      internalID: 6337361356230092579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_25
+      rect:
+        serializedVersion: 2
+        x: 805
+        y: 807
+        width: 194
+        height: 216
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fcc7cfe93c30418b0800000000000000
+      internalID: -5182513132475745073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_26
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 533
+        width: 218
+        height: 95
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89554f8a058546e40800000000000000
+      internalID: 5648736936084657560
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_27
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 539
+        width: 218
+        height: 176
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6868a2fc52bd18920800000000000000
+      internalID: 2990912582986663558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_28
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 539
+        width: 188
+        height: 215
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea2fc542bc0fd4e30800000000000000
+      internalID: 4489509158837351086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_29
+      rect:
+        serializedVersion: 2
+        x: 824
+        y: 539
+        width: 167
+        height: 215
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a24f397cb88fc7e0800000000000000
+      internalID: -1743024187699674457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_30
+      rect:
+        serializedVersion: 2
+        x: 1086
+        y: 539
+        width: 143
+        height: 215
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86edc41046974b850800000000000000
+      internalID: 6391867241571081832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_31
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 275
+        width: 142
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a14ec12a9e866c2f0800000000000000
+      internalID: -952958918485810150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_32
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 275
+        width: 148
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b672dd09b7f55d030800000000000000
+      internalID: 3518823668175939435
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_33
+      rect:
+        serializedVersion: 2
+        x: 567
+        y: 275
+        width: 142
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79c6690413747d230800000000000000
+      internalID: 3663475098751757463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_34
+      rect:
+        serializedVersion: 2
+        x: 833
+        y: 275
+        width: 138
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed2e6824f9d47d240800000000000000
+      internalID: 4816403672907309790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_35
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 21
+        width: 150
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3fabf280f802b0a10800000000000000
+      internalID: 1876629468419701491
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_36
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 21
+        width: 156
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7fff9dfb829ab5380800000000000000
+      internalID: -8981399039377801225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_37
+      rect:
+        serializedVersion: 2
+        x: 541
+        y: 21
+        width: 180
+        height: 216
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c65be2dd9d779f130800000000000000
+      internalID: 3601041154661856620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: white-animal-cat-sprite-sheet_38
+      rect:
+        serializedVersion: 2
+        x: 797
+        y: 19
+        width: 180
+        height: 218
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8e55088113a6d230800000000000000
+      internalID: 3663294642604301966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 8042b336a805fa544b249ffd7087366c
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceOnImport
+        value: False
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":256.0,"y":256.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      white-animal-cat-sprite-sheet_0: -1805863595141494948
+      white-animal-cat-sprite-sheet_1: -1651096931240067171
+      white-animal-cat-sprite-sheet_10: 5237584264528071623
+      white-animal-cat-sprite-sheet_11: -3534130569122981403
+      white-animal-cat-sprite-sheet_12: -5673928108972426961
+      white-animal-cat-sprite-sheet_13: 1384670703527737843
+      white-animal-cat-sprite-sheet_14: 6016159734368918870
+      white-animal-cat-sprite-sheet_15: -788186197560267596
+      white-animal-cat-sprite-sheet_16: 6036494300404748848
+      white-animal-cat-sprite-sheet_17: -3613887070761422622
+      white-animal-cat-sprite-sheet_18: 271324684354047265
+      white-animal-cat-sprite-sheet_19: 7605999586914275207
+      white-animal-cat-sprite-sheet_2: 7920582316784662898
+      white-animal-cat-sprite-sheet_20: 1660401918844050107
+      white-animal-cat-sprite-sheet_21: 7562316357547425040
+      white-animal-cat-sprite-sheet_22: 4850040999504981244
+      white-animal-cat-sprite-sheet_23: 6187194762866659473
+      white-animal-cat-sprite-sheet_24: 6337361356230092579
+      white-animal-cat-sprite-sheet_25: -5182513132475745073
+      white-animal-cat-sprite-sheet_26: 5648736936084657560
+      white-animal-cat-sprite-sheet_27: 2990912582986663558
+      white-animal-cat-sprite-sheet_28: 4489509158837351086
+      white-animal-cat-sprite-sheet_29: -1743024187699674457
+      white-animal-cat-sprite-sheet_3: 8884338219024961981
+      white-animal-cat-sprite-sheet_30: 6391867241571081832
+      white-animal-cat-sprite-sheet_31: -952958918485810150
+      white-animal-cat-sprite-sheet_32: 3518823668175939435
+      white-animal-cat-sprite-sheet_33: 3663475098751757463
+      white-animal-cat-sprite-sheet_34: 4816403672907309790
+      white-animal-cat-sprite-sheet_35: 1876629468419701491
+      white-animal-cat-sprite-sheet_36: -8981399039377801225
+      white-animal-cat-sprite-sheet_37: 3601041154661856620
+      white-animal-cat-sprite-sheet_38: 3663294642604301966
+      white-animal-cat-sprite-sheet_4: -81958170486891061
+      white-animal-cat-sprite-sheet_5: 6223888218676149076
+      white-animal-cat-sprite-sheet_6: -3630634770807708459
+      white-animal-cat-sprite-sheet_7: -7376486845833556160
+      white-animal-cat-sprite-sheet_8: 4322311414737316367
+      white-animal-cat-sprite-sheet_9: -761183061578815850
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
