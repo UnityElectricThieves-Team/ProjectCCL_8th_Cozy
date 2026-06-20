@@ -101,9 +101,13 @@ public class OverlayWindow : MonoBehaviour
     {
         if (_hwnd != IntPtr.Zero) return true;
 
-        _hwnd = Win32WindowApi.GetActiveWindow();
-        if (_hwnd == IntPtr.Zero) _hwnd = Win32WindowApi.GetForegroundWindow();
-        if (_hwnd == IntPtr.Zero) _hwnd = Win32WindowApi.FindWindow(null, Application.productName);
+        // 반드시 자기 프로세스의 메인 창만 잡는다.
+        // GetActiveWindow/GetForegroundWindow는 시작 순간 우리 창이 아직 활성/포그라운드가
+        // 아니면 그때 맨 앞이던 다른 앱(예: 전체화면 게임)의 창을 반환할 수 있고,
+        // 그 창에 borderless/투명/리사이즈가 적용되어 대상 앱이 망가진다.
+        // 시작 직후엔 아직 창이 없어 Zero일 수 있으나, 그 경우 호출 측이 다음 프레임 재시도(_pending).
+        // MainWindowHandle은 첫 접근값을 Process 객체에 캐시하므로, 매번 새 Process로 읽어 Zero가 굳지 않게 한다.
+        _hwnd = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
 
         return _hwnd != IntPtr.Zero;
     }
