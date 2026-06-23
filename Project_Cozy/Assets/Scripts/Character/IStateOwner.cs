@@ -11,6 +11,7 @@ public interface IStateOwner
     float Gravity { get; }
     float WakeUpDuration { get; }
     float LandDuration { get; }
+    float TransformDuration { get; }
     float NextIdleDuration();
     float NextWalkDuration();
 
@@ -26,6 +27,9 @@ public interface IStateOwner
     void ApplyVerticalDelta(float deltaY);
     void SetWorldPosition(Vector2 worldPos);
     void SetFacing(float direction);
+
+    CharacterForm CurrentForm { get; }
+    void SetForm(CharacterForm form);
 
     void ChangeState(CharacterState nextId);
 }

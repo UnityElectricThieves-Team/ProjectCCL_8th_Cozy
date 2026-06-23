@@ -10,11 +10,14 @@ public class InputInteractionManager : MonoBehaviour
     [SerializeField] private bool debugLogs;
     [Tooltip("When enabled, skips Physics2D overlap while the mouse pixel position is unchanged and no mouse button was pressed this frame. Turn off if interactables can move under a stationary cursor.")]
     [SerializeField] private bool _skipRescanWhenPointerUnchanged = true;
+    [Tooltip("호버 좌표 소스. 빌드의 투명 클릭-통과 창에선 Mouse.current가 freeze되므로 OS 커서 기반 좌표를 쓴다. 비우면 Awake에서 자동 탐색, 없으면 Mouse.current 폴백.")]
+    [SerializeField] private WindowsCursorToUnityScreen _cursorSource;
 
     private Collider2D[] hitBuffer;
     private IHoverable currentHover;
     private IClickable currentClickable;
     private IShiftRightClickable currentShiftRightClickable;
+    private IRightClickable currentRightClickable;
     private readonly Dictionary<Collider2D, CachedInteractable> interactableCache = new Dictionary<Collider2D, CachedInteractable>(256);
 
     private Vector2Int _lastPointerPixel;
@@ -25,6 +28,7 @@ public class InputInteractionManager : MonoBehaviour
         public IHoverable hoverable;
         public IClickable clickable;
         public IShiftRightClickable shiftRightClickable;
+        public IRightClickable rightClickable;
         public Renderer renderer;
         public int sortingOrder;
         public int sortingLayerValue;
@@ -39,6 +43,8 @@ public class InputInteractionManager : MonoBehaviour
 
         maxOverlapHits = Mathf.Max(1, maxOverlapHits);
         hitBuffer = new Collider2D[maxOverlapHits];
+
+        if (_cursorSource == null) _cursorSource = FindFirstObjectByType<WindowsCursorToUnityScreen>();
     }
 
     private void OnDisable()
@@ -55,32 +61,36 @@ public class InputInteractionManager : MonoBehaviour
         }
 
         var mouse = Mouse.current;
-        var pointerPixel = Vector2Int.FloorToInt(mouse.position.ReadValue());
+        var mouseScreen = ReadMouseScreenPosition(mouse);
+        var pointerPixel = Vector2Int.FloorToInt(mouseScreen);
         var pointerMoved = !_hasLastPointerPixel || pointerPixel != _lastPointerPixel;
         var anyMousePress = mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame;
 
         IHoverable nextHover;
         IClickable nextClickable;
         IShiftRightClickable nextShiftRightClickable;
+        IRightClickable nextRightClickable;
 
         if (_skipRescanWhenPointerUnchanged && _hasLastPointerPixel && !pointerMoved && !anyMousePress)
         {
             nextHover = currentHover;
             nextClickable = currentClickable;
             nextShiftRightClickable = currentShiftRightClickable;
+            nextRightClickable = currentRightClickable;
         }
         else
         {
             _lastPointerPixel = pointerPixel;
             _hasLastPointerPixel = true;
 
-            var mouseWorld = targetCamera.ScreenToWorldPoint(mouse.position.ReadValue());
+            var mouseWorld = targetCamera.ScreenToWorldPoint(mouseScreen);
             var point2D = new Vector2(mouseWorld.x, mouseWorld.y);
 
             var hitCount = Physics2D.OverlapPointNonAlloc(point2D, hitBuffer, interactableLayerMask);
             nextHover = null;
             nextClickable = null;
             nextShiftRightClickable = null;
+            nextRightClickable = null;
             var bestSortingOrder = int.MinValue;
             var bestSortingLayerValue = int.MinValue;
 
@@ -96,7 +106,8 @@ public class InputInteractionManager : MonoBehaviour
                 var candidateHover = cached.hoverable;
                 var candidateClickable = cached.clickable;
                 var candidateShiftRightClickable = cached.shiftRightClickable;
-                if (candidateHover == null && candidateClickable == null && candidateShiftRightClickable == null)
+                var candidateRightClickable = cached.rightClickable;
+                if (candidateHover == null && candidateClickable == null && candidateShiftRightClickable == null && candidateRightClickable == null)
                 {
                     continue;
                 }
@@ -117,6 +128,7 @@ public class InputInteractionManager : MonoBehaviour
                 nextHover = candidateHover;
                 nextClickable = candidateClickable;
                 nextShiftRightClickable = candidateShiftRightClickable;
+                nextRightClickable = candidateRightClickable;
             }
         }
 
@@ -134,6 +146,7 @@ public class InputInteractionManager : MonoBehaviour
 
         currentClickable = nextClickable;
         currentShiftRightClickable = nextShiftRightClickable;
+        currentRightClickable = nextRightClickable;
 
         if (currentClickable != null && mouse.leftButton.wasPressedThisFrame)
         {
@@ -141,13 +154,22 @@ public class InputInteractionManager : MonoBehaviour
         }
 
         var keyboard = Keyboard.current;
-        if (currentShiftRightClickable != null
-            && mouse.rightButton.wasPressedThisFrame
-            && keyboard != null
-            && keyboard.shiftKey.isPressed)
+        if (mouse.rightButton.wasPressedThisFrame)
         {
-            currentShiftRightClickable.OnShiftRightClick();
+            var shiftHeld = keyboard != null && keyboard.shiftKey.isPressed;
+            if (shiftHeld)
+                currentShiftRightClickable?.OnShiftRightClick();
+            else
+                currentRightClickable?.OnRightClick();
         }
+    }
+
+    // 호버 좌표 소스 선택: 빌드의 투명 클릭-통과 창에선 Mouse.current.position이 투명 픽셀 위에서 freeze되므로
+    // OS 커서 기반(WindowsCursorToUnityScreen)을 우선 사용. 없거나 에디터면 Mouse.current로 폴백.
+    private Vector2 ReadMouseScreenPosition(Mouse mouse)
+    {
+        if (_cursorSource != null) return _cursorSource.UnityScreenPosition;
+        return mouse != null ? mouse.position.ReadValue() : Vector2.zero;
     }
 
     private CachedInteractable GetOrCreateCachedInteractable(Collider2D collider)
@@ -163,6 +185,7 @@ public class InputInteractionManager : MonoBehaviour
             hoverable = collider.GetComponent<IHoverable>(),
             clickable = collider.GetComponent<IClickable>(),
             shiftRightClickable = collider.GetComponent<IShiftRightClickable>(),
+            rightClickable = collider.GetComponent<IRightClickable>(),
             renderer = renderer,
             sortingOrder = renderer != null ? renderer.sortingOrder : 0,
             sortingLayerValue = renderer != null ? SortingLayer.GetLayerValueFromID(renderer.sortingLayerID) : 0

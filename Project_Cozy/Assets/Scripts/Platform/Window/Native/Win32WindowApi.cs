@@ -55,6 +55,14 @@ internal static class Win32WindowApi
         public int cyBottomHeight;
     }
 
+    /// <summary>Win32 POINT — 화면/클라이언트 좌표(좌상단 원점, y-down).</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct POINT
+    {
+        public int x;
+        public int y;
+    }
+
     [DllImport("user32.dll")]
     public static extern IntPtr GetActiveWindow();
 
@@ -81,6 +89,14 @@ internal static class Win32WindowApi
 
     [DllImport("user32.dll")]
     public static extern int GetSystemMetrics(int nIndex);
+
+    /// <summary>OS 데스크톱 커서 위치(전역 화면 좌표). 창 포커스·투명 여부와 무관하게 갱신된다.</summary>
+    [DllImport("user32.dll")]
+    public static extern bool GetCursorPos(out POINT lpPoint);
+
+    /// <summary>화면(데스크톱) 좌표를 지정 창의 클라이언트 좌표로 변환. 현재 창 위치·크기 기준이라 리사이즈/이동에 자동 대응.</summary>
+    [DllImport("user32.dll")]
+    public static extern bool ScreenToClient(IntPtr hWnd, ref POINT lpPoint);
 
     /// <summary>UnityEngine.Color → Win32 COLORREF(0x00BBGGRR).</summary>
     public static uint ToColorRef(byte r, byte g, byte b)

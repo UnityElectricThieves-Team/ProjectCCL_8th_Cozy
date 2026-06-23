@@ -25,6 +25,8 @@ public sealed class StateModule
     [SerializeField] private Vector2 _walkDurationRange = new Vector2(3f, 5f);
     [SerializeField] private float _wakeUpDuration = 0.6f;
     [SerializeField] private float _landDuration = 0.4f;
+    [Tooltip("변신(Transform) 이펙트 지속시간. 중간 지점에서 폼이 스왑된다.")]
+    [SerializeField] private float _transformDuration = 0.8f;
 
     [Header("Movement")]
     [SerializeField] private float _walkSpeed = 1.5f;
@@ -57,6 +59,7 @@ public sealed class StateModule
     public float RunSpeed => _runSpeed;
     public float WakeUpDuration => _wakeUpDuration;
     public float LandDuration => _landDuration;
+    public float TransformDuration => _transformDuration;
     public float NextIdleDuration() => RandomInRange(_idleDurationRange);
     public float NextWalkDuration() => RandomInRange(_walkDurationRange);
 
@@ -87,6 +90,7 @@ public sealed class StateModule
         RegisterState(new LandState());
         RegisterState(new SpecialIdleState());
         RegisterState(new SpecialWalkState());
+        RegisterState(new TransformState());
     }
 
     /// <summary>자식 클래스의 종별 추가 state 확장점. <see cref="BaseCharacterController.RegisterExtraStates"/>에서 호출.</summary>
@@ -197,6 +201,18 @@ public sealed class StateModule
         if (IsLockedState) return;
         if (CurrentStateId == CharacterState.Grabbed) return;
         ChangeState(CharacterState.Grabbed);
+    }
+
+    /// <summary>변신 진입. 잠금 상태(WakeUp/Land/Transform 진행 중)면 무시. 폼 방향·친밀도 게이트는 호출자(BaseCharacterController)가 판정.</summary>
+    public void RequestTransform()
+    {
+        if (IsLockedState) return;
+        // 공중/들린 상태에서는 변신 금지 — 중력·접지 처리가 변신과 얽혀 공중 정지하는 버그 방지.
+        if (CurrentStateId == CharacterState.Fall) return;
+        if (CurrentStateId == CharacterState.Grabbed) return;
+        // 수면 중 우클릭은 기상(RecordInput→RequestWakeUp) 입력으로 처리되게 변신 금지(경합 제거).
+        if (CurrentStateId == CharacterState.Sleep) return;
+        ChangeState(CharacterState.Transform);
     }
 
     // ===== State 전환 =====

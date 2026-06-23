@@ -25,7 +25,9 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     [SerializeField] private float _groundProbeDistance = 100f;
     [Tooltip("발이 바닥(y=_floorY)에 닿았다고 보는 허용 오차.")]
     [SerializeField] private float _groundContactThreshold = 0.1f;
-    [Tooltip("SR/Collider 미설정 시 폴백 발 오프셋.")]
+    [Tooltip("발 위치 오프셋(루트 로컬 기준). 발이 바닥에 닿는 지점을 캐릭터 원점 기준으로 지정. " +
+             "스프라이트/콜라이더 bounds에 의존하지 않아 애니메이션 중에도 안정적. " +
+             "센터 피벗 스프라이트는 보통 y를 음수(발이 원점 아래)로 둔다.")]
     [SerializeField] private Vector2 _footOffset = Vector2.zero;
 
     [Header("Modules")]
@@ -49,28 +51,16 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public float Gravity => _gravity;
     public float WakeUpDuration => _state.WakeUpDuration;
     public float LandDuration => _state.LandDuration;
+    public float TransformDuration => _state.TransformDuration;
     public float NextIdleDuration() => _state.NextIdleDuration();
     public float NextWalkDuration() => _state.NextWalkDuration();
 
     // ===== IStateOwner: Transform / 발 위치 =====
     public Transform Transform => transform;
-    public Vector2 FootWorldPosition
-    {
-        get
-        {
-            if (_visualCollider != null)
-            {
-                var b = _visualCollider.bounds;
-                return new Vector2(b.center.x, b.min.y);
-            }
-            if (_spriteRenderer != null && _spriteRenderer.sprite != null)
-            {
-                var b = _spriteRenderer.bounds;
-                return new Vector2(b.center.x, b.min.y);
-            }
-            return transform.TransformPoint(_footOffset);
-        }
-    }
+    // 발 위치는 루트 transform + 고정 오프셋(_footOffset)으로 계산한다.
+    // 애니메이션 프레임마다 변하는 스프라이트/콜라이더 bounds에 의존하지 않아
+    // 매 프레임 안정적(상하 떨림 없음). 오프셋은 인스펙터에서 발 위치에 맞춰 조정.
+    public Vector2 FootWorldPosition => transform.TransformPoint(_footOffset);
 
     // ===== IStateOwner: 상태 전환 =====
     public void ChangeState(CharacterState nextId) => _state.ChangeState(nextId);
@@ -183,6 +173,14 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public void RequestUnpet() => _state.RequestUnpet();
     public void RequestGrab() => _state.RequestGrab();
 
+    /// <summary>우클릭 변신 토글. 동물→소녀는 친밀도 만점 필요, 소녀→동물은 언제든. CharacterInteractionRelay.OnRightClick에서 호출.</summary>
+    public void RequestTransform()
+    {
+        // 동물 → 소녀: 친밀도 만점일 때만 (AI_Logic.md §Transform). 소녀 → 동물: 무조건 허용.
+        if (_visual.CurrentForm == CharacterForm.Animal && !_affinity.IsMaxed) return;
+        _state.RequestTransform();
+    }
+
     // ===== IStateOwner: 물리/표현 헬퍼 =====
 
     public void MoveHorizontal(float deltaX)
@@ -208,6 +206,9 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     {
         _visual.SetFacing(direction < 0f);
     }
+
+    public CharacterForm CurrentForm => _visual.CurrentForm;
+    public void SetForm(CharacterForm form) => _visual.SetForm(form);
 
     // ===== IStateOwner: Ground =====
 

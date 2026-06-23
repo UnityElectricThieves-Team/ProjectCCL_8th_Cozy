@@ -17,6 +17,8 @@ public sealed class OpaqueHoverable : MonoBehaviour, IHoverable
     [SerializeField, Tooltip("비우면 Awake 시 Camera.main으로 폴백.")] private Camera _camera;
     [SerializeField, Range(0f, 1f), Tooltip("알파가 이 값보다 크면 불투명으로 판정. 픽셀 아트엔 0.1 정도면 충분.")]
     private float _alphaThreshold = 0.1f;
+    [SerializeField, Tooltip("호버 좌표 소스. 빌드의 투명 클릭-통과 창에선 Mouse.current가 freeze되므로 OS 커서 기반 좌표를 쓴다. 비우면 자동 탐색, 없으면 Mouse.current 폴백.")]
+    private WindowsCursorToUnityScreen _cursorSource;
 
     [Header("Events")]
     [SerializeField, Tooltip("매니저 hover ∧ 알파 불투명 진입 시 발사.")]
@@ -37,6 +39,7 @@ public sealed class OpaqueHoverable : MonoBehaviour, IHoverable
     {
         if (_spriteRenderer == null) _spriteRenderer = GetComponent<SpriteRenderer>();
         _resolvedCamera = _camera != null ? _camera : Camera.main;
+        if (_cursorSource == null) _cursorSource = FindFirstObjectByType<WindowsCursorToUnityScreen>();
     }
 
     // InputInteractionManager가 호출 — Collider2D 안으로 진입
@@ -86,13 +89,20 @@ public sealed class OpaqueHoverable : MonoBehaviour, IHoverable
     {
         if (_spriteRenderer == null || _spriteRenderer.sprite == null) return false;
 
-        var mouse = Mouse.current;
-        if (mouse == null) return false;
-
         Camera cam = _resolvedCamera != null ? _resolvedCamera : Camera.main;
         if (cam == null) return false;
 
-        Vector2 mouseScreen = mouse.position.ReadValue();
+        Vector2 mouseScreen;
+        if (_cursorSource != null)
+        {
+            mouseScreen = _cursorSource.UnityScreenPosition;
+        }
+        else
+        {
+            var mouse = Mouse.current;
+            if (mouse == null) return false;
+            mouseScreen = mouse.position.ReadValue();
+        }
         Vector3 mouseWorld = cam.ScreenToWorldPoint(new Vector3(mouseScreen.x, mouseScreen.y, 0f));
 
         // 월드 → SpriteRenderer 로컬 (transform.localScale, 회전 모두 자동 보정됨)

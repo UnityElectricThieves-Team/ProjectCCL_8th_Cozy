@@ -1,7 +1,21 @@
 using UnityEngine;
 
+// ============================================================
+// <deprecated>
+// 이 컴포넌트는 더 이상 사용하지 않습니다 (2026-06부터).
+//
+// 원래 Pet 전용 애니메이션이 없던 시절, 쓰다듬을 때 노란색 tint + 크기 확대로
+// 임시 시각 피드백을 주던 placeholder였습니다. 이제 Pet 상태(CharacterState.Pet)에
+// 실제 애니메이션이 연결되어, 호버 시 BaseCharacterController.OnHover → RequestPet 으로
+// Pet 상태에 진입하면 그 애니메이션이 재생됩니다. 따라서 이 컴포넌트의 역할은 사라졌습니다.
+//
+// 사람 · AI · 다른 프로젝트 모두: 새로 부착하거나 사용하지 마세요. 참고용으로만 남겨둔 코드입니다.
+// (Character.prefab의 Visual에서 이미 제거됨.)
+// </deprecated>
+// ============================================================
+
 /// <summary>
-/// 쓰다듬 시각 반응. 자식 Visual GameObject에 부착. <see cref="OpaqueHoverable"/>의 UnityEvent에서 호출되어
+/// [DEPRECATED — 위 주석 참고] 쓰다듬 시각 반응. 자식 Visual GameObject에 부착. <see cref="OpaqueHoverable"/>의 UnityEvent에서 호출되어
 /// Tint는 자체 처리, Scale은 부모 <see cref="BaseCharacterController.Scale"/>의 ExtraMultiplier에 위임.
 /// </summary>
 public sealed class PettingReaction : MonoBehaviour

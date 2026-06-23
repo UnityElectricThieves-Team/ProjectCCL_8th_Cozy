@@ -16,3 +16,8 @@ public interface IShiftRightClickable
 {
     void OnShiftRightClick();
 }
+
+public interface IRightClickable
+{
+    void OnRightClick();
+}

@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2843509638916326727}
-  - component: {fileID: -194812744603331188}
   - component: {fileID: 5990119214145366604}
   m_Layer: 0
   m_Name: Character
@@ -35,28 +34,6 @@ Transform:
   - {fileID: 724841922947246909}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &-194812744603331188
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2249430935833052887}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 45eb79c2c6de7b847ad467e5698dae3f, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &5990119214145366604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69,11 +46,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b1acfa07210b604fa95943bdded477a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BaseCharacterController
-  _animator: {fileID: -194812744603331188}
+  _animator: {fileID: 4113159975239720336}
   _spriteRenderer: {fileID: 5591664294296824350}
-  _visualCollider: {fileID: 5684865512778039783}
-  _gravity: 12
-  _floorY: 0
+  _visualCollider: {fileID: 0}
+  _gravity: 20
+  _floorY: 7
   _groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -85,6 +62,7 @@ MonoBehaviour:
     _walkDurationRange: {x: 3, y: 5}
     _wakeUpDuration: 0.6
     _landDuration: 0.4
+    _transformDuration: 0.8
     _walkSpeed: 1.5
     _runSpeed: 3.5
     _outFocusKey: {fileID: 0}
@@ -95,8 +73,8 @@ MonoBehaviour:
     _logStateChanges: 1
   _visual:
     _visualStateParameter: VisualState
-    _animalOverride: {fileID: 0}
-    _girlOverride: {fileID: 0}
+    _animalOverride: {fileID: 22100000, guid: 252592adae4fe0444b2ac9671a9c2c00, type: 2}
+    _girlOverride: {fileID: 22100000, guid: dc96266d532d3d84c8c16520cd609833, type: 2}
     _startForm: 0
     _startState: 0
   _affinity:
@@ -115,13 +93,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4326145103118088703}
+  - component: {fileID: 4113159975239720336}
   - component: {fileID: 5591664294296824350}
-  - component: {fileID: 5684865512778039783}
-  - component: {fileID: 996106129911498342}
+  - component: {fileID: 5416345582349782209}
   - component: {fileID: 4528180928151775974}
   - component: {fileID: 3454434006092565042}
   - component: {fileID: 3200586724842295907}
-  - component: {fileID: 3402326961030724237}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -144,6 +121,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2843509638916326727}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &4113159975239720336
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5691119776310040808}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 45eb79c2c6de7b847ad467e5698dae3f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!212 &5591664294296824350
 SpriteRenderer:
   serializedVersion: 2
@@ -203,8 +202,8 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!60 &5684865512778039783
-PolygonCollider2D:
+--- !u!61 &5416345582349782209
+BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -247,29 +246,8 @@ PolygonCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Points:
-    m_Paths:
-    - - {x: 0.1875, y: -0.125}
-      - {x: 0.1875, y: 0.125}
-      - {x: -0.03125, y: 0.28125}
-      - {x: -0.15625, y: 0.28125}
-      - {x: -0.1875, y: 0.1875}
-      - {x: -0.1875, y: -0.125}
-      - {x: -0.15625, y: -0.15625}
-      - {x: 0.09375, y: -0.15625}
-  m_UseDelaunayMesh: 1
---- !u!114 &996106129911498342
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5691119776310040808}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26c792d1856c192448a2a8b1743c79a5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PolygonColliderSpriteSync
+  m_Size: {x: 16, y: 16}
+  m_EdgeRadius: 0
 --- !u!114 &4528180928151775974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -300,36 +278,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 3402326961030724237}
-        m_TargetAssemblyTypeName: PettingReaction, Assembly-CSharp
-        m_MethodName: OnPetEnter
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
   _onOpaqueHoverExit:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 5990119214145366604}
         m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
         m_MethodName: OnHoverEnd
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 3402326961030724237}
-        m_TargetAssemblyTypeName: PettingReaction, Assembly-CSharp
-        m_MethodName: OnPetExit
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -379,26 +333,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterInteractionRelay
   _owner: {fileID: 0}
---- !u!114 &3402326961030724237
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5691119776310040808}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f394968f1f01d24591749a7f5a7369a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PettingReaction
-  _spriteRenderer: {fileID: 5591664294296824350}
-  _controller: {fileID: 5990119214145366604}
-  _enableTint: 1
-  _onColor: {r: 1, g: 0.9, b: 0.5, a: 1}
-  _offColor: {r: 1, g: 1, b: 1, a: 1}
-  _enableScale: 1
-  _onScale: 1.1
-  _offScale: 1
 --- !u!1 &7770905970032606799
 GameObject:
   m_ObjectHideFlags: 0

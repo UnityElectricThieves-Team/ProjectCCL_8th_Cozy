@@ -126,10 +126,19 @@ public sealed class VisualModule
 
     private void ApplyForm(CharacterForm form)
     {
-        CurrentForm = form;
-        if (_animator == null) return;
+        if (_animator == null) { CurrentForm = form; return; }
         var ov = form == CharacterForm.Animal ? _animalOverride : _girlOverride;
-        if (ov != null)
-            _animator.runtimeAnimatorController = ov;
+        if (ov == null)
+        {
+            // 오버라이드 미할당 — 폼 스왑을 건너뛴다. CurrentForm을 갱신하면 "내부 폼≠화면"
+            // 불일치로 토글/게이트가 영구히 어긋나므로, 실패 시 폼도 그대로 둔다.
+            Debug.LogWarning($"[VisualModule] '{form}' 폼 오버라이드가 비어 폼 스왑을 건너뜁니다.", _owner);
+            return;
+        }
+        _animator.runtimeAnimatorController = ov;
+        CurrentForm = form;
+        // 같은 base를 공유하는 오버라이드 간 교체라 파라미터가 유지될 수도 있으나,
+        // 혹시 리셋되는 경우를 대비해 현재 시각 상태를 새 컨트롤러에 다시 적용(보험).
+        _animator.SetInteger(_stateHash, (int)CurrentState);
     }
 }
