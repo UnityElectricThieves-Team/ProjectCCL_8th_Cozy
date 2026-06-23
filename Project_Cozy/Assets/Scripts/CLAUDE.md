@@ -54,7 +54,7 @@
 - `Character/ScaleMultiplierSettings.cs` — 게임 내 모든 ScaleMultiplier를 모은 ScriptableObject. 현재 `Character` 하나, 향후 UI/Background 확장.
 - `Character/Modules/StateModule.cs` — State 머신 + Sleep 정책 + SpecialMode 분기 + `IsLockedState` 가드. 11 State 등록 + `Request*` API.
 - `Character/Modules/VisualModule.cs` — Animator 단일 진입점(`Play`/`PlayOneShot`(float timer)/`SetFacing`/`SetForm`).
-- `Character/Modules/AffinityModule.cs` — 친밀도 수치 + 4 이벤트(`AffinityChanged`/`SpecialActivated`/`SpecialReleased`/`HumanTransformAvailable`).
+- `Character/Modules/AffinityModule.cs` — 친밀도 수치 + 3 이벤트(`AffinityChanged`/`SpecialActivated`/`SpecialReleased`).
 - `Character/Modules/ScaleModule.cs` — `_baseScale * User * Extra` 곱셈으로 루트 `transform.localScale` 갱신. `ScaleMultiplierSettings.Character.Changed` 구독.
 - `Character/States/BaseCharacterState.cs` — abstract state 베이스.
 - `Character/States/{Idle, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, SpecialIdle, SpecialWalk}State.cs` — 11개 State 클래스. `Run`/`Special*`은 `Walk`/`Idle` 상속.

@@ -50,7 +50,7 @@ Int 값은 [BaseAnimatorController.controller](../../Assets/Animations/Animation
 - **`CharacterInteractionRelay.cs`** — 자식 Visual에 부착, `IShiftRightClickable`만 책임 (Shift+우클릭 → 친밀도 리셋). IHoverable/IClickable은 OpaqueHoverable/ClickableEvent에 양보.
 - **`Modules/StateModule.cs`** — State 머신 + Sleep 정책 + SpecialMode 분기. 11 State 인스턴스 + `Request*` API + 잠금 가드(`IsLockedState`) + 입력 4채널 구독(InFocus·OutFocus). `RegisterState(IState)` 확장점.
 - **`Modules/VisualModule.cs`** — Animator 단일 진입점. `Play(state)` / `PlayOneShot(state)` / `SetFacing` / `SetForm`. OneShot은 float timer 기반 (UniTask 미사용).
-- **`Modules/AffinityModule.cs`** — 친밀도 수치 + 이벤트 (`AffinityChanged`/`SpecialActivated`/`SpecialReleased`/`HumanTransformAvailable`). 시각 직접 제어 금지.
+- **`Modules/AffinityModule.cs`** — 친밀도 수치 + 이벤트 (`AffinityChanged`/`SpecialActivated`/`SpecialReleased`). 시각 직접 제어 금지.
 - **`Modules/ScaleModule.cs`** — 루트 `transform.localScale = _baseScale * User * Extra` 갱신. `ScaleMultiplierSettings.Character.Changed` 구독 + 호버 강조 같은 일시 `ExtraMultiplier` 슬롯 제공.
 - **`ScaleMultiplier.cs` / `ScaleMultiplierSettings.cs`** — 직렬화 단위 + 종합 ScriptableObject. UI(`CharacterSizeSelector`)가 `Character.Value`를 set하면 `ScaleModule`이 구독해 적용.
 - **`PettingReaction.cs`** — 자식 Visual에 부착되는 쓰다듬 시각 반응. `OpaqueHoverable` UnityEvent 수신 → tint 자체 처리 + `controller.Scale.ExtraMultiplier`로 일시 스케일 위임. Scale 책임이 분리되어 multiplier와 충돌 없음.

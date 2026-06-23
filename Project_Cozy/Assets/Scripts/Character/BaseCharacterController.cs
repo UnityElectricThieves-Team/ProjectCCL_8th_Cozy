@@ -176,8 +176,8 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     /// <summary>우클릭 변신 토글. 동물→소녀는 친밀도 만점 필요, 소녀→동물은 언제든. CharacterInteractionRelay.OnRightClick에서 호출.</summary>
     public void RequestTransform()
     {
-        // 동물 → 소녀: 친밀도 만점일 때만 (AI_Logic.md §Transform). 소녀 → 동물: 무조건 허용.
-        if (_visual.CurrentForm == CharacterForm.Animal && !_affinity.IsMaxed) return;
+        // 동물 → 소녀: 친밀도가 변신 임계 이상일 때만 (AI_Logic.md §Transform). 소녀 → 동물: 무조건 허용.
+        if (_visual.CurrentForm == CharacterForm.Animal && !_affinity.CanHumanTransform) return;
         _state.RequestTransform();
     }
 

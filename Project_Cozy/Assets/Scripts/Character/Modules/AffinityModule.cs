@@ -1,68 +1,72 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// 친밀도 수치 + 이벤트만. <see cref="UnityEngine.Animator"/>/<see cref="UnityEngine.SpriteRenderer"/> 직접 참조 금지 —
-/// 시각 전환은 <c>SpecialActivated</c>/<c>SpecialReleased</c>/<c>HumanTransformAvailable</c> 이벤트로 위임한다.
+/// 시각 전환은 <c>SpecialActivated</c>/<c>SpecialReleased</c> 이벤트로 위임한다.
 /// 순수 C# <see cref="SerializableAttribute"/> 클래스 — <see cref="BaseCharacterController"/>가 <c>[SerializeField]</c>로 nested 보유.
 /// </summary>
 [Serializable]
 public sealed class AffinityModule
 {
     [Header("Affinity")]
-    [SerializeField] private int _maxAffinity = 100;
-    [Tooltip("호버 진입 시(OnHoverEnter) 누적 친밀도.")]
+    [Tooltip("이 친밀도에 도달하면 소녀로 변신할 수 있다.")]
+    [FormerlySerializedAs("_maxAffinity")]
+    [SerializeField] private int _humanTransformThreshold = 100;
+    [Tooltip("쓰다듬기(호버 진입) 1회당 오르는 친밀도.")]
     [SerializeField] private int _affinityPerHoverEnter = 10;
-    [Tooltip("인간 변신 가능 임계. Phase 8에서 활용.")]
-    [SerializeField] private int _humanTransformThreshold = 1000;
+    [Tooltip("친밀도 최대치. 이 값을 넘으면 더 오르지 않는다(오버플로우 방지).")]
+    [SerializeField] private int _affinityHardCap = 100_000_000;
 
     private BaseCharacterController _owner;
     private int _affinity;
+    private int _cumulativeAffinity;
 
+    /// <summary>현재 친밀도. <see cref="Reset"/>로 0으로 돌아간다.</summary>
     public int Current => _affinity;
-    public int Max => _maxAffinity;
-    public bool IsMaxed => _affinity >= Mathf.Max(1, _maxAffinity);
-    public bool CanHumanTransform => _affinity >= _humanTransformThreshold;
+    /// <summary>줄어들지 않는 누적 친밀도. <see cref="Reset"/>에도 유지된다(디버그 표시·향후 활용용).</summary>
+    public int CumulativeAffinity => _cumulativeAffinity;
+    /// <summary>친밀도 최대치(하드 상한).</summary>
+    public int Max => _affinityHardCap;
+    /// <summary>소녀 변신 가능 여부 — 친밀도가 변신 임계 이상인가.</summary>
+    public bool CanHumanTransform => _affinity >= Mathf.Max(1, _humanTransformThreshold);
 
     /// <summary>친밀도 값이 변할 때마다 새 값으로 호출.</summary>
     public event Action<int> AffinityChanged;
-    /// <summary>친밀도가 Max에 진입한 순간 1회 발사. <see cref="StateModule.SpecialMode"/> ON 신호.</summary>
+    /// <summary>친밀도가 변신 임계에 진입한 순간 1회 발사. <see cref="StateModule.SpecialMode"/> ON 신호.</summary>
     public event Action SpecialActivated;
-    /// <summary>친밀도가 Max에서 해제된 순간 1회 발사.</summary>
+    /// <summary>친밀도가 변신 임계에서 해제된 순간 1회 발사.</summary>
     public event Action SpecialReleased;
-    /// <summary>인간 변신 임계 도달 시 1회 발사. Phase 8에서 변신 시퀀스 트리거.</summary>
-    public event Action HumanTransformAvailable;
 
     public void Bind(BaseCharacterController owner)
     {
         _owner = owner;
     }
 
-    /// <summary>호버 진입 시 누적. Cap 도달 시 SpecialActivated 발사, 변신 임계 도달 시 HumanTransformAvailable 발사.</summary>
+    /// <summary>호버 진입 시 누적. 변신 임계 진입 시 SpecialActivated 발사, 하드 상한에서 멈춘다.</summary>
     public void AddOnHoverEnter()
     {
-        var cap = Mathf.Max(1, _maxAffinity);
+        var cap = Mathf.Max(1, _affinityHardCap);
         if (_affinity >= cap) return;
 
         var before = _affinity;
         var gain = Mathf.Max(0, _affinityPerHoverEnter);
         _affinity = Mathf.Min(cap, _affinity + gain);
+        _cumulativeAffinity = Mathf.Min(cap, _cumulativeAffinity + (_affinity - before));
 
         AffinityChanged?.Invoke(_affinity);
-
-        if (before < cap && _affinity >= cap)
-            SpecialActivated?.Invoke();
 
         if (before < _humanTransformThreshold && _affinity >= _humanTransformThreshold)
-            HumanTransformAvailable?.Invoke();
+            SpecialActivated?.Invoke();
     }
 
-    /// <summary>친밀도 0 리셋. Max에서 해제 시 SpecialReleased 발사.</summary>
+    /// <summary>현재 친밀도 0 리셋. 누적 친밀도는 유지. 변신 임계에서 해제 시 SpecialReleased 발사.</summary>
     public void Reset()
     {
-        var wasMax = IsMaxed;
+        var wasTransformable = CanHumanTransform;
         _affinity = 0;
         AffinityChanged?.Invoke(_affinity);
-        if (wasMax) SpecialReleased?.Invoke();
+        if (wasTransformable) SpecialReleased?.Invoke();
     }
 }

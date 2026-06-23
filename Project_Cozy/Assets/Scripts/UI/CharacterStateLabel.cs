@@ -41,6 +41,6 @@ public sealed class CharacterStateLabel : MonoBehaviour
 
     private void Refresh()
     {
-        _label.text = $"State: {_character.State.CurrentStateName}\nAffinity: {_character.Affinity.Current}";
+        _label.text = $"State: {_character.State.CurrentStateName}\nAffinity: {_character.Affinity.Current}\nCumulative: {_character.Affinity.CumulativeAffinity}";
     }
 }

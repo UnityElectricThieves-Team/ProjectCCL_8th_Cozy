@@ -78,9 +78,9 @@ MonoBehaviour:
     _startForm: 0
     _startState: 0
   _affinity:
-    _maxAffinity: 100
+    _humanTransformThreshold: 100
     _affinityPerHoverEnter: 10
-    _humanTransformThreshold: 1000
+    _affinityHardCap: 100000000
   _scale:
     _settings: {fileID: 11400000, guid: f969c08165cf55b468e1f3a4f2c83e7b, type: 2}
     _baseScale: {x: 1, y: 1, z: 1}
@@ -263,6 +263,7 @@ MonoBehaviour:
   _spriteRenderer: {fileID: 0}
   _camera: {fileID: 0}
   _alphaThreshold: 0.1
+  _cursorSource: {fileID: 0}
   _onOpaqueHoverEnter:
     m_PersistentCalls:
       m_Calls:
