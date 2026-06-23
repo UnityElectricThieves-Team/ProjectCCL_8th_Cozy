@@ -36,9 +36,15 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     [SerializeField] private AffinityModule _affinity = new AffinityModule();
     [SerializeField] private ScaleModule _scale = new ScaleModule();
 
+    // 스폰 시 CharacterNames에서 할당받는 고유 이름(정체성). 표현(머리 위 라벨)과 분리.
+    private string _name;
+
     public Animator Animator => _animator;
     public SpriteRenderer SpriteRenderer => _spriteRenderer;
     public Collider2D VisualCollider => _visualCollider;
+
+    /// <summary>스폰 시 할당된 이름. 머리 위 라벨(<see cref="CharacterNameLabel"/>)이 표시한다.</summary>
+    public string Name => _name;
 
     public StateModule State => _state;
     public VisualModule Visual => _visual;
@@ -71,6 +77,8 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         if (_spriteRenderer == null) _spriteRenderer = GetComponent<SpriteRenderer>();
         if (_visualCollider == null && _spriteRenderer != null)
             _visualCollider = _spriteRenderer.GetComponent<Collider2D>();
+
+        _name = CharacterNames.Acquire();
 
         _state.Bind(this);
         _visual.Bind(this);
@@ -111,6 +119,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     protected virtual void OnDestroy()
     {
+        CharacterNames.Release(_name);
         _state.StateChanged -= OnStateChanged;
         if (_affinity != null)
         {
