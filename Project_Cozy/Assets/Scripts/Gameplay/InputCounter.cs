@@ -24,8 +24,18 @@ public class InputCounter : MonoBehaviour
 
     private IDisposable _anyButtonSubscription;
 
-    /// <summary>지금까지 누적된 입력 횟수 — 기획 용어로는 '스폰 기운'.</summary>
+    /// <summary>지금까지 누적된 입력 횟수 — 기획 용어로는 '스폰 기운'. 스폰으로 차감된다.</summary>
     public int Count { get; private set; }
+
+    /// <summary>줄어들지 않는 총 입력 누적. 스폰으로 Count가 깎여도 유지된다(디버그 표시·향후 해금용).</summary>
+    public int CumulativeCount { get; private set; }
+
+    /// <summary>입력 1회 — 소비형 Count와 누적 CumulativeCount를 함께 올린다. 모든 입력 채널이 이 메서드를 통한다.</summary>
+    private void Increment()
+    {
+        Count++;
+        CumulativeCount++;
+    }
 
     /// <summary>스폰 기운 차감. 음수로 가지 않도록 0에서 클램프.</summary>
     public void ReduceSpawnEnergy(int amount)
@@ -36,6 +46,11 @@ public class InputCounter : MonoBehaviour
 
     private void OnEnable()
     {
+        // 인스펙터 미연결 시 Singleton 폴백 — OutFocus 훅은 OS-wide라 씬당 1개. 훅의 [DefaultExecutionOrder(-100)]이
+        // 먼저 Awake되도록 보장하므로 이 시점에 Instance가 잡혀 있다. (StateModule.Bind와 같은 방식)
+        if (_outFocusKey == null) _outFocusKey = OutFocusKeyHook.Instance;
+        if (_outFocusMouse == null) _outFocusMouse = OutFocusMouseHook.Instance;
+
         if (_outFocusKey != null) _outFocusKey.KeyPressed += OnOutFocusKey;
         else Debug.LogError($"[{nameof(InputCounter)}] OutFocusKeyHook 참조가 없습니다.", this);
 
@@ -45,7 +60,7 @@ public class InputCounter : MonoBehaviour
         // InFocus 키 — KeyControl만 통과시켜 마우스/게임패드 등 다른 ButtonControl 제외.
         _anyButtonSubscription = InputSystem.onAnyButtonPress.Call(ctrl =>
         {
-            if (ctrl is KeyControl) Count++;
+            if (ctrl is KeyControl) Increment();
         });
     }
 
@@ -63,11 +78,11 @@ public class InputCounter : MonoBehaviour
         var mouse = Mouse.current;
         if (mouse == null) return;
 
-        if (mouse.leftButton.wasPressedThisFrame)   Count++;
-        if (mouse.rightButton.wasPressedThisFrame)  Count++;
-        if (mouse.middleButton.wasPressedThisFrame) Count++;
+        if (mouse.leftButton.wasPressedThisFrame)   Increment();
+        if (mouse.rightButton.wasPressedThisFrame)  Increment();
+        if (mouse.middleButton.wasPressedThisFrame) Increment();
     }
 
-    private void OnOutFocusKey(Key _)              => Count++;
-    private void OnOutFocusMouseButton(MouseButton _) => Count++;
+    private void OnOutFocusKey(Key _)              => Increment();
+    private void OnOutFocusMouseButton(MouseButton _) => Increment();
 }

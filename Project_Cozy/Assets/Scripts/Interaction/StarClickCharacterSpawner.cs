@@ -1,5 +1,12 @@
 using UnityEngine;
 
+// ============================================================
+// <deprecated>
+// Star 오브젝트에서는 더 이상 사용하지 않습니다. 클릭→캐릭터 스폰은 StarController.RequestSpawn으로 통합됐습니다.
+// 레거시 StarKK.prefab이 아직 이 컴포넌트를 참조하므로 남겨둡니다 — StarKK 정리 시 삭제 검토.
+// </deprecated>
+// ============================================================
+
 /// <summary>
 /// StarKK 클릭 시 <see cref="_characterPrefab"/>(예: Character_debug) 1개를 인근에 스폰한다.
 /// 게이트: <see cref="_starThreshold"/>의 <see cref="StarInputThreshold.Counter"/>의 Count가
