@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -8,9 +9,7 @@ using UnityEngine;
 /// 대신 카메라가 보는 월드 범위가 창 크기에 비례해 함께 변동한다(바닥 _minY는 하단에 고정).
 /// x는 0이 가운데, 좌우 폭은 현재 종횡비로 맞춰져 픽셀이 정사각을 유지한다.
 ///
-/// 게임 로딩 시 자동 1회 적용. WindowResizeHandler(koko 윈도우)가 씬에 있으면 그
-/// Resized 이벤트를 구독해 리사이즈마다 자동 재Fit한다. WindowResizeHandler가 없는
-/// 씬(예: MainScene_KK)에서는 1회 Fit만.
+/// 게임 로딩 시 자동 1회 적용.
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Camera))]
@@ -24,23 +23,12 @@ public class CameraFitter : MonoBehaviour
     [Tooltip("이 화면 높이(px)에서 _minY~_maxY가 정확히 보인다. 오브젝트의 화면 크기는 이 기준으로 고정된다.")]
     [SerializeField] private float _referenceHeight = 1080f;
 
-    [Header("Resize 연동 (선택)")]
-    [Tooltip("창 리사이즈 시 자동 재Fit할 핸들러. 비우면 Awake에서 씬에서 자동 탐색. 없으면 1회 Fit만.")]
-    [SerializeField] private WindowResizeHandler _resizeHandler;
-
     private Camera _camera;
 
     void Awake()
     {
         _camera = GetComponent<Camera>();
-        if (_resizeHandler == null) _resizeHandler = FindFirstObjectByType<WindowResizeHandler>();
-        if (_resizeHandler != null) _resizeHandler.Resized += Fit;
         StartCoroutine(FitAfterReady());
-    }
-
-    void OnDestroy()
-    {
-        if (_resizeHandler != null) _resizeHandler.Resized -= Fit;
     }
 
     // OverlayWindow/WindowResizeHandler가 초기 창 배치를 잡는 데 몇 프레임 걸리므로,
