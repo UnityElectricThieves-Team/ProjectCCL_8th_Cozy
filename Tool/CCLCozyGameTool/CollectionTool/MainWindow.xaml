@@ -1,0 +1,315 @@
+<Window x:Class="CollectionTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CollectionTool"
+        mc:Ignorable="d"
+        Title="Collection Data Tool" Height="800" Width="1200"
+        Background="#F6F4F0"
+        FontFamily="Segoe UI">
+    <Window.Resources>
+        <!-- Palette: https://colorhunt.co/palette/2e50774da1a979d7bef6f4f0 -->
+        <!-- #2E5077(네이비)를 메인으로 쓰고, #4DA1A9/#79D7BE는 선택·호버·사진슬롯 같은 특정 배경에만 포인트로 사용 -->
+        <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="BorderBrush2" Color="#D9E0E8"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#2E5077"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#7C8FA6"/>
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#2E5077"/>
+        <SolidColorBrush x:Key="SecondaryBrush" Color="#E7ECF1"/>
+        <SolidColorBrush x:Key="DangerBrush" Color="#E8908C"/>
+        <SolidColorBrush x:Key="SelectedItemBrush" Color="#2E5077"/>
+        <SolidColorBrush x:Key="HoverItemBrush" Color="#E3F3F1"/>
+        <SolidColorBrush x:Key="PhotoSlotBrush" Color="#4DA1A9"/>
+        <SolidColorBrush x:Key="AccentTealBrush" Color="#4DA1A9"/>
+
+        <!-- Card container -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+
+        <!-- Buttons -->
+        <Style x:Key="BaseButtonStyle" TargetType="Button">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bg" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bg" Property="Background" Value="#DDE3EA"/>
+                                <Setter Property="Foreground" Value="#9AA6B5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        </Style>
+        <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource DangerBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <!-- Text inputs -->
+        <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentTealBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="DatePicker">
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        </Style>
+
+        <!-- List -->
+        <Style x:Key="EntryListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="10,9"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="BorderBrush" Value="#2E5077"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="bd" Background="Transparent" BorderThickness="1" BorderBrush="LightGray" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource HoverItemBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource SelectedItemBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style x:Key="PhotoSlotLabelStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Style="{StaticResource CardStyle}" Padding="12">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="ImportFromDatButton" Content="다시 불러오기" Width="110" Margin="0,0,8,0"
+                        Style="{StaticResource SecondaryButtonStyle}" Click="ImportFromDatButton_Click"
+                        ToolTip="collection.dat를 복호화해 불러옵니다"/>
+                <Button x:Name="ExportButton" Content="게임용 내보내기(암호화)" Width="180"
+                        Style="{StaticResource SecondaryButtonStyle}" Click="ExportButton_Click"/>
+                <TextBlock x:Name="StatusText" VerticalAlignment="Center" Margin="16,0,0,0"
+                           Foreground="{StaticResource TextSecondaryBrush}"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Entry list -->
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="등록된 항목" Style="{StaticResource SectionHeaderStyle}"/>
+                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button x:Name="AddButton" Content="새 항목 추가" Width="130"
+                                Style="{StaticResource PrimaryButtonStyle}" Click="AddButton_Click"/>
+                        <Button x:Name="RemoveButton" Content="선택 삭제" Width="90" Margin="8,0,0,0"
+                                Style="{StaticResource DangerButtonStyle}" Click="RemoveButton_Click"/>
+                    </StackPanel>
+                    <ListBox x:Name="EntryListBox" DisplayMemberPath="Name"
+                             BorderThickness="0" Background="Transparent"
+                             ItemContainerStyle="{StaticResource EntryListBoxItemStyle}"
+                             SelectionChanged="EntryListBox_SelectionChanged"/>
+                </DockPanel>
+            </Border>
+
+            <!-- Detail editor -->
+            <Grid Grid.Column="2">
+                <Border Style="{StaticResource CardStyle}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="DetailPanel" IsEnabled="False">
+                            <TextBlock Text="상세 정보" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,10">
+                                    <TextBlock Text="이름 *" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="NameTextBox" Style="{StaticResource RoundedTextBoxStyle}" TextChanged="RequiredField_Changed"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,10">
+                                    <TextBlock Text="취미 *" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="HobbyTextBox" Style="{StaticResource RoundedTextBoxStyle}" TextChanged="RequiredField_Changed"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,10">
+                                    <TextBlock Text="나이 *" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="AgeTextBox" Style="{StaticResource RoundedTextBoxStyle}" TextChanged="RequiredField_Changed"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,10">
+                                    <TextBlock Text="키(cm) *" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="HeightTextBox" Style="{StaticResource RoundedTextBoxStyle}" TextChanged="RequiredField_Changed"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,10">
+                                    <TextBlock Text="생일 *" Style="{StaticResource FieldLabelStyle}"/>
+                                    <DatePicker x:Name="BirthdayDatePicker" HorizontalAlignment="Stretch"
+                                                SelectedDateChanged="RequiredField_DateChanged"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="사진 (선택 입력)" Style="{StaticResource SectionHeaderStyle}" Margin="0,16,0,10"/>
+                            <UniformGrid Columns="4">
+                                <StackPanel Margin="0,0,10,0">
+                                    <TextBlock Text="숨김-메인" Style="{StaticResource PhotoSlotLabelStyle}"/>
+                                    <Border BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1" CornerRadius="8"
+                                            Width="120" Height="120" Background="{StaticResource PhotoSlotBrush}" ClipToBounds="True">
+                                        <Image x:Name="MainHiddenImage" Stretch="UniformToFill"/>
+                                    </Border>
+                                    <Button Content="업로드" Margin="0,6,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="UploadMainHidden_Click"/>
+                                    <Button Content="제거" Margin="0,4,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="ClearMainHidden_Click"/>
+                                </StackPanel>
+                                <StackPanel Margin="0,0,10,0">
+                                    <TextBlock Text="숨김-서브" Style="{StaticResource PhotoSlotLabelStyle}"/>
+                                    <Border BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1" CornerRadius="8"
+                                            Width="120" Height="120" Background="{StaticResource PhotoSlotBrush}" ClipToBounds="True">
+                                        <Image x:Name="SubHiddenImage" Stretch="UniformToFill"/>
+                                    </Border>
+                                    <Button Content="업로드" Margin="0,6,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="UploadSubHidden_Click"/>
+                                    <Button Content="제거" Margin="0,4,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="ClearSubHidden_Click"/>
+                                </StackPanel>
+                                <StackPanel Margin="0,0,10,0">
+                                    <TextBlock Text="공개-메인" Style="{StaticResource PhotoSlotLabelStyle}"/>
+                                    <Border BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1" CornerRadius="8"
+                                            Width="120" Height="120" Background="{StaticResource PhotoSlotBrush}" ClipToBounds="True">
+                                        <Image x:Name="MainImage" Stretch="UniformToFill"/>
+                                    </Border>
+                                    <Button Content="업로드" Margin="0,6,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="UploadMain_Click"/>
+                                    <Button Content="제거" Margin="0,4,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="ClearMain_Click"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="공개-서브" Style="{StaticResource PhotoSlotLabelStyle}"/>
+                                    <Border BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1" CornerRadius="8"
+                                            Width="120" Height="120" Background="{StaticResource PhotoSlotBrush}" ClipToBounds="True">
+                                        <Image x:Name="SubImage" Stretch="UniformToFill"/>
+                                    </Border>
+                                    <Button Content="업로드" Margin="0,6,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="UploadSub_Click"/>
+                                    <Button Content="제거" Margin="0,4,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="ClearSub_Click"/>
+                                </StackPanel>
+                            </UniformGrid>
+
+                            <Button x:Name="ApplyButton" Content="저장" Margin="0,22,0,0" HorizontalAlignment="Right"
+                                    Width="140" Height="38" FontSize="14"
+                                    Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False" Click="ApplyButton_Click"/>
+                            <TextBlock Text="* 표시된 항목은 필수이며, 모두 입력해야 저장 버튼이 활성화됩니다."
+                                       Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"
+                                       HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Guide overlay shown until an entry is selected -->
+                <Border x:Name="EditOverlay" CornerRadius="12" Background="#D9F6F4F0" Panel.ZIndex="10">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Width="52" Height="52" CornerRadius="26" Background="{StaticResource AccentTealBrush}"
+                                HorizontalAlignment="Center" Margin="0,0,0,14">
+                            <TextBlock Text="+" FontSize="26" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-3,0,0"/>
+                        </Border>
+                        <TextBlock Text="새 항목 추가를 눌러주세요" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="왼쪽 목록에서 항목을 선택하거나 '새 항목 추가'를 눌러 편집을 시작하세요."
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"
+                                   HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
