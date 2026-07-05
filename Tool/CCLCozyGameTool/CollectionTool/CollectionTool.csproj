@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <Configurations>Debug;Release;Publish</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Publish|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Shared with Unity: source of truth lives in Project_Cozy, linked here (no copy, no DLL). -->
+    <Compile Include="..\..\..\Project_Cozy\Assets\Scripts\Contents\CollectionSystem\Model\CollectionData.cs" Link="Model\CollectionData.cs" />
+    <Compile Include="..\..\..\Project_Cozy\Assets\Scripts\Contents\CollectionSystem\Model\CollectionDataStorage.cs" Link="Model\CollectionDataStorage.cs" />
+    <!-- Central data utility (Platform/Data): no UnityEngine dependency, so it can be shared as-is. -->
+    <Compile Include="..\..\..\Project_Cozy\Assets\Scripts\Platform\Data\GameDataCrypto.cs" Link="PlatformData\GameDataCrypto.cs" />
+    <Compile Include="..\..\..\Project_Cozy\Assets\Scripts\Platform\Data\GameDataStore.cs" Link="PlatformData\GameDataStore.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <Target Name="CopyToToolBin" AfterTargets="Build" Condition="'$(Configuration)' == 'Publish'">
+    <PropertyGroup>
+      <_ToolBinDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\Bin\CollectionTool'))</_ToolBinDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <_PublishFiles Include="$(TargetDir)**\*" />
+    </ItemGroup>
+    <MakeDir Directories="$(_ToolBinDir)" />
+    <Copy SourceFiles="@(_PublishFiles)"
+          DestinationFiles="@(_PublishFiles->'$(_ToolBinDir)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Message Text="[CollectionTool] Publish → $(_ToolBinDir)" Importance="high" />
+  </Target>
+
+</Project>
