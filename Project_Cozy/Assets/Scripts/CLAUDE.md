@@ -12,7 +12,7 @@
 | `Animation/` | 스프라이트 애니메이션 등 순수 표현 컴포넌트. 게임 로직·OS를 모른다. | (없음) |
 | `Character/` | 캐릭터 단일 개체의 자율 거동·친밀도·시각. `BaseCharacterController` 단일 컴포넌트 + nested module(`StateModule`/`VisualModule`/`AffinityModule`). | `Interaction/`, `Animation/`, `Platform/Input/` — 자세한 컨벤션은 [Character/CLAUDE.md](Character/CLAUDE.md) |
 | `Gameplay/` | 게임 로직. `Platform/`의 인프라를 *소비*한다 (별 클릭 · 변신 등은 채워지는 중). | `Platform/`, `Animation/`, `Interaction/` |
-| `UI/` | HUD·메뉴 표시. TextMeshPro 사용. | `Gameplay/`, `Character/` |
+| `UI/` | HUD·메뉴 표시. TextMeshPro 사용. | 하위 레이어 자유 참조 (`Gameplay/`·`Character/`·`Interaction/`·`Platform/` 등) — UI는 최상위 표현층이라 하위를 향한 참조에 제한을 두지 않는다. 설정 UI가 창 정책(`Platform/`의 `OverlayWindowController` 등)을 직접 제어하는 교차가 잦기 때문. 단 §3의 일방 의존 원칙(하위가 UI를 참조하는 역방향)은 여전히 금지. |
 
 > 새 시스템(변신, 다중 모니터, 클릭 투과 등)이 구현되면 이 표에 위치를 같이 적는다.
 
@@ -63,7 +63,8 @@
 - `Character/CharacterAnimator.cs` / `CharacterBrain.cs` / `VisualState.cs` — `Prototype.Minjun` namespace 격리. develop-kk 직접 사용 X. develop 머지 시 재논의.
 
 ### Gameplay/
-- `Gameplay/InputCounter.cs` — 입력 4채널을 단일 `Count`로 합산.
+- `Gameplay/InputCounter.cs` — 입력 4채널을 단일 `Count`(스폰 기운)로 합산. `ExportSave`/`ImportSave` 저장 seam 보유.
+- `Gameplay/InputCounterFileFormat.cs` — 스폰 기운의 저장 데이터 컨테이너(`Count`+`CumulativeCount`). `HeartFileFormat`과 같은 패턴.
 - `Gameplay/StarInputThreshold.cs` — Star의 `InputCounter.Count`가 임계 도달 시 UnityEvent 1회 발사.
 - `Gameplay/SpriteTintHighlight.cs` — `Apply()` 호출 시 SpriteRenderer tint 변경하는 UnityEvent 핸들러.
 - `Gameplay/AnimatorKeyToggle.cs` — 지정 키 누르면 `SpriteAnimator` 재생/정지 토글.
@@ -71,7 +72,6 @@
 ### UI/
 - `UI/DebugCounterLabel.cs` — `InputCounter.Count`를 매 프레임 폴링해 TMP 라벨에 표시.
 - `UI/CharacterStateLabel.cs` — `BaseCharacterController.State.StateChanged`를 구독해 현재 상태 이름을 TMP 라벨에 표시(테스트용).
-- `UI/CharacterScaleClicker.cs` — `IClickable`. 자식 GameObject당 1 옵션. 클릭 시 `ScaleMultiplierSettings.Character.Value`를 `_value`로 set. Start에서 부모 layout rebuild 후 `BoxCollider2D.size`를 RectTransform.rect에 자동 핏. RectTransform + BoxCollider2D `[RequireComponent]`.
 
 ## 컨벤션
 
