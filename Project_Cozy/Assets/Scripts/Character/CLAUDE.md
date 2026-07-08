@@ -67,7 +67,7 @@ Int 값은 [BaseAnimatorController.controller](../../Assets/Animations/Animation
 ## 컨벤션
 
 - **마우스 상호작용은 인터페이스로만.** `InputInteractionManager`로의 직접 의존 금지. `IHoverable` / `IClickable` / `IShiftRightClickable`(→ [Interaction/InteractionInterfaces.cs](../Interaction/InteractionInterfaces.cs))만 구현.
-- **OS-wide 입력은 [Platform/Input/](../Platform/Input/)의 컴포넌트 또는 `InputSystem` API를 *구독*해서 받는다**. Character는 *추상화된 입력 결과만 소비* — OS 호출(Win32 P/Invoke 등)은 직접 하지 않는다. `OutFocusKeyHook`/`OutFocusMouseHook`은 Singleton (`[DefaultExecutionOrder(-100)]` + `Instance`) — StateModule.Bind에서 자동 참조.
+- **OS-wide 입력은 [Platform/Input/](../Platform/Input/)의 컴포넌트 또는 `InputSystem` API를 *구독*해서 받는다**. Character는 *추상화된 입력 결과만 소비* — OS 호출(Win32 P/Invoke 등)은 직접 하지 않는다. `OutFocusKeyHook`/`OutFocusMouseHook`은 static 이벤트를 방송하므로, `StateModule`은 참조 없이 `OutFocusKeyHook.KeyPressed += ...`로 구독한다.
 - **State 결정은 항상 코드 (StateModule)**. Animator 그래프는 시각만 — Int 파라미터 `VisualState` 하나만 받아 Any State → 각 state 트랜지션.
 - **물리는 직접 갱신 — Rigidbody2D 미사용.** 매 프레임 `transform.position += ...` 패턴. 충돌 판정은 *Physics 콜백을 받지 않고* `Physics2D.Raycast` 등으로 매 프레임 능동 질의(`BaseCharacterController.TryGetGroundBelow`). 게임 이벤트(착지, 먼지 등)는 Physics 발화가 아니라 State 전환에 묶는다.
 - **외부 참조는 인스펙터 또는 Singleton.** 런타임 Find / FindObjectOfType은 *씬 단일 인스턴스 보장 + Awake 1회* 케이스에만 허용.

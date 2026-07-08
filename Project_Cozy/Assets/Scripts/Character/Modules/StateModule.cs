@@ -33,8 +33,6 @@ public sealed class StateModule
     [SerializeField] private float _runSpeed = 3.5f;
 
     [Header("Sleep policy")]
-    [SerializeField] private OutFocusKeyHook _outFocusKey;
-    [SerializeField] private OutFocusMouseHook _outFocusMouse;
     [Tooltip("이 시간 동안 무입력이 누적되면 sleep 검사 시작.")]
     [SerializeField] private float _idleThresholdSeconds = 30f;
     [SerializeField] private float _sleepCheckInterval = 5f;
@@ -74,11 +72,6 @@ public sealed class StateModule
         _owner = owner;
         _stateOwner = owner;
 
-        // 인스펙터 미연결 시 Singleton 인스턴스 참조 — OutFocus hook은 OS-wide라 씬당 1개만 존재.
-        // hook 측 [DefaultExecutionOrder(-100)]이 BaseCharacterController보다 먼저 Awake되도록 보장하므로 이 시점에 Instance가 잡혀 있다.
-        if (_outFocusKey == null) _outFocusKey = OutFocusKeyHook.Instance;
-        if (_outFocusMouse == null) _outFocusMouse = OutFocusMouseHook.Instance;
-
         RegisterState(new IdleState());
         RegisterState(new WalkState());
         RegisterState(new RunState());
@@ -111,8 +104,8 @@ public sealed class StateModule
 
     public void Subscribe()
     {
-        if (_outFocusKey != null) _outFocusKey.KeyPressed += OnOutFocusKey;
-        if (_outFocusMouse != null) _outFocusMouse.ButtonPressed += OnOutFocusMouseButton;
+        OutFocusKeyHook.KeyPressed += OnOutFocusKey;
+        OutFocusMouseHook.ButtonPressed += OnOutFocusMouseButton;
         _anyButtonSubscription = InputSystem.onAnyButtonPress.Call(ctrl =>
         {
             if (ctrl is KeyControl) RecordInput();
@@ -121,8 +114,8 @@ public sealed class StateModule
 
     public void Unsubscribe()
     {
-        if (_outFocusKey != null) _outFocusKey.KeyPressed -= OnOutFocusKey;
-        if (_outFocusMouse != null) _outFocusMouse.ButtonPressed -= OnOutFocusMouseButton;
+        OutFocusKeyHook.KeyPressed -= OnOutFocusKey;
+        OutFocusMouseHook.ButtonPressed -= OnOutFocusMouseButton;
         _anyButtonSubscription?.Dispose();
         _anyButtonSubscription = null;
     }

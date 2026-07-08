@@ -24,8 +24,8 @@
 - `Platform/Window/HitTestCalculator.cs` — 마우스 좌표 → `ResizeHitZone` 판정(순수 C#, EditMode 테스트 가능).
 - `Platform/Window/ResizeHitZone.cs` — `ResizeHitZone` enum + Win32 NCHITTEST 코드 매핑.
 - `Platform/Input/GlobalKeyInput.cs` — 포커스 무관 전역 키 입력 소스. 두 OS 경로(WH_KEYBOARD_LL + InputSystem.onAnyButtonPress)를 단일 이벤트 `KeyPressed(Key)`로 추상화.
-- `Platform/Input/OutFocusKeyHook.cs` — OutFocus 키 입력만 `KeyPressed(Key)` 이벤트로 노출. `[DefaultExecutionOrder(-100)]` + Singleton `Instance` (씬당 1개, OS-wide hook).
-- `Platform/Input/OutFocusMouseHook.cs` — OutFocus 마우스 down 3종을 `ButtonPressed(MouseButton)` 이벤트로 노출. Singleton.
+- `Platform/Input/OutFocusKeyHook.cs` — OutFocus 키 입력만 **static 이벤트** `KeyPressed(Key)`로 방송. 소비자는 인스턴스 참조 없이 `OutFocusKeyHook.KeyPressed +=`로 구독. 씬당 1개(OS-wide hook)라 중복 부착만 Awake에서 방지.
+- `Platform/Input/OutFocusMouseHook.cs` — OutFocus 마우스 down 3종을 **static 이벤트** `ButtonPressed(MouseButton)`로 방송. 구독 방식·단일 인스턴스 원칙은 위와 동일.
 - `Platform/Input/Win32KeyMap.cs` — Win32 vkCode → `UnityEngine.InputSystem.Key` 매핑(순수 로직, EditMode 테스트 가능).
 
 ### Interaction/
@@ -70,6 +70,6 @@
 ## 컨벤션
 
 - **Namespace 미사용** (글로벌 namespace 유지) — Platform/ 등 모든 폴더 동일. *예외*: 민준 deprecated 코드는 `Prototype.Minjun` namespace로 격리.
-- **외부 참조는 인스펙터 (`[SerializeField] private`)** 또는 같은 GameObject의 `GetComponent`(Awake 1회 캐싱). 매 프레임 또는 빈번한 `Find` / `FindObjectOfType` 금지. *씬 단일 인스턴스가 보장되는* 컴포넌트는 `[DefaultExecutionOrder(-100)]` + Singleton `Instance` 패턴 사용 (예: OutFocusKeyHook).
+- **외부 참조는 인스펙터 (`[SerializeField] private`)** 또는 같은 GameObject의 `GetComponent`(Awake 1회 캐싱). 매 프레임 또는 빈번한 `Find` / `FindObjectOfType` 금지. *씬 단일 인스턴스라 가져와서 메서드를 호출하는* 컴포넌트는 Singleton `Instance` 패턴 사용(예: `HeartSystem`). *입력을 방송만 하는 소스*는 참조 대신 **static 이벤트**를 노출해 소비자가 구독한다(예: `OutFocusKeyHook.KeyPressed`).
 - **상호작용은 인터페이스로만.** 게임 객체는 `Interaction/`의 인터페이스를 구현하고 매니저로의 직접 의존은 두지 않는다.
 - 그 외 네이밍·MonoBehaviour·성능 원칙은 루트 [CLAUDE.md](../../../CLAUDE.md) 참조.

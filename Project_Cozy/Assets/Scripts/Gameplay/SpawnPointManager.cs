@@ -20,9 +20,6 @@ using UnityEngine.InputSystem.Utilities; // .Call() extension method
 /// </summary>
 public class SpawnPointManager : MonoBehaviour
 {
-    [SerializeField] private OutFocusKeyHook _outFocusKey;
-    [SerializeField] private OutFocusMouseHook _outFocusMouse;
-
     private IDisposable _anyButtonSubscription;
 
     /// <summary>현재 스폰 기운 — 소비형. 스폰으로 차감된다.</summary>
@@ -61,16 +58,9 @@ public class SpawnPointManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // 인스펙터 미연결 시 Singleton 폴백 — OutFocus 훅은 OS-wide라 씬당 1개. 훅의 [DefaultExecutionOrder(-100)]이
-        // 먼저 Awake되도록 보장하므로 이 시점에 Instance가 잡혀 있다. (StateModule.Bind와 같은 방식)
-        if (_outFocusKey == null) _outFocusKey = OutFocusKeyHook.Instance;
-        if (_outFocusMouse == null) _outFocusMouse = OutFocusMouseHook.Instance;
-
-        if (_outFocusKey != null) _outFocusKey.KeyPressed += OnOutFocusKey;
-        else Debug.LogError($"[{nameof(SpawnPointManager)}] OutFocusKeyHook 참조가 없습니다.", this);
-
-        if (_outFocusMouse != null) _outFocusMouse.ButtonPressed += OnOutFocusMouseButton;
-        else Debug.LogError($"[{nameof(SpawnPointManager)}] OutFocusMouseHook 참조가 없습니다.", this);
+        // OutFocus 훅은 static 이벤트를 방송하므로 인스턴스 참조 없이 바로 구독한다.
+        OutFocusKeyHook.KeyPressed += OnOutFocusKey;
+        OutFocusMouseHook.ButtonPressed += OnOutFocusMouseButton;
 
         // InFocus 키 — KeyControl만 통과시켜 마우스/게임패드 등 다른 ButtonControl 제외.
         _anyButtonSubscription = InputSystem.onAnyButtonPress.Call(ctrl =>
@@ -81,8 +71,8 @@ public class SpawnPointManager : MonoBehaviour
 
     private void OnDisable()
     {
-        if (_outFocusKey != null) _outFocusKey.KeyPressed -= OnOutFocusKey;
-        if (_outFocusMouse != null) _outFocusMouse.ButtonPressed -= OnOutFocusMouseButton;
+        OutFocusKeyHook.KeyPressed -= OnOutFocusKey;
+        OutFocusMouseHook.ButtonPressed -= OnOutFocusMouseButton;
         _anyButtonSubscription?.Dispose();
         _anyButtonSubscription = null;
     }
