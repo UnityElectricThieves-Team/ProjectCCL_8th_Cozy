@@ -101,6 +101,7 @@ GameObject:
   - component: {fileID: 4528180928151775974}
   - component: {fileID: 3454434006092565042}
   - component: {fileID: 3200586724842295907}
+  - component: {fileID: 1571698509915394532}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -336,6 +337,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterInteractionRelay
   _owner: {fileID: 0}
+--- !u!114 &1571698509915394532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5691119776310040808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6eee7b475867c4459780307eba0efd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BridgeAffinityHeart
+  _affinityStepSize: 100
+  _heartsPerStep: 10
 --- !u!1 &7139112986684070208
 GameObject:
   m_ObjectHideFlags: 0
