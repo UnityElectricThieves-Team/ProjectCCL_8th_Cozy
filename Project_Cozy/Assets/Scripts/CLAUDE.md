@@ -49,7 +49,6 @@
 - `Character/CharacterState.cs` — 통합 13-state enum + `CharacterForm` enum(Animal/Girl).
 - `Character/IStateOwner.cs` — State 클래스가 의존할 owner 인터페이스.
 - `Character/CharacterInteractionRelay.cs` — 자식 Visual에 부착, IShiftRightClickable만 책임 (친밀도 리셋).
-- `Character/PettingReaction.cs` — 쓰다듬 시각 반응. 자식 Visual에 부착. OpaqueHoverable UnityEvent 수신 → tint 자체 처리 + `BaseCharacterController.Scale.ExtraMultiplier`로 일시 스케일 위임.
 - `Character/ScaleMultiplier.cs` — 직렬화 가능한 배수 단위(`Value` + `Changed` 이벤트).
 - `Character/ScaleMultiplierSettings.cs` — 게임 내 모든 ScaleMultiplier를 모은 ScriptableObject. 현재 `Character` 하나, 향후 UI/Background 확장.
 - `Character/Modules/StateModule.cs` — State 머신 + Sleep 정책 + SpecialMode 분기 + `IsLockedState` 가드. 11 State 등록 + `Request*` API.
@@ -59,18 +58,13 @@
 - `Character/States/BaseCharacterState.cs` — abstract state 베이스.
 - `Character/States/{Idle, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, SpecialIdle, SpecialWalk}State.cs` — 11개 State 클래스. `Run`/`Special*`은 `Walk`/`Idle` 상속.
 
-### Character/  민준 프로토 (`<deprecated_for_develop_kk>`, namespace 격리)
-- `Character/CharacterAnimator.cs` / `CharacterBrain.cs` / `VisualState.cs` — `Prototype.Minjun` namespace 격리. develop-kk 직접 사용 X. develop 머지 시 재논의.
-
 ### Gameplay/
-- `Gameplay/InputCounter.cs` — 입력 4채널을 단일 `Count`(스폰 기운)로 합산. `ExportSave`/`ImportSave` 저장 seam 보유.
-- `Gameplay/InputCounterFileFormat.cs` — 스폰 기운의 저장 데이터 컨테이너(`Count`+`CumulativeCount`). `HeartFileFormat`과 같은 패턴.
-- `Gameplay/StarInputThreshold.cs` — Star의 `InputCounter.Count`가 임계 도달 시 UnityEvent 1회 발사.
-- `Gameplay/SpriteTintHighlight.cs` — `Apply()` 호출 시 SpriteRenderer tint 변경하는 UnityEvent 핸들러.
+- `Gameplay/SpawnPointManager.cs` — 스폰 포인트의 '스폰 기운'을 관리. 입력 4채널을 `CurrentEnergy`(소비형)+`CumulativeEnergy`(누적)로 쌓고 스폰 시 차감. `ExportSave`/`ImportSave` 저장 seam 보유.
+- `Gameplay/SpawnPointFileFormat.cs` — 스폰 기운의 저장 데이터 컨테이너(`CurrentEnergy`+`CumulativeEnergy`). `HeartFileFormat`과 같은 패턴.
 - `Gameplay/AnimatorKeyToggle.cs` — 지정 키 누르면 `SpriteAnimator` 재생/정지 토글.
 
 ### UI/
-- `UI/DebugCounterLabel.cs` — `InputCounter.Count`를 매 프레임 폴링해 TMP 라벨에 표시.
+- `UI/DebugCounterLabel.cs` — `SpawnPointManager`의 스폰 기운을 매 프레임 폴링해 TMP 라벨에 표시.
 - `UI/CharacterStateLabel.cs` — `BaseCharacterController.State.StateChanged`를 구독해 현재 상태 이름을 TMP 라벨에 표시(테스트용).
 
 ## 컨벤션

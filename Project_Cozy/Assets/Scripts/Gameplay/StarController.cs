@@ -1,9 +1,10 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// 별(스폰 포인트)의 중앙 컨트롤러 — <see cref="BaseCharacterController"/>에 대응하는 별 버전.
 ///
-/// - 진행도(<see cref="InputCounter.Count"/>, 스폰 기운)가 <see cref="_threshold"/> 이상인 동안 Activated,
+/// - 스폰 기운(<see cref="SpawnPointManager.CurrentEnergy"/>)이 <see cref="_threshold"/> 이상인 동안 Activated,
 ///   아니면 Idle인 2상태 머신. 상태가 바뀔 때만 Animator의 Int 파라미터(<see cref="StateParameter"/>)를 갱신한다
 ///   (Character의 VisualModule과 같은 방식이되 상태 클래스 없이 단순화).
 /// - 클릭(드래그가 아니었을 때) 시 캐릭터 1개 스폰을 요청한다. 생성·동시존재 캡 판정은 <see cref="CharacterManager"/>에 위임 —
@@ -19,8 +20,8 @@ public sealed class StarController : MonoBehaviour, IClickable
     [Header("Refs")]
     [Tooltip("Visual 자식의 Animator. Idle/Activated 상태를 가진 StarAnimation 컨트롤러를 연결.")]
     [SerializeField] private Animator _animator;
-    [Tooltip("진행도(스폰 기운) 소스. 비우면 Awake에서 같은 GameObject에서 탐색.")]
-    [SerializeField] private InputCounter _counter;
+    [Tooltip("스폰 기운 소스(SpawnPointManager). 비우면 Awake에서 같은 GameObject에서 탐색.")]
+    [SerializeField, FormerlySerializedAs("_counter")] private SpawnPointManager _spawnPoint;
 
     [Header("Spawn")]
     [Tooltip("기운이 이 값 이상이어야 Activated가 되고 클릭 스폰이 가능하다. 클릭 1회 스폰마다 이만큼 차감.")]
@@ -43,7 +44,7 @@ public sealed class StarController : MonoBehaviour, IClickable
 
     private void Awake()
     {
-        if (_counter == null) _counter = GetComponent<InputCounter>();
+        if (_spawnPoint == null) _spawnPoint = GetComponent<SpawnPointManager>();
         _stateHash = Animator.StringToHash(StateParameter);
         _draggable = GetComponent<DraggableObject2D>();
     }
@@ -66,13 +67,13 @@ public sealed class StarController : MonoBehaviour, IClickable
 
     private void Update()
     {
-        if (_counter == null) return;
+        if (_spawnPoint == null) return;
         var desired = IsReady() ? StarState.Activated : StarState.Idle;
         if (desired != _current) ApplyState(desired);
     }
 
-    // 스폰 가능(=Activated) 여부. Count는 스폰으로 차감되므로 임계값 아래로 내려가면 다시 Idle.
-    private bool IsReady() => _counter != null && _counter.Count >= _threshold;
+    // 스폰 가능(=Activated) 여부. CurrentEnergy는 스폰으로 차감되므로 임계값 아래로 내려가면 다시 Idle.
+    private bool IsReady() => _spawnPoint != null && _spawnPoint.CurrentEnergy >= _threshold;
 
     /// <summary>현재 Activated(스폰 가능) 상태인가. 디버그 표시 등 외부 노출용.</summary>
     public bool IsActivated => IsReady();
@@ -111,7 +112,7 @@ public sealed class StarController : MonoBehaviour, IClickable
 
         // 생성·캡 판정은 CharacterManager에 위임. null이면 캡 도달이라 기운 차감 없음.
         var instance = CharacterManager.Instance.Spawn(_characterPrefab, transform.position + offset, _spawnParent);
-        if (instance != null) _counter.ReduceSpawnEnergy(_threshold);
+        if (instance != null) _spawnPoint.Spend(_threshold);
     }
 
     private void ApplyState(StarState next)
