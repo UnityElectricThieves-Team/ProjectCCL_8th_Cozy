@@ -58,7 +58,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -115,56 +115,12 @@ TextureImporter:
       name: image_postbox_0
       rect:
         serializedVersion: 2
-        x: 3
-        y: 2
-        width: 9
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e71e0fb7864473840800000000000000
-      internalID: 5203703109996568958
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: image_postbox_1
-      rect:
-        serializedVersion: 2
-        x: 11
-        y: 2
-        width: 13
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d7db9d5b0fc46fdd0800000000000000
-      internalID: -2452688350329848451
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: image_postbox_2
-      rect:
-        serializedVersion: 2
         x: 23
         y: 2
         width: 130
         height: 145
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -177,55 +133,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: image_postbox_3
-      rect:
-        serializedVersion: 2
-        x: 152
-        y: 2
-        width: 13
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 451d3a166daa4c110800000000000000
-      internalID: 1280336031817912660
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: image_postbox_4
-      rect:
-        serializedVersion: 2
-        x: 164
-        y: 2
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4298aa28074a37610800000000000000
-      internalID: 1617817494291646756
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 0db2d16cae2e9594bac6c6e18a049209
     internalID: 0
     vertices: []
     indices: 
@@ -235,9 +147,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      image_postbox_0: 5203703109996568958
+      image_postbox_0: -3472546451071955382
       image_postbox_1: -2452688350329848451
-      image_postbox_2: -3472546451071955382
       image_postbox_3: 1280336031817912660
       image_postbox_4: 1617817494291646756
   mipmapLimitGroupName: 

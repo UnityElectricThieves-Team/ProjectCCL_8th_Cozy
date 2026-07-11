@@ -19,11 +19,11 @@ public sealed class ShopItemSlot : MonoBehaviour
     private static readonly Color AffordableColor = new(0.1f, 0.1f, 0.1f);
     private static readonly Color UnaffordableColor = new(0.537f, 0.537f, 0.537f);
 
-    private ShopItem _item;
-    private Action<ShopItem> _onBuy;
+    private ShopItemDefinition _item;
+    private Action<ShopItemDefinition> _onBuy;
 
     /// <summary>슬롯을 상품 하나로 채운다. 구매 버튼을 누르면 onBuy(item)을 부른다.</summary>
-    public void Bind(ShopItem item, Action<ShopItem> onBuy)
+    public void Bind(ShopItemDefinition item, Action<ShopItemDefinition> onBuy)
     {
         _item = item;
         _onBuy = onBuy;

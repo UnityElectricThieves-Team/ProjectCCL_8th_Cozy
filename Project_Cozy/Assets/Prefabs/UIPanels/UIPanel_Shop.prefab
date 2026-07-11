@@ -220,12 +220,5 @@ MonoBehaviour:
   _content: {fileID: 2623965854237614214}
   _slotPrefab: {fileID: 8056819112647908949, guid: f0b3b91f275ecb04eb0c07037ac0e725, type: 3}
   _items:
-  - displayName: "\uD654\uBD84"
-    price: 100
-    icon: {fileID: 0}
-  - displayName: "\uCC3D\uBB38"
-    price: 300
-    icon: {fileID: 0}
-  - displayName: "\uAE40\uBBFC\uC900\uC758 \uC704\uB300\uD55C \uC0AC\uC9C4\uCCA9"
-    price: 15000
-    icon: {fileID: 0}
+  - {fileID: 11400000, guid: 4196878441c755b49b33e447c8fd35dd, type: 2}
+  - {fileID: 11400000, guid: c113c621cc54e8b4083cda366133312b, type: 2}

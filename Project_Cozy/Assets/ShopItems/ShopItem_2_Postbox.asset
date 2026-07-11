@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopItemDefinition
   id: shop_item_2_postbox
   displayName: "\uC6B0\uCCB4\uD1B5"
-  icon: {fileID: 5203703109996568958, guid: 1469049cff6dd8d4080e6d8cbbf87d38, type: 3}
+  icon: {fileID: 21300000, guid: 1469049cff6dd8d4080e6d8cbbf87d38, type: 3}
   price: 300

@@ -18,8 +18,8 @@ public sealed class ShopPanelContentController : MonoBehaviour
     [Tooltip("복제해서 각 상품 슬롯으로 쓸 ShopItemSlot 프리팹.")]
     [SerializeField] private ShopItemSlot _slotPrefab;
 
-    [Tooltip("진열할 상품들. 배열 순서대로 슬롯이 만들어진다.")]
-    [SerializeField] private ShopItem[] _items;
+    [Tooltip("진열할 상품들. 배열 순서대로 슬롯이 만들어진다. ShopItemDefinition 에셋을 드래그해 채운다.")]
+    [SerializeField] private ShopItemDefinition[] _items;
 
     private readonly List<ShopItemSlot> _slots = new();
 
@@ -55,7 +55,7 @@ public sealed class ShopPanelContentController : MonoBehaviour
         }
     }
 
-    private void TryPurchase(ShopItem item)
+    private void TryPurchase(ShopItemDefinition item)
     {
         if (item == null) return;
         HeartSystem.Instance?.TrySpend(item.price);
