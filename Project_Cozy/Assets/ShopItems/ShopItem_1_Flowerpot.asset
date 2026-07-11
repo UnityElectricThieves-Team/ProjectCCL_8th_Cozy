@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6111ad88a1bd97647bb7ebdd01ee283e, type: 3}
+  m_Name: ShopItem_1_Flowerpot
+  m_EditorClassIdentifier: Assembly-CSharp::ShopItemDefinition
+  id: shop_item_1_flowerpot
+  displayName: "\uD654\uBD84"
+  icon: {fileID: -5064033452520201308, guid: 29a4282544a5c57439352c4fdc9d7217, type: 3}
+  price: 100
