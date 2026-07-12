@@ -19,7 +19,7 @@
     <Compile Include="..\..\..\Project_Cozy\Assets\Scripts\Contents\CollectionSystem\Model\CollectionDataStorage.cs" Link="Model\CollectionDataStorage.cs" />
     <!-- Central data utility (Platform/Data): no UnityEngine dependency, so it can be shared as-is. -->
     <Compile Include="..\..\..\Project_Cozy\Assets\Scripts\Platform\Data\GameDataCrypto.cs" Link="PlatformData\GameDataCrypto.cs" />
-    <Compile Include="..\..\..\Project_Cozy\Assets\Scripts\Platform\Data\GameDataStore.cs" Link="PlatformData\GameDataStore.cs" />
+    <Compile Include="..\..\..\Project_Cozy\Assets\Scripts\Platform\Data\GameDataIO.cs" Link="PlatformData\GameDataIO.cs" />
   </ItemGroup>
 
   <ItemGroup>
