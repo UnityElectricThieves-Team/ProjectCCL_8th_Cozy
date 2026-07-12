@@ -22,14 +22,14 @@
 - [x] 투명 배경 + Borderless 창 *(OverlayWindow: WS_POPUP + LAYERED + ColorKey)*
 - [x] Always-on-Top (앞단에 계속 유지가 되는지) *(HWND_TOPMOST + WM_EXITSIZEMOVE 보정)*
 - [x] 클릭 투과 — 투명 영역 투과, 스프라이트 영역만 클릭 판정 *(LWA_COLORKEY per-pixel)*
-- [x] 클릭/키보드 입력 시 카운트 누적 (별 시스템 연동) *(InputCounter)*
+- [x] 클릭/키보드 입력 시 카운트 누적 (별 시스템 연동) *(SpawnPointManager)*
 
 ---
 
 ## 별 시스템 *(가제)*
 
 - [x] 백그라운드 키보드/마우스 입력 수집 (게임 포커스 없어도 동작) *(OutFocusKeyHook/MouseHook, 전용 스레드 LL 훅)*
-- [x] 입력 횟수 누적 카운트 *(InputCounter.Count, 스폰 시 ReduceSpawnEnergy 차감)*
+- [x] 입력 횟수 누적 카운트 *(SpawnPointManager.CurrentEnergy, 스폰 시 Spend 차감)*
 - [~] 캐릭터별 해금 조건 충족 시 별 반짝임 연출 *(StarInputThreshold→UnityEvent 로직 O, 연출은 아트 의존)*
 - [~] 반짝이는 별 클릭 → 해당 캐릭터 1개 스폰 후 Idle 복귀 *(StarClickCharacterSpawner 구현 O, 단 GameScene엔 데모버튼(CharacterSpawner)만 배치)*
 - [x] 스폰 연출 — 화면 상단에서 낙하 후 착지 *(스폰 +Y 오프셋 → Fall→Land→Idle)*

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// 마우스 좌클릭으로 transform 위치를 드래그한다. <see cref="InputInteractionManager"/>의
@@ -44,7 +45,10 @@ public sealed class DraggableObject2D : MonoBehaviour
         var mouseScreen = ReadMouseScreen(mouse);
         var mouseWorld = _camera.ScreenToWorldPoint(mouseScreen);
 
-        if (mouse.leftButton.wasPressedThisFrame && _collider.OverlapPoint(mouseWorld))
+        // UI(패널·버튼) 위에서 누른 press는 UI가 먹는다 — 뒤 캐릭터가 드래그로 끌려오지 않게 가드.
+        // 진행 중인 드래그는 첫 프레임에만 판정하므로 끊기지 않는다.
+        if (mouse.leftButton.wasPressedThisFrame && _collider.OverlapPoint(mouseWorld)
+            && (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject()))
         {
             _pressActive = true;
             _isDragging = false;

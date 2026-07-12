@@ -26,7 +26,7 @@ GameObject "Character.prefab"
 
 자식 Visual GameObject
 ├─ SpriteRenderer
-├─ PolygonCollider2D + PolygonColliderSpriteSync
+├─ PolygonCollider2D
 ├─ OpaqueHoverable           (IHoverable, 알파 검사 후 UnityEvent 발사)
 ├─ ClickableEvent            (IClickable, UnityEvent 발사)
 └─ CharacterInteractionRelay (IShiftRightClickable — 친밀도 리셋만 위임)
@@ -53,10 +53,8 @@ Int 값은 [BaseAnimatorController.controller](../../Assets/Animations/Animation
 - **`Modules/AffinityModule.cs`** — 친밀도 수치 + 이벤트 (`AffinityChanged`/`SpecialActivated`/`SpecialReleased`). 시각 직접 제어 금지.
 - **`Modules/ScaleModule.cs`** — 루트 `transform.localScale = _baseScale * User * Extra` 갱신. `ScaleMultiplierSettings.Character.Changed` 구독 + 호버 강조 같은 일시 `ExtraMultiplier` 슬롯 제공.
 - **`ScaleMultiplier.cs` / `ScaleMultiplierSettings.cs`** — 직렬화 단위 + 종합 ScriptableObject. UI(`CharacterSizeSelector`)가 `Character.Value`를 set하면 `ScaleModule`이 구독해 적용.
-- **`PettingReaction.cs`** — 자식 Visual에 부착되는 쓰다듬 시각 반응. `OpaqueHoverable` UnityEvent 수신 → tint 자체 처리 + `controller.Scale.ExtraMultiplier`로 일시 스케일 위임. Scale 책임이 분리되어 multiplier와 충돌 없음.
 - **`States/BaseCharacterState.cs`** — abstract. `OnEnter(IStateOwner)` / `Tick(IStateOwner, dt)` / `OnExit(IStateOwner)`.
 - **`States/{Idle, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, SpecialIdle, SpecialWalk}State.cs`** — 11개 State 클래스. `RunState`는 `WalkState` 상속(속도만 다름). `Special{Idle,Walk}State`는 `IdleState`/`WalkState` 상속(enum만 다름). `Transform`/`Interact`는 OneShot이라 State 클래스 없이 `VisualModule.PlayOneShot` 직접 호출.
-- **민준 프로토 (`<deprecated_for_develop_kk>` 주석, `Prototype.Minjun` namespace 격리)** — `CharacterAnimator.cs`/`CharacterBrain.cs`/`VisualState.cs`. develop-kk 시스템에서 직접 사용 안 함. develop 머지 시 재논의.
 
 ## 상태 잠금 (기획서 §🛡️ 준수)
 
@@ -69,7 +67,7 @@ Int 값은 [BaseAnimatorController.controller](../../Assets/Animations/Animation
 ## 컨벤션
 
 - **마우스 상호작용은 인터페이스로만.** `InputInteractionManager`로의 직접 의존 금지. `IHoverable` / `IClickable` / `IShiftRightClickable`(→ [Interaction/InteractionInterfaces.cs](../Interaction/InteractionInterfaces.cs))만 구현.
-- **OS-wide 입력은 [Platform/Input/](../Platform/Input/)의 컴포넌트 또는 `InputSystem` API를 *구독*해서 받는다**. Character는 *추상화된 입력 결과만 소비* — OS 호출(Win32 P/Invoke 등)은 직접 하지 않는다. `OutFocusKeyHook`/`OutFocusMouseHook`은 Singleton (`[DefaultExecutionOrder(-100)]` + `Instance`) — StateModule.Bind에서 자동 참조.
+- **OS-wide 입력은 [Platform/Input/](../Platform/Input/)의 컴포넌트 또는 `InputSystem` API를 *구독*해서 받는다**. Character는 *추상화된 입력 결과만 소비* — OS 호출(Win32 P/Invoke 등)은 직접 하지 않는다. `OutFocusKeyHook`/`OutFocusMouseHook`은 static 이벤트를 방송하므로, `StateModule`은 참조 없이 `OutFocusKeyHook.KeyPressed += ...`로 구독한다.
 - **State 결정은 항상 코드 (StateModule)**. Animator 그래프는 시각만 — Int 파라미터 `VisualState` 하나만 받아 Any State → 각 state 트랜지션.
 - **물리는 직접 갱신 — Rigidbody2D 미사용.** 매 프레임 `transform.position += ...` 패턴. 충돌 판정은 *Physics 콜백을 받지 않고* `Physics2D.Raycast` 등으로 매 프레임 능동 질의(`BaseCharacterController.TryGetGroundBelow`). 게임 이벤트(착지, 먼지 등)는 Physics 발화가 아니라 State 전환에 묶는다.
 - **외부 참조는 인스펙터 또는 Singleton.** 런타임 Find / FindObjectOfType은 *씬 단일 인스턴스 보장 + Awake 1회* 케이스에만 허용.

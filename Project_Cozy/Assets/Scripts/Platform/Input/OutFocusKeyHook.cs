@@ -12,25 +12,25 @@ using UnityEngine.InputSystem;
 /// 포커스 무관 통합 입력 소스는 <see cref="GlobalKeyInput"/> 쪽. 본 컴포넌트는 *OutFocus 전용*이라는 의미를 이름과 동작에서 일치시킨 별개 추상화.
 /// 현재 keydown만, 모디파이어/조합키/keyup 미지원.
 /// </summary>
-[DefaultExecutionOrder(-100)]
 public class OutFocusKeyHook : OutFocusLowLevelHook
 {
-    /// <summary>씬 단일 인스턴스. WH_KEYBOARD_LL이 OS-wide라 씬당 1개만 존재해야 정상. 중복 부착 시 두 번째는 Awake에서 자기 컴포넌트만 Destroy.</summary>
-    public static OutFocusKeyHook Instance { get; private set; }
+    // 씬 단일 인스턴스 추적 — 외부 참조용이 아니라 중복 부착 방지용. 소비자는 static <see cref="KeyPressed"/> 이벤트를 구독한다.
+    // WH_KEYBOARD_LL이 OS-wide라 씬당 1개만 존재해야 정상. 중복 부착 시 두 번째는 Awake에서 자기 컴포넌트만 Destroy.
+    static OutFocusKeyHook _instance;
 
     void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (_instance != null && _instance != this)
         {
             Destroy(this);
             return;
         }
-        Instance = this;
+        _instance = this;
     }
 
     protected override void OnDestroy()
     {
-        if (Instance == this) Instance = null;
+        if (_instance == this) _instance = null;
         base.OnDestroy();
     }
 
@@ -38,8 +38,17 @@ public class OutFocusKeyHook : OutFocusLowLevelHook
     const int WM_KEYDOWN     = 0x0100;
     const int WM_SYSKEYDOWN  = 0x0104;
 
-    /// <summary>OutFocus 상태에서 키가 눌렸을 때 발생. 인자는 매핑된 <see cref="Key"/> (매핑 실패 시 <see cref="Key.None"/>).</summary>
-    public event Action<Key> KeyPressed;
+    /// <summary>OutFocus 상태에서 키가 눌렸을 때 발생. 인자는 매핑된 <see cref="Key"/> (매핑 실패 시 <see cref="Key.None"/>).
+    /// static 이벤트 — 소비자는 인스턴스 참조 없이 <c>OutFocusKeyHook.KeyPressed += ...</c>로 구독한다.</summary>
+    public static event Action<Key> KeyPressed;
+
+    // 도메인 리로드 끄기 상황에서 static 상태가 세션 간 잔존하는 것을 방지(CharacterNames.ResetState와 같은 패턴).
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetState()
+    {
+        KeyPressed = null;
+        _instance = null;
+    }
 
     protected override int HookId => WH_KEYBOARD_LL;
 

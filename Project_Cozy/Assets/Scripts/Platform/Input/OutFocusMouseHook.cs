@@ -11,25 +11,25 @@ using UnityEngine.InputSystem.LowLevel; // MouseButton (Left/Right/Middle/Forwar
 ///
 /// 키보드 쪽 <see cref="OutFocusKeyHook"/>과 평행한 추상화 — OutFocus 전용임을 이름과 동작에서 일치시킨다.
 /// </summary>
-[DefaultExecutionOrder(-100)]
 public class OutFocusMouseHook : OutFocusLowLevelHook
 {
-    /// <summary>씬 단일 인스턴스. WH_MOUSE_LL이 OS-wide라 씬당 1개만 존재해야 정상. 중복 부착 시 두 번째는 Awake에서 자기 컴포넌트만 Destroy.</summary>
-    public static OutFocusMouseHook Instance { get; private set; }
+    // 씬 단일 인스턴스 추적 — 외부 참조용이 아니라 중복 부착 방지용. 소비자는 static <see cref="ButtonPressed"/> 이벤트를 구독한다.
+    // WH_MOUSE_LL이 OS-wide라 씬당 1개만 존재해야 정상. 중복 부착 시 두 번째는 Awake에서 자기 컴포넌트만 Destroy.
+    static OutFocusMouseHook _instance;
 
     void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (_instance != null && _instance != this)
         {
             Destroy(this);
             return;
         }
-        Instance = this;
+        _instance = this;
     }
 
     protected override void OnDestroy()
     {
-        if (Instance == this) Instance = null;
+        if (_instance == this) _instance = null;
         base.OnDestroy();
     }
 
@@ -38,8 +38,17 @@ public class OutFocusMouseHook : OutFocusLowLevelHook
     const int WM_RBUTTONDOWN = 0x0204;
     const int WM_MBUTTONDOWN = 0x0207;
 
-    /// <summary>OutFocus 상태에서 마우스 버튼이 눌렸을 때 발생. 인자는 어떤 버튼이 눌렸는지(Left/Right/Middle).</summary>
-    public event Action<MouseButton> ButtonPressed;
+    /// <summary>OutFocus 상태에서 마우스 버튼이 눌렸을 때 발생. 인자는 어떤 버튼이 눌렸는지(Left/Right/Middle).
+    /// static 이벤트 — 소비자는 인스턴스 참조 없이 <c>OutFocusMouseHook.ButtonPressed += ...</c>로 구독한다.</summary>
+    public static event Action<MouseButton> ButtonPressed;
+
+    // 도메인 리로드 끄기 상황에서 static 상태가 세션 간 잔존하는 것을 방지(CharacterNames.ResetState와 같은 패턴).
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetState()
+    {
+        ButtonPressed = null;
+        _instance = null;
+    }
 
     protected override int HookId => WH_MOUSE_LL;
 

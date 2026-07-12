@@ -1,5 +1,19 @@
+// ============================================================
+// InputInteractionManager
+//
+// 월드 2D 오브젝트 입력의 중앙 라우터. 매 프레임 마우스 화면 좌표를 월드로 바꿔
+// Physics2D.OverlapPoint로 콜라이더를 모으고, sortingLayer→sortingOrder가 가장 위인
+// 콜라이더 하나를 골라 그 콜라이더의 IClickable / IHoverable / IRightClickable /
+// IShiftRightClickable로 호버·클릭·우클릭을 디스패치한다.
+//
+// 마우스 좌표는 투명 클릭-통과 창에서 Mouse.current가 freeze되므로
+// WindowsCursorToUnityScreen(OS 커서 기반)를 우선 사용하고, 없으면 Mouse.current로 폴백한다.
+// 한 프레임에 인터랙터블 하나만 승자. 각 인터페이스는 콜라이더의 첫 컴포넌트만 사용한다.
+// uGUI 위에 포인터가 있으면(EventSystem.IsPointerOverGameObject) 월드 라우팅을 건너뛴다(UI 우선).
+// ============================================================
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class InputInteractionManager : MonoBehaviour
@@ -57,6 +71,20 @@ public class InputInteractionManager : MonoBehaviour
     {
         if (targetCamera == null || Mouse.current == null)
         {
+            return;
+        }
+
+        // 포인터가 uGUI 위에 있으면(EventSystem 영역) 월드 콜라이더 라우팅을 건너뛴다.
+        // UI를 누른 클릭이 뒤의 캐릭터로 새지 않도록. 단순 return이 아니라 현재 호버를 풀고
+        // 다음 프레임에 강제 재스캔(_hasLastPointerPixel=false)되게 한다.
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            currentHover?.OnHoverExit();
+            currentHover = null;
+            currentClickable = null;
+            currentShiftRightClickable = null;
+            currentRightClickable = null;
+            _hasLastPointerPixel = false;
             return;
         }
 

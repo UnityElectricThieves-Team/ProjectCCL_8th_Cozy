@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>우하단 메뉴 바 + 메인 UI 화면 설계 (초안)</title>
+<style>
+  :root{
+    --bg:#eceff3; --card:#ffffff; --ink:#232b34; --muted:#5c6b7a;
+    --line:#e4e9ef; --accent:#356098; --accent-soft:#eaf1f9;
+    --dec:#2563eb; --dec-bg:#eef3ff; --dec-line:#c7d7fe;
+    --q:#8b5cf6;  --q-bg:#f4efff;  --q-line:#dcc9fb;
+    --warn:#d1495b; --warn-bg:#fdedef; --warn-line:#f6ccd2;
+    --note:#0d7a70; --note-bg:#e7f6f3; --note-line:#bfe6df;
+    --code-bg:#f5f7fa; --code-line:#e0e6ee; --code-ink:#243244;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Segoe UI",Roboto,system-ui,sans-serif;
+    font-size:16px; line-height:1.8; -webkit-font-smoothing:antialiased;
+  }
+  .layout{max-width:1200px; margin:0 auto; padding:28px 20px 80px;}
+  @media(min-width:1080px){
+    .layout{display:grid; grid-template-columns:238px minmax(0,1fr); gap:36px; align-items:start;}
+    .toc{position:sticky; top:28px; max-height:calc(100vh - 56px); overflow:auto;}
+  }
+
+  /* 목차 */
+  .toc{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:18px 18px 20px; font-size:14px;
+  }
+  .toc h2{margin:0 0 10px; font-size:13px; letter-spacing:.04em; color:var(--muted); text-transform:uppercase;}
+  .toc ol{margin:0; padding:0; list-style:none; counter-reset:toc;}
+  .toc li{margin:2px 0;}
+  .toc a{
+    display:block; color:var(--muted); text-decoration:none; padding:5px 8px;
+    border-radius:7px; line-height:1.45;
+  }
+  .toc a:hover{background:var(--accent-soft); color:var(--accent);}
+  .toc a .n{display:inline-block; width:1.4em; color:var(--accent); font-weight:700;}
+
+  /* 본문 카드 */
+  .content{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:44px 52px 56px;
+    box-shadow:0 1px 2px rgba(20,40,70,.05), 0 14px 40px rgba(20,40,70,.06);
+  }
+  @media(max-width:640px){ .content{padding:28px 22px;} }
+
+  h1{font-size:29px; line-height:1.35; margin:0 0 6px; letter-spacing:-.01em;}
+  h2{
+    font-size:22px; margin:52px 0 16px; padding-top:22px; border-top:2px solid var(--line);
+    letter-spacing:-.01em; scroll-margin-top:24px;
+  }
+  h2:first-of-type{border-top:none; padding-top:0; margin-top:30px;}
+  h3{font-size:17.5px; margin:30px 0 10px; color:#2c3946; scroll-margin-top:24px;}
+  h2 .num{color:var(--accent); font-weight:800; margin-right:.4em;}
+  p{margin:12px 0;}
+  ul,ol{margin:12px 0; padding-left:24px;}
+  li{margin:6px 0;}
+  strong{color:#141b22;}
+  code{
+    font-family:"Cascadia Code","D2Coding",Consolas,"Courier New",monospace;
+    background:var(--code-bg); border:1px solid var(--code-line); border-radius:5px;
+    padding:1px 6px; font-size:13.5px; color:#0a4a6b;
+  }
+  pre{
+    background:var(--code-bg); border:1px solid var(--code-line); border-radius:11px;
+    padding:18px 20px; overflow:auto; margin:16px 0; line-height:1.6;
+  }
+  pre code{background:none; border:none; padding:0; color:var(--code-ink); font-size:13px;}
+  a{color:var(--accent);}
+
+  /* 표 */
+  .tablewrap{overflow-x:auto; margin:18px 0; border:1px solid var(--line); border-radius:11px;}
+  table{border-collapse:collapse; width:100%; font-size:14.5px;}
+  th,td{padding:11px 14px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line);}
+  th{background:var(--accent-soft); color:#284a70; font-weight:700; white-space:nowrap;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:#fafbfd;}
+  td code, th code{font-size:12.5px;}
+
+  /* 콜아웃 */
+  .callout{
+    border-left:5px solid var(--muted); border-radius:10px; padding:14px 18px 14px 16px;
+    margin:18px 0; background:#f6f8fa;
+  }
+  .callout .tag{
+    display:inline-block; font-size:12px; font-weight:800; letter-spacing:.03em;
+    margin-bottom:4px; text-transform:uppercase;
+  }
+  .callout p:first-of-type{margin-top:2px;} .callout p:last-child{margin-bottom:0;}
+  .callout ul{margin:6px 0;}
+  .c-dec{background:var(--dec-bg); border-color:var(--dec);}      .c-dec .tag{color:var(--dec);}
+  .c-q{background:var(--q-bg);   border-color:var(--q);}          .c-q .tag{color:var(--q);}
+  .c-warn{background:var(--warn-bg); border-color:var(--warn);}   .c-warn .tag{color:var(--warn);}
+  .c-note{background:var(--note-bg); border-color:var(--note);}   .c-note .tag{color:var(--note);}
+
+  /* 헤더 메타 */
+  .meta{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:14px 0 6px;}
+  .badge{
+    display:inline-block; font-size:12.5px; font-weight:700; padding:3px 11px; border-radius:999px;
+    background:var(--accent-soft); color:var(--accent); border:1px solid #cfe0f1;
+  }
+  .badge.draft{background:#fff3e0; color:#b5651d; border-color:#f3d9b0;}
+  .badge.ok{background:#e7f6ed; color:#1f7a45; border-color:#c2e6cf;}
+  .subtle{color:var(--muted); font-size:14px;}
+  .lead{color:var(--muted); font-size:15px; margin-top:4px;}
+  hr{border:none; border-top:1px solid var(--line); margin:22px 0;}
+  .status-no{color:var(--warn); font-weight:700;}
+  .status-yes{color:var(--note); font-weight:700;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <h2>목차</h2>
+  <ol>
+    <li><a href="#s1"><span class="n">1</span>목적과 범위</a></li>
+    <li><a href="#s2"><span class="n">2</span>지금 씬의 실제 상태</a></li>
+    <li><a href="#s3"><span class="n">3</span>오브젝트 계층 모식도</a></li>
+    <li><a href="#s4"><span class="n">4</span>클래스 구조</a></li>
+    <li><a href="#s5"><span class="n">5</span>숨김 방식 (성능)</a></li>
+    <li><a href="#s6"><span class="n">6</span>창 액션 side-effect</a></li>
+    <li><a href="#s7"><span class="n">7</span>현서 크로스체크 — CanvasScaler</a></li>
+    <li><a href="#s8"><span class="n">8</span>구현 계획 — 2트랙</a></li>
+    <li><a href="#s9"><span class="n">9</span>확정된 결정 요약</a></li>
+    <li><a href="#sx"><span class="n">＋</span>부록: 적대 검수 이력</a></li>
+  </ol>
+</nav>
+
+<main class="content">
+
+  <h1>우하단 메뉴 바 + 메인 UI 화면 설계 <span class="subtle">(초안)</span></h1>
+  <div class="meta">
+    <span class="badge">작성: develop-kk</span>
+    <span class="badge draft">상태: 초안 · 토의용</span>
+    <span class="badge ok">3회 적대 검수 완료</span>
+  </div>
+  <p class="lead">이 문서는 <strong>현서와 크로스체크</strong>할 항목(특히 §7 CanvasScaler)을 포함합니다. 확정이 아니라, 같이 다듬는 출발점입니다.<br>
+  Figma: <code>CCL_8th_Cozy_Companion</code> (Inventory / Shop / Collection / Picture / Option 프레임 참고).</p>
+
+  <!-- ===================== 1 ===================== -->
+  <h2 id="s1"><span class="num">1.</span>목적과 범위</h2>
+
+  <h3>만들려는 것</h3>
+  <ul>
+    <li>화면 <strong>우하단에 세로로 쌓인 버튼 바</strong> (버튼 6개, 6번째는 미정이라 5 + TBD).</li>
+    <li>각 버튼을 누르면 대응하는 <strong>메인 UI 화면(패널)</strong>이 뜬다.</li>
+    <li>메인 화면은 <strong>한 번에 하나만</strong> 보이고(상호배제), 6개 오브젝트는 모두 메모리에 상주하며 표시/숨김만 바뀐다.</li>
+  </ul>
+
+  <h3>이번 범위 <strong>밖</strong> (별도 논의)</h3>
+  <ul>
+    <li>각 메인 화면의 <strong>내부 구성</strong>(인벤토리 슬롯, 샵 상품 카드 등). 지금은 껍데기 패널만.</li>
+    <li><strong>잠금(방해금지) 기능</strong> — 선행 조건이 없어서 이번엔 뺀다. §6-A 참고.</li>
+    <li>6번째 버튼이 무엇인지.</li>
+  </ul>
+
+  <div class="callout c-note">
+    <span class="tag">핵심 관심사 (원 요구)</span>
+    <p>"WindowResize / CameraFitter 등 창 단위 액션이 UI 위치·상호작용에 일으킬 수 있는 버그"를 중심으로 구조를 설계한다. → 이 부분은 <strong>§6</strong>에서 집중적으로 다룬다.</p>
+  </div>
+
+  <!-- ===================== 2 ===================== -->
+  <h2 id="s2"><span class="num">2.</span>지금 씬(GameScene)의 실제 상태 — 먼저 맞춰두기</h2>
+  <p>설계 얘기 전에, <strong>현재 씬에 실제로 뭐가 있는지</strong>부터 GUID로 확인한 사실을 공유한다. (인스펙터 값이 아니라 디스크의 씬 파일을 직접 읽음.)</p>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>항목</th><th>실제 상태</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Canvas가 2개</strong></td>
+        <td>① <code>UIRoot</code> — Overlay, CanvasScaler = <strong>Constant Pixel Size / 800×600</strong>(= Unity 기본값 그대로), <code>UIManager</code>가 여기 붙음.<br>
+        ② <code>CharacterScaleSetters</code> — 테스트용(<code>CharacterScaleClicker</code>), <strong>Scale With Screen Size / 1920×1020 / Match=Width</strong>, SortingOrder <strong>100</strong></td></tr>
+      <tr><td><strong>CameraFitter</strong></td><td>씬에 <span class="status-yes">있음</span>. 리사이즈마다 카메라를 다시 맞춤(refit). → UI가 신경 써야 할 실재 컴포넌트</td></tr>
+      <tr><td><strong>WindowAspectFitter</strong></td><td>씬에 <span class="status-no">없음</span>. 즉 32:3 가로 띠 강제는 이 씬엔 적용 안 됨</td></tr>
+      <tr><td>창 스택</td><td><code>OverlayWindow</code> + <code>OverlayWindowController</code> + <code>WindowResizeHandler</code> + <code>WindowDebugOverlay</code> + <code>OverlayModeDemoButtons</code> + <code>WindowsCursorToUnityScreen</code></td></tr>
+      <tr><td>기본 창 크기</td><td>거의 전체화면 (<code>OverlayWindow.SetFullscreen</code>: 화면폭 × (화면높이-90)). EditRegion에서 리사이즈 가능(최소 200×200)</td></tr>
+      <tr><td>UI 입력 모듈</td><td><code>InputSystemUIInputModule</code> 존재 (New Input System용, 올바름)</td></tr>
+      <tr><td>아직 씬에 없는 것</td><td><code>UIPanel</code> / <code>SettingsPanel</code> / <code>Phase0InputProbe</code> (전부 새 파일, 미배치)</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout c-q">
+    <span class="tag">❓ 현서에게 두 가지 확인 요청</span>
+    <ol>
+      <li><code>CharacterScaleSetters</code> 캔버스(SortingOrder 100, 테스트용)는 디버그 잔재로 보이는데, <strong>지워도 될까?</strong> 안 지우면 SortingOrder 100이라 새 메뉴 UI 위에 그려진다. 또 이 캔버스의 <code>CharacterScaleClicker</code>가 <code>ScaleMultiplierSettings.Character</code>에 값을 쓰는데, 설정 패널의 캐릭터 크기 슬라이더도 같은 값을 써서 나중에 충돌 소지가 있다.</li>
+      <li>그 캔버스의 <strong>1920×1020 / Match=Width</strong>는 의도적으로 고른 값 같은데, 이유가 궁금하다(§7에서 이어짐).</li>
+    </ol>
+  </div>
+
+  <!-- ===================== 3 ===================== -->
+  <h2 id="s3"><span class="num">3.</span>오브젝트 계층 모식도</h2>
+  <p>새 UI는 <strong><code>UIRoot</code>(UIManager가 붙은 Overlay Canvas) 아래</strong>에 둔다. Canvas를 <strong>Screen Space - Overlay</strong>로 두는 게 이 설계의 핵심 결정이다 — 이유는 §6(CameraFitter 분리).</p>
+
+<pre><code>EventSystem (InputSystemUIInputModule)          ← 이미 있음
+UIManager (GameObject)                           ← 이미 있음
+Canvas [Screen Space - Overlay]  = UIRoot        ← 이미 있음
+├─ CanvasScaler                    ← §7 결정 후 확정 (지금은 Constant)
+├─ GraphicRaycaster
+│
+├─ MenuButtonBar                   ← 신규. 우하단 앵커, 가장자리서 24px+ 안쪽, VerticalLayoutGroup
+│   ├─ BarBackground (Image)                 ← Figma 세로 레일 배경. 순수 검정(0,0,0) 금지(§6)
+│   ├─ Btn_Inventory  (Button + Image)
+│   ├─ Btn_Shop
+│   ├─ Btn_Collection
+│   ├─ Btn_Picture
+│   ├─ Btn_Option
+│   └─ (6번째, TBD)
+│
+└─ Panels (중앙 컨테이너)
+    ├─ Panel_Inventory   (UIPanel 그대로)
+    ├─ Panel_Shop        (UIPanel 그대로)
+    ├─ Panel_Collection  (UIPanel 그대로)
+    ├─ Panel_Picture     (UIPanel 그대로)
+    ├─ Panel_Option      (= SettingsPanel, 기존)
+    └─ (6번째, TBD)</code></pre>
+
+  <div class="callout c-note">
+    <span class="tag">앵커</span>
+    <p><code>MenuButtonBar</code>의 RectTransform 앵커와 피벗을 우하단 (1, 0)에 두면, 창을 리사이즈해도 바가 우하단에 자동으로 붙는다. 위치 계산 스크립트가 필요 없다.</p>
+  </div>
+
+  <!-- ===================== 4 ===================== -->
+  <h2 id="s4"><span class="num">4.</span>클래스 구조</h2>
+
+  <h3>4-1. 유니티 초심자용 결론 먼저</h3>
+  <ul>
+    <li><strong>SpriteRenderer·Animator 필요 없음.</strong> <code>SpriteRenderer</code>는 월드(캐릭터)용이고, UI에선 <code>Image</code>를 쓴다. hover 강조 + 눌린 이미지 교체는 <strong>uGUI <code>Button</code>의 SpriteSwap 트랜지션</strong>이 스크립트 0줄로 해준다(Highlighted / Pressed 스프라이트만 꽂으면 됨). Animator는 여러 프레임 애니메이션이 필요할 때만이고, 항상 떠 있는 앱에 버튼마다 Animator를 물리는 건 낭비라 안 쓴다.</li>
+    <li><strong>6개 화면을 다 분리하는 게 맞다.</strong> <code>UIManager</code>가 이미 "열린 패널 1개"만 추적하는 구조라 분리가 자연스럽고, "배경만 두고 내용 교체"는 관리가 더 복잡해진다.</li>
+  </ul>
+
+  <h3>4-2. 클래스 표</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>클래스</th><th>상태</th><th>책임</th></tr></thead>
+    <tbody>
+      <tr><td><code>UIManager</code></td><td><strong>재사용 (변경 0)</strong></td><td>싱글톤. 열린 패널 1개 추적, <code>Open</code>(다른 건 닫고 교체)/<code>Close</code>/<code>Toggle</code>, ESC 닫기. → 요구사항 "한 번에 1개"·"토글"을 <strong>이미 충족</strong></td></tr>
+      <tr><td><code>UIPanel</code></td><td><strong>재사용 + 필드 1개</strong></td><td><code>CanvasGroup</code>으로 여닫기(현행 유지). 공통 <code>[SerializeField] Button _closeButton</code>(선택) 추가 → Awake에서 있으면 <code>Close(this)</code> 연결. Figma의 각 패널 X 버튼용</td></tr>
+      <tr><td><code>SettingsPanel</code></td><td><strong>재사용 + 정리</strong></td><td><code>Panel_Option</code> 역할. <code>_openButton</code>·<code>_lockButton</code>·<code>_uiScaleSlider</code> 배선 <strong>제거</strong>(사유는 §6-A, §7). <code>_editRegionButton</code>·<code>_fullscreenButton</code>·캐릭터 크기 슬라이더는 유지</td></tr>
+      <tr><td><code>MenuButtonBar</code></td><td><strong>신규</strong></td><td>버튼↔패널 쌍 배열을 들고, 각 버튼 클릭을 <code>UIManager.Toggle(panel)</code>에 연결. 매 프레임 로직 없음</td></tr>
+      <tr><td><code>DraggableObject2D</code></td><td><strong>수정 1줄</strong></td><td>드래그 시작 조건에 "UI 위가 아닐 때"만 통과하는 가드 추가(§6-드래그 누수)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>4-3. 신규 <code>MenuButtonBar</code> 개요</h3>
+<pre><code>public class MenuButtonBar : MonoBehaviour
+{
+    [System.Serializable]
+    public struct Entry { public Button button; public UIPanel panel; }
+
+    [SerializeField] private Entry[] _entries;   // 5개 + 6번째는 정해지면 추가(가변)
+
+    private void Awake()
+    {
+        foreach (var e in _entries)
+            if (e.button != null)
+                e.button.onClick.AddListener(() => UIManager.Instance.Toggle(e.panel));
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()   // 셋업 실수(빈 배선) 조기 발견 — 코드베이스 컨벤션
+    {
+        foreach (var e in _entries)
+            if (e.button == null || e.panel == null)
+                Debug.LogWarning($"[MenuButtonBar] Entry에 빈 참조가 있습니다 ({name}).", this);
+    }
+#endif
+}</code></pre>
+  <ul>
+    <li>버튼의 hover/눌림 시각은 여기서 안 건드린다 — uGUI Button SpriteSwap이 담당.</li>
+    <li>배선은 <strong>코드(AddListener)</strong>로 한다. 인스펙터 드래그 연결은 씬 파일에 숨어 리뷰/머지에 안 보이기 때문(SettingsPanel과 같은 방침).</li>
+  </ul>
+
+  <h3>4-4. 함수 책임 한눈에</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>기능</th><th>담당</th><th>방식</th></tr></thead>
+    <tbody>
+      <tr><td>버튼 hover/눌림 비주얼</td><td>uGUI Button</td><td>SpriteSwap (스크립트 0)</td></tr>
+      <tr><td>버튼 클릭 → 패널 열기/전환</td><td><code>MenuButtonBar</code> → <code>UIManager</code></td><td><code>Toggle</code> / <code>Open</code></td></tr>
+      <tr><td>패널 표시·숨김 + 상호배제</td><td><code>UIManager</code> + <code>UIPanel</code></td><td>현행</td></tr>
+      <tr><td>패널 X 닫기</td><td><code>UIPanel._closeButton</code> → <code>UIManager.Close</code></td><td>코드 배선</td></tr>
+      <tr><td>리사이즈 시 위치</td><td>RectTransform 우하단 앵커</td><td>자동</td></tr>
+      <tr><td>리사이즈 시 크기</td><td>CanvasScaler</td><td>§7 결정 후</td></tr>
+      <tr><td>드래그 누수 방지</td><td><code>DraggableObject2D</code> 가드</td><td>코드 1줄</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- ===================== 5 ===================== -->
+  <h2 id="s5"><span class="num">5.</span>숨김 방식 (성능)</h2>
+  <p>요구사항: "숨김/표시는 성능상 더 나은 방식으로, Always-On-Top / per-pixel Click-Through를 해치지 않게."</p>
+  <ul>
+    <li><strong>기본안: 현행 <code>CanvasGroup.alpha = 0</code> 유지.</strong> <code>UIPanel</code>이 이미 이 방식이다. 숨길 때 alpha 0 + 클릭 차단으로 끄므로 상태(슬라이더 값 등)가 보존되고, Always-On-Top·클릭 투과에 아무 영향이 없다(Normal 모드에서 Overlay UI의 불투명 픽셀은 그대로 클릭됨).</li>
+  </ul>
+  <div class="callout c-note">
+    <span class="tag">주의 · 추후 최적화 여지</span>
+    <p>alpha=0이어도 숨은 패널은 드로우콜을 낸다. 5개가 항상 그려지는 셈이라, <strong>나중에 프로파일링에서 문제로 잡히면</strong> 그때 각 패널을 nested Canvas로 감싸 <code>Canvas.enabled</code>를 alpha와 함께 끄는 방식으로 올리면 된다(상태·API 그대로, 추가만). <strong>지금은 재작성하지 않는다</strong> — 측정 없이 최적화부터 하지 않는다.</p>
+  </div>
+
+  <!-- ===================== 6 ===================== -->
+  <h2 id="s6"><span class="num">6.</span>창 액션 side-effect 분석 <span class="subtle">(핵심)</span></h2>
+  <p>창 모드와 리사이즈가 UI에 어떻게 얽히는지 정리한다. 이게 이 설계의 진짜 목적이다.</p>
+
+  <h3>6-1. CameraFitter / 리사이즈 → <strong>Overlay로 완전 분리</strong></h3>
+  <ul>
+    <li><code>CameraFitter</code>는 리사이즈 때 <code>Screen.width/height</code>만 읽어 <strong>카메라</strong>의 orthoSize·위치·aspect만 바꾼다. 어떤 Canvas·RectTransform도 건드리지 않는다(코드로 확인).</li>
+    <li>UI Canvas를 <strong>Screen Space - Overlay</strong>로 두면 카메라를 아예 안 쓰므로, CameraFitter가 뭘 하든 UI는 영향이 <strong>0</strong>이다.</li>
+    <li>리사이즈 시 UI 위치는 RectTransform 앵커가 알아서 붙인다. → <strong>원 요구의 "CameraFitter 상호작용 버그"는 이 결정으로 구조적으로 차단된다.</strong></li>
+  </ul>
+  <div class="callout c-note">
+    <span class="tag">왜 Overlay가 정답인가</span>
+    <p>만약 UI를 Screen Space - Camera나 World Space로 뒀다면 CameraFitter가 UI를 같이 흔들어 버그가 났을 것이다.</p>
+  </div>
+
+  <h3>6-2. 창 모드 3종과 UI 클릭 가능성</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>모드</th><th>창 상태</th><th>UI 클릭?</th><th>이번 설계 대응</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Normal</strong></td><td>투명 + ColorKey. 캐릭터·UI 불투명 픽셀은 클릭됨, 빈 곳은 통과</td><td><span class="status-yes">O</span></td><td>정상 동작</td></tr>
+      <tr><td><strong>PassThrough(잠금)</strong></td><td>창 전체 클릭 통과(WS_EX_TRANSPARENT)</td><td><span class="status-no">X</span> (UI도 통과됨)</td><td>이 슬라이스에서 <strong>제외</strong> (§6-A)</td></tr>
+      <tr><td><strong>EditRegion</strong></td><td>불투명 + 가장자리 리사이즈 핫존</td><td><span class="status-yes">O</span></td><td>바를 가장자리서 <strong>24px+ 안쪽</strong>에 (§6-B)</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout c-warn">
+    <span class="tag">⚠ 6-A. 잠금(PassThrough)을 이번에 빼는 이유 — 선행 조건 부재</span>
+    <p>잠금에 들어가면 창 전체가 클릭 통과가 된다. 그러면 잠금을 푸는 유일한 인앱 경로인 잠금 버튼조차 <strong>눌리지 않는다.</strong> 그런데 현재 코드에는 <strong>잠금을 풀어주는 전역 핫키 구독이 아예 없다</strong>(<code>ToggleMode</code>를 부르는 건 설정의 잠금 버튼과 데모뿐). 즉 지금 잠금을 켜면 <strong>앱 강제종료 말고는 빠져나올 방법이 없다.</strong></p>
+    <p>→ 이번 슬라이스에서는 <code>SettingsPanel</code>의 <code>_lockButton</code> 배선을 <strong>코드에서 제거</strong>한다(인스펙터에서 실수로 연결해 밟는 사고를 원천 차단). 잠금은 나중에 <strong>전역 핫키 잠금해제(<code>GlobalKeyInput</code>/<code>OutFocusKeyHook</code> → <code>ToggleMode</code>)를 Platform/Gameplay에 먼저 만든 뒤</strong> 재도입한다. (별도 작업 항목)</p>
+  </div>
+
+  <h3>6-B. EditRegion과 버튼 바의 겹침</h3>
+  <p>EditRegion에선 창 가장자리가 리사이즈 핫존이다(변 6px, 모서리 12px). OS가 이 영역 클릭을 uGUI보다 <strong>먼저</strong> 가로채므로, 버튼이 모서리에 딱 붙으면 그 버튼은 죽는다. → <strong>바를 가장자리에서 24px 이상 안쪽</strong>에 두면 충돌이 없다. (EditRegion 종료는 <code>RegionEditChrome</code>의 중앙 "완료" 버튼으로 가능하니, 바를 굳이 EditRegion에서 숨길 필요는 없다.)</p>
+
+  <div class="callout c-warn">
+    <span class="tag">⚠ 6-C. ColorKey 검정 구멍</span>
+    <p>per-pixel 투과는 순수 검정 (0,0,0) 픽셀을 투명 + 통과로 처리한다. → <strong>UI 아트에 순수 검정을 쓰지 말 것</strong>(짙은 회색으로 회피). 배경 이미지·아이콘 모두 해당.</p>
+  </div>
+
+  <h3>6-D. 좌표 freeze로 인한 hover 잔류 (사소)</h3>
+  <p>투명(빈) 픽셀 위에선 <code>Mouse.current</code>가 멈춘다. 불투명한 바 위에선 정상 갱신되므로 버튼 hover는 잘 뜬다. 다만 <strong>바에서 빈 공간으로 곧장 커서가 빠질 때</strong> 하이라이트가 잠깐 남을 수 있다(기능 문제 아님, 다른 불투명 위로 가면 즉시 정상화). 클릭에는 영향 없다.</p>
+
+  <div class="callout c-warn">
+    <span class="tag">⚠ 6-E. 드래그 누수 — 실재하는 버그, 1줄로 막음</span>
+    <p><code>DraggableObject2D</code>는 입력 매니저를 안 거치고 <strong>자체로</strong> 마우스를 폴링한다. 그래서 "포인터가 UI 위인가" 검사를 안 한다. <strong>패널이 열려 있어도 그 뒤 캐릭터가 드래그로 끌려오는</strong> 버그가 난다. → 드래그 시작 조건에 아래 한 줄을 추가한다:</p>
+<pre><code>// 47행 근처, press 시작 조건에 추가
+&amp;&amp; (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject())</code></pre>
+    <p>(<code>using UnityEngine.EventSystems;</code> 추가.) 진행 중인 드래그는 첫 프레임에만 판정하므로 끊기지 않고, 캐릭터 위에 UI가 없을 때(정상 드래그)는 방해하지 않는다.</p>
+  </div>
+
+  <!-- ===================== 7 ===================== -->
+  <h2 id="s7"><span class="num">7.</span>현서 크로스체크 항목 — CanvasScaler 정책 <span class="subtle">(열린 질문)</span></h2>
+  <div class="callout c-q">
+    <span class="tag">🔍 이게 이 문서에서 제일 같이 정해야 하는 부분이다</span>
+    <p>아래 상황·트레이드오프·잠정 권장을 보고, 특히 <strong>현서가 테스트 캔버스에 왜 1920×1020 / Match=Width를 골랐는지</strong> 확인해 주세요.</p>
+  </div>
+
+  <h3>상황</h3>
+  <ul>
+    <li><code>UIRoot</code>(우리 메뉴가 들어갈 캔버스)는 <strong>Constant Pixel Size / 800×600</strong>인데, 이건 Unity가 캔버스 만들면 나오는 <strong>기본값 그대로</strong>라 아무도 의도적으로 고른 게 아닐 가능성이 크다.</li>
+    <li>반면 테스트 캔버스는 <strong>Scale With Screen Size / 1920×1020 / Match=Width</strong>로, <strong>누군가 의도적으로</strong> 설정했다. (현서?)</li>
+  </ul>
+
+  <h3>두 모드의 차이</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>모드</th><th>창을 키우면/줄이면</th><th>문제</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Constant Pixel Size</strong></td><td>UI가 픽셀 고정 (안 커지고 안 줄어듦)</td><td>작게 리사이즈한 창(최소 200×200)에서 6버튼 바 + 중앙 패널이 <strong>창을 넘치거나 덮음</strong>. 4K에선 UI가 상대적으로 작아짐</td></tr>
+      <tr><td><strong>Scale With Screen Size</strong></td><td>기준 해상도 대비 비율로 UI가 같이 커지고 줄어듦</td><td>넘침 없음. 단 <code>scaleFactor</code> 기반 슬라이더는 무의미해짐</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>잠정 권장</h3>
+  <ul>
+    <li><strong><code>UIRoot</code>를 Scale With Screen Size로.</strong> 이 씬은 32:3 띠 강제가 없고(WindowAspectFitter 미배치) 창이 전체화면~축소까지 넓게 변하므로, 자동 축소가 되는 쪽이 안전하다. 참고로 <code>CameraFitter</code>는 캐릭터의 <strong>화면 픽셀 크기를 창 크기와 무관하게 고정</strong>한다 — UI도 극단적으로 안 변하는 게 캐릭터와 톤이 맞는다.</li>
+    <li><strong>기준 해상도·Match 축은 현서 의견이 필요.</strong> 테스트 캔버스가 이미 <code>Match=Width / 1920×1020</code>을 쓰는데, 이게 의도라면 메뉴 UI도 거기 맞추는 게 일관적이다. 다만 <strong>왜 1080이 아니라 1020인지, 왜 Height가 아니라 Width인지</strong> 최초 의도를 알아야 우리가 맞추든 바꾸든 결정할 수 있다.</li>
+  </ul>
+
+  <div class="callout c-note">
+    <span class="tag">참고 · 처음에 내가 틀렸던 점 (투명하게 공유)</span>
+    <p>초안에서 나는 "Match=Height / 1080"을 권했는데, 적대 검수에서 <strong>이 프로젝트엔 그게 오히려 나쁠 수 있다</strong>는 지적을 받았다. (가로로 긴 창이 지배적이라면 Height 기준은 UI를 과하게 줄인다.) 그래서 지금은 <strong>현서가 이미 고른 Width 기준이 더 맞을 수 있다</strong>고 보고, 단정 대신 크로스체크로 남긴다.</p>
+  </div>
+
+  <h3>딸린 변경</h3>
+  <p><code>SettingsPanel</code>의 "UI 크기" 슬라이더(<code>_uiScaleSlider → canvasScaler.scaleFactor</code>)는 <strong>Constant 모드에서만</strong> 동작한다. Scale With Screen Size로 가면 이 배선은 죽는다. 그래서 이번 슬라이스에서는 이 배선을 <strong>일단 제거</strong>하고, CanvasScaler 정책이 확정된 뒤 그 모드에 맞는 방식으로 다시 붙인다.</p>
+
+  <!-- ===================== 8 ===================== -->
+  <h2 id="s8"><span class="num">8.</span>구현 계획 — 2트랙</h2>
+  <p>이 기능은 <strong>코드로 되는 부분</strong>과 <strong>사람이 유니티 에디터에서 해야 하는 부분</strong>이 갈린다. (Claude는 <code>.unity</code> 씬 파일을 직접 편집하지 않는다 — 씬 규칙.)</p>
+
+  <h3>트랙 1 — 코드 (Claude가 작성/수정 가능)</h3>
+  <ol>
+    <li><code>MenuButtonBar</code> 신규 작성 → <strong>verify</strong>: 컴파일 통과, OnValidate 경고 로직 포함.</li>
+    <li><code>UIPanel</code>에 <code>_closeButton</code>(선택) 필드 + Awake 연결 → <strong>verify</strong>: 컴파일 통과, 기존 여닫기 불변.</li>
+    <li><code>SettingsPanel</code> 정리: <code>_openButton</code>·<code>_lockButton</code>·<code>_uiScaleSlider</code> 배선 제거 → <strong>verify</strong>: 컴파일 통과, <code>_editRegionButton</code>/<code>_fullscreenButton</code>/캐릭터 슬라이더 유지.</li>
+    <li><code>DraggableObject2D</code> 드래그 가드 1줄 추가 → <strong>verify</strong>: 컴파일 통과.</li>
+  </ol>
+  <div class="callout c-dec">
+    <span class="tag">코드 트랙 완료 기준</span>
+    <p><strong>컴파일 성공 + 경고 없음 + 기존 참조 안 깨짐.</strong></p>
+  </div>
+
+  <h3>트랙 2 — 씬 구성 + 빌드 검증 (사람이 에디터에서)</h3>
+  <div class="callout c-warn">
+    <span class="tag">⚠ 검증은 빌드에서만 유효</span>
+    <p>아래 검증은 <strong>빌드에서만</strong> 유효하다. 에디터에선 투명·클릭통과·리사이즈가 <code>#if !UNITY_EDITOR</code>로 꺼져 있어 확인이 안 된다.</p>
+  </div>
+  <ol>
+    <li><code>UIRoot</code> 아래 <code>MenuButtonBar</code>(우하단 앵커, 24px inset) + 버튼 + <code>Panels</code> 구성, 버튼 SpriteSwap 스프라이트 지정.</li>
+    <li>(선행 게이트 <strong>G0</strong>) <code>Phase0InputProbe</code>를 <code>UIRoot</code>에 붙여 빌드 → 투명 오버레이에서 <strong>버튼 클릭이 수신되고</strong> <code>IsPointerOverGameObject</code>가 버튼 위에서 true인지 확인. <strong>이게 통과돼야</strong> 이 설계 전체(표준 uGUI 전제)가 성립한다.</li>
+    <li><strong>G1</strong>: 6버튼을 순서대로 눌러 <strong>해당 패널만</strong> 뜨는지(동시 2개 없음).</li>
+    <li><strong>G2</strong>: 같은 버튼 재클릭 / X 버튼 → 닫힘.</li>
+    <li><strong>G3</strong>: 창을 작게~전체화면으로 리사이즈 → 바가 우하단 유지 + 창 밖으로 안 넘침(§7 정책에 의존).</li>
+    <li><strong>G4</strong>: 패널 열린 채 그 위를 드래그 → 뒤 캐릭터가 안 움직임.</li>
+  </ol>
+
+  <!-- ===================== 9 ===================== -->
+  <h2 id="s9"><span class="num">9.</span>확정된 결정 요약</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>결정</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A</strong></td><td>잠금(PassThrough)은 이번 제외. <code>SettingsPanel._lockButton</code> 배선 제거. 전역 핫키 잠금해제 구현 후 재도입</td></tr>
+      <tr><td><strong>B</strong></td><td><code>Scripts/CLAUDE.md</code>의 UI 레이어 참조 제한 제거 완료 — UI는 하위 레이어(Platform 포함)를 자유 참조</td></tr>
+      <tr><td><strong>C</strong></td><td><span class="status-no">미확정.</span> CanvasScaler 정책은 §7대로 현서와 크로스체크 후 확정</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- ===================== 부록 ===================== -->
+  <h2 id="sx"><span class="num">＋</span>부록: 적대 검수 이력</h2>
+  <p>이 설계는 독립 리뷰어(별도 에이전트)에게 <strong>총 5회</strong> 적대적 검수를 받으며 다듬었다. 주요 교정:</p>
+  <ul>
+    <li><strong>UIModeGate(모드별 UI 자동 숨김 컴포넌트)를 폐기</strong> — 상태 꼬임 + 레이어 위반 유발. 정적 규칙(inset, 잠금 제외)으로 대체.</li>
+    <li><strong>씬 모델 정정</strong> — 초안이 "Canvas 1개 / 32:3 띠"로 잘못 봤으나, 실제로는 Canvas 2개 + CameraFitter 있음 + WindowAspectFitter 없음. §2가 실측 반영본.</li>
+    <li><strong>CanvasScaler 권장을 Height→미확정으로 하향</strong> — 이 프로젝트 창 형태엔 Width 기준이 더 맞을 수 있어 현서 크로스체크로 전환(§7).</li>
+    <li><strong>과설계 제거</strong> — <code>_closeButton</code>용 상속형 OnValidate 등 검수 대응으로 붙였던 복잡성을 다시 걷어냄(선택 필드엔 경고 대상이 없음).</li>
+  </ul>
+
+</main>
+</div>
+</body>
+</html>
