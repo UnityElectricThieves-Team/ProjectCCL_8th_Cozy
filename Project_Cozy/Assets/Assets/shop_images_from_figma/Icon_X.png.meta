@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 29a4282544a5c57439352c4fdc9d7217
+guid: b1537e6bec7b1ae45941f28241474d08
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5064033452520201308
-    second: image_flowerpot_0
+      213: 102205073636348463
+    second: Icon_X_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: image_flowerpot_0
+      name: Icon_X_0
       rect:
         serializedVersion: 2
-        x: 19
-        y: 6
-        width: 92
-        height: 110
+        x: 0
+        y: 0
+        width: 60
+        height: 62
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4a3a6d3c760f8b9b0800000000000000
-      internalID: -5064033452520201308
+      spriteID: f22565419fa1b6100800000000000000
+      internalID: 102205073636348463
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      image_flowerpot_0: -5064033452520201308
+      Icon_X_0: 102205073636348463
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

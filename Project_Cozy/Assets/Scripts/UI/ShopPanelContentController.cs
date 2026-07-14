@@ -1,57 +1,132 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 /// <summary>
-/// 상점 패널 내용물(Content)의 두뇌. 진열 상품 목록으로 슬롯들을 <see cref="_content"/> 아래에 만들고,
-/// 하트 보유량이 바뀔 때마다 각 슬롯의 구매 가능/불가능을 갱신한다.
-/// 구매는 <see cref="HeartSystem.TrySpend"/>로 처리 — 잔액이 모자라면 아무 일도 없다.
+/// 상점 패널 내용물(Content)의 두뇌. '장식'과 '배경' 두 모드를 하나가 관리한다 —
+/// 선택된 탭에 따라 진열 상품·행 프리팹·열 수·버튼 동작이 달라진다.
+/// 탭을 누르면 <see cref="SetMode"/>가 기존 행을 비우고 그 모드로 다시 채운다.
 ///
-/// 패널 루트에 붙는다(내용물 로직이 있는 화면에만 컨트롤러를 둔다 — 여닫기는 <see cref="UIPanel"/> 담당).
-/// 패널은 CanvasGroup으로 숨기므로(SetActive 아님) 열고 닫아도 이 컴포넌트는 계속 살아 있다.
-/// 구독은 <see cref="OnEnable"/>/<see cref="OnDisable"/>(생성·파괴 시점)에서 걸고 푼다.
+/// - 장식: <see cref="ShopItemRow"/>에 <see cref="ShopItemSlot"/>을 3개씩. 버튼=구매(하트 차감).
+/// - 배경: <see cref="BackgroundItemRow"/>에 <see cref="BackgroundItemSlot"/>을 2개씩. 버튼=구매→사용→사용취소(<see cref="BackgroundSystem"/>).
+///
+/// 패널 루트에 붙는다. 패널은 CanvasGroup으로 숨기므로(SetActive 아님) 이 컴포넌트는 계속 살아 있다.
+/// 구독은 <see cref="OnEnable"/>/<see cref="OnDisable"/>에서 걸고 푼다.
 /// </summary>
 public sealed class ShopPanelContentController : MonoBehaviour
 {
-    [Tooltip("슬롯을 만들어 넣을 부모. Base 프리팹의 Content(스크롤을 붙였다면 ScrollRect의 Content).")]
+    private enum ShopMode { Decoration, Background }
+
+    [Tooltip("행을 만들어 넣을 부모. 두 모드가 공유한다.")]
     [SerializeField] private Transform _content;
 
-    [Tooltip("복제해서 각 상품 슬롯으로 쓸 ShopItemSlot 프리팹.")]
-    [SerializeField] private ShopItemSlot _slotPrefab;
+    [Header("장식 탭")]
+    [FormerlySerializedAs("_rowPrefab")]
+    [SerializeField] private ShopItemRow _decorationRowPrefab;
+    [FormerlySerializedAs("_slotPrefab")]
+    [SerializeField] private ShopItemSlot _decorationSlotPrefab;
+    [FormerlySerializedAs("_items")]
+    [SerializeField] private ShopItemDefinition[] _decorationItems;
 
-    [Tooltip("진열할 상품들. 배열 순서대로 슬롯이 만들어진다. ShopItemDefinition 에셋을 드래그해 채운다.")]
-    [SerializeField] private ShopItemDefinition[] _items;
+    [Header("배경 탭")]
+    [SerializeField] private BackgroundItemRow _backgroundRowPrefab;
+    [SerializeField] private BackgroundItemSlot _backgroundSlotPrefab;
+    [SerializeField] private ShopItemDefinition[] _backgroundItems;
 
-    private readonly List<ShopItemSlot> _slots = new();
+    [Header("탭 버튼")]
+    [SerializeField] private Button _decorationTab;
+    [SerializeField] private Button _backgroundTab;
+    [Tooltip("활성/비활성 색을 칠할 탭 배경 이미지.")]
+    [SerializeField] private Image _decorationTabImage;
+    [SerializeField] private Image _backgroundTabImage;
+
+    // Figma: 활성 탭=시안(#39C9E6), 비활성=회색(#D9D9D9).
+    private static readonly Color ActiveTab = new(0.224f, 0.788f, 0.902f);
+    private static readonly Color InactiveTab = new(0.851f, 0.851f, 0.851f);
+
+    private readonly List<ShopItemRow> _decorationRows = new();
+    private readonly List<BackgroundItemRow> _backgroundRows = new();
+    private ShopMode _mode = ShopMode.Decoration;
 
     private void Awake()
     {
-        BuildSlots();
+        if (_decorationTab != null) _decorationTab.onClick.AddListener(() => SetMode(ShopMode.Decoration));
+        if (_backgroundTab != null) _backgroundTab.onClick.AddListener(() => SetMode(ShopMode.Background));
     }
 
     private void OnEnable()
     {
         var hearts = HeartSystem.Instance;
-        if (hearts == null) return; // 씬에 HeartSystem이 없으면 조용히 넘어간다
+        if (hearts != null) hearts.HeartsChanged += OnHeartsChanged;
 
-        hearts.HeartsChanged += OnHeartsChanged;
-        RefreshAffordability(hearts.CurrentHearts); // 현재 잔액으로 초기 상태 맞춤
+        var bg = BackgroundSystem.Instance;
+        if (bg != null)
+        {
+            bg.OwnedChanged += OnBackgroundStateChanged;
+            bg.ActiveBackgroundChanged += OnActiveBackgroundChanged;
+        }
+
+        SetMode(_mode); // 현재 모드로 (재)구성 + 상태 반영
     }
 
     private void OnDisable()
     {
-        if (HeartSystem.Instance != null)
-            HeartSystem.Instance.HeartsChanged -= OnHeartsChanged;
+        var hearts = HeartSystem.Instance;
+        if (hearts != null) hearts.HeartsChanged -= OnHeartsChanged;
+
+        var bg = BackgroundSystem.Instance;
+        if (bg != null)
+        {
+            bg.OwnedChanged -= OnBackgroundStateChanged;
+            bg.ActiveBackgroundChanged -= OnActiveBackgroundChanged;
+        }
     }
 
-    private void BuildSlots()
+    private void SetMode(ShopMode mode)
     {
-        if (_content == null || _slotPrefab == null || _items == null) return;
+        _mode = mode;
+        ClearRows();
+        if (mode == ShopMode.Decoration) BuildDecorationRows();
+        else BuildBackgroundRows();
+        UpdateTabVisuals();
+        Refresh();
+    }
 
-        foreach (var item in _items)
+    private void ClearRows()
+    {
+        _decorationRows.Clear();
+        _backgroundRows.Clear();
+        if (_content == null) return;
+        for (int i = _content.childCount - 1; i >= 0; i--)
         {
-            var slot = Instantiate(_slotPrefab, _content);
-            slot.Bind(item, TryPurchase);
-            _slots.Add(slot);
+            var child = _content.GetChild(i).gameObject;
+            child.SetActive(false); // 이번 프레임 레이아웃에서 즉시 빠지도록
+            Destroy(child);
+        }
+    }
+
+    private void BuildDecorationRows()
+    {
+        if (_content == null || _decorationRowPrefab == null || _decorationSlotPrefab == null || _decorationItems == null) return;
+        int i = 0;
+        while (i < _decorationItems.Length)
+        {
+            var row = Instantiate(_decorationRowPrefab, _content);
+            _decorationRows.Add(row);
+            i += row.Populate(_decorationItems, i, _decorationSlotPrefab, TryPurchase);
+        }
+    }
+
+    private void BuildBackgroundRows()
+    {
+        if (_content == null || _backgroundRowPrefab == null || _backgroundSlotPrefab == null || _backgroundItems == null) return;
+        int i = 0;
+        while (i < _backgroundItems.Length)
+        {
+            var row = Instantiate(_backgroundRowPrefab, _content);
+            _backgroundRows.Add(row);
+            i += row.Populate(_backgroundItems, i, _backgroundSlotPrefab);
         }
     }
 
@@ -59,23 +134,37 @@ public sealed class ShopPanelContentController : MonoBehaviour
     {
         if (item == null) return;
         HeartSystem.Instance?.TrySpend(item.price);
-        // 성공하면 HeartsChanged가 울려 OnHeartsChanged → RefreshAffordability로 이어진다.
-        // 실패(잔액 부족)면 TrySpend가 false만 반환하고 아무 변화 없음.
+        // 성공하면 HeartsChanged가 울려 Refresh로 이어진다. 실패(잔액 부족)면 아무 변화 없음.
     }
 
-    private void OnHeartsChanged(int currentHearts) => RefreshAffordability(currentHearts);
-
-    private void RefreshAffordability(int currentHearts)
+    private void UpdateTabVisuals()
     {
-        foreach (var slot in _slots)
-            slot.SetAffordable(currentHearts >= slot.Price);
+        if (_decorationTabImage != null) _decorationTabImage.color = _mode == ShopMode.Decoration ? ActiveTab : InactiveTab;
+        if (_backgroundTabImage != null) _backgroundTabImage.color = _mode == ShopMode.Background ? ActiveTab : InactiveTab;
+    }
+
+    private void OnHeartsChanged(int _) => Refresh();
+    private void OnBackgroundStateChanged() => Refresh();
+    private void OnActiveBackgroundChanged(string _) => Refresh();
+
+    private void Refresh()
+    {
+        int hearts = HeartSystem.Instance != null ? HeartSystem.Instance.CurrentHearts : 0;
+        if (_mode == ShopMode.Decoration)
+        {
+            foreach (var row in _decorationRows) row.RefreshAffordability(hearts);
+        }
+        else
+        {
+            foreach (var row in _backgroundRows) row.RefreshState();
+        }
     }
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (_content == null || _slotPrefab == null)
-            Debug.LogWarning($"[{nameof(ShopPanelContentController)}] _content 또는 _slotPrefab이 비어 있음.", this);
+        if (_content == null)
+            Debug.LogWarning($"[{nameof(ShopPanelContentController)}] _content가 비어 있음.", this);
     }
 #endif
 }
