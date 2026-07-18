@@ -59,7 +59,7 @@
 - `Character/States/{Idle, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, SpecialIdle, SpecialWalk}State.cs` — 11개 State 클래스. `Run`/`Special*`은 `Walk`/`Idle` 상속.
 
 ### Gameplay/
-- `Gameplay/SpawnPointManager.cs` — 스폰 포인트의 '스폰 기운'을 관리. 입력 4채널을 `CurrentEnergy`(소비형)+`CumulativeEnergy`(누적)로 쌓고 스폰 시 차감. `ExportSave`/`ImportSave` 저장 seam 보유.
+- `Gameplay/SpawnPointManager.cs` — 스폰 포인트의 '스폰 기운'을 관리. 입력 4채널을 `CurrentEnergy`(소비형)+`CumulativeEnergy`(누적)로 쌓고 스폰 시 차감. (저장 연결은 아직 미구현.)
 - `Gameplay/SpawnPointFileFormat.cs` — 스폰 기운의 저장 데이터 컨테이너(`CurrentEnergy`+`CumulativeEnergy`). `HeartFileFormat`과 같은 패턴.
 - `Gameplay/AnimatorKeyToggle.cs` — 지정 키 누르면 `SpriteAnimator` 재생/정지 토글.
 

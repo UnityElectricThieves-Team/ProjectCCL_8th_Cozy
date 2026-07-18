@@ -42,20 +42,6 @@ public class SpawnPointManager : MonoBehaviour
         CurrentEnergy = Mathf.Max(0, CurrentEnergy - amount);
     }
 
-    /// <summary>현재 스폰 기운 상태를 저장 데이터로 내보낸다(미래 저장 시스템용). <see cref="HeartSystem.ExportSave"/>와 같은 seam.</summary>
-    public SpawnPointFileFormat ExportSave()
-    {
-        return new SpawnPointFileFormat { currentEnergy = CurrentEnergy, cumulativeEnergy = CumulativeEnergy };
-    }
-
-    /// <summary>저장 데이터를 스폰 기운 상태에 주입한다(미래 저장 시스템용). null은 무시.</summary>
-    public void ImportSave(SpawnPointFileFormat data)
-    {
-        if (data == null) return;
-        CurrentEnergy = data.currentEnergy;
-        CumulativeEnergy = data.cumulativeEnergy;
-    }
-
     private void OnEnable()
     {
         // OutFocus 훅은 static 이벤트를 방송하므로 인스턴스 참조 없이 바로 구독한다.

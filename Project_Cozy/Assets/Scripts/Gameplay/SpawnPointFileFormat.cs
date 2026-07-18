@@ -1,8 +1,7 @@
 using System;
 
 /// <summary>
-/// 스폰 기운(입력 누적)의 저장 데이터 컨테이너. 미래 통합 저장 시스템이 <see cref="SpawnPointManager.ExportSave"/>/
-/// <see cref="SpawnPointManager.ImportSave"/>로 주고받는 직렬화 타입. <see cref="HeartFileFormat"/>과 같은 seam 패턴이다.
+/// 스폰 기운(입력 누적)의 저장 데이터 컨테이너. 미래 저장 시스템이 주고받을 직렬화 타입. <see cref="HeartFileFormat"/>과 같은 패턴이다.
 ///
 /// currentEnergy    = 소비형 스폰 기운(<see cref="SpawnPointManager.CurrentEnergy"/>). 스폰으로 차감된다.
 /// cumulativeEnergy = 줄지 않는 누적 스폰 기운(<see cref="SpawnPointManager.CumulativeEnergy"/>). 캐릭터 해금 진행도·재파밍 방지용.
