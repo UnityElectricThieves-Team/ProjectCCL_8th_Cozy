@@ -15,6 +15,7 @@ using UnityEngine;
 ///
 /// 저장은 아직 미연결(세션 휘발) — 재화·친밀도와 같은 상태다. [[project_pending_affinity_save_api]] 패턴을 따른다.
 /// </summary>
+[DefaultExecutionOrder(-100)]
 public sealed class BackgroundSystem : MonoBehaviour
 {
     public static BackgroundSystem Instance { get; private set; }
