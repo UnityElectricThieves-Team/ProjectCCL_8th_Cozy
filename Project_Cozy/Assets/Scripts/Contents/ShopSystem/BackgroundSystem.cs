@@ -13,7 +13,7 @@ using UnityEngine;
 /// - 배경은 <b>한 번에 하나만</b> 활성. 다른 배경을 쓰면 이전 배경은 자동으로 사용 해제된다(활성 id가 하나뿐이라 자연히 성립).
 /// - 사용 취소하면 기본(활성 없음)으로 돌아간다.
 ///
-/// 저장은 아직 미연결(세션 휘발) — 재화·친밀도와 같은 상태다. [[project_pending_affinity_save_api]] 패턴을 따른다.
+/// 저장은 아직 미연결이라 구매 집합과 활성 배경 모두 세션이 끝나면 사라진다. 하트·친밀도와 같은 상태다.
 /// </summary>
 [DefaultExecutionOrder(-100)]
 public sealed class BackgroundSystem : MonoBehaviour
