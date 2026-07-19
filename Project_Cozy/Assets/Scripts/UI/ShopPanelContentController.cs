@@ -26,13 +26,13 @@ public sealed class ShopPanelContentController : MonoBehaviour
     [SerializeField] private ShopItemRow _decorationRowPrefab;
     [FormerlySerializedAs("_slotPrefab")]
     [SerializeField] private ShopItemSlot _decorationSlotPrefab;
-    [FormerlySerializedAs("_items")]
-    [SerializeField] private ShopItemDefinition[] _decorationItems;
 
     [Header("배경 탭")]
     [SerializeField] private BackgroundItemRow _backgroundRowPrefab;
     [SerializeField] private BackgroundItemSlot _backgroundSlotPrefab;
-    // 배경 목록은 여기 두지 않는다 — BackgroundSystem이 카탈로그를 들고, 이 화면은 받아서 정렬해 그린다.
+
+    // 상품 목록은 두 탭 다 여기 두지 않는다 — ShopSystem과 BackgroundSystem이 각자 카탈로그를 들고,
+    // 이 화면은 받아서 자기 규칙으로 정렬해 그린다.
 
     [Header("탭 버튼")]
     [SerializeField] private Button _decorationTab;
@@ -48,8 +48,9 @@ public sealed class ShopPanelContentController : MonoBehaviour
     private readonly List<ShopItemRow> _decorationRows = new();
     private readonly List<BackgroundItemRow> _backgroundRows = new();
 
-    // 진열 순서로 정렬한 배경 목록. 행을 다시 만들 때마다 채워 쓰는 재사용 버퍼다.
-    private readonly List<ShopItemDefinition> _sortedBackgrounds = new();
+    // 진열 순서로 정렬한 상품 목록. 행을 다시 만들 때마다 채워 쓰는 재사용 버퍼다.
+    // 탭은 한 번에 하나만 열리고 ClearRows가 매번 싹 지우고 다시 만들기 때문에, 두 탭이 이 하나를 번갈아 써도 된다.
+    private readonly List<ShopItemDefinition> _sortedItems = new();
     private ShopMode _mode = ShopMode.Decoration;
 
     private void Awake()
@@ -119,13 +120,28 @@ public sealed class ShopPanelContentController : MonoBehaviour
 
     private void BuildDecorationRows()
     {
-        if (_content == null || _decorationRowPrefab == null || _decorationSlotPrefab == null || _decorationItems == null) return;
+        if (_content == null || _decorationRowPrefab == null || _decorationSlotPrefab == null) return;
+
+        var system = ShopSystem.Instance;
+        if (system == null)
+        {
+            Debug.LogWarning($"[{nameof(ShopPanelContentController)}] 씬에 {nameof(ShopSystem)}이 없어 장식 탭을 채울 수 없음.", this);
+            return;
+        }
+
+        BuildSortedItems(system.AvailableDecorations);
+        if (_sortedItems.Count == 0)
+        {
+            Debug.LogWarning($"[{nameof(ShopPanelContentController)}] {nameof(ShopSystem)}의 장식 목록이 비어 있음.", system);
+            return;
+        }
+
         int i = 0;
-        while (i < _decorationItems.Length)
+        while (i < _sortedItems.Count)
         {
             var row = Instantiate(_decorationRowPrefab, _content);
             _decorationRows.Add(row);
-            i += row.Populate(_decorationItems, i, _decorationSlotPrefab, TryPurchase);
+            i += row.Populate(_sortedItems, i, _decorationSlotPrefab, TryPurchase);
         }
     }
 
@@ -141,39 +157,39 @@ public sealed class ShopPanelContentController : MonoBehaviour
             return;
         }
 
-        BuildSortedBackgrounds(system.AvailableBackgrounds);
-        if (_sortedBackgrounds.Count == 0)
+        BuildSortedItems(system.AvailableBackgrounds);
+        if (_sortedItems.Count == 0)
         {
             Debug.LogWarning($"[{nameof(ShopPanelContentController)}] {nameof(BackgroundSystem)}의 배경 목록이 비어 있음.", system);
             return;
         }
 
         int i = 0;
-        while (i < _sortedBackgrounds.Count)
+        while (i < _sortedItems.Count)
         {
             var row = Instantiate(_backgroundRowPrefab, _content);
             _backgroundRows.Add(row);
-            i += row.Populate(_sortedBackgrounds, i, _backgroundSlotPrefab);
+            i += row.Populate(_sortedItems, i, _backgroundSlotPrefab);
         }
     }
 
     /// <summary>
-    /// 카탈로그를 진열 순서로 정렬해 <see cref="_sortedBackgrounds"/>에 담는다.
+    /// 카탈로그를 진열 순서로 정렬해 <see cref="_sortedItems"/>에 담는다. 두 탭이 함께 쓴다.
     /// 시스템이 준 순서는 쓰지 않는다 — 무엇이 있는지는 시스템이 알고, 어떤 순서로 보일지는 이 화면이 정한다.
     /// 그래서 진열 규칙을 바꿀 때 시스템이나 인스펙터를 건드릴 필요가 없다.
     ///
     /// 인스펙터에서 칸을 비워둔 채로 두면 null이 섞여 들어오므로 여기서 걸러낸다.
     /// </summary>
-    private void BuildSortedBackgrounds(IReadOnlyList<ShopItemDefinition> catalog)
+    private void BuildSortedItems(IReadOnlyList<ShopItemDefinition> catalog)
     {
-        _sortedBackgrounds.Clear();
+        _sortedItems.Clear();
         if (catalog == null) return;
 
         for (int i = 0; i < catalog.Count; i++)
         {
-            if (catalog[i] != null) _sortedBackgrounds.Add(catalog[i]);
+            if (catalog[i] != null) _sortedItems.Add(catalog[i]);
         }
-        _sortedBackgrounds.Sort(CompareForDisplay);
+        _sortedItems.Sort(CompareForDisplay);
     }
 
     // 진열 규칙: 싼 것부터. 가격이 같으면 id 순으로 갈라 순서를 고정한다 —

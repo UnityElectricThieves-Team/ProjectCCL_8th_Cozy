@@ -20,6 +20,16 @@ public sealed class ShopSystem : MonoBehaviour
 {
     public static ShopSystem Instance { get; private set; }
 
+    [Tooltip("게임에 존재하는 모든 장식. 여기 늘어놓은 순서는 상점 진열 순서와 무관하다 — 진열 순서는 상점이 따로 정한다.")]
+    [SerializeField] private ShopItemDefinition[] _availableDecorations;
+
+    /// <summary>
+    /// 게임에 존재하는 모든 장식 목록. 상점이 이걸 받아 자기 규칙대로 정렬해 진열한다.
+    /// 카탈로그를 상점 패널이 아니라 이 시스템이 드는 이유는, 소유 상태를 들고 있는 쪽이
+    /// "어떤 장식들이 있는가"도 알아야 하기 때문이다(<see cref="BackgroundSystem"/>와 같은 구조).
+    /// </summary>
+    public IReadOnlyList<ShopItemDefinition> AvailableDecorations => _availableDecorations;
+
     private ShopInventoryFileFormat _inventory = new();
 
     /// <summary>소유가 바뀌었을 때(장식을 샀을 때) 울린다. 슬롯들이 표시를 갱신하는 신호.</summary>
