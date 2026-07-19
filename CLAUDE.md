@@ -83,7 +83,7 @@ ProjectCCL_8th_Cozy/
 - [Project_Cozy/Assets/Characters/CLAUDE.md](Project_Cozy/Assets/Characters/CLAUDE.md) — 캐릭터 에셋 폴더 구조, 프리팹 콜로케이션
 
 ### .claude/rules/ 인덱스
-- `behavioral-guidelines.md`, `git-workflow.md` — paths 없음, 항상 로드
+- `behavioral-guidelines.md`, `git.md` — paths 없음, 항상 로드
 - `docs-conventions.md` — 문서 작업 시
 - `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/project-settings.md`, `unity/platform.md`, `unity/characters.md` — 해당 파일 작업 시
 
@@ -91,5 +91,4 @@ ProjectCCL_8th_Cozy/
 
 ### 합의 필요 — 비어있는 항목
 
-- §6.2 Git 워크플로우 → `.claude/rules/git-workflow.md` (placeholder)
 - §7 AI 작업 시 공통 규칙 → 아직 없음 (`.claude/rules/ai-common.md` 후보)
