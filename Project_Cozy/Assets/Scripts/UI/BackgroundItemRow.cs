@@ -22,9 +22,9 @@ public sealed class BackgroundItemRow : MonoBehaviour
     /// <paramref name="items"/>의 <paramref name="start"/>부터 최대 <see cref="Capacity"/>개를 채우고 실제 채운 수를 반환한다.
     /// 부족한 마지막 칸은 투명한 빈 슬롯으로 메워 열 정렬을 유지한다.
     /// </summary>
-    public int Populate(ShopItemDefinition[] items, int start, BackgroundItemSlot slotPrefab)
+    public int Populate(IReadOnlyList<ShopItemDefinition> items, int start, BackgroundItemSlot slotPrefab)
     {
-        int count = Mathf.Min(_capacity, items.Length - start);
+        int count = Mathf.Min(_capacity, items.Count - start);
         for (int k = 0; k < count; k++)
         {
             var slot = Instantiate(slotPrefab, transform);
