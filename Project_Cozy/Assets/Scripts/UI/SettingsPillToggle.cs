@@ -10,8 +10,9 @@ using UnityEngine.UI;
 /// 켜짐: 배경 보라(#948EEB), 손잡이 오른쪽, 글자 "ON"이 왼쪽.
 /// 꺼짐: 배경 회색(#CFCFCF), 손잡이 왼쪽, 글자 "OFF"가 오른쪽.
 ///
-/// 색과 글자는 즉시 바뀌고 손잡이만 <see cref="_slideDuration"/>에 걸쳐 미끄러진다.
-/// 완성된 그림 두 장을 갈아끼우는 방식과 달리 움직임을 인스펙터에서 조절할 수 있다.
+/// 배경색과 글자 내용은 즉시 바뀌고, 손잡이와 글자 상자는 <see cref="_slideDuration"/>에 걸쳐
+/// 나란히 미끄러진다. 글자는 정렬을 바꾸지 않고 상자째 옮기므로 움직임이 끊기지 않는다.
+/// 글자 상자의 정렬은 프리팹에서 가운데로 두는 것을 전제로 한다.
 ///
 /// 상태는 <see cref="Toggle"/>이 들고 있고 이 컴포넌트는 그리기만 한다.
 /// </summary>
@@ -26,7 +27,11 @@ public sealed class SettingsPillToggle : MonoBehaviour
     [SerializeField] private float _knobOnX = 60.8f;
     [SerializeField] private float _knobOffX = 5.56f;
 
-    [Tooltip("손잡이가 반대편까지 미끄러지는 데 걸리는 시간(초). 0이면 즉시 이동.")]
+    [Tooltip("켜짐/꺼짐일 때 글자 상자의 anchoredPosition.x. 손잡이가 없는 쪽 공간의 한가운데가 기준.")]
+    [SerializeField] private float _labelOnX = -19.6f;
+    [SerializeField] private float _labelOffX = 19.6f;
+
+    [Tooltip("손잡이와 글자가 반대편까지 미끄러지는 데 걸리는 시간(초). 0이면 즉시 이동.")]
     [SerializeField] private float _slideDuration = 0.12f;
 
     [Tooltip("배경 알약의 색. 기본값은 Figma 기준 — 켜짐 #948EEB, 꺼짐 #CFCFCF.")]
@@ -42,7 +47,7 @@ public sealed class SettingsPillToggle : MonoBehaviour
         _toggle.onValueChanged.AddListener(OnToggled);
     }
 
-    // 미끄러지는 중에 숨겨지면 손잡이가 어중간한 자리에 멈춘다. 다시 보일 때 현재 값으로 맞춘다.
+    // 미끄러지는 중에 숨겨지면 어중간한 자리에 멈춘다. 다시 보일 때 현재 값으로 맞춘다.
     private void OnEnable() => Redraw(_toggle.isOn);
 
     private void OnDestroy()
@@ -52,54 +57,58 @@ public sealed class SettingsPillToggle : MonoBehaviour
 
     private void OnToggled(bool on)
     {
-        ApplyColorAndLabel(on);
+        ApplyColorAndText(on);
 
         // 숨어 있는 탭 안에서는 코루틴을 시작할 수 없어 바로 옮긴다.
         if (_slideDuration <= 0f || !isActiveAndEnabled)
         {
-            SetKnobX(TargetX(on));
+            SetKnobX(KnobTargetX(on));
+            SetLabelX(LabelTargetX(on));
             return;
         }
 
         if (_slide != null) StopCoroutine(_slide);
-        _slide = StartCoroutine(SlideKnob(TargetX(on)));
+        _slide = StartCoroutine(Slide(on));
     }
 
-    private IEnumerator SlideKnob(float targetX)
+    private IEnumerator Slide(bool on)
     {
-        float startX = _knob != null ? _knob.anchoredPosition.x : targetX;
+        float knobFrom = _knob != null ? _knob.anchoredPosition.x : 0f;
+        float labelFrom = _label != null ? _label.rectTransform.anchoredPosition.x : 0f;
+        float knobTo = KnobTargetX(on);
+        float labelTo = LabelTargetX(on);
 
         // 게임이 멈춰도 UI는 움직여야 하므로 unscaled 시간을 쓴다.
         for (float t = 0f; t < _slideDuration; t += Time.unscaledDeltaTime)
         {
-            SetKnobX(Mathf.Lerp(startX, targetX, t / _slideDuration));
+            float progress = t / _slideDuration;
+            SetKnobX(Mathf.Lerp(knobFrom, knobTo, progress));
+            SetLabelX(Mathf.Lerp(labelFrom, labelTo, progress));
             yield return null;
         }
 
-        SetKnobX(targetX);
+        SetKnobX(knobTo);
+        SetLabelX(labelTo);
         _slide = null;
     }
 
     /// <summary>애니메이션 없이 현재 값 그대로 그린다.</summary>
     private void Redraw(bool on)
     {
-        ApplyColorAndLabel(on);
-        SetKnobX(TargetX(on));
+        ApplyColorAndText(on);
+        SetKnobX(KnobTargetX(on));
+        SetLabelX(LabelTargetX(on));
     }
 
-    private void ApplyColorAndLabel(bool on)
+    private void ApplyColorAndText(bool on)
     {
         if (_background != null) _background.color = on ? _onBackgroundColor : _offBackgroundColor;
-
-        if (_label != null)
-        {
-            _label.text = on ? "ON" : "OFF";
-            // 손잡이 반대쪽에 글자가 오도록 정렬만 바꾼다 (글자 상자는 알약 전체를 덮는다는 전제).
-            _label.alignment = on ? TextAlignmentOptions.Left : TextAlignmentOptions.Right;
-        }
+        if (_label != null) _label.text = on ? "ON" : "OFF";
     }
 
-    private float TargetX(bool on) => on ? _knobOnX : _knobOffX;
+    private float KnobTargetX(bool on) => on ? _knobOnX : _knobOffX;
+
+    private float LabelTargetX(bool on) => on ? _labelOnX : _labelOffX;
 
     private void SetKnobX(float x)
     {
@@ -107,5 +116,14 @@ public sealed class SettingsPillToggle : MonoBehaviour
         var p = _knob.anchoredPosition;
         p.x = x;
         _knob.anchoredPosition = p;
+    }
+
+    private void SetLabelX(float x)
+    {
+        if (_label == null) return;
+        var rt = _label.rectTransform;
+        var p = rt.anchoredPosition;
+        p.x = x;
+        rt.anchoredPosition = p;
     }
 }
