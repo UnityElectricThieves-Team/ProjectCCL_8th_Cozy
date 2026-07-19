@@ -30,4 +30,5 @@ public static class GameDataPaths
 #endif
     public static string SpawnEnergy => Path.Combine(SaveRoot, "spawnEnergy" + UserDataExtension);
     public static string Hearts => Path.Combine(SaveRoot, "hearts" + UserDataExtension);
+    public static string ShopInventory => Path.Combine(SaveRoot, "shopInventory" + UserDataExtension);
 }

@@ -67,6 +67,11 @@ public sealed class ShopPanelContentController : MonoBehaviour
             bg.ActiveBackgroundChanged += OnActiveBackgroundChanged;
         }
 
+        // 장식 보유 개수 갱신. HeartsChanged로는 부족하다 — TryBuy가 하트를 먼저 차감하므로
+        // 그쪽 갱신은 개수가 올라가기 전에 돌아 옛 개수를 그린다.
+        var shop = ShopSystem.Instance;
+        if (shop != null) shop.OwnedChanged += OnShopOwnedChanged;
+
         SetMode(_mode); // 현재 모드로 (재)구성 + 상태 반영
     }
 
@@ -81,6 +86,9 @@ public sealed class ShopPanelContentController : MonoBehaviour
             bg.OwnedChanged -= OnBackgroundStateChanged;
             bg.ActiveBackgroundChanged -= OnActiveBackgroundChanged;
         }
+
+        var shop = ShopSystem.Instance;
+        if (shop != null) shop.OwnedChanged -= OnShopOwnedChanged;
     }
 
     private void SetMode(ShopMode mode)
@@ -133,7 +141,9 @@ public sealed class ShopPanelContentController : MonoBehaviour
     private void TryPurchase(ShopItemDefinition item)
     {
         if (item == null) return;
-        HeartSystem.Instance?.TrySpend(item.price);
+        // 하트 차감은 ShopSystem이 소유 기록과 함께 처리한다 — 여기서 TrySpend를 직접 부르면
+        // 하트만 빠져나가고 산 물건이 아무 데도 남지 않는다(배경 탭이 BackgroundSystem에 맡기는 것과 같은 구조).
+        ShopSystem.Instance?.TryBuy(item);
         // 성공하면 HeartsChanged가 울려 Refresh로 이어진다. 실패(잔액 부족)면 아무 변화 없음.
     }
 
@@ -144,6 +154,7 @@ public sealed class ShopPanelContentController : MonoBehaviour
     }
 
     private void OnHeartsChanged(int _) => Refresh();
+    private void OnShopOwnedChanged() => Refresh();
     private void OnBackgroundStateChanged() => Refresh();
     private void OnActiveBackgroundChanged(string _) => Refresh();
 
@@ -152,7 +163,7 @@ public sealed class ShopPanelContentController : MonoBehaviour
         int hearts = HeartSystem.Instance != null ? HeartSystem.Instance.CurrentHearts : 0;
         if (_mode == ShopMode.Decoration)
         {
-            foreach (var row in _decorationRows) row.RefreshAffordability(hearts);
+            foreach (var row in _decorationRows) row.Refresh(hearts);
         }
         else
         {

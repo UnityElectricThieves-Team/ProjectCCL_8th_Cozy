@@ -56,10 +56,13 @@ public sealed class ShopItemRow : MonoBehaviour
         return count;
     }
 
-    /// <summary>이 행의 모든 슬롯에 대해 현재 하트로 살 수 있는지 갱신한다.</summary>
-    public void RefreshAffordability(int currentHearts)
+    /// <summary>이 행의 모든 슬롯을 현재 상태(살 수 있는지 + 몇 개 가지고 있는지)에 맞춰 다시 그린다.</summary>
+    public void Refresh(int currentHearts)
     {
         foreach (var slot in _slots)
+        {
             slot.SetAffordable(currentHearts >= slot.Price);
+            slot.RefreshOwned();
+        }
     }
 }
