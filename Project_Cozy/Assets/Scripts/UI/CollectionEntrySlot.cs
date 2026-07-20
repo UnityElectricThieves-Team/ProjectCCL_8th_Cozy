@@ -11,6 +11,10 @@ using UnityEngine.UI;
 /// </summary>
 public sealed class CollectionEntrySlot : MonoBehaviour
 {
+    // 사진을 못 만든 항목을 눈에 띄게 표시하는 색. 스프라이트가 null인 Image는
+    // 단색 사각형으로 그려지므로, 이 색이 곧 "사진 없음" 신호가 된다.
+    private static readonly Color MissingPhotoColor = new Color(0.9f, 0.3f, 0.3f, 0.5f);
+
     [Tooltip("항목 썸네일. 어떤 사진을 넣을지는 컨트롤러가 정한다.")]
     [SerializeField] private Image _thumbnail;
     [SerializeField] private Button _button;
@@ -30,8 +34,10 @@ public sealed class CollectionEntrySlot : MonoBehaviour
 
         if (_thumbnail != null)
         {
+            // 사진이 없어도 칸은 남긴다 — 이미지를 꺼버리면 "사진만 없는 슬롯"과
+            // "슬롯이 아예 안 만들어진 것"이 화면에서 구분되지 않는다.
             _thumbnail.sprite = thumbnail;
-            _thumbnail.enabled = thumbnail != null; // 사진이 없는 항목은 빈 칸으로 둔다
+            _thumbnail.color = thumbnail != null ? Color.white : MissingPhotoColor;
         }
 
         if (_button != null)

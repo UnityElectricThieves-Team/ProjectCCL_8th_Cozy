@@ -54,7 +54,19 @@ public sealed class CollectionPanelContentController : MonoBehaviour
 
     private void BuildSlots(CollectionBoolData data)
     {
-        if (_listContent == null || _slotPrefab == null || data == null) return;
+        // 목록이 비는 경로는 전부 소리를 낸다 — 조용히 return하면 배선 실수인지
+        // 데이터가 없는 것인지 화면만 봐서는 구분할 수 없다.
+        if (_listContent == null || _slotPrefab == null)
+        {
+            Debug.LogWarning($"[{nameof(CollectionPanelContentController)}] _listContent 또는 _slotPrefab이 비어 목록을 만들지 못했습니다.", this);
+            return;
+        }
+
+        if (data == null || data.collectionDataList == null || data.collectionDataList.Count == 0)
+        {
+            Debug.LogWarning($"[{nameof(CollectionPanelContentController)}] 도감 데이터가 비어 있습니다. 경로: {GameDataPaths.CollectionData}", this);
+            return;
+        }
 
         CollectionEntrySlot firstSlot = null;
         foreach (var entry in data.collectionDataList)

@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
 /// 모든 UI 패널의 베이스. 열기/닫기를 <see cref="CanvasGroup"/>으로 비파괴 처리한다.
@@ -10,9 +9,6 @@ using UnityEngine.UI;
 [RequireComponent(typeof(CanvasGroup))]
 public class UIPanel : MonoBehaviour
 {
-    [Tooltip("패널 안의 닫기(X) 버튼. 있으면 누를 때 이 패널을 닫는다. 없으면 비워둬도 됨.")]
-    [SerializeField] private Button _closeButton;
-
     private CanvasGroup _group;
 
     public bool IsOpen => _group != null && _group.alpha > 0f;
@@ -21,10 +17,15 @@ public class UIPanel : MonoBehaviour
     {
         _group = GetComponent<CanvasGroup>();
         ApplyVisible(false); // 기본은 닫힘 상태
-
-        if (_closeButton != null)
-            _closeButton.onClick.AddListener(() => UIManager.Instance?.Close(this));
     }
+
+    /// <summary>
+    /// 닫기(X) 버튼의 On Click에 인스펙터로 거는 진입점. 타깃은 패널 루트 자신이라
+    /// 프리팹 안에서 배선이 완결된다(씬의 UIManager를 프리팹에서 참조할 수 없으므로).
+    /// <see cref="Close"/>를 직접 걸면 UIManager의 열린 패널 목록에서 빠지지 않아
+    /// ESC가 이미 닫힌 패널을 대상으로 헛 눌린다 — 반드시 이 메서드를 건다.
+    /// </summary>
+    public void RequestClose() => UIManager.Instance?.Close(this);
 
     public virtual void Open() => ApplyVisible(true);
     public virtual void Close() => ApplyVisible(false);
