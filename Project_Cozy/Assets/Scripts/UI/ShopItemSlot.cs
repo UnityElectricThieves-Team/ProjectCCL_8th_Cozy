@@ -6,7 +6,8 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 상점 '장식' 슬롯 한 칸의 표시. 상품 아이콘·이름·가격을 채우고, 구매 버튼 클릭을 바깥(컨트롤러)으로 넘긴다.
-/// 실제 하트 차감은 <see cref="ShopPanelContentController"/>가 하고, 이 슬롯은 구매 가능/불가능 시각만 책임진다.
+/// 하트 차감과 소유 기록은 <see cref="ShopSystem"/>가 한 묶음으로 처리하고,
+/// 이 슬롯은 구매 가능/불가능 시각과 보유 개수 표시만 책임진다.
 /// 인스펙터 필드 구성은 <see cref="BackgroundItemSlot"/>과 동일하게 맞춰 두 슬롯을 일관되게 둔다.
 /// 슬롯 프리팹 루트에 붙는다.
 /// </summary>
@@ -58,6 +59,22 @@ public sealed class ShopItemSlot : MonoBehaviour
         if (_buttonLabel != null) _buttonLabel.color = affordable ? AffordableColor : UnaffordableColor;
         if (_buttonImage != null && (_buyableSprite != null || _notBuyableSprite != null))
             _buttonImage.sprite = affordable ? _buyableSprite : _notBuyableSprite;
+    }
+
+    /// <summary>
+    /// 보유 개수를 이름 옆에 붙여 다시 그린다(하나라도 있으면 "쿠션 x1"). 없으면 이름만.
+    /// 1개부터 표시하는 이유는, 처음 산 순간에 화면이 그대로면 구매가 됐는지 알 수 없기 때문이다.
+    /// 장식은 같은 걸 여러 개 살 수 있어서 "보유/미보유"가 아니라 개수를 보여준다.
+    ///
+    /// 개수를 위한 별도 라벨을 두지 않고 이름 텍스트를 재구성하는 이유는, 슬롯 프리팹에
+    /// 새 오브젝트를 추가하지 않고 표시를 붙이기 위해서다. Figma에 개수 자리가 정해지면 그때 옮긴다.
+    /// 항상 <see cref="_item"/>의 원본 이름에서 다시 만든다 — 현재 텍스트에 덧붙이면 갱신할 때마다 "x2 x3"로 쌓인다.
+    /// </summary>
+    public void RefreshOwned()
+    {
+        if (_nameText == null || _item == null) return;
+        int count = ShopSystem.Instance != null ? ShopSystem.Instance.GetCount(_item.id) : 0;
+        _nameText.text = count > 0 ? $"{_item.displayName} x{count}" : _item.displayName;
     }
 
     /// <summary>이 슬롯이 표시 중인 상품 가격(컨트롤러가 구매 가능 여부 계산에 쓴다).</summary>

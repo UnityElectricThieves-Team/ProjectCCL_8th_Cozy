@@ -135,6 +135,9 @@ ehthumbs.db
 # Claude Code 작업물 (팀 합의 후 재검토 — Docs/TODO.md 참조)
 CLAUDE.local.md
 
+# 병렬 작업용 git worktree 체크아웃 — 각자 로컬에서만 만들고 공유하지 않는다.
+.claude/worktrees/
+
 # 로컬 시크릿 (Figma 액세스 토큰 등 개인 키) — 절대 커밋 금지
 .env
 .env.*

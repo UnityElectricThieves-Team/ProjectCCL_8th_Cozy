@@ -29,10 +29,10 @@ public sealed class ShopItemRow : MonoBehaviour
     /// 상품이 <see cref="Capacity"/>보다 적은 마지막 행은 남는 칸을 보이지 않는 빈 슬롯으로 메워
     /// 항상 <see cref="Capacity"/>칸을 유지한다 — 그래야 상품이 왼쪽 열부터 어긋나지 않게 정렬된다.
     /// </summary>
-    public int Populate(ShopItemDefinition[] items, int start,
+    public int Populate(IReadOnlyList<ShopItemDefinition> items, int start,
                         ShopItemSlot slotPrefab, Action<ShopItemDefinition> onBuy)
     {
-        int count = Mathf.Min(_capacity, items.Length - start);
+        int count = Mathf.Min(_capacity, items.Count - start);
         for (int k = 0; k < count; k++)
         {
             var slot = Instantiate(slotPrefab, transform);
@@ -56,10 +56,13 @@ public sealed class ShopItemRow : MonoBehaviour
         return count;
     }
 
-    /// <summary>이 행의 모든 슬롯에 대해 현재 하트로 살 수 있는지 갱신한다.</summary>
-    public void RefreshAffordability(int currentHearts)
+    /// <summary>이 행의 모든 슬롯을 현재 상태(살 수 있는지 + 몇 개 가지고 있는지)에 맞춰 다시 그린다.</summary>
+    public void Refresh(int currentHearts)
     {
         foreach (var slot in _slots)
+        {
             slot.SetAffordable(currentHearts >= slot.Price);
+            slot.RefreshOwned();
+        }
     }
 }
