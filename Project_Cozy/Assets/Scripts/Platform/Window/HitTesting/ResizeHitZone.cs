@@ -1,7 +1,7 @@
 /// <summary>
 /// 마우스가 창의 어느 영역에 위치하는지 나타내는 enum (리사이즈 핫존 전용).
 /// HitTestCalculator가 좌표 → ResizeHitZone 판정을 수행하고,
-/// WindowResizeHandler는 이 값을 Win32의 NCHITTEST 반환값(HT*)으로 변환해 OS에 돌려준다.
+/// WindowManager는 이 값을 Win32의 NCHITTEST 반환값(HT*)으로 변환해 OS에 돌려준다.
 /// </summary>
 public enum ResizeHitZone
 {

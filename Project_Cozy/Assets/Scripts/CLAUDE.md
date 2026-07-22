@@ -8,21 +8,22 @@
 |---|---|---|
 | `Platform/` | OS 의존 인프라 — borderless·Always-on-Top 창, 비포커스 키보드 훅, Win32 / DwmApi 호출. 게임 로직을 모른다. | (없음) — 자세한 컨벤션은 [Platform/CLAUDE.md](Platform/CLAUDE.md) |
 | `Interaction/` | 마우스 입력 라우팅 + 인터랙터블 인터페이스 계약. 게임 객체가 `IHoverable` / `IClickable` / `IShiftRightClickable`을 구현하면 매니저가 자동 라우팅. | (없음) — 자세한 컨벤션은 [Interaction/CLAUDE.md](Interaction/CLAUDE.md) |
-| `PerformanceSetting/` | 프레임 레이트·윈도우 종횡비 등 런타임 *정책*. Win32 일부 직접 호출. | (없음) — 자세한 컨벤션은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) |
+| `PerformanceSetting/` | 프레임 레이트·뷰포트 등 런타임 *정책*. OS 조작은 `Platform/`에 위임. | `Platform/` — 자세한 컨벤션은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) |
 | `Animation/` | 스프라이트 애니메이션 등 순수 표현 컴포넌트. 게임 로직·OS를 모른다. | (없음) |
 | `Character/` | 캐릭터 단일 개체의 자율 거동·친밀도·시각. `BaseCharacterController` 단일 컴포넌트 + nested module(`StateModule`/`VisualModule`/`AffinityModule`). | `Interaction/`, `Animation/`, `Platform/Input/` — 자세한 컨벤션은 [Character/CLAUDE.md](Character/CLAUDE.md) |
 | `Gameplay/` | 게임 로직. `Platform/`의 인프라를 *소비*한다 (별 클릭 · 변신 등은 채워지는 중). | `Platform/`, `Animation/`, `Interaction/` |
-| `UI/` | HUD·메뉴 표시. TextMeshPro 사용. | 하위 레이어 자유 참조 (`Gameplay/`·`Character/`·`Interaction/`·`Platform/` 등) — UI는 최상위 표현층이라 하위를 향한 참조에 제한을 두지 않는다. 설정 UI가 창 정책(`Platform/`의 `OverlayWindowController` 등)을 직접 제어하는 교차가 잦기 때문. 단 §3의 일방 의존 원칙(하위가 UI를 참조하는 역방향)은 여전히 금지. |
+| `UI/` | HUD·메뉴 표시. TextMeshPro 사용. | 하위 레이어 자유 참조 (`Gameplay/`·`Character/`·`Interaction/`·`PerformanceSetting/`·`Platform/` 등). 하위 계층이 UI를 참조하는 역방향은 금지. |
 
 > 새 시스템(변신, 다중 모니터, 클릭 투과 등)이 구현되면 이 표에 위치를 같이 적는다.
 
 ## 현재 들어 있는 것
 
 ### Platform/
-- `Platform/Window/BorderlessWindow.cs` — Always-on-Top + borderless + 투명 배경(Awake 1회 적용, HWND 노출).
-- `Platform/Window/WindowResizeHandler.cs` — 마우스 드래그 리사이즈(WndProc 서브클래싱).
-- `Platform/Window/HitTestCalculator.cs` — 마우스 좌표 → `ResizeHitZone` 판정(순수 C#, EditMode 테스트 가능).
-- `Platform/Window/ResizeHitZone.cs` — `ResizeHitZone` enum + Win32 NCHITTEST 코드 매핑.
+- `Platform/Window/Core/WindowManager.cs` — HWND, DWM 투명화, 클릭 통과, 창 이동·리사이즈의 단일 진입점.
+- `Platform/Window/Input/WindowsCursorToUnityScreen.cs` — OS 커서를 Unity 화면 좌표로 변환.
+- `Platform/Window/HitTesting/HitTestCalculator.cs` — 마우스 좌표 → `ResizeHitZone` 판정(순수 C#, EditMode 테스트 가능).
+- `Platform/Window/HitTesting/ResizeHitZone.cs` — 이동 Caption + 8방향 리사이즈 판정값과 NCHITTEST 매핑.
+- `Platform/Window/Core/BorderlessWindow.cs` — 구 프로토타입. 현행 스택과 함께 사용하지 않으며 제거 대기.
 - `Platform/Input/GlobalKeyInput.cs` — 포커스 무관 전역 키 입력 소스. 두 OS 경로(WH_KEYBOARD_LL + InputSystem.onAnyButtonPress)를 단일 이벤트 `KeyPressed(Key)`로 추상화.
 - `Platform/Input/OutFocusKeyHook.cs` — OutFocus 키 입력만 **static 이벤트** `KeyPressed(Key)`로 방송. 소비자는 인스턴스 참조 없이 `OutFocusKeyHook.KeyPressed +=`로 구독. 씬당 1개(OS-wide hook)라 중복 부착만 Awake에서 방지.
 - `Platform/Input/OutFocusMouseHook.cs` — OutFocus 마우스 down 3종을 **static 이벤트** `ButtonPressed(MouseButton)`로 방송. 구독 방식·단일 인스턴스 원칙은 위와 동일.
@@ -39,7 +40,11 @@
 
 ### PerformanceSetting/
 - `PerformanceSetting/PerformanceSettings.cs` — VSync OFF + foreground/background `targetFrameRate` 전환.
-- `PerformanceSetting/WindowAspectFitter.cs` — Win32로 윈도우 크기·종횡비·하단 도킹 강제.
+- `PerformanceSetting/Viewport/ViewportScreenSettings.cs` — 평시·편집 뷰포트 상태와 적용 정책.
+- `PerformanceSetting/Viewport/BaseSpaceCameraFitter.cs` — 베이스 픽셀 영역의 카메라 프레이밍.
+- `PerformanceSetting/Viewport/ViewportEditHandles.cs` — 편집 모드 뷰포트 핸들.
+- `PerformanceSetting/Viewport/WindowMoveResizeGuide.cs` — 평시 창 이동·리사이즈 시각 안내.
+- `PerformanceSetting/CameraFitter.cs`, `WindowAspectFitter.cs` — 씬 마이그레이션 전까지 유지하는 구 구현.
 
 ### Animation/
 - `Animation/SpriteAnimator.cs` — 프레임 배열을 fps마다 순환. `IsPlaying` / `Play` / `Stop` / `Toggle`. **캐릭터 외 사용처 전용** (별·달 등). 새 `BaseCharacterController` 시스템엔 사용 금지.
@@ -59,6 +64,8 @@
 - `Character/States/{Idle, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, SpecialIdle, SpecialWalk}State.cs` — 11개 State 클래스. `Run`/`Special*`은 `Walk`/`Idle` 상속.
 
 ### Gameplay/
+- `Gameplay/Viewport/IViewportExitListener.cs` — 뷰포트 이탈 캐릭터의 자체 처리 계약.
+- `Gameplay/Viewport/ViewportResidencyEnforcer.cs` — 확정 뷰포트 밖 캐릭터 회수.
 - `Gameplay/SpawnPointManager.cs` — 스폰 포인트의 '스폰 기운'을 관리. 입력 4채널을 `CurrentEnergy`(소비형)+`CumulativeEnergy`(누적)로 쌓고 스폰 시 차감. (저장 연결은 아직 미구현.)
 - `Gameplay/SpawnPointFileFormat.cs` — 스폰 기운의 저장 데이터 컨테이너(`CurrentEnergy`+`CumulativeEnergy`). `HeartFileFormat`과 같은 패턴.
 - `Gameplay/AnimatorKeyToggle.cs` — 지정 키 누르면 `SpriteAnimator` 재생/정지 토글.

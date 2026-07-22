@@ -31,7 +31,7 @@ public class CameraFitter : MonoBehaviour
         StartCoroutine(FitAfterReady());
     }
 
-    // OverlayWindow/WindowResizeHandler가 초기 창 배치를 잡는 데 몇 프레임 걸리므로,
+    // OS 창의 초기 배치가 안정되는 데 몇 프레임 걸리므로,
     // 그보다 살짝 늦게 측정해야 Screen 크기·종횡비가 안정화된 상태에서 Fit된다.
     private IEnumerator FitAfterReady()
     {
@@ -83,7 +83,7 @@ public class CameraFitter : MonoBehaviour
         pos.y = _minY + _camera.orthographicSize;
         transform.position = pos;
 
-        // 가로 aspect를 현재 화면 종횡비로 설정해 픽셀이 정사각을 유지한다. WindowResizeHandler.Resized
+        // 가로 aspect를 현재 화면 종횡비로 설정해 픽셀이 정사각을 유지한다.
         // 구독 시 리사이즈마다 Fit()이 재호출되어 위 스케일·종횡비가 다시 맞춰진다.
         _camera.aspect = (float)Screen.width / Screen.height;
     }

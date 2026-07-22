@@ -2,6 +2,8 @@
 
 2026-06-14
 
+> **역사 문서 주의:** 이 문서의 §5 “ColorKey 채택” 결론은 2026-06-14 당시 결정이며 현재는 폐기됐다. 현행 구현은 DWM 알파 합성 + `WindowManager`의 hover-aware 클릭 통과다. 현재 구조와 비교는 [WindowServiceArchitecture.html](WindowServiceArchitecture.html)을 기준으로 본다.
+
 데스크톱 펫 윈도우는 화면을 점유하면서도, 게임 오브젝트(캐릭터·별 등) 위가 아닐 때의 클릭은 뒤의 프로그램으로 통과시켜야 한다. 이 "클릭 통과(click-through)"를 두 개발자가 서로 다른 방식으로 구현했다. 본 문서는 두 구현의 동작·비용·트레이드오프를 사실 기반으로 정리한다.
 
 **채택:** develop 통합 과정에서 윈도우 레이어를 koko 구현(`OverlayWindow` 스택)으로 일원화했고, 클릭 통과도 **koko의 ColorKey 방식(아래 방식 A)** 을 채택한다. (§5)

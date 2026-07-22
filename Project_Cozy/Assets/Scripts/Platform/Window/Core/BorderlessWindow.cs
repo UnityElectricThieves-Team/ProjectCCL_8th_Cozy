@@ -6,7 +6,7 @@ using UnityEngine;
 /// Always-on-Top + 투명 배경 borderless 창 설정.
 /// 빌드 전용 (#if !UNITY_EDITOR) — Editor에서 실행하면 Unity Editor 창 자체가 망가진다.
 ///
-/// 다른 컴포넌트(WindowResizeHandler 등)가 HWND를 필요로 하므로 Hwnd 프로퍼티로 노출한다.
+/// 다른 창 컴포넌트가 HWND를 필요로 하는 초기 실험을 위해 Hwnd 프로퍼티로 노출한다.
 /// 적용 시점을 Awake로 둬서, Start에서 등록되는 다른 Window 관련 컴포넌트보다 먼저 스타일이 잡히도록 한다.
 /// </summary>
 public class BorderlessWindow : MonoBehaviour
