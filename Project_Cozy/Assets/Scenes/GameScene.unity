@@ -683,8 +683,8 @@ MonoBehaviour:
   _alwaysOnTop: 1
   _hoverAwareClickThrough: 1
   _borderless: 1
-  _maximizeToWorkArea: 0
-  _resizable: 1
+  _maximizeToWorkArea: 1
+  _resizable: 0
   _minSize: {x: 200, y: 200}
   _maxSize: {x: 1920, y: 1080}
   _edgeThicknessPx: 6
@@ -1095,7 +1095,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2568727742563759575, guid: 0e1cbf919906db945b54734d2607b77f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 157.80612
+      value: 157.80579
       objectReference: {fileID: 0}
     - target: {fileID: 2580507884901385582, guid: 0e1cbf919906db945b54734d2607b77f, type: 3}
       propertyPath: m_Size
@@ -2423,7 +2423,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8719988749074779421, guid: 89cc1fa6070c34e40b45d702aeafab44, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 157.80612
+      value: 157.80579
       objectReference: {fileID: 0}
     - target: {fileID: 8748706181986467236, guid: 89cc1fa6070c34e40b45d702aeafab44, type: 3}
       propertyPath: m_Size
