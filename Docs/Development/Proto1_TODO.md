@@ -19,9 +19,11 @@
 
 ## 창 / 렌더링
 
-- [x] 투명 배경 + Borderless 창 *(OverlayWindow: WS_POPUP + LAYERED + ColorKey)*
+> ⚠️ 아래 괄호 안의 구현 근거는 PR #13 이전 기준입니다. `OverlayWindow`와 ColorKey 방식은 사라지고 `WindowManager` + DWM 알파 합성으로 대체됐습니다. 달성 여부(체크 표시)는 그대로 유효합니다.
+
+- [x] 투명 배경 + Borderless 창 *(현행: `WindowManager` — WS_EX_LAYERED + DwmExtendFrameIntoClientArea. 카메라 클리어 알파 0 필요)*
 - [x] Always-on-Top (앞단에 계속 유지가 되는지) *(HWND_TOPMOST + WM_EXITSIZEMOVE 보정)*
-- [x] 클릭 투과 — 투명 영역 투과, 스프라이트 영역만 클릭 판정 *(LWA_COLORKEY per-pixel)*
+- [x] 클릭 투과 — 투명 영역 투과, 스프라이트 영역만 클릭 판정 *(현행: 매 프레임 커서 폴링 → 콜라이더/UGUI 판정 → 창 단위 WS_EX_TRANSPARENT 토글)*
 - [x] 클릭/키보드 입력 시 카운트 누적 (별 시스템 연동) *(SpawnPointManager)*
 
 ---

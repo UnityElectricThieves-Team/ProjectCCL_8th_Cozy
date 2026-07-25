@@ -3,6 +3,8 @@
 > 작성: develop-kk / 상태: **초안(토의용)** / 최종 검토 전 3회 적대 검수 완료.
 > 이 문서는 **현서와 크로스체크**할 항목(특히 §7 CanvasScaler)을 포함합니다. 확정 아니고, 같이 다듬는 출발점입니다.
 
+> ⚠️ **창 스택 서술은 낡았습니다 (PR #13 이후).** 이 문서가 전제하는 `OverlayWindow` / `OverlayWindowController` / `WindowResizeHandler` / `RegionEditChrome` / `OverlayModeDemoButtons`는 모두 삭제되고 `WindowManager` 하나로 통합됐습니다. 특히 **창 이동·리사이즈 핫존 수치를 이 문서 기준으로 구현하면 안 됩니다** — 현행 캡션 존은 상단 중앙 220×28이고, 가장자리 6px·모서리 12px는 `WindowManager` 인스펙터에서 확인하세요. UI 레이아웃·CanvasScaler 논의는 여전히 유효합니다. 현행 창 구조는 [WindowServiceHandover.md](WindowServiceHandover.md) 참조.
+
 Figma: `CCL_8th_Cozy_Companion` (Inventory / Shop / Collection / Picture / Option 프레임 참고).
 
 ---
@@ -35,8 +37,8 @@ Figma: `CCL_8th_Cozy_Companion` (Inventory / Shop / Collection / Picture / Optio
 | **Canvas가 2개** | ① `UIRoot` — Overlay, CanvasScaler = **Constant Pixel Size / 800×600**(= Unity 기본값 그대로), `UIManager`가 여기 붙음. ② `CharacterScaleSetters` — 테스트용(`CharacterScaleClicker`), **Scale With Screen Size / 1920×1020 / Match=Width**, SortingOrder **100** |
 | **CameraFitter** | 씬에 **있음**. 리사이즈마다 카메라를 다시 맞춤(refit). → UI가 신경 써야 할 실재 컴포넌트 |
 | **WindowAspectFitter** | 씬에 **없음**. 즉 32:3 가로 띠 강제는 이 씬엔 적용 안 됨 |
-| 창 스택 | `OverlayWindow` + `OverlayWindowController` + `WindowResizeHandler` + `WindowDebugOverlay` + `OverlayModeDemoButtons` + `WindowsCursorToUnityScreen` |
-| 기본 창 크기 | 거의 전체화면 (`OverlayWindow.SetFullscreen`: 화면폭 × (화면높이-90)). EditRegion에서 리사이즈 가능(최소 200×200) |
+| 창 스택 | ~~`OverlayWindow` + `OverlayWindowController` + `WindowResizeHandler` + `WindowDebugOverlay` + `OverlayModeDemoButtons`~~ + `WindowsCursorToUnityScreen` — **현행은 `WindowManager` 단일 컴포넌트**(취소선 항목 전부 삭제됨) |
+| 기본 창 크기 | ~~거의 전체화면 (`OverlayWindow.SetFullscreen`: 화면폭 × (화면높이-90)). EditRegion에서 리사이즈 가능(최소 200×200)~~ — **현행은 `WindowManager`의 `Maximize To Work Area` / `Resizable` 토글로 결정**. 최소 200×200은 그대로 |
 | UI 입력 모듈 | `InputSystemUIInputModule` 존재 (New Input System용, 올바름) |
 | 아직 씬에 없는 것 | `UIPanel` / `SettingsPanel` / `Phase0InputProbe` (전부 새 파일, 미배치) |
 
@@ -162,19 +164,28 @@ public class MenuButtonBar : MonoBehaviour
 
 ### 6-2. 창 모드 3종과 UI 클릭 가능성
 
+> ⚠️ **아래 3종 모드(`eWindowMode`)는 사라졌습니다.** 현행 `WindowManager`에는 모드 개념이 없고, 인스펙터 토글(`hoverAwareClickThrough` 등)로 동작이 정해집니다. 투명 방식도 ColorKey에서 DWM 알파 합성으로 바뀌었습니다. 표는 당시 기록으로 남겨둡니다.
+
 | 모드 | 창 상태 | UI 클릭? | 이번 설계 대응 |
 |---|---|---|---|
 | **Normal** | 투명 + ColorKey. 캐릭터·UI 불투명 픽셀은 클릭됨, 빈 곳은 통과 | **O** | 정상 동작 |
 | **PassThrough(잠금)** | 창 전체 클릭 통과(WS_EX_TRANSPARENT) | **X** (UI도 통과됨) | 이 슬라이스에서 **제외** (§6-A) |
 | **EditRegion** | 불투명 + 가장자리 리사이즈 핫존 | O | 바를 가장자리서 **24px+ 안쪽**에 (§6-B) |
 
+현행에서 UI 클릭이 잡히는 방식도 달라졌다. 예전에는 OS가 픽셀 색으로 판정했지만, 지금은 `WindowManager`가 매 프레임 `EventSystem.RaycastAll`로 커서 아래 UI를 확인해 클릭 통과를 끈다. 그래서 UI가 클릭되려면 **레이캐스트에 걸려야** 한다 — `CanvasGroup.blocksRaycasts`가 꺼진 패널은 보이더라도 클릭이 바탕화면으로 통과한다.
+
 ### 6-A. 잠금(PassThrough)을 이번에 빼는 이유 — 선행 조건 부재
 잠금에 들어가면 창 전체가 클릭 통과가 된다. 그러면 잠금을 푸는 유일한 인앱 경로인 잠금 버튼조차 **눌리지 않는다.** 그런데 현재 코드에는 **잠금을 풀어주는 전역 핫키 구독이 아예 없다**(`ToggleMode`를 부르는 건 설정의 잠금 버튼과 데모뿐). 즉 지금 잠금을 켜면 **앱 강제종료 말고는 빠져나올 방법이 없다.**
 
 → 이번 슬라이스에서는 `SettingsPanel`의 `_lockButton` 배선을 **코드에서 제거**한다(인스펙터에서 실수로 연결해 밟는 사고를 원천 차단). 잠금은 나중에 **전역 핫키 잠금해제(`GlobalKeyInput`/`OutFocusKeyHook` → `ToggleMode`)를 Platform/Gameplay에 먼저 만든 뒤** 재도입한다. (별도 작업 항목)
 
-### 6-B. EditRegion과 버튼 바의 겹침
-EditRegion에선 창 가장자리가 리사이즈 핫존이다(변 6px, 모서리 12px). OS가 이 영역 클릭을 uGUI보다 **먼저** 가로채므로, 버튼이 모서리에 딱 붙으면 그 버튼은 죽는다. → **바를 가장자리에서 24px 이상 안쪽**에 두면 충돌이 없다. (EditRegion 종료는 `RegionEditChrome`의 중앙 "완료" 버튼으로 가능하니, 바를 굳이 EditRegion에서 숨길 필요는 없다.)
+### 6-B. 리사이즈 핫존과 버튼 바의 겹침
+
+> ⚠️ 이 절은 `EditRegion` 모드를 전제로 쓰였는데, 그 모드는 사라졌습니다. 아래는 현행 구조로 다시 쓴 것입니다.
+
+창 가장자리가 리사이즈 핫존이다(변 6px, 모서리 12px). OS가 이 영역 클릭을 uGUI보다 **먼저** 가로채므로, 버튼이 모서리에 딱 붙으면 그 버튼은 죽는다. → **바를 가장자리에서 24px 이상 안쪽**에 두면 충돌이 없다. 이 결론은 그대로 유효하다.
+
+달라진 점은 적용 시점이다. 예전에는 EditRegion 모드에서만 핫존이 살아 있었지만, 현행 `WindowManager`는 `Resizable`이 켜져 있으면 **평시에도 항상** 가장자리가 핫존이다. 그리고 **상단 중앙 220×28 캡션 존**이 새로 생겼다 — 여기를 클릭하면 창 이동으로 흡수되므로, 그 자리에 버튼이나 캐릭터가 오면 클릭이 죽는다(`WindowServiceHandover.md` §6 보류 3번과 같은 문제).
 
 ### 6-C. ColorKey 검정 구멍
 per-pixel 투과는 순수 검정 (0,0,0) 픽셀을 투명 + 통과로 처리한다. → **UI 아트에 순수 검정을 쓰지 말 것**(짙은 회색으로 회피). 배경 이미지·아이콘 모두 해당.

@@ -16,7 +16,7 @@
 - 빈 곳 클릭은 뒤 앱으로 통과, 캐릭터/UI 위 클릭은 잡힌다 (hover-aware 클릭 통과)
 - 평시엔 창 = 뷰포트 rect만 존재 (뷰포트 밖은 렌더링·합성 비용 0)
 - 편집 모드에서 뷰포트를 핸들 드래그로 조정, 평시엔 상단 그립으로 창 이동
-- 뷰포트 밖으로 밀려난 캐릭터는 회수 (창이 없는 영역 = 렌더링·클릭 불가 영역)
+- 뷰포트 밖으로 밀려난 캐릭터를 어떻게 다룰지 (창이 없는 영역 = 렌더링·클릭 불가 영역) — **처리 방식 미확정, 미구현**
 
 ## 2. 확정된 설계 결정과 이유 (뒤집기 전에 반드시 읽을 것)
 
@@ -30,7 +30,9 @@
 | **평시 창=뷰포트 / 편집 시 창=모니터 전체** | BitBlt 복사·DWM 합성 비용 절감의 핵심. 편집은 일시 상태라 전체 화면 비용 허용 |
 | **창 이동/리사이즈는 OS에 위임 (NCHITTEST)** | WndProc 서브클래싱으로 `HTCAPTION`(상단 중앙 그립)/`HTLEFT` 등만 응답 — 커서, 드래그 추적, ESC 취소를 OS가 공짜로 처리 |
 | **창 드래그 후 역동기화** | 사용자가 창을 직접 옮기면 `WM_EXITSIZEMOVE` → 창 rect를 새 뷰포트로 수용(카메라 재프레이밍 + 영속화). 없으면 다음 적용 때 원위치로 튕김 |
-| **뷰포트 밖 캐릭터는 신호 + 기본 회수** | 신호만 보내고 방치하면 영영 접근 불가. `IViewportExitListener`가 자체 처리(true 반환)하지 않으면 안쪽으로 클램프 텔레포트 |
+
+> ⚠️ **뷰포트 밖 캐릭터 회수는 확정 결정이 아니다 — 아래 표에서 제외했다.** 신호만 보내고 방치하면 영영 접근 불가라는 문제 인식은 유효하지만, "강제로 위치를 바꾸는 것이 게임 디자인상 적절한가"가 미결이라 `ViewportResidencyEnforcer` 코드에 `TODO`로 남아 있다. §6 보류 항목 참조.
+
 
 ## 3. 컴포넌트 구조 (신 스택)
 
@@ -58,15 +60,22 @@ PerformanceSetting/Viewport/ViewportEditHandles.cs     ← 편집 모드 핸들 
 PerformanceSetting/Viewport/WindowMoveResizeGuide.cs   ← 평시 창 이동·리사이즈 시각 안내 (IMGUI 상시)
     ※ 실제 창 조작은 WindowManager/OS가 담당하며 이 컴포넌트는 안내만 담당
 
-Gameplay/Viewport/ViewportResidencyEnforcer.cs         ← ViewportApplied 구독 → 밖 캐릭터 신호/회수
-Gameplay/Viewport/IViewportExitListener.cs             ← 캐릭터 측 자체 연출 훅 (bool 반환 = 자체 처리 여부)
-Gameplay/CharacterManager.cs                  ← Alive 목록 노출 (회수 순회용)
+Gameplay/Viewport/ViewportResidencyEnforcer.cs         ← ⚠️ 골격만. ViewportApplied는 구독하지만
+    OnViewportApplied 본문과 Recall()이 전부 주석 처리돼 실제로는 아무 일도 하지 않는다.
+    막힌 지점: CharacterManager에 살아있는 캐릭터를 순회할 공개 API가 없다
+    (현재 `AliveCount`(int)와 private 리스트뿐 — `Alive` 프로퍼티는 존재하지 않는다).
+Gameplay/Viewport/IViewportExitListener.cs             ← 캐릭터 측 자체 연출 훅 (bool 반환 = 자체 처리 여부).
+    계약만 정의됨 — 호출하는 코드가 없어 아직 구현체를 붙일 의미가 없다.
 
 Examples/WindowFeatureTestPanel.cs            ← 테스트 하니스. 우하단 버튼 패널 런타임 생성
     EnsureCompanion으로 편집 핸들/평시 안내/회수기를 자동 장착 + Bind() 참조 주입
 ```
 
-**구 스택 정리 상태**: `OverlayWindow*`, `WindowResizeHandler`, `RegionEditChrome` 코드는 제거됐다. `GameScene`과 `TestHyeonScene`의 직렬화 참조는 Unity Editor에서 GameObject를 제거해야 한다. `Core/BorderlessWindow`와 `ClickThroughProbe`는 별도 프로토타입 정리 대상으로 남아 있다.
+**구 스택 정리 상태**: `OverlayWindow*`, `WindowResizeHandler`, `RegionEditChrome` 코드는 제거됐다.
+
+- `GameScene` — 정리 완료. 죽은 컴포넌트 5개와 `DevTools_OverlayMode` 오브젝트를 제거하고 `WindowManager`를 부착했으며, DWM 알파 합성이 되도록 카메라 알파를 0으로, HDR·MSAA를 OFF로 맞췄다. 뷰포트 편집 스택(`ViewportScreenSettings` 등)은 아직 넣지 않았다 — `CameraFitter` → `BaseSpaceCameraFitter` 교체가 좌표 기준을 바꾸는 작업이라 분리했다.
+- `TestHyeonScene` — 옛 컴포넌트가 비활성(`m_IsActive: 0`) 상태로 남아 있어 씬을 열면 Missing Script 경고가 뜬다. Unity Editor에서 제거해야 한다.
+- `Core/BorderlessWindow`, `Input/ClickThroughProbe` — 별도 프로토타입 정리 대상으로 남아 있다.
 
 ## 4. 시간축 실행 흐름 (요약)
 
@@ -74,7 +83,7 @@ Examples/WindowFeatureTestPanel.cs            ← 테스트 하니스. 우하단
 2. **+10프레임** — `ViewportScreenSettings.Start`: 모니터 읽기 → `ApplyNormal()` (창=뷰포트 배치 + 카메라 프레이밍 + `ViewportApplied` 발행). `_ready=true` 이전의 `EnterEdit`는 경고 로그 + 거부됨
 3. **매 프레임** — 폴링: `GetCursorPos` → 좌표 변환 → `Physics2D.OverlapPoint` → (미적중 시) UGUI `RaycastAll` → 리사이즈/캡션 핫존 → 캐시와 다를 때만 `SetWindowLong`
 4. **수시 (OS 스레드 가능)** — WndProc: 캡션/가장자리 히트 응답, 드래그 종료 시 volatile 플래그 → 메인 스레드가 `WindowRectChangedByUser`로 변환
-5. **편집 왕복** — EnterEdit(suspend 먼저 → 풀스크린) ↔ Save/Cancel(→ `ApplyNormal` → 회수 실행)
+5. **편집 왕복** — EnterEdit(suspend 먼저 → 풀스크린) ↔ Save/Cancel(→ `ApplyNormal` → `ViewportApplied` 발행). 이 이벤트를 받아 밖의 캐릭터를 처리하는 부분은 아직 비어 있다
 
 상세 다이어그램은 문서 상단 로컬 HTML 참조.
 
@@ -85,7 +94,7 @@ Examples/WindowFeatureTestPanel.cs            ← 테스트 하니스. 우하단
 2. **캡션 이동 핫존 연결** — `HitTestCalculator`/`ResizeHitZone`에 이미 있던 Caption/HTCAPTION을 WindowManager에 배선 (`_captionHeightPx=28`, `_captionWidthPx=220`)
 3. **창 드래그 역동기화** — `WM_EXITSIZEMOVE` → `WindowRectChangedByUser` → 뷰포트 수용
 4. **편집 핸들 드래그** (`ViewportEditHandles`) + **평시 창 조작 안내** (`WindowMoveResizeGuide`)
-5. **캐릭터 회수 체계** (`ViewportApplied` + `IViewportExitListener` + `ViewportResidencyEnforcer`)
+5. **캐릭터 회수 체계의 골격만** (`ViewportApplied` 이벤트 + `IViewportExitListener` 계약 + `ViewportResidencyEnforcer` 껍데기) — 동작하는 회수는 없다
 6. **테스트 하니스** (`WindowFeatureTestPanel`) — 스폰/편집/프리셋 버튼 + 컴패니언 자동 장착
 
 ### 5.2 "핸들이 안 보인다" 버그의 원인 (재발 방지용 기록)
@@ -93,9 +102,9 @@ Examples/WindowFeatureTestPanel.cs            ← 테스트 하니스. 우하단
 2. **[구조] 기본 뷰포트=화면 전체**: 바깥 딤 4조각이 전부 면적 0, 테두리는 모니터 최외곽 3px — 수학적으로 아무것도 안 보임
 3. **[빌드 한정] DWM 목적지 알파**: IMGUI는 straight-alpha라 알파 0 배경 위에서 목적지 알파를 못 채워 딤이 의도(0.45)보다 훨씬 옅게(≈0.2) 합성됨. **Editor에서 재현 안 되고 빌드에서만 나타남**
 
-## 6. 5인 리뷰 토론 결론 (합의/기각/보류)
+## 6. 검토 결론 (채택/기각/보류)
 
-렌더링·입력/좌표·수명주기/배선·Win32/스레딩·UX/성능 관점의 5개 에이전트 리뷰 + 교차 반박 라운드 결과.
+렌더링, 입력·좌표, 수명주기·배선, Win32·스레딩, UX·성능 다섯 관점으로 나눠 검토한 결과.
 
 ### 채택 (모두 반영 완료)
 - 편집 중 **카메라 클리어 알파 0.45 전환/복원** (`ViewportEditHandles._editBackdropAlpha`) — 전역 딤 신호 + DWM 목적지 알파 확보 겸용. 이탈/파괴 시 복원 보장
@@ -121,7 +130,8 @@ Examples/WindowFeatureTestPanel.cs            ← 테스트 하니스. 우하단
 5. `WM_GETMINMAXINFO`의 `_maxSize`(1920×1080)가 4K 모니터에서 평시 리사이즈를 제한 — 모니터 rect로 갱신
 6. Editor에서 게임뷰 < 720×480이면 `ClampToBaseSpace`가 min>max로 깨진 rect 생성 — `MinViewportSize`를 베이스 공간과 먼저 min 연산
 7. EnterEdit 직후 1~2프레임 `Screen.width/height`가 옛 창 크기 (첫 프레임 히트테스트 빗나감 가능) — 1프레임 지연 활성화 검토
-8. 캐릭터 "걸어서 복귀" 연출 — `IViewportExitListener` 구현체를 상태 머신(WalkState 계열)에 연결
+8. **뷰포트 밖 캐릭터를 어떻게 다룰지 결정** — 코드는 `ViewportResidencyEnforcer`에 껍데기만 있고 본문이 주석 처리돼 있다. 두 가지가 막혀 있다. (a) 강제로 위치를 옮기는 것이 게임 디자인상 적절한지 미결, (b) `CharacterManager`에 살아있는 캐릭터를 순회할 공개 API가 없음(`AliveCount`만 있고 목록은 private). 방향이 정해지면 (b)를 먼저 열어야 한다
+9. 캐릭터 "걸어서 복귀" 연출 — 위 8번이 정해진 뒤 `IViewportExitListener` 구현체를 상태 머신(WalkState 계열)에 연결
 
 ## 7. 작업 시 반드시 지킬 것
 
@@ -138,5 +148,6 @@ Examples/WindowFeatureTestPanel.cs            ← 테스트 하니스. 우하단
 1. 실행 → 캐릭터 위 클릭(잡힘) / 빈 곳 클릭(뒤로 통과) / 테스트 패널 버튼 클릭(잡힘)
 2. 상단 중앙 주황 그립 드래그 → 창 이동 → 카메라가 새 위치의 베이스 공간을 비추는지 (캐릭터가 창을 따라오지 않고 제자리에 있어야 정상 — 창은 "뷰파인더")
 3. 창 가장자리 드래그 → 리사이즈 → 뷰포트 역동기화 확인
-4. [편집 시작] → 화면 전체가 반투명 딤 + 주황 테두리/핸들 → 핸들 드래그로 축소 → 캐릭터가 밖에 남게 [저장] → 캐릭터 회수 확인
+4. [편집 시작] → 화면 전체가 반투명 딤 + 주황 테두리/핸들 → 핸들 드래그로 축소 → [저장] → 창이 새 뷰포트 크기로 줄어드는지 확인
+   (뷰포트 밖에 남은 캐릭터는 아직 처리되지 않는다 — 회수 미구현이므로 접근 불가 상태로 남는 것이 현재의 정상 동작이다)
 5. [취소] 경로, 멀티모니터 드래그, 앱 종료 시 크래시 없음 확인

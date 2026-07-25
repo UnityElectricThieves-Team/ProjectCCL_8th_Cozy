@@ -144,6 +144,8 @@
   <p class="lead">이 문서는 <strong>현서와 크로스체크</strong>할 항목(특히 §7 CanvasScaler)을 포함합니다. 확정이 아니라, 같이 다듬는 출발점입니다.<br>
   Figma: <code>CCL_8th_Cozy_Companion</code> (Inventory / Shop / Collection / Picture / Option 프레임 참고).</p>
 
+  <p class="lead"><strong>⚠ 창 스택 서술은 낡았습니다 (PR #13 이후).</strong> 이 문서가 전제하는 <code>OverlayWindow</code> / <code>OverlayWindowController</code> / <code>WindowResizeHandler</code> / <code>RegionEditChrome</code> / <code>OverlayModeDemoButtons</code>는 모두 삭제되고 <code>WindowManager</code> 하나로 통합됐고, 투명 방식도 ColorKey에서 DWM 알파 합성으로 바뀌었습니다. 특히 <strong>창 이동·리사이즈 핫존 수치를 이 문서 기준으로 구현하면 안 됩니다</strong> — 현행 캡션 존은 상단 중앙 220×28입니다. UI 레이아웃·CanvasScaler 논의는 여전히 유효합니다. 현행 창 구조는 <code>WindowServiceHandover.md</code> 참조.</p>
+
   <!-- ===================== 1 ===================== -->
   <h2 id="s1"><span class="num">1.</span>목적과 범위</h2>
 
@@ -178,8 +180,8 @@
         ② <code>CharacterScaleSetters</code> — 테스트용(<code>CharacterScaleClicker</code>), <strong>Scale With Screen Size / 1920×1020 / Match=Width</strong>, SortingOrder <strong>100</strong></td></tr>
       <tr><td><strong>CameraFitter</strong></td><td>씬에 <span class="status-yes">있음</span>. 리사이즈마다 카메라를 다시 맞춤(refit). → UI가 신경 써야 할 실재 컴포넌트</td></tr>
       <tr><td><strong>WindowAspectFitter</strong></td><td>씬에 <span class="status-no">없음</span>. 즉 32:3 가로 띠 강제는 이 씬엔 적용 안 됨</td></tr>
-      <tr><td>창 스택</td><td><code>OverlayWindow</code> + <code>OverlayWindowController</code> + <code>WindowResizeHandler</code> + <code>WindowDebugOverlay</code> + <code>OverlayModeDemoButtons</code> + <code>WindowsCursorToUnityScreen</code></td></tr>
-      <tr><td>기본 창 크기</td><td>거의 전체화면 (<code>OverlayWindow.SetFullscreen</code>: 화면폭 × (화면높이-90)). EditRegion에서 리사이즈 가능(최소 200×200)</td></tr>
+      <tr><td>창 스택</td><td><del><code>OverlayWindow</code> + <code>OverlayWindowController</code> + <code>WindowResizeHandler</code> + <code>WindowDebugOverlay</code> + <code>OverlayModeDemoButtons</code></del> + <code>WindowsCursorToUnityScreen</code> — <strong>현행은 <code>WindowManager</code> 단일 컴포넌트</strong>(취소선 항목 전부 삭제됨)</td></tr>
+      <tr><td>기본 창 크기</td><td><del>거의 전체화면 (<code>OverlayWindow.SetFullscreen</code>: 화면폭 × (화면높이-90)). EditRegion에서 리사이즈 가능(최소 200×200)</del> — <strong>현행은 <code>WindowManager</code>의 <code>Maximize To Work Area</code> / <code>Resizable</code> 토글로 결정</strong>. 최소 200×200은 그대로</td></tr>
       <tr><td>UI 입력 모듈</td><td><code>InputSystemUIInputModule</code> 존재 (New Input System용, 올바름)</td></tr>
       <tr><td>아직 씬에 없는 것</td><td><code>UIPanel</code> / <code>SettingsPanel</code> / <code>Phase0InputProbe</code> (전부 새 파일, 미배치)</td></tr>
     </tbody>
@@ -316,6 +318,7 @@ Canvas [Screen Space - Overlay]  = UIRoot        ← 이미 있음
   </div>
 
   <h3>6-2. 창 모드 3종과 UI 클릭 가능성</h3>
+  <p><strong>⚠ 아래 3종 모드(<code>eWindowMode</code>)는 사라졌습니다.</strong> 현행 <code>WindowManager</code>에는 모드 개념이 없고, 인스펙터 토글(<code>hoverAwareClickThrough</code> 등)로 동작이 정해집니다. 표는 당시 기록으로 남겨둡니다.</p>
   <div class="tablewrap"><table>
     <thead><tr><th>모드</th><th>창 상태</th><th>UI 클릭?</th><th>이번 설계 대응</th></tr></thead>
     <tbody>
@@ -324,6 +327,7 @@ Canvas [Screen Space - Overlay]  = UIRoot        ← 이미 있음
       <tr><td><strong>EditRegion</strong></td><td>불투명 + 가장자리 리사이즈 핫존</td><td><span class="status-yes">O</span></td><td>바를 가장자리서 <strong>24px+ 안쪽</strong>에 (§6-B)</td></tr>
     </tbody>
   </table></div>
+  <p>현행에서 UI 클릭이 잡히는 방식도 달라졌다. 예전에는 OS가 픽셀 색으로 판정했지만, 지금은 <code>WindowManager</code>가 매 프레임 <code>EventSystem.RaycastAll</code>로 커서 아래 UI를 확인해 클릭 통과를 끈다. 그래서 UI가 클릭되려면 <strong>레이캐스트에 걸려야</strong> 한다 — <code>CanvasGroup.blocksRaycasts</code>가 꺼진 패널은 보이더라도 클릭이 바탕화면으로 통과한다.</p>
 
   <div class="callout c-warn">
     <span class="tag">⚠ 6-A. 잠금(PassThrough)을 이번에 빼는 이유 — 선행 조건 부재</span>
@@ -331,8 +335,10 @@ Canvas [Screen Space - Overlay]  = UIRoot        ← 이미 있음
     <p>→ 이번 슬라이스에서는 <code>SettingsPanel</code>의 <code>_lockButton</code> 배선을 <strong>코드에서 제거</strong>한다(인스펙터에서 실수로 연결해 밟는 사고를 원천 차단). 잠금은 나중에 <strong>전역 핫키 잠금해제(<code>GlobalKeyInput</code>/<code>OutFocusKeyHook</code> → <code>ToggleMode</code>)를 Platform/Gameplay에 먼저 만든 뒤</strong> 재도입한다. (별도 작업 항목)</p>
   </div>
 
-  <h3>6-B. EditRegion과 버튼 바의 겹침</h3>
-  <p>EditRegion에선 창 가장자리가 리사이즈 핫존이다(변 6px, 모서리 12px). OS가 이 영역 클릭을 uGUI보다 <strong>먼저</strong> 가로채므로, 버튼이 모서리에 딱 붙으면 그 버튼은 죽는다. → <strong>바를 가장자리에서 24px 이상 안쪽</strong>에 두면 충돌이 없다. (EditRegion 종료는 <code>RegionEditChrome</code>의 중앙 "완료" 버튼으로 가능하니, 바를 굳이 EditRegion에서 숨길 필요는 없다.)</p>
+  <h3>6-B. 리사이즈 핫존과 버튼 바의 겹침</h3>
+  <p><strong>⚠ 이 절은 <code>EditRegion</code> 모드를 전제로 쓰였는데, 그 모드는 사라졌습니다.</strong> 아래는 현행 구조로 다시 쓴 것입니다.</p>
+  <p>창 가장자리가 리사이즈 핫존이다(변 6px, 모서리 12px). OS가 이 영역 클릭을 uGUI보다 <strong>먼저</strong> 가로채므로, 버튼이 모서리에 딱 붙으면 그 버튼은 죽는다. → <strong>바를 가장자리에서 24px 이상 안쪽</strong>에 두면 충돌이 없다. 이 결론은 그대로 유효하다.</p>
+  <p>달라진 점은 적용 시점이다. 예전에는 EditRegion 모드에서만 핫존이 살아 있었지만, 현행 <code>WindowManager</code>는 <code>Resizable</code>이 켜져 있으면 <strong>평시에도 항상</strong> 가장자리가 핫존이다. 그리고 <strong>상단 중앙 220×28 캡션 존</strong>이 새로 생겼다 — 여기를 클릭하면 창 이동으로 흡수되므로, 그 자리에 버튼이나 캐릭터가 오면 클릭이 죽는다.</p>
 
   <div class="callout c-warn">
     <span class="tag">⚠ 6-C. ColorKey 검정 구멍</span>

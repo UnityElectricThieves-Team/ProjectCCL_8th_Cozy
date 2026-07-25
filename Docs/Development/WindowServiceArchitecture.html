@@ -354,7 +354,7 @@
       <div class="grid-3">
         <article class="card"><h3>평시</h3><p>Windows 창 크기와 확정 뷰포트 크기가 같다. 창 밖은 렌더링도 DWM 합성도 하지 않는다.</p></article>
         <article class="card"><h3>편집 중</h3><p>배치할 데스크톱 전체를 보도록 현재 모니터 전체로 잠시 확장한다.</p></article>
-        <article class="card"><h3>저장·취소</h3><p>확정 뷰포트로 다시 축소하고 카메라를 재프레이밍하며, 밖의 캐릭터를 회수한다.</p></article>
+        <article class="card"><h3>저장·취소</h3><p>확정 뷰포트로 다시 축소하고 카메라를 재프레이밍한 뒤 <code>ViewportApplied</code>를 발행한다. 뷰포트 밖에 남은 캐릭터를 어떻게 다룰지는 아직 정해지지 않았고, 이 이벤트를 받는 구현도 비어 있다.</p></article>
       </div>
     </section>
 
@@ -388,7 +388,7 @@
         <div class="step"><div><strong>ViewportScreenSettings.Start</strong><span>모니터 크기 확인 → 초기 뷰포트 적용 → 카메라 프레이밍</span></div></div>
         <div class="step"><div><strong>평시 Update</strong><span>커서 아래 Collider·UGUI·이동/리사이즈 핫존을 판정해 클릭 통과 상태 유지</span></div></div>
         <div class="step"><div><strong>편집 진입</strong><span>클릭 통과와 OS 리사이즈 정지 → 모니터 전체 확장 → 딤과 편집 핸들 표시</span></div></div>
-        <div class="step"><div><strong>저장 또는 취소</strong><span>확정 뷰포트로 창 축소 → 카메라 재프레이밍 → 밖의 캐릭터 회수</span></div></div>
+        <div class="step"><div><strong>저장 또는 취소</strong><span>확정 뷰포트로 창 축소 → 카메라 재프레이밍 → <code>ViewportApplied</code> 발행 (밖의 캐릭터 처리는 미구현)</span></div></div>
       </div>
     </section>
 
@@ -404,7 +404,7 @@
 
     <footer class="footer">
       기준 문서: WindowServiceHandover.md · 현재 코드 기준 2026-07-21<br>
-      이 파일은 외부 CDN과 Claude 아티팩트에 의존하지 않는 독립형 HTML이다.
+      이 파일은 외부 CDN에 의존하지 않는 단독 HTML이라 브라우저로 바로 열 수 있다.
     </footer>
   </main>
 </body>
