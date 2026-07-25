@@ -9,8 +9,8 @@ using UnityEngine;
 /// 평소에는 반투명으로 표시하고, 커서가 이동 핸들 위에 있으면 진하게 표시한다.
 /// 편집 모드 중에는 그리지 않는다.
 ///
-/// 핸들 크기는 WindowManager의 핫존 값과 동일하게 맞춰야
-/// "보이는 곳 = 잡히는 곳"이 된다.
+/// 핸들 크기는 WindowManager에서 직접 읽는다 — 값을 복제해 두면 한쪽만 바뀔 때
+/// "보이는 곳 ≠ 잡히는 곳"이 되기 때문이다.
 /// </summary>
 [DisallowMultipleComponent]
 public class WindowMoveResizeGuide : MonoBehaviour
@@ -18,10 +18,8 @@ public class WindowMoveResizeGuide : MonoBehaviour
     [SerializeField, Tooltip("편집 중 숨김 판정용. 비우면 자동 탐색 (없으면 항상 표시).")]
     private ViewportScreenSettings _viewportSettings;
 
-    [Header("핫존 미러 (WindowManager와 일치)")]
-    [SerializeField] private int _captionHeightPx = 28;
-    [SerializeField] private int _captionWidthPx = 220;
-    [SerializeField] private int _edgeThicknessPx = 6;
+    [SerializeField, Tooltip("핫존 수치의 원천. 비우면 자동 탐색. 없으면 안내할 핫존이 없어 비활성화된다.")]
+    private WindowManager _windowManager;
 
     [Header("시각")]
     [SerializeField, Tooltip("ViewportEditHandles와 동일한 주황색을 사용한다.")]
@@ -40,19 +38,31 @@ public class WindowMoveResizeGuide : MonoBehaviour
     {
         if (_viewportSettings == null)
             _viewportSettings = FindFirstObjectByType<ViewportScreenSettings>();
+        if (_windowManager == null) _windowManager = FindFirstObjectByType<WindowManager>();
+
+        if (_windowManager == null)
+        {
+            // 핫존을 만드는 주체가 없으면 안내할 것도 없다 — 없는 조작을 있는 것처럼 그리지 않는다.
+            Debug.LogWarning("[WindowMoveResizeGuide] WindowManager 없음 — 비활성.");
+            enabled = false;
+        }
     }
 
     private void OnGUI()
     {
+        if (_windowManager == null) return; // 런타임 파괴 대비
         if (_viewportSettings != null && _viewportSettings.IsEditing) return;
         EnsureAssets();
 
+        int captionWidthPx = _windowManager.CaptionWidthPx;
+        int captionHeightPx = _windowManager.CaptionHeightPx;
+
         float width = Screen.width;
         Rect grip = new Rect(
-            (width - _captionWidthPx) / 2f,
+            (width - captionWidthPx) / 2f,
             0f,
-            _captionWidthPx,
-            _captionHeightPx);
+            captionWidthPx,
+            captionHeightPx);
 
         bool hover = grip.Contains(Event.current.mousePosition);
         float alpha = hover ? _hoverAlpha : _idleAlpha;
@@ -67,7 +77,7 @@ public class WindowMoveResizeGuide : MonoBehaviour
     private void DrawResizeEdges(float width, float height)
     {
         Color edgeColor = new Color(_accent.r, _accent.g, _accent.b, _idleAlpha * 0.6f);
-        float thickness = Mathf.Max(1f, _edgeThicknessPx * 0.5f);
+        float thickness = Mathf.Max(1f, _windowManager.EdgeThicknessPx * 0.5f);
 
         DrawRect(new Rect(0, 0, width, thickness), edgeColor);
         DrawRect(new Rect(0, height - thickness, width, thickness), edgeColor);

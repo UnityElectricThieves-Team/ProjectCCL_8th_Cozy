@@ -53,6 +53,19 @@ public class WindowManager : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool _debugLogs;
 
+    // ===== 핫존 수치 공개 (시각 안내용) =====
+    // 안내 UI(WindowMoveResizeGuide)가 같은 값을 따로 들고 있으면 한쪽만 바뀔 때
+    // "보이는 곳 ≠ 잡히는 곳"이 되므로, 핫존의 주인이 값을 읽기 전용으로 노출한다.
+
+    /// <summary>가장자리 리사이즈 핫존 두께(px).</summary>
+    public int EdgeThicknessPx => _edgeThicknessPx;
+
+    /// <summary>상단 중앙 이동 핸들 두께(px). 0이면 이동 핸들 없음.</summary>
+    public int CaptionHeightPx => _captionHeightPx;
+
+    /// <summary>상단 중앙 이동 핸들 폭(px). 0 이하면 상단 전체 폭.</summary>
+    public int CaptionWidthPx => _captionWidthPx;
+
     // ===== Win32 상수 =====
     const int  GWL_STYLE          = -16;
     const int  GWL_EXSTYLE        = -20;
