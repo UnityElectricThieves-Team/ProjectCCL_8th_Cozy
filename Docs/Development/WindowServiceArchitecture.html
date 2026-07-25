@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Cozy · WindowService 구조와 크로마키 비교</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0d12;
+      --panel: #141821;
+      --panel-2: #1a202b;
+      --line: #303949;
+      --text: #eef2f8;
+      --muted: #aab5c6;
+      --orange: #ff941a;
+      --orange-soft: rgba(255, 148, 26, 0.14);
+      --blue: #63a8ff;
+      --blue-soft: rgba(99, 168, 255, 0.14);
+      --green: #6ee7a8;
+      --red: #ff7d83;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(99, 168, 255, 0.12), transparent 28rem),
+        radial-gradient(circle at 92% 10%, rgba(255, 148, 26, 0.10), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+      font-family: "Noto Sans KR", "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+
+    a { color: var(--blue); }
+    code { color: #ffd293; font-family: Consolas, monospace; }
+
+    .page {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 48px 0 96px;
+    }
+
+    .hero {
+      padding: 42px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(26, 32, 43, 0.97), rgba(15, 18, 25, 0.97));
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--orange);
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin: 0; font-size: clamp(2rem, 5vw, 4rem); }
+    h2 { margin: 64px 0 22px; font-size: clamp(1.6rem, 3vw, 2.35rem); }
+    h3 { margin: 0 0 10px; font-size: 1.12rem; }
+
+    .lede {
+      max-width: 860px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .verdict {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 16px;
+      align-items: center;
+      margin-top: 28px;
+      padding: 18px 20px;
+      border: 1px solid rgba(110, 231, 168, 0.36);
+      border-radius: 14px;
+      background: rgba(110, 231, 168, 0.08);
+    }
+
+    .verdict strong { color: var(--green); }
+    .badge {
+      display: inline-flex;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #07110c;
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+
+    .grid-2, .grid-3 {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .card {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(20, 24, 33, 0.92);
+    }
+
+    .card.old { border-top: 3px solid var(--red); }
+    .card.current { border-top: 3px solid var(--orange); }
+    .card p { margin: 0; color: var(--muted); }
+
+    .mini-flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .node {
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .arrow { color: var(--muted); font-weight: 900; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      min-width: 780px;
+      border-collapse: collapse;
+      background: rgba(20, 24, 33, 0.92);
+    }
+
+    th, td {
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { color: var(--text); background: #1a202b; }
+    th:nth-child(2) { color: var(--red); }
+    th:nth-child(3) { color: var(--orange); }
+    td:first-child { width: 18%; color: var(--text); font-weight: 750; }
+    td { color: var(--muted); }
+    tr:last-child td { border-bottom: 0; }
+
+    .diagram {
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(14, 17, 24, 0.94);
+    }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: repeat(7, auto);
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flow-box {
+      min-width: 118px;
+      padding: 14px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-2);
+      text-align: center;
+      font-size: 0.88rem;
+      font-weight: 750;
+    }
+
+    .flow-box.os { border-color: rgba(99, 168, 255, 0.55); background: var(--blue-soft); }
+    .flow-box.unity { border-color: rgba(255, 148, 26, 0.55); background: var(--orange-soft); }
+    .flow-arrow { color: var(--muted); font-size: 1.25rem; text-align: center; }
+
+    .tree {
+      margin: 0;
+      padding: 22px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #0e1118;
+      color: #dce5f2;
+      font: 0.92rem/1.7 Consolas, monospace;
+      white-space: pre;
+    }
+
+    .callout {
+      margin-top: 18px;
+      padding: 18px 20px;
+      border-left: 4px solid var(--orange);
+      border-radius: 0 12px 12px 0;
+      background: var(--orange-soft);
+      color: #f7dec0;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+      counter-reset: step;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--orange);
+      color: #1a0d00;
+      font-weight: 900;
+    }
+
+    .step strong { display: block; margin-bottom: 3px; }
+    .step span { color: var(--muted); }
+
+    .footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 860px) {
+      .page { width: min(100% - 24px, 1180px); padding-top: 20px; }
+      .hero { padding: 26px; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .flow-row { grid-template-columns: 1fr; }
+      .flow-arrow { transform: rotate(90deg); }
+      .verdict { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">Project Cozy · WindowService</p>
+      <h1>크로마키에서<br>DWM 알파 창으로</h1>
+      <p class="lede">
+        과거 방식은 특정 색을 투명하게 지우는 <strong>ColorKey</strong>였다.
+        현재 방식은 Unity가 만든 알파 값을 DWM이 합성하고, 상호작용 가능 여부는
+        콜라이더와 UI를 기준으로 직접 판단한다.
+      </p>
+      <div class="verdict">
+        <span class="badge">현재 채택</span>
+        <div><strong>DWM 알파 합성 + hover-aware 클릭 통과 + 창 크기=뷰포트</strong><br>
+          검정 콘텐츠와 반투명 UI를 보존하면서 합성 비용은 실제 창 면적으로 제어한다.</div>
+      </div>
+    </header>
+
+    <section>
+      <h2>한눈에 보는 핵심 차이</h2>
+      <div class="grid-2">
+        <article class="card old">
+          <h3>이전 · ColorKey 크로마키</h3>
+          <p>“검정이면 투명”처럼 특정 RGB 색을 제거한다. OS가 렌더 결과의 색을 보고 픽셀 단위로 클릭을 통과시킨다.</p>
+          <div class="mini-flow">
+            <span class="node">렌더 픽셀 색</span><span class="arrow">→</span>
+            <span class="node">ColorKey 비교</span><span class="arrow">→</span>
+            <span class="node">픽셀별 통과</span>
+          </div>
+        </article>
+        <article class="card current">
+          <h3>현재 · DWM 알파 합성</h3>
+          <p>RGB와 알파를 함께 합성한다. 클릭은 매 프레임 콜라이더·UGUI·창 핫존을 검사해 창 전체 통과 비트를 토글한다.</p>
+          <div class="mini-flow">
+            <span class="node">OS 커서</span><span class="arrow">→</span>
+            <span class="node">Unity Hit Test</span><span class="arrow">→</span>
+            <span class="node">창 통과 토글</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>기술 비교</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>항목</th><th>이전 ColorKey</th><th>현재 DWM 알파</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>투명 기준</td><td>지정된 RGB 색과 같은가</td><td>렌더 타깃의 알파 값이 얼마인가</td></tr>
+            <tr><td>검정 콘텐츠</td><td>순검정 글자·그림에도 구멍이 생김</td><td>검정 RGB라도 알파가 있으면 정상 표시</td></tr>
+            <tr><td>반투명 UI</td><td>색 일치 여부만 보므로 자연스러운 반투명 표현이 어려움</td><td>0~1 알파 농도를 그대로 합성 가능</td></tr>
+            <tr><td>클릭 표면</td><td>실제 비키색 렌더 픽셀</td><td>Physics2D 콜라이더 + UGUI 레이캐스트 + 창 핫존</td></tr>
+            <tr><td>클릭 통과 단위</td><td>픽셀 단위</td><td><code>WS_EX_TRANSPARENT</code> 창 전체 단위</td></tr>
+            <tr><td>프레임 작업</td><td>앱 측 폴링 없음</td><td>커서 위치에서 점 질의 1회, 상태 변화 시에만 Win32 호출</td></tr>
+            <tr><td>아트 제약</td><td>키 색을 콘텐츠에 사용할 수 없음</td><td>색 제약 없음, 대신 콜라이더 관리 필요</td></tr>
+            <tr><td>창 면적</td><td>주로 큰 투명 오버레이 유지</td><td>평시 창 자체를 뷰포트 Rect로 축소</td></tr>
+            <tr><td>편집 모드</td><td>불투명 EditRegion 모드로 전환</td><td>모니터 전체 창 + 알파 0.45 딤 + 뷰포트 핸들</td></tr>
+            <tr><td>주요 클래스</td><td>삭제된 <code>OverlayWindow</code> 계열</td><td><code>WindowManager</code> + <code>ViewportScreenSettings</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>현재 클릭 통과 흐름</h2>
+      <div class="diagram">
+        <div class="flow-row">
+          <div class="flow-box os">GetCursorPos<br>OS 전역 커서</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box unity">창 기준<br>Unity 좌표</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box unity">Collider<br>UGUI<br>Hit Zone</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box os">WS_EX_TRANSPARENT<br>상태 변화 때만 토글</div>
+        </div>
+      </div>
+      <div class="callout">
+        <strong>왜 OS 커서를 읽는가?</strong><br>
+        클릭 통과가 켜지면 Unity Input System의 포인터 위치가 멈출 수 있다.
+        그래서 통과 상태와 무관한 <code>GetCursorPos</code>를 사용해야 다시 캐릭터 위로 들어온 순간을 감지할 수 있다.
+      </div>
+    </section>
+
+    <section>
+      <h2>왜 창을 뷰포트만큼 줄이는가</h2>
+      <div class="grid-3">
+        <article class="card"><h3>평시</h3><p>Windows 창 크기와 확정 뷰포트 크기가 같다. 창 밖은 렌더링도 DWM 합성도 하지 않는다.</p></article>
+        <article class="card"><h3>편집 중</h3><p>배치할 데스크톱 전체를 보도록 현재 모니터 전체로 잠시 확장한다.</p></article>
+        <article class="card"><h3>저장·취소</h3><p>확정 뷰포트로 다시 축소하고 카메라를 재프레이밍하며, 밖의 캐릭터를 회수한다.</p></article>
+      </div>
+    </section>
+
+    <section>
+      <h2>현재 코드 구조</h2>
+      <pre class="tree">Scripts/
+├─ Platform/Window/
+│  ├─ Core/WindowManager.cs
+│  ├─ Input/WindowsCursorToUnityScreen.cs
+│  └─ HitTesting/
+│     ├─ HitTestCalculator.cs
+│     └─ ResizeHitZone.cs
+│
+├─ PerformanceSetting/Viewport/
+│  ├─ ViewportScreenSettings.cs
+│  ├─ BaseSpaceCameraFitter.cs
+│  ├─ ViewportEditHandles.cs
+│  └─ WindowMoveResizeGuide.cs
+│
+├─ Gameplay/Viewport/
+│  ├─ IViewportExitListener.cs
+│  └─ ViewportResidencyEnforcer.cs
+│
+└─ Examples/WindowFeatureTestPanel.cs</pre>
+    </section>
+
+    <section>
+      <h2>실행 순서</h2>
+      <div class="timeline">
+        <div class="step"><div><strong>WindowManager.Awake</strong><span>HWND 획득 → borderless → DWM 알파 → topmost → WndProc 설치</span></div></div>
+        <div class="step"><div><strong>ViewportScreenSettings.Start</strong><span>모니터 크기 확인 → 초기 뷰포트 적용 → 카메라 프레이밍</span></div></div>
+        <div class="step"><div><strong>평시 Update</strong><span>커서 아래 Collider·UGUI·이동/리사이즈 핫존을 판정해 클릭 통과 상태 유지</span></div></div>
+        <div class="step"><div><strong>편집 진입</strong><span>클릭 통과와 OS 리사이즈 정지 → 모니터 전체 확장 → 딤과 편집 핸들 표시</span></div></div>
+        <div class="step"><div><strong>저장 또는 취소</strong><span>확정 뷰포트로 창 축소 → 카메라 재프레이밍 → 밖의 캐릭터 회수</span></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>현재 남은 주의점</h2>
+      <div class="grid-2">
+        <article class="card"><h3>BitBlt 유지</h3><p><code>useFlipModelSwapchain: 0</code>이 현재 Unity 알파 창 경로의 전제다.</p></article>
+        <article class="card"><h3>카메라 클리어</h3><p>RGB는 검정, 알파는 0. HDR과 MSAA는 알파를 손상할 수 있어 꺼둔다.</p></article>
+        <article class="card"><h3>빌드에서 검증</h3><p>DWM 합성 결과는 Editor와 다르므로 시각·입력 튜닝은 Windows 빌드에서 확인한다.</p></article>
+        <article class="card"><h3>남은 프로토타입</h3><p><code>BorderlessWindow</code>와 <code>ClickThroughProbe</code>는 별도 정리 대상으로 남아 있다.</p></article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      기준 문서: WindowServiceHandover.md · 현재 코드 기준 2026-07-21<br>
+      이 파일은 외부 CDN과 Claude 아티팩트에 의존하지 않는 독립형 HTML이다.
+    </footer>
+  </main>
+</body>
+</html>

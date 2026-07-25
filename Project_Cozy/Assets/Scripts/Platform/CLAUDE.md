@@ -12,12 +12,14 @@ Always-on-Top, borderless + resize, 클릭 투과, 비포커스 키/마우스 �
 ## 하위 폴더
 
 ### Window/
-borderless 창의 외형 / 거동 관리.
+Windows 창의 외형, 입력 통과, 이동·리사이즈를 관리한다.
 
-- `BorderlessWindow.cs` — Always-on-Top + borderless + 투명 배경 (Awake 1회 적용, HWND 노출)
-- `WindowResizeHandler.cs` — 마우스 드래그 리사이즈 (WndProc 서브클래싱, `BorderlessWindow`에 의존)
-- `HitTestCalculator.cs` — 마우스 좌표 → `ResizeHitZone` 판정 (순수 C#, EditMode 테스트 가능)
-- `ResizeHitZone.cs` — `ResizeHitZone` enum + Win32 NCHITTEST 코드 매핑
+- `Core/WindowManager.cs` — HWND와 WndProc의 단일 소유자. DWM 투명화, Topmost, 클릭 통과, 영역 적용을 담당
+- `Input/WindowsCursorToUnityScreen.cs` — 클릭 통과 중에도 OS 커서를 Unity 화면 좌표로 제공
+- `HitTesting/HitTestCalculator.cs` — 마우스 좌표 → `ResizeHitZone` 판정 (순수 C#, EditMode 테스트 가능)
+- `HitTesting/ResizeHitZone.cs` — Caption 이동 + 8방향 리사이즈 판정값과 Win32 NCHITTEST 매핑
+- `Registry/`와 `Editor/` — 선택적 서비스 등록 데이터와 편집 도구. 현행 핵심 부팅 경로에서는 미사용
+- `Core/BorderlessWindow.cs`, `Input/ClickThroughProbe.cs` — 구 프로토타입, 제거 대기
 
 ### Input/
 포커스 상태와 무관한 입력 수집.

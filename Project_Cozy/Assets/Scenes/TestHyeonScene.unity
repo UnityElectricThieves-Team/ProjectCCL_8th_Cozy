@@ -129,6 +129,9 @@ GameObject:
   m_Component:
   - component: {fileID: 18784580}
   - component: {fileID: 18784579}
+  - component: {fileID: 18784581}
+  - component: {fileID: 18784582}
+  - component: {fileID: 18784583}
   m_Layer: 0
   m_Name: WindowService
   m_TagString: Untagged
@@ -156,13 +159,76 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 18784578}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 5.41217, y: 0.92231, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &18784581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 18784578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8e7758d5e36e244ba1247b13582dba3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WindowManager
+  _alwaysOnTop: 1
+  _hoverAwareClickThrough: 1
+  _borderless: 1
+  _maximizeToWorkArea: 0
+  _resizable: 0
+  _minSize: {x: 200, y: 200}
+  _maxSize: {x: 1920, y: 1080}
+  _edgeThicknessPx: 6
+  _cornerSizePx: 12
+  _captionHeightPx: 28
+  _captionWidthPx: 220
+  _pollingCamera: {fileID: 788830926}
+  _debugLogs: 1
+--- !u!114 &18784582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 18784578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12dac6e450f95394facc5a7447f26e25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ViewportScreenSettings
+  _windowManager: {fileID: 18784581}
+  _cameraFitter: {fileID: 788830929}
+  _viewport:
+    x: 0
+    y: 0
+    width: 0
+    height: 0
+--- !u!114 &18784583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 18784578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 868470e68cc223d4898a829a7923a176, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NormalWindowSetting
+  _viewportSettings: {fileID: 18784582}
+  _captionHeightPx: 28
+  _captionWidthPx: 220
+  _edgeThicknessPx: 6
+  _accent: {r: 0.4, g: 0.8, b: 1, a: 1}
+  _idleAlpha: 0.28
+  _hoverAlpha: 0.85
 --- !u!1 &319457221
 GameObject:
   m_ObjectHideFlags: 0
@@ -183,7 +249,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &319457222
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -314,7 +380,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -348,8 +414,8 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 1
-  m_AllowMSAA: 1
+  m_HDR: 0
+  m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
@@ -423,12 +489,60 @@ MonoBehaviour:
   m_GameObject: {fileID: 788830924}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ea7ce15e9c4fa045b6d0050c74dcfc0, type: 3}
+  m_Script: {fileID: 11500000, guid: f52e93755c0f1ba4492f891900fbcd11, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraFitter
-  _minY: 0
-  _maxY: 100
-  _referenceHeight: 1080
+  m_EditorClassIdentifier: Assembly-CSharp::BaseSpaceCameraFitter
+  _pixelsPerUnit: 100
+  _masterCanvasBottomRight: {x: 0, y: 0}
+--- !u!1 &827694959
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 827694961}
+  - component: {fileID: 827694960}
+  m_Layer: 0
+  m_Name: WindowFeatureTestPanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &827694960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827694959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a04211043b131a64a95546d7d5641ca4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WindowFeatureTestPanel
+  _viewportSettings: {fileID: 18784582}
+  _characterPrefab: {fileID: 3665602860445646210, guid: 69430a0d4ef602d49a10c594e04ea968, type: 3}
+  _spawnAnchor: {fileID: 0}
+  _spawnSpread: 1.5
+  _previewStepPx: 120
+--- !u!4 &827694961
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827694959}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 5.41217, y: 0.92231, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &872194209
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,7 +606,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1065563797
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -529,4 +643,5 @@ SceneRoots:
   - {fileID: 319457225}
   - {fileID: 872194211}
   - {fileID: 1065563798}
+  - {fileID: 827694961}
   - {fileID: 18784580}
