@@ -126,11 +126,19 @@ public class ViewportScreenSettings : MonoBehaviour
 
     // ===== 외부 API =====
 
-    /// <summary>확정 뷰포트를 직접 설정(로드 경로). 베이스 공간 밖 값은 클램프. 편집 중엔 무시.</summary>
+    /// <summary>확정 뷰포트를 직접 설정(로드 경로). 베이스 공간 밖 값은 클램프.
+    /// 편집 중이면 확정 값만 갱신하고 화면 적용은 편집을 벗어날 때까지 미룬다.</summary>
     public void SetViewport(RectInt viewport)
     {
-        if (_isEditing || !_ready) { _viewport = viewport; return; } // ready 전엔 Start가 클램프·적용
+        // ready 전엔 베이스 공간 크기를 아직 모르므로 클램프할 수 없다 — Start가 클램프·적용을 맡는다.
+        if (!_ready) { _viewport = viewport; return; }
+
         _viewport = ClampToBaseSpace(viewport);
+
+        // 편집 중에는 진행 중인 프리뷰를 건드리지 않는다. 저장/취소로 빠져나올 때
+        // ExitEdit → ApplyNormal이 이 확정 값을 화면에 반영한다.
+        if (_isEditing) return;
+
         ApplyNormal();
     }
 
