@@ -177,7 +177,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  - {fileID: -1117185328460090246, guid: 3497559a781b07b48b4fa332579ba053, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -223,8 +223,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Star
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3497559a781b07b48b4fa332579ba053, type: 2}
+  m_sharedMaterial: {fileID: -1117185328460090246, guid: 3497559a781b07b48b4fa332579ba053, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -308,7 +308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edd7327874aba9f429260bad149095f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DebugCounterLabel
-  _counter: {fileID: 6259409690066820168}
+  _spawnPoint: {fileID: 6259409690066820168}
   _label: {fileID: 5915856496749809437}
   _star: {fileID: 7167739134718551443}
 --- !u!1 &8430567564375317691
@@ -398,7 +398,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StarController
   _animator: {fileID: 2463182645505033677}
-  _counter: {fileID: 6259409690066820168}
+  _spawnPoint: {fileID: 6259409690066820168}
   _threshold: 100
   _characterPrefab: {fileID: 2249430935833052887, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
   _spawnParent: {fileID: 0}
@@ -416,8 +416,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3f2a1b04d8e5f6a9b0c1d2e3f4a5b6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputCounter
-  _outFocusKey: {fileID: 0}
-  _outFocusMouse: {fileID: 0}
 --- !u!114 &3214033234658873489
 MonoBehaviour:
   m_ObjectHideFlags: 0
