@@ -2,7 +2,7 @@
 
 2026-05-24
 
-Project Cozy의 핵심 컨셉인 *투명 배경 + 클릭 투과*를 [WindowManager](../../Project_Cozy/Assets/Scripts/Platform/Window/WindowManager.cs)에 통합하는 작업을 진행하면서, *원리적으로는 표준 패턴인데도 Unity 6 / URP 17 환경에서 단순히는 작동하지 않는* 다층 함정을 만났다. 이 글은 그 시행착오와 최종적으로 작동에 도달한 정확한 설정 조합을 기록한다. 클릭 투과의 입력 처리 자체는 [260523 — WS_EX_TRANSPARENT ON 시 Unity의 마우스 입력 감지](260523_WS_EX_TRANSPARENT시%20마우스%20입력%20감지.md)에 별도로 정리되어 있으므로 여기서는 *배경 투명화*에 집중한다.
+Project Cozy의 핵심 컨셉인 *투명 배경 + 클릭 투과*를 [WindowManager](../../Project_Cozy/Assets/Scripts/Platform/Window/Core/WindowManager.cs)에 통합하는 작업을 진행하면서, *원리적으로는 표준 패턴인데도 Unity 6 / URP 17 환경에서 단순히는 작동하지 않는* 다층 함정을 만났다. 이 글은 그 시행착오와 최종적으로 작동에 도달한 정확한 설정 조합을 기록한다. 클릭 투과의 입력 처리 자체는 [WS_EX_TRANSPARENT ON 시 Unity의 마우스 입력 감지 (2026-05-23)](WsExTransparentMouseInputStudy.md)에 별도로 정리되어 있으므로 여기서는 *배경 투명화*에 집중한다.
 
 ## 기획 요구사항
 
@@ -19,7 +19,7 @@ Project Cozy의 핵심 컨셉인 *투명 배경 + 클릭 투과*를 [WindowManag
 
 ## 구현 제약사항
 
-- **`WS_EX_TRANSPARENT`가 ON인 동안에는 Unity InputSystem이 마우스 위치를 받지 못한다.** OS가 마우스 메시지를 우리 창에 전달하지 않기 때문(그게 click-through의 본질). 즉 Unity InputSystem에 의존해 *호버 여부를 판단해 OFF로 돌리는 것*이 불가능 — 한 번 ON 되면 다시 OFF될 수 없는 닭-달걀 문제. 해결: Win32 `GetCursorPos`로 글로벌 마우스 위치를 직접 받아 콜라이더 충돌 판정. (자세한 검증은 [260523 글](260523_WS_EX_TRANSPARENT시%20마우스%20입력%20감지.md) 참조)
+- **`WS_EX_TRANSPARENT`가 ON인 동안에는 Unity InputSystem이 마우스 위치를 받지 못한다.** OS가 마우스 메시지를 우리 창에 전달하지 않기 때문(그게 click-through의 본질). 즉 Unity InputSystem에 의존해 *호버 여부를 판단해 OFF로 돌리는 것*이 불가능 — 한 번 ON 되면 다시 OFF될 수 없는 닭-달걀 문제. 해결: Win32 `GetCursorPos`로 글로벌 마우스 위치를 직접 받아 콜라이더 충돌 판정. (자세한 검증은 [2026-05-23 글](WsExTransparentMouseInputStudy.md) 참조)
 - **URP의 디폴트 렌더링 경로는 알파 채널을 보존하지 않는다.** RT/백버퍼 포맷을 *알파 없는 포맷*으로 최적화하는 것이 디폴트라, 카메라가 `(0,0,0,0)`으로 클리어해도 최종 백버퍼엔 알파 1이 도달 → DWM이 합성할 알파 정보가 없어 통째로 불투명 처리됨. Unity Issue Tracker에 *"By Design"*으로 등록되어 있고, *Post Processing을 끄는 것만으로는 해결되지 않는다*. 우회 설정 다수 필요.
 - **DXGI Flip Model Swapchain이 켜져 있으면 백버퍼가 DWM 합성을 우회하고 화면에 직접 표시된다**(Independent Flip 모드). 알파 보존을 아무리 잘 해도 DWM이 합성 단계에 끼어들지 못해 투명이 작동하지 않음. Unity 디폴트로 ON되어 있어 *반드시 명시적으로 OFF*해야 한다. 또한 이 토글은 *DX11에서만 끌 수 있으며*, DX12에서는 Flip Model이 강제되므로 DX12 빌드 자체가 사용 불가능하다(아래 §최종 구현 방법 참조).
 

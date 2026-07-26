@@ -3,7 +3,7 @@
 > **범위**: `CameraFitter` → `BaseSpaceCameraFitter` 좌표 모델 교체와, 뷰포트 편집 스택
 > (`ViewportScreenSettings` / `ViewportEditHandles` / `WindowMoveResizeGuide`)을 GameScene에 넣는 작업.
 > **전제**: 창 스택(`WindowManager`)은 이미 GameScene에 들어가 있다 (커밋 `98738da`, `8c3de6f`).
-> **배경 문서**: [WindowServiceHandover.md](WindowServiceHandover.md), [Docs/Planning/User_Settings.md](../Planning/User_Settings.md) §2.1.1
+> **배경 문서**: [WindowServiceHandover.md](WindowServiceHandover.md), [Docs/Planning/UserSettings.md](../Planning/UserSettings.md) §2.1.1
 > **작성**: 2026-07-25 · 브랜치 `feature/viewport-stack`
 
 ---
@@ -192,7 +192,7 @@ _masterCanvasBottomRight = (88.8889, 0)      ← 1920 가로 모니터 기준
 
 ### 3.2 바닥이 뷰포트를 따라가지 않는다 (기획서와의 불일치)
 
-`User_Settings.md` §2.1.1은 이렇게 못박고 있다.
+`UserSettings.md` §2.1.1은 이렇게 못박고 있다.
 
 > **땅바닥(캐릭터가 서는 지면)은 항상 뷰포트 하단 변에 포함되며 뷰포트와 함께 이동한다.**
 

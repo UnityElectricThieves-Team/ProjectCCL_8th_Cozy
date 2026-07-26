@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 캐릭터 단일 개체의 메인 컴포넌트. 라이프사이클을 받아 3개 module(<see cref="StateModule"/>/<see cref="VisualModule"/>/<see cref="AffinityModule"/>)에 위임한다.
+/// 캐릭터 단일 개체의 메인 컴포넌트. 라이프사이클을 받아 4개 module(<see cref="StateModule"/>/<see cref="VisualModule"/>/<see cref="AffinityModule"/>/<see cref="ScaleModule"/>)에 위임한다.
 /// non-sealed — 종별 자식 클래스(Cat/Dog 등)가 상속한다. 이번 마일스톤(Phase 1~7)은 base만, 자식 클래스 도입은 Phase 10.
 ///
 /// IStateOwner 구현 — State 클래스가 호출하는 정책 수치·거동 API를 노출. 정책 수치는 StateModule에 위임, Ground 시스템·중력·물리는 본체가 담당.
@@ -185,7 +185,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     /// <summary>우클릭 변신 토글. 동물→소녀는 친밀도 만점 필요, 소녀→동물은 언제든. CharacterInteractionRelay.OnRightClick에서 호출.</summary>
     public void RequestTransform()
     {
-        // 동물 → 소녀: 친밀도가 변신 임계 이상일 때만 (AI_Logic.md §Transform). 소녀 → 동물: 무조건 허용.
+        // 동물 → 소녀: 친밀도가 변신 임계 이상일 때만 (AILogic.md §Transform). 소녀 → 동물: 무조건 허용.
         if (_visual.CurrentForm == CharacterForm.Animal && !_affinity.CanHumanTransform) return;
         _state.RequestTransform();
     }

@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// "화면 설정"(User_Settings.md §2.1.1)의 정책 레이어 — 평시/편집 절충안.
+/// "화면 설정"(UserSettings.md §2.1.1)의 정책 레이어 — 평시/편집 절충안.
 ///
 /// 평시(Normal):   OS 창 자체를 뷰포트 rect로 배치 → 뷰포트 밖 픽셀은 렌더링·DWM 합성 비용 0.
 /// 편집(Editing):  창을 모니터 전체로 확장하고 카메라는 베이스 공간 전체를 프레이밍.

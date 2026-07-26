@@ -17,7 +17,7 @@
 
 `CurrentEnergy`가 우리가 흔히 말하는 "스폰 기운"이다. 스폰으로 깎이면 다시 임계값 아래로 내려가 별이 잠긴다. `CumulativeEnergy`는 스폰으로 `CurrentEnergy`가 깎여도 유지되므로, "지금까지 이 유저가 얼마나 입력했나"를 나타낸다.
 
-> 기획(`Docs/Planning/Progress_Numeric_Balance.md` §2)에서 캐릭터 해금 게이트는 **누적 스폰 기운**(`CumulativeEnergy`)이 임계(10 → 500 → 1,500 …)를 넘는 방식으로 정의돼 있다. 지금 코드가 `CurrentEnergy`를 스폰마다 차감하는 소비 모델은 프로토타입 단계의 동작이며, 기획의 누적 게이트와는 별개다. 이 문서는 현재 코드 동작을 기술한다.
+> 기획(`Docs/Planning/ProgressNumericBalance.md` §2)에서 캐릭터 해금 게이트는 **누적 스폰 기운**(`CumulativeEnergy`)이 임계(10 → 500 → 1,500 …)를 넘는 방식으로 정의돼 있다. 지금 코드가 `CurrentEnergy`를 스폰마다 차감하는 소비 모델은 프로토타입 단계의 동작이며, 기획의 누적 게이트와는 별개다. 이 문서는 현재 코드 동작을 기술한다.
 
 ---
 

@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// orthographic 카메라를 "베이스 공간의 지정 픽셀 영역"에 절대 픽셀 1:1로 프레이밍한다.
 ///
-/// 좌표계 전제 (Docs/Planning/User_Settings.md §2.1.1):
+/// 좌표계 전제 (Docs/Planning/UserSettings.md §2.1.1):
 ///   - 마스터 캔버스(3840×2160)가 모든 에셋의 제작 기준 절대 좌표계 — 모니터 해상도와 무관하게 크기 불변.
 ///   - 베이스 공간 = 마스터 캔버스의 "우하단"을 모니터 해상도만큼 잘라낸 영역.
 ///   - 따라서 월드 앵커도 우하단: _masterCanvasBottomRight가 마스터 캔버스 우하단 모서리의 월드 좌표.

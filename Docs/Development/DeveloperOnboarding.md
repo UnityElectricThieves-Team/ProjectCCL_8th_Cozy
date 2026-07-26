@@ -1,10 +1,10 @@
 # 개발자 온보딩
 
-Project Cozy에 처음 합류한 개발자가 거쳐야 할 환경 셋업 단계입니다. 프로젝트 개요는 [README.md](../README.md) 참조.
+Project Cozy에 처음 합류한 개발자가 거쳐야 할 환경 셋업 단계입니다. 프로젝트 개요는 [README.md](../../README.md) 참조.
 
 ## 1. 사전 요구사항
 
-- Unity Hub + **Unity 6000.3.10f1** ([ProjectVersion.txt](../Project_Cozy/ProjectSettings/ProjectVersion.txt) 참조)
+- Unity Hub + **Unity 6000.3.10f1** ([ProjectVersion.txt](../../Project_Cozy/ProjectSettings/ProjectVersion.txt) 참조)
 - Git 2.30+
 - Git LFS
 - 코드 에디터: Visual Studio 또는 Rider

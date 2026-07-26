@@ -23,7 +23,7 @@
 - **Win32 충돌 주의.** 구 `WindowAspectFitter`와 `BorderlessWindow`는 현행 `WindowManager`와 같은 HWND를 만진다. 본편 통합 씬에서는 함께 활성화하지 않는다.
 - **GameScene의 PPU는 10.8이다.** `BaseSpaceCameraFitter._pixelsPerUnit`의 설계 의도값은 100이지만, 옛 `CameraFitter`가 잡아둔 배치(1080px = 월드 100유닛)를 그대로 보존하려고 낮춰 잡았다. 100으로 되돌리려면 캐릭터 스프라이트 임포트 PPU와 `_floorY`·중력·이동 속도까지 함께 환산해야 한다 — 근거와 환산표는 [ViewportStackMigration.md](../../../../Docs/Development/ViewportStackMigration.md) §3.3.
 - **에디터 보호.** Win32 호출은 [Platform/CLAUDE.md](../Platform/CLAUDE.md)와 동일 원칙 — `#if !UNITY_EDITOR` 가드 또는 에디터에서 안전한 분기. 에디터에서 호출하면 Unity Editor 창 자체가 망가질 수 있다.
-- 그 외 네이밍 규칙은 [Scripts/CLAUDE.md](../CLAUDE.md) + 루트 [CLAUDE.md](../../../../CLAUDE.md) §4 참조.
+- 그 외 네이밍 규칙은 [Scripts/CLAUDE.md](../CLAUDE.md) + [.claude/rules/unity/csharp.md](../../../../.claude/rules/unity/csharp.md) 참조.
 
 ## 추후 후보 (지금은 만들지 않음)
 

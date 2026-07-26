@@ -1,7 +1,6 @@
 ---
 paths:
   - "Project_Cozy/ProjectSettings/**"
-  - "**/ProjectSettings/*.asset"
 ---
 
 # ProjectSettings 작업 규칙

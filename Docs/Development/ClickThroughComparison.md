@@ -11,8 +11,8 @@
 > **기준 시점:** §1·§2의 메커니즘 서술은 **2026-06-14 시점 `develop-kk`의 실제 코드**(`OverlayWindow.cs`, `WindowManager.cs`)를 직접 읽고 작성했다. 아래 "관련 선행 기록"은 작성 당시(5월)의 스터디 노트로, **현재 구현과 다를 수 있으니** 현재 코드의 사실 근거로 삼지 말고 배경 참고로만 볼 것.
 
 관련 선행 기록 (과거 스터디 노트 — 현재 구현과 괴리 가능):
-- [260523_WS_EX_TRANSPARENT시 마우스 입력 감지](260523_WS_EX_TRANSPARENT시%20마우스%20입력%20감지.md)
-- [260524_투명 배경 구현을 위한 스터디 기록](260524_투명%20배경%20구현을%20위한%20스터디%20기록.md)
+- [WS_EX_TRANSPARENT 시 마우스 입력 감지 (2026-05-23)](WsExTransparentMouseInputStudy.md)
+- [투명 배경 구현을 위한 스터디 기록 (2026-05-24)](TransparentBackgroundStudy.md)
 
 ---
 
@@ -73,7 +73,7 @@
 ### 핵심 제약 — 커서 좌표를 `GetCursorPos`로 읽음
 현재 코드 사실: `PollClickThrough`는 커서 좌표를 **`GetCursorPos`(OS-wide)** 로 읽고 Unity Input API(`Mouse.current`)를 쓰지 않는다.
 
-배경(과거 스터디 노트 — 작성 시점 관찰): `WS_EX_TRANSPARENT`가 ON이면 OS가 마우스 메시지를 아래 창으로 라우팅해 **Unity `Mouse.current.position`은 멈추고 `GetCursorPos`만 갱신**되더라는 기록이 있다(→ [260523 기록](260523_WS_EX_TRANSPARENT시%20마우스%20입력%20감지.md)). 이 구조가 그대로라면, 통과 토글 판정을 Unity 입력에 의존할 경우 "한 번 통과 ON → 트리거 소실 → 복귀 불가" 데드락이 생기므로 OS-wide 폴링이 필요하다. *이 freeze 관찰 자체는 과거 기록이며 현재 환경에서 재검증된 값은 아니다 — 다만 현재 코드가 `GetCursorPos`를 쓰는 것은 이 제약과 일관된다.*
+배경(과거 스터디 노트 — 작성 시점 관찰): `WS_EX_TRANSPARENT`가 ON이면 OS가 마우스 메시지를 아래 창으로 라우팅해 **Unity `Mouse.current.position`은 멈추고 `GetCursorPos`만 갱신**되더라는 기록이 있다(→ [2026-05-23 기록](WsExTransparentMouseInputStudy.md)). 이 구조가 그대로라면, 통과 토글 판정을 Unity 입력에 의존할 경우 "한 번 통과 ON → 트리거 소실 → 복귀 불가" 데드락이 생기므로 OS-wide 폴링이 필요하다. *이 freeze 관찰 자체는 과거 기록이며 현재 환경에서 재검증된 값은 아니다 — 다만 현재 코드가 `GetCursorPos`를 쓰는 것은 이 제약과 일관된다.*
 
 ### 판정 기준
 - **Physics2D 콜라이더**의 존재. 통과 여부는 보이는 픽셀이 아니라 콜라이더 모양으로 결정된다.
