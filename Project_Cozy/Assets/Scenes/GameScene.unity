@@ -646,6 +646,8 @@ GameObject:
   m_Component:
   - component: {fileID: 319457225}
   - component: {fileID: 319457226}
+  - component: {fileID: 319457227}
+  - component: {fileID: 319457228}
   m_Layer: 0
   m_Name: OverlayWindow
   m_TagString: Untagged
@@ -683,8 +685,8 @@ MonoBehaviour:
   _alwaysOnTop: 1
   _hoverAwareClickThrough: 1
   _borderless: 1
-  _maximizeToWorkArea: 1
-  _resizable: 0
+  _maximizeToWorkArea: 0
+  _resizable: 1
   _minSize: {x: 200, y: 200}
   _maxSize: {x: 1920, y: 1080}
   _edgeThicknessPx: 6
@@ -693,6 +695,42 @@ MonoBehaviour:
   _captionWidthPx: 220
   _pollingCamera: {fileID: 788830926}
   _debugLogs: 0
+--- !u!114 &319457227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319457221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12dac6e450f95394facc5a7447f26e25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ViewportScreenSettings
+  _windowManager: {fileID: 0}
+  _cameraFitter: {fileID: 0}
+  _viewport:
+    x: 0
+    y: 0
+    width: 0
+    height: 0
+--- !u!114 &319457228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319457221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a04211043b131a64a95546d7d5641ca4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WindowFeatureTestPanel
+  _viewportSettings: {fileID: 0}
+  _characterPrefab: {fileID: 0}
+  _spawnAnchor: {fileID: 0}
+  _spawnSpread: 1.5
+  _previewStepPx: 120
 --- !u!1 &337577130
 GameObject:
   m_ObjectHideFlags: 0
@@ -1095,7 +1133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2568727742563759575, guid: 0e1cbf919906db945b54734d2607b77f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 157.80579
+      value: 157.80577
       objectReference: {fileID: 0}
     - target: {fileID: 2580507884901385582, guid: 0e1cbf919906db945b54734d2607b77f, type: 3}
       propertyPath: m_Size
@@ -1672,12 +1710,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 788830924}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ea7ce15e9c4fa045b6d0050c74dcfc0, type: 3}
+  m_Script: {fileID: 11500000, guid: f52e93755c0f1ba4492f891900fbcd11, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraFitter
-  _minY: 0
-  _maxY: 100
-  _referenceHeight: 1080
+  m_EditorClassIdentifier: Assembly-CSharp::BaseSpaceCameraFitter
+  _pixelsPerUnit: 10.8
+  _masterCanvasBottomRight: {x: 88.8889, y: 0}
 --- !u!1 &884012405
 GameObject:
   m_ObjectHideFlags: 0
@@ -2423,7 +2460,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8719988749074779421, guid: 89cc1fa6070c34e40b45d702aeafab44, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 157.80579
+      value: 157.80577
       objectReference: {fileID: 0}
     - target: {fileID: 8748706181986467236, guid: 89cc1fa6070c34e40b45d702aeafab44, type: 3}
       propertyPath: m_Size
@@ -3062,6 +3099,6 @@ SceneRoots:
   - {fileID: 1156403278}
   - {fileID: 1256683719}
   - {fileID: 1492600941}
-  - {fileID: 1143461085}
   - {fileID: 679324991}
   - {fileID: 535656489}
+  - {fileID: 1143461085}

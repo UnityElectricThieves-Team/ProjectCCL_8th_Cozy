@@ -52,7 +52,7 @@ MonoBehaviour:
   _spriteRenderer: {fileID: 5591664294296824350}
   _visualCollider: {fileID: 5416345582349782209}
   _gravity: 20
-  _floorY: 7
+  _floorY: 11.4444
   _groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -67,8 +67,6 @@ MonoBehaviour:
     _transformDuration: 0.8
     _walkSpeed: 1.5
     _runSpeed: 3.5
-    _outFocusKey: {fileID: 0}
-    _outFocusMouse: {fileID: 0}
     _idleThresholdSeconds: 3
     _sleepCheckInterval: 5
     _sleepProbabilityPerCheck: 0.3

@@ -41,10 +41,10 @@
 ### PerformanceSetting/
 - `PerformanceSetting/PerformanceSettings.cs` — VSync OFF + foreground/background `targetFrameRate` 전환.
 - `PerformanceSetting/Viewport/ViewportScreenSettings.cs` — 평시·편집 뷰포트 상태와 적용 정책.
-- `PerformanceSetting/Viewport/BaseSpaceCameraFitter.cs` — 베이스 픽셀 영역의 카메라 프레이밍.
+- `PerformanceSetting/Viewport/BaseSpaceCameraFitter.cs` — 베이스 공간 좌표 규약(우하단 앵커 + PPU)의 소유자. 카메라 프레이밍 + 베이스 공간 px → 월드 좌표 변환.
 - `PerformanceSetting/Viewport/ViewportEditHandles.cs` — 편집 모드 뷰포트 핸들.
 - `PerformanceSetting/Viewport/WindowMoveResizeGuide.cs` — 평시 창 이동·리사이즈 시각 안내.
-- `PerformanceSetting/CameraFitter.cs`, `WindowAspectFitter.cs` — 씬 마이그레이션 전까지 유지하는 구 구현.
+- `PerformanceSetting/WindowAspectFitter.cs` — 구 구현(`PerformanceSystemScene` 전용). 후속 시스템과 제거 조건은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) 참조.
 
 ### Animation/
 - `Animation/SpriteAnimator.cs` — 프레임 배열을 fps마다 순환. `IsPlaying` / `Play` / `Stop` / `Toggle`. **캐릭터 외 사용처 전용** (별·달 등). 새 `BaseCharacterController` 시스템엔 사용 금지.
@@ -76,7 +76,7 @@
 
 ## 컨벤션
 
-- **Namespace 미사용** (글로벌 namespace 유지) — Platform/ 등 모든 폴더 동일. *예외*: 민준 deprecated 코드는 `Prototype.Minjun` namespace로 격리.
+- **Namespace 미사용** (글로벌 namespace 유지) — Platform/ 등 모든 폴더 동일.
 - **외부 참조는 인스펙터 (`[SerializeField] private`)** 또는 같은 GameObject의 `GetComponent`(Awake 1회 캐싱). 매 프레임 또는 빈번한 `Find` / `FindObjectOfType` 금지. *씬 단일 인스턴스라 가져와서 메서드를 호출하는* 컴포넌트는 Singleton `Instance` 패턴 사용(예: `HeartSystem`). *입력을 방송만 하는 소스*는 참조 대신 **static 이벤트**를 노출해 소비자가 구독한다(예: `OutFocusKeyHook.KeyPressed`).
 - **상호작용은 인터페이스로만.** 게임 객체는 `Interaction/`의 인터페이스를 구현하고 매니저로의 직접 의존은 두지 않는다.
 - 그 외 네이밍·MonoBehaviour·성능 원칙은 루트 [CLAUDE.md](../../../CLAUDE.md) 참조.
