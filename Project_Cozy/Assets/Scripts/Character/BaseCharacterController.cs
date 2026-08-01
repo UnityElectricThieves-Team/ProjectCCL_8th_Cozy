@@ -39,6 +39,17 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     // 스폰 시 CharacterNames에서 할당받는 고유 이름(정체성). 표현(머리 위 라벨)과 분리.
     private string _name;
 
+    // 이 캐릭터가 머무를 수 있는 월드 영역. 밖에서 SetLivingArea로 주입한다(기본은 제한 없음).
+    // 캐릭터는 이 사각형이 무엇에서 왔는지 모른다 — 뷰포트를 아는 것은 Gameplay/Viewport 쪽이다.
+    private Rect _livingArea;
+    private bool _hasLivingArea;
+
+    /// <summary>실제로 서고 걷는 바닥 높이(월드 y).
+    /// 거주 영역이 주어졌으면 **그 아래 변이 곧 지면**이다 — 뷰포트를 올리든 내리든 지면이 따라간다
+    /// (기획 §2.1.1: "땅바닥은 항상 뷰포트 하단 변에 포함되며 뷰포트와 함께 이동한다").
+    /// 직렬화된 <see cref="_floorY"/>는 거주 영역이 없는 씬에서 쓰는 대체값이다.</summary>
+    private float FloorY => _hasLivingArea ? _livingArea.yMin : _floorY;
+
     public Animator Animator => _animator;
     public SpriteRenderer SpriteRenderer => _spriteRenderer;
     public Collider2D VisualCollider => _visualCollider;
@@ -192,11 +203,24 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     // ===== IStateOwner: 물리/표현 헬퍼 =====
 
-    public void MoveHorizontal(float deltaX)
+    /// <summary>수평 이동. 거주 영역에 막혀 요청한 만큼 못 갔으면 false를 돌려준다
+    /// (WalkState가 이걸 보고 제자리걸음 대신 반대로 돌아선다).</summary>
+    public bool MoveHorizontal(float deltaX)
     {
-        var p = transform.position;
-        p.x += deltaX;
+        Vector3 p = transform.position;
+        Vector2 foot = FootWorldPosition;
+
+        float desiredFootX = foot.x + deltaX;
+        // 발 기준으로 잡는다. 스프라이트 bounds는 애니메이션 프레임마다 달라져 경계가 떨린다
+        // (_footOffset이 존재하는 이유와 같다).
+        float allowedFootX = _hasLivingArea
+            ? Mathf.Clamp(desiredFootX, _livingArea.xMin, _livingArea.xMax)
+            : desiredFootX;
+
+        p.x += allowedFootX - foot.x;
         transform.position = p;
+
+        return Mathf.Approximately(allowedFootX, desiredFootX);
     }
 
     public void ApplyVerticalDelta(float deltaY)
@@ -208,7 +232,48 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     public void SetWorldPosition(Vector2 worldPos)
     {
+        if (_hasLivingArea)
+        {
+            // MoveHorizontal과 같은 경계(발 기준)를 쓴다. 세로는 바닥선이 아니라 영역 아래 변까지
+            // 허용한다 — 바닥 밑으로 끌어내렸다 놓는 기존 동작(놓으면 바닥으로 스냅)을 살리기 위해서다.
+            Vector2 footDelta = FootWorldPosition - (Vector2)transform.position;
+            Vector2 foot = worldPos + footDelta;
+            foot.x = Mathf.Clamp(foot.x, _livingArea.xMin, _livingArea.xMax);
+            foot.y = Mathf.Clamp(foot.y, _livingArea.yMin, _livingArea.yMax);
+            worldPos = foot - footDelta;
+        }
         transform.position = new Vector3(worldPos.x, worldPos.y, transform.position.z);
+    }
+
+    /// <summary>
+    /// 이 캐릭터가 머무를 수 있는 월드 영역을 지정한다. 걷기도 드래그도 이 밖으로 나가지 못하고,
+    /// 바닥선도 이 영역의 아래 변보다 내려가지 않는다.
+    ///
+    /// 캐릭터는 이 사각형이 무엇에서 왔는지 모른다 — 월드 좌표로 환산된 결과만 받는다.
+    /// 뷰포트에서 환산해 걸어주는 것은 <c>Gameplay/Viewport/ViewportLivingAreaBinder</c>다.
+    ///
+    /// 지금 밖에 있으면 즉시 안으로 끌어들인다(뷰포트를 캐릭터 밑에서 줄인 경우).
+    /// </summary>
+    public void SetLivingArea(Rect worldArea)
+    {
+        // 영역을 바꾸기 **전** 기준으로 "바닥에 있었는가"를 먼저 판정한다.
+        // 서 있던 캐릭터는 새 바닥에 계속 서 있어야 한다 — 뷰포트 아래 변을 내리면 같이 내려가야 하는데,
+        // Idle/Walk 중에는 아무도 접지를 다시 보지 않아서(FallState·Grabbed 릴리즈·StartUp에서만 본다)
+        // 값만 바꿔두면 공중에 뜬 채로 남는다.
+        bool wasGrounded = IsFootOnGround(out _);
+
+        _livingArea = worldArea;
+        _hasLivingArea = true;
+
+        Vector2 foot = FootWorldPosition;
+        float x = Mathf.Clamp(foot.x, _livingArea.xMin, _livingArea.xMax);
+        // 공중에 있던 캐릭터(스폰 직후 낙하 등)는 높이를 건드리지 않고 영역 안으로만 넣는다.
+        float y = wasGrounded ? FloorY : Mathf.Clamp(foot.y, FloorY, _livingArea.yMax);
+
+        Vector3 p = transform.position;
+        p.x += x - foot.x;
+        p.y += y - foot.y;
+        transform.position = p;
     }
 
     public void SetFacing(float direction)
@@ -223,25 +288,27 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     public bool TryGetGroundBelow(out Vector2 hitPoint)
     {
-        // 무한 수평 바닥(y=_floorY): 발 바로 아래 바닥점은 항상 존재.
+        // 무한 수평 바닥(y=FloorY): 발 바로 아래 바닥점은 항상 존재.
         var foot = FootWorldPosition;
-        hitPoint = new Vector2(foot.x, _floorY);
+        hitPoint = new Vector2(foot.x, FloorY);
         return true;
     }
 
     public bool IsFootOnGround(out Vector2 hitPoint)
     {
         var foot = FootWorldPosition;
-        hitPoint = new Vector2(foot.x, _floorY);
+        float floor = FloorY;
+        hitPoint = new Vector2(foot.x, floor);
         // 발이 바닥선(허용오차 내)에 닿았거나 그 아래로 파묻혔으면 접지.
-        return foot.y <= _floorY + _groundContactThreshold;
+        return foot.y <= floor + _groundContactThreshold;
     }
 
     public bool IsFootBelowGround(out Vector2 groundTop)
     {
         var foot = FootWorldPosition;
-        groundTop = new Vector2(foot.x, _floorY);
-        return foot.y < _floorY;
+        float floor = FloorY;
+        groundTop = new Vector2(foot.x, floor);
+        return foot.y < floor;
     }
 
     public void SnapToGround(Vector2 hitPoint)
@@ -257,10 +324,16 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         var foot = FootWorldPosition;
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(foot, 0.03f);
-        // 바닥선(y=_floorY)과 발→바닥 거리 표시.
+        // 바닥선(y=FloorY)과 발→바닥 거리 표시.
+        float floor = FloorY;
         Gizmos.color = Color.green;
-        Gizmos.DrawLine(new Vector3(foot.x - 1f, _floorY, 0f), new Vector3(foot.x + 1f, _floorY, 0f));
-        Gizmos.DrawLine(new Vector3(foot.x, foot.y, 0f), new Vector3(foot.x, _floorY, 0f));
+        Gizmos.DrawLine(new Vector3(foot.x - 1f, floor, 0f), new Vector3(foot.x + 1f, floor, 0f));
+        Gizmos.DrawLine(new Vector3(foot.x, foot.y, 0f), new Vector3(foot.x, floor, 0f));
+
+        // 거주 영역(있으면) — 캐릭터가 나갈 수 없는 경계.
+        if (!_hasLivingArea) return;
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireCube(_livingArea.center, new Vector3(_livingArea.width, _livingArea.height, 0f));
     }
 #endif
 }

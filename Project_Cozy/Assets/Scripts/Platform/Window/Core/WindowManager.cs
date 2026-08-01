@@ -21,8 +21,12 @@ using UnityEngine.EventSystems;
 ///     ※ Unity 카메라 clear color가 검정(0,0,0)이어야 작동.
 ///
 /// 토글 변경은 부팅 시 1회만 반영 (런타임 변경 미지원).
-/// 예외 — 런타임 영역 API: ApplyRegion / ApplyMonitorFullscreen / TryGetMonitorRect /
-///   SetClickThroughSuspended. ViewportScreenSettings(정책)가 뷰포트↔편집 전환에 사용한다.
+/// 예외 — 런타임 영역 API: ApplyRegion / TryGetWorkAreaRect / SetClickThroughSuspended 등.
+///
+/// **창 배치의 주인은 정책 레이어(ViewportScreenSettings)다.** 이 클래스는 시키는 대로 놓기만 한다.
+/// 창은 작업 영역에 고정이고 평상시 크기가 바뀌지 않으며, 사용자가 "윈도우 크기 재조정"을 누를 때만
+/// 다시 잡는다. 근거는 Docs/Development/WindowViewportUIArchitecture.md.
+///
 /// 빌드 전용 — Editor에서는 모든 Win32 호출 스킵 (Editor 창 보호).
 /// </summary>
 [DisallowMultipleComponent]
@@ -33,8 +37,15 @@ public class WindowManager : MonoBehaviour
     [SerializeField] private bool _alwaysOnTop            = true;
     [SerializeField] private bool _hoverAwareClickThrough = true;
     [SerializeField] private bool _borderless             = true;
-    [SerializeField] private bool _maximizeToWorkArea     = false;
-    [SerializeField] private bool _resizable              = true;
+    [SerializeField, Tooltip("부팅 시 1회 작업 영역을 채운다. 창 배치의 주인은 정책 레이어" +
+        "(ViewportScreenSettings)이므로, 그것이 있는 씬에서는 반드시 꺼둔다 — 켜면 두 주인이 창을 놓고 다툰다. " +
+        "ViewportScreenSettings가 없는 씬 전용.")]
+    private bool _maximizeToWorkArea     = false;
+
+    [SerializeField, Tooltip("OS 가장자리 리사이즈·상단 캡션 이동을 켠다. 창이 정적인 현행 모델에서는 " +
+        "쓰지 않는다(꺼둘 것) — 켜면 사용자가 창을 끌어 작업 영역과 어긋나게 만들 수 있다. " +
+        "이 토글을 끄면 WndProc 서브클래싱 전체가 설치되지 않는다.")]
+    private bool _resizable              = true;
 
     [Header("Resize (when resizable)")]
     [SerializeField] private Vector2Int _minSize         = new Vector2Int(200, 200);
@@ -65,6 +76,12 @@ public class WindowManager : MonoBehaviour
 
     /// <summary>상단 중앙 이동 핸들 폭(px). 0 이하면 상단 전체 폭.</summary>
     public int CaptionWidthPx => _captionWidthPx;
+
+    /// <summary>사용자가 창을 직접 옮기거나 크기를 바꿀 수 있는가 = WndProc 히트테스트가 설치됐는가.
+    /// 창이 정적인 현행 모델에서는 false다. 안내 UI는 이 값이 false면 그리지 않아야 한다 —
+    /// 없는 조작을 있는 것처럼 그리면 "보이는 곳 = 잡히는 곳" 원칙이 깨진다.
+    /// Editor에서는 Win32를 건드리지 않으므로 항상 false.</summary>
+    public bool IsWindowUserResizable => _wndProcInstalled;
 
     // ===== Win32 상수 =====
     const int  GWL_STYLE          = -16;
@@ -196,7 +213,11 @@ public class WindowManager : MonoBehaviour
     }
 
     /// <summary>사용자가 창을 드래그(이동/리사이즈)한 직후 메인 스레드에서 발행.
-    /// 뷰포트 정책(ViewportScreenSettings)이 창 rect → 뷰포트 역동기화에 사용.</summary>
+    ///
+    /// ⚠️ **구독자가 없다.** 창이 작업 영역에 고정된 뒤로 사용자가 창을 끄는 경로가 사라졌고
+    /// (_resizable이 꺼져 있으면 WndProc 자체가 설치되지 않아 발행도 되지 않는다),
+    /// 예전에 이 이벤트를 받아 "창 rect를 새 뷰포트로 수용"하던 역동기화는 제거됐다.
+    /// 되살리면 사용자가 창을 끌 때마다 뷰포트 설정이 덮어써진다.</summary>
     public event Action WindowRectChangedByUser;
 
     void Update()
@@ -296,7 +317,15 @@ public class WindowManager : MonoBehaviour
             SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     }
 
-    /// <summary>창을 현재 모니터 전체(rcMonitor)로 확장. 화면 설정(뷰포트 편집) 진입용.</summary>
+    /// <summary>
+    /// 창을 현재 모니터 전체(rcMonitor)로 확장.
+    ///
+    /// ⚠️ **deprecated — 호출자가 없다.** 창이 작업 영역에 고정된 뒤로 "모니터 전체로 확장"이 필요한
+    /// 경로가 사라졌다(편집 모드도 이미 작업 영역 전체를 쓴다). 게다가 이 함수는 rcMonitor를 쓰므로
+    /// **작업표시줄을 덮는다** — 클릭 통과가 고장 났을 때의 마지막 탈출구를 없애는 셈이라 새 코드에서
+    /// 쓰면 안 된다. 작업 영역이 필요하면 TryGetWorkAreaRect + ApplyRegion을 쓴다.
+    /// 남겨둔 이유는 되돌릴 여지 하나뿐이다.
+    /// </summary>
     public void ApplyMonitorFullscreen()
     {
         if (_hwnd == IntPtr.Zero) return;
@@ -307,8 +336,31 @@ public class WindowManager : MonoBehaviour
             SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     }
 
-    /// <summary>현재 창이 있는 모니터의 전체 rect(스크린 좌표, 픽셀).
-    /// 베이스 공간 크기의 원천. Editor/획득 실패 시 false.</summary>
+    /// <summary>
+    /// 현재 창이 있는 모니터의 **작업 영역** rect(작업표시줄을 뺀 영역, 스크린 좌표, 픽셀).
+    /// 베이스 공간 크기의 원천이자 창을 놓을 자리. Editor/획득 실패 시 false.
+    ///
+    /// 작업표시줄을 비워두는 것은 안전장치다 — 클릭 통과가 고장 나 창이 모든 클릭을 흡수해도
+    /// 사용자가 작업표시줄로 앱을 닫을 수 있다. (작업표시줄 자동 숨김이 켜져 있으면 rcWork가
+    /// 모니터 전체가 되어 이 방어가 사라지므로, 기하학만으로 안전을 보장하지는 않는다.)
+    /// </summary>
+    public bool TryGetWorkAreaRect(out RectInt workAreaRect)
+    {
+        workAreaRect = default;
+        if (_hwnd == IntPtr.Zero) return false;
+        if (!TryGetMonitorInfo(out MONITORINFO mi)) return false;
+        workAreaRect = new RectInt(
+            mi.rcWork.Left, mi.rcWork.Top,
+            mi.rcWork.Right - mi.rcWork.Left, mi.rcWork.Bottom - mi.rcWork.Top);
+        return true;
+    }
+
+    /// <summary>현재 창이 있는 모니터의 전체 rect(작업표시줄 포함, 스크린 좌표, 픽셀).
+    /// Editor/획득 실패 시 false.
+    ///
+    /// ⚠️ **호출자가 없다.** 베이스 공간의 원천이 작업 영역으로 바뀌면서 쓰이지 않게 됐다.
+    /// 지우지 않은 것은 "모니터 전체"가 필요한 경로(다중 모니터 선택 등)가 나중에 생길 수 있어서다.
+    /// 베이스 공간·창 배치에는 TryGetWorkAreaRect를 쓴다.</summary>
     public bool TryGetMonitorRect(out RectInt monitorRect)
     {
         monitorRect = default;

@@ -21,7 +21,13 @@ public class WalkState : BaseCharacterState
 
     public override void Tick(IStateOwner owner, float dt)
     {
-        owner.MoveHorizontal(_direction * Speed(owner) * dt);
+        if (!owner.MoveHorizontal(_direction * Speed(owner) * dt))
+        {
+            // 거주 영역 경계에 막혔다 — 벽에 대고 제자리걸음 하는 대신 돌아선다.
+            _direction = -_direction;
+            owner.SetFacing(_direction);
+        }
+
         if (Time.time >= _endsAt)
             owner.ChangeState(CharacterState.Idle);
     }

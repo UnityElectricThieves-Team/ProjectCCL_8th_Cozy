@@ -52,7 +52,7 @@ MonoBehaviour:
   _spriteRenderer: {fileID: 5591664294296824350}
   _visualCollider: {fileID: 5416345582349782209}
   _gravity: 20
-  _floorY: 11.4444
+  _floorY: 7
   _groundLayerMask:
     serializedVersion: 2
     m_Bits: 64

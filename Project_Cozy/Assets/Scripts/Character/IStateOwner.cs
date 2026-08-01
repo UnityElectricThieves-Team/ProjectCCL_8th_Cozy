@@ -23,7 +23,8 @@ public interface IStateOwner
     bool IsFootBelowGround(out Vector2 groundTop);
     void SnapToGround(Vector2 hitPoint);
 
-    void MoveHorizontal(float deltaX);
+    /// <summary>수평 이동. 거주 영역 경계에 막혀 요청한 만큼 못 갔으면 false — 호출자가 방향을 되돌릴 수 있다.</summary>
+    bool MoveHorizontal(float deltaX);
     void ApplyVerticalDelta(float deltaY);
     void SetWorldPosition(Vector2 worldPos);
     void SetFacing(float direction);
