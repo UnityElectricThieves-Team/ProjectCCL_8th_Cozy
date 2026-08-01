@@ -1,6 +1,6 @@
 ---
 name: sync-develop-docs
-description: origin/develop 의 새 커밋(문서/코드)을 현재 작업 브랜치로 머지한다. SessionStart 훅이 세션 시작마다 이 스킬을 호출하도록 안내하며, 사용자가 직접 /sync-develop-docs 로 호출할 수도 있다.
+description: origin/develop 의 새 커밋(문서/코드)을 현재 작업 브랜치로 머지한다. 자동으로 실행하지 않는다 — 사용자가 /sync-develop-docs 로 직접 호출하거나 develop 동기화를 요청할 때만 사용.
 ---
 
 # sync-develop-docs
@@ -34,7 +34,7 @@ description: origin/develop 의 새 커밋(문서/코드)을 현재 작업 브�
 6. **충돌 처리**
    - 충돌이 나면 충돌 파일 목록만 보고하고 **멈춘다**.
    - `git checkout --ours` / `--theirs` 로 한쪽을 통째로 버리지 **말 것**.
-   - 자동으로 해결하려 하지 말고, 헷갈리면 디스코드에 물어보라고 안내. (`.claude/rules/git.md` 준수)
+   - 자동으로 해결하려 하지 말고, 사용자가 직접 풀도록 안내. (`.claude/rules/git.md` 준수)
 
 ## 주의
 
