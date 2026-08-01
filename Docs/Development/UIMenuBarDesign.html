@@ -126,7 +126,7 @@
     <li><a href="#s4"><span class="n">4</span>클래스 구조</a></li>
     <li><a href="#s5"><span class="n">5</span>숨김 방식 (성능)</a></li>
     <li><a href="#s6"><span class="n">6</span>창 액션 side-effect</a></li>
-    <li><a href="#s7"><span class="n">7</span>현서 크로스체크 — CanvasScaler</a></li>
+    <li><a href="#s7"><span class="n">7</span>결정 필요 — CanvasScaler</a></li>
     <li><a href="#s8"><span class="n">8</span>구현 계획 — 2트랙</a></li>
     <li><a href="#s9"><span class="n">9</span>확정된 결정 요약</a></li>
     <li><a href="#sx"><span class="n">＋</span>부록: 적대 검수 이력</a></li>
@@ -141,7 +141,7 @@
     <span class="badge draft">상태: 초안 · 토의용</span>
     <span class="badge ok">3회 적대 검수 완료</span>
   </div>
-  <p class="lead">이 문서는 <strong>현서와 크로스체크</strong>할 항목(특히 §7 CanvasScaler)을 포함합니다. 확정이 아니라, 같이 다듬는 출발점입니다.<br>
+  <p class="lead">이 문서는 아직 <strong>결정이 필요한 항목</strong>(특히 §7 CanvasScaler)을 포함합니다. 확정이 아니라, 다듬어 나가는 출발점입니다.<br>
   Figma: <code>CCL_8th_Cozy_Companion</code> (Inventory / Shop / Collection / Picture / Option 프레임 참고).</p>
 
   <p class="lead"><strong>⚠ 창 스택 서술은 낡았습니다 (PR #13 이후).</strong> 이 문서가 전제하는 <code>OverlayWindow</code> / <code>OverlayWindowController</code> / <code>WindowResizeHandler</code> / <code>RegionEditChrome</code> / <code>OverlayModeDemoButtons</code>는 모두 삭제되고 <code>WindowManager</code> 하나로 통합됐고, 투명 방식도 ColorKey에서 DWM 알파 합성으로 바뀌었습니다. 특히 <strong>창 이동·리사이즈 핫존 수치를 이 문서 기준으로 구현하면 안 됩니다</strong> — 현행 캡션 존은 상단 중앙 220×28입니다. UI 레이아웃·CanvasScaler 논의는 여전히 유효합니다. 현행 창 구조는 <code>WindowServiceHandover.md</code> 참조.</p>
@@ -188,7 +188,7 @@
   </table></div>
 
   <div class="callout c-q">
-    <span class="tag">❓ 현서에게 두 가지 확인 요청</span>
+    <span class="tag">❓ 확인이 필요한 두 가지</span>
     <ol>
       <li><code>CharacterScaleSetters</code> 캔버스(SortingOrder 100, 테스트용)는 디버그 잔재로 보이는데, <strong>지워도 될까?</strong> 안 지우면 SortingOrder 100이라 새 메뉴 UI 위에 그려진다. 또 이 캔버스의 <code>CharacterScaleClicker</code>가 <code>ScaleMultiplierSettings.Character</code>에 값을 쓰는데, 설정 패널의 캐릭터 크기 슬라이더도 같은 값을 써서 나중에 충돌 소지가 있다.</li>
       <li>그 캔버스의 <strong>1920×1020 / Match=Width</strong>는 의도적으로 고른 값 같은데, 이유가 궁금하다(§7에서 이어짐).</li>
@@ -357,16 +357,16 @@ Canvas [Screen Space - Overlay]  = UIRoot        ← 이미 있음
   </div>
 
   <!-- ===================== 7 ===================== -->
-  <h2 id="s7"><span class="num">7.</span>현서 크로스체크 항목 — CanvasScaler 정책 <span class="subtle">(열린 질문)</span></h2>
+  <h2 id="s7"><span class="num">7.</span>결정 필요 항목 — CanvasScaler 정책 <span class="subtle">(열린 질문)</span></h2>
   <div class="callout c-q">
-    <span class="tag">🔍 이게 이 문서에서 제일 같이 정해야 하는 부분이다</span>
-    <p>아래 상황·트레이드오프·잠정 권장을 보고, 특히 <strong>현서가 테스트 캔버스에 왜 1920×1020 / Match=Width를 골랐는지</strong> 확인해 주세요.</p>
+    <span class="tag">🔍 이게 이 문서에서 제일 먼저 정해야 하는 부분이다</span>
+    <p>아래 상황·트레이드오프·잠정 권장을 보고, 특히 <strong>테스트 캔버스가 왜 1920×1020 / Match=Width를 쓰는지</strong> 확인해 주세요.</p>
   </div>
 
   <h3>상황</h3>
   <ul>
     <li><code>UIRoot</code>(우리 메뉴가 들어갈 캔버스)는 <strong>Constant Pixel Size / 800×600</strong>인데, 이건 Unity가 캔버스 만들면 나오는 <strong>기본값 그대로</strong>라 아무도 의도적으로 고른 게 아닐 가능성이 크다.</li>
-    <li>반면 테스트 캔버스는 <strong>Scale With Screen Size / 1920×1020 / Match=Width</strong>로, <strong>누군가 의도적으로</strong> 설정했다. (현서?)</li>
+    <li>반면 테스트 캔버스는 <strong>Scale With Screen Size / 1920×1020 / Match=Width</strong>로, <strong>누군가 의도적으로</strong> 설정했다.</li>
   </ul>
 
   <h3>두 모드의 차이</h3>
@@ -381,12 +381,12 @@ Canvas [Screen Space - Overlay]  = UIRoot        ← 이미 있음
   <h3>잠정 권장</h3>
   <ul>
     <li><strong><code>UIRoot</code>를 Scale With Screen Size로.</strong> 이 씬은 32:3 띠 강제가 없고(WindowAspectFitter 미배치) 창이 전체화면~축소까지 넓게 변하므로, 자동 축소가 되는 쪽이 안전하다. 참고로 <code>CameraFitter</code>는 캐릭터의 <strong>화면 픽셀 크기를 창 크기와 무관하게 고정</strong>한다 — UI도 극단적으로 안 변하는 게 캐릭터와 톤이 맞는다.</li>
-    <li><strong>기준 해상도·Match 축은 현서 의견이 필요.</strong> 테스트 캔버스가 이미 <code>Match=Width / 1920×1020</code>을 쓰는데, 이게 의도라면 메뉴 UI도 거기 맞추는 게 일관적이다. 다만 <strong>왜 1080이 아니라 1020인지, 왜 Height가 아니라 Width인지</strong> 최초 의도를 알아야 우리가 맞추든 바꾸든 결정할 수 있다.</li>
+    <li><strong>기준 해상도·Match 축은 아직 미확정.</strong> 테스트 캔버스가 이미 <code>Match=Width / 1920×1020</code>을 쓰는데, 이게 의도라면 메뉴 UI도 거기 맞추는 게 일관적이다. 다만 <strong>왜 1080이 아니라 1020인지, 왜 Height가 아니라 Width인지</strong> 최초 의도를 알아야 우리가 맞추든 바꾸든 결정할 수 있다.</li>
   </ul>
 
   <div class="callout c-note">
     <span class="tag">참고 · 처음에 내가 틀렸던 점 (투명하게 공유)</span>
-    <p>초안에서 나는 "Match=Height / 1080"을 권했는데, 적대 검수에서 <strong>이 프로젝트엔 그게 오히려 나쁠 수 있다</strong>는 지적을 받았다. (가로로 긴 창이 지배적이라면 Height 기준은 UI를 과하게 줄인다.) 그래서 지금은 <strong>현서가 이미 고른 Width 기준이 더 맞을 수 있다</strong>고 보고, 단정 대신 크로스체크로 남긴다.</p>
+    <p>초안에서 나는 "Match=Height / 1080"을 권했는데, 적대 검수에서 <strong>이 프로젝트엔 그게 오히려 나쁠 수 있다</strong>는 지적을 받았다. (가로로 긴 창이 지배적이라면 Height 기준은 UI를 과하게 줄인다.) 그래서 지금은 <strong>테스트 캔버스가 이미 쓰는 Width 기준이 더 맞을 수 있다</strong>고 보고, 단정 대신 열린 질문으로 남긴다.</p>
   </div>
 
   <h3>딸린 변경</h3>
@@ -429,7 +429,7 @@ Canvas [Screen Space - Overlay]  = UIRoot        ← 이미 있음
     <tbody>
       <tr><td><strong>A</strong></td><td>잠금(PassThrough)은 이번 제외. <code>SettingsPanel._lockButton</code> 배선 제거. 전역 핫키 잠금해제 구현 후 재도입</td></tr>
       <tr><td><strong>B</strong></td><td><code>Scripts/CLAUDE.md</code>의 UI 레이어 참조 제한 제거 완료 — UI는 하위 레이어(Platform 포함)를 자유 참조</td></tr>
-      <tr><td><strong>C</strong></td><td><span class="status-no">미확정.</span> CanvasScaler 정책은 §7대로 현서와 크로스체크 후 확정</td></tr>
+      <tr><td><strong>C</strong></td><td><span class="status-no">미확정.</span> CanvasScaler 정책은 §7대로 확인 후 확정</td></tr>
     </tbody>
   </table></div>
 
@@ -439,7 +439,7 @@ Canvas [Screen Space - Overlay]  = UIRoot        ← 이미 있음
   <ul>
     <li><strong>UIModeGate(모드별 UI 자동 숨김 컴포넌트)를 폐기</strong> — 상태 꼬임 + 레이어 위반 유발. 정적 규칙(inset, 잠금 제외)으로 대체.</li>
     <li><strong>씬 모델 정정</strong> — 초안이 "Canvas 1개 / 32:3 띠"로 잘못 봤으나, 실제로는 Canvas 2개 + CameraFitter 있음 + WindowAspectFitter 없음. §2가 실측 반영본.</li>
-    <li><strong>CanvasScaler 권장을 Height→미확정으로 하향</strong> — 이 프로젝트 창 형태엔 Width 기준이 더 맞을 수 있어 현서 크로스체크로 전환(§7).</li>
+    <li><strong>CanvasScaler 권장을 Height→미확정으로 하향</strong> — 이 프로젝트 창 형태엔 Width 기준이 더 맞을 수 있어 열린 질문으로 전환(§7).</li>
     <li><strong>과설계 제거</strong> — <code>_closeButton</code>용 상속형 OnValidate 등 검수 대응으로 붙였던 복잡성을 다시 걷어냄(선택 필드엔 경고 대상이 없음).</li>
   </ul>
 
