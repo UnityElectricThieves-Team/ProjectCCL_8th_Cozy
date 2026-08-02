@@ -95,7 +95,7 @@ public sealed class StateModule
     /// <summary>BaseCharacterController.Start에서 호출 — 시작 상태 결정.</summary>
     public void StartUp()
     {
-        var startId = _stateOwner.IsFootOnGround(out _) ? CharacterState.Idle : CharacterState.Fall;
+        var startId = _stateOwner.IsFootOnGround() ? CharacterState.Idle : CharacterState.Fall;
         EnterState(startId);
 
         _lastInputAt = Time.time;
@@ -125,6 +125,8 @@ public sealed class StateModule
         if (_current != null)
             _current.Tick(_stateOwner, dt);
 
+        EnforceFloor();
+
         // InFocus 마우스 폴링
         var mouse = Mouse.current;
         if (mouse != null && (mouse.leftButton.wasPressedThisFrame
@@ -140,6 +142,29 @@ public sealed class StateModule
         _lastCheckAt = Time.time;
         if (UnityEngine.Random.value < _sleepProbabilityPerCheck)
             RequestSleep();
+    }
+
+    // ===== 접지 규칙 =====
+
+    /// <summary>이 상태는 자기 세로 위치를 스스로 쥐고 있다 — 바닥 고정에서 제외된다.
+    /// Grabbed가 여기 있는 것은 공중이라서가 아니라 마우스가 y를 정하기 때문이다.
+    ///
+    /// **세로로 스스로 움직이는 상태를 새로 만들면 여기 넣어야 한다.** 빠뜨리면 그 상태는 매 프레임
+    /// 지면으로 끌려내려가고, 증상은 "모션이 안 나온다"로 조용히 나타난다.</summary>
+    private bool OwnsVerticalPosition =>
+        CurrentStateId == CharacterState.Fall
+        || CurrentStateId == CharacterState.Grabbed;
+
+    /// <summary>접지 규칙을 적용한다 — 세로를 스스로 쥔 상태가 아니면 발을 지면에 고정.
+    /// 접지를 여러 곳에서 스냅하는 대신 이 한 곳으로 모았다. 흩뿌리면 반드시 빠지는 경로가 생긴다
+    /// (실제로 Idle·Walk 중에는 아무도 접지를 다시 보지 않아 공중에 뜬 채 굳는 버그가 있었다).</summary>
+    public void EnforceFloor()
+    {
+        // StartUp 전 — 시작 상태를 Idle로 볼지 Fall로 볼지는 StartUp이 정한다. 여기서 먼저 바닥에
+        // 붙여버리면 스폰 직후 낙하가 사라진다(별에서 스폰된 캐릭터는 Start보다 먼저 거주 영역을 받는다).
+        if (_current == null) return;
+        if (OwnsVerticalPosition) return;
+        _stateOwner.SnapToFloor();
     }
 
     // ===== Request* API =====

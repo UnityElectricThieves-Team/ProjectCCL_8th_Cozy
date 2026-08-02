@@ -4,31 +4,20 @@ using UnityEngine;
 /// 캐릭터 단일 개체의 메인 컴포넌트. 라이프사이클을 받아 4개 module(<see cref="StateModule"/>/<see cref="VisualModule"/>/<see cref="AffinityModule"/>/<see cref="ScaleModule"/>)에 위임한다.
 /// non-sealed — 종별 자식 클래스(Cat/Dog 등)가 상속한다. 이번 마일스톤(Phase 1~7)은 base만, 자식 클래스 도입은 Phase 10.
 ///
-/// IStateOwner 구현 — State 클래스가 호출하는 정책 수치·거동 API를 노출. 정책 수치는 StateModule에 위임, Ground 시스템·중력·물리는 본체가 담당.
+/// IStateOwner 구현 — State 클래스가 호출하는 정책 수치·거동 API를 노출. 정책 수치는 StateModule에 위임,
+/// 지면 높이·거주 영역·중력·좌표 갱신은 본체가 담당. 접지를 언제 강제할지는 StateModule이 정한다(EnforceFloor).
 /// </summary>
 public class BaseCharacterController : MonoBehaviour, IStateOwner
 {
     [Header("Unity refs")]
     [SerializeField] private Animator _animator;
     [SerializeField] private SpriteRenderer _spriteRenderer;
-    [Tooltip("기존 PolygonCollider2D 참조 — 발 위치 계산용. 비어 있으면 Awake에서 _spriteRenderer의 GameObject에서 자동 탐색.")]
+    [Tooltip("[미사용] 읽는 코드가 없다. 발 위치 계산에 쓰였으나 이제 루트가 곧 발이라 필요 없다. 제거 대기.")]
     [SerializeField] private Collider2D _visualCollider;
 
-    [Header("Ground & Gravity")]
+    [Header("Gravity")]
     [Tooltip("아래 가속도. FallState가 매 프레임 -gravity*dt로 적용.")]
     [SerializeField] private float _gravity = 12f;
-    [Tooltip("바닥 수평선의 y좌표. 발이 이 높이에 닿으면 착지. (Ground 콜라이더 비의존)")]
-    [SerializeField] private float _floorY = 0f;
-    [Tooltip("[미사용] 현재 y=_floorY 평면 사용. Ground 콜라이더 재도입 시 사용.")]
-    [SerializeField] private LayerMask _groundLayerMask;
-    [Tooltip("[미사용] 현재 y=_floorY 평면 사용. Ground 콜라이더 재도입 시 사용.")]
-    [SerializeField] private float _groundProbeDistance = 100f;
-    [Tooltip("발이 바닥(y=_floorY)에 닿았다고 보는 허용 오차.")]
-    [SerializeField] private float _groundContactThreshold = 0.1f;
-    [Tooltip("발 위치 오프셋(루트 로컬 기준). 발이 바닥에 닿는 지점을 캐릭터 원점 기준으로 지정. " +
-             "스프라이트/콜라이더 bounds에 의존하지 않아 애니메이션 중에도 안정적. " +
-             "센터 피벗 스프라이트는 보통 y를 음수(발이 원점 아래)로 둔다.")]
-    [SerializeField] private Vector2 _footOffset = Vector2.zero;
 
     [Header("Modules")]
     [SerializeField] private StateModule _state = new StateModule();
@@ -44,11 +33,18 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     private Rect _livingArea;
     private bool _hasLivingArea;
 
+    /// <summary>거주 영역이 아직 안 들어온 씬에서 쓰는 지면 높이. 인스펙터로 열지 않는다 —
+    /// 조절 가능한 바닥이 있으면 그게 다른 오차(발 위치 어긋남 등)의 보정값 노릇을 하다가,
+    /// 지면 정의가 바뀌는 순간 보정이 통째로 사라진다. 실제로 그렇게 어긋난 전례가 있다.</summary>
+    private const float FallbackFloorY = 0f;
+
     /// <summary>실제로 서고 걷는 바닥 높이(월드 y).
     /// 거주 영역이 주어졌으면 **그 아래 변이 곧 지면**이다 — 뷰포트를 올리든 내리든 지면이 따라간다
     /// (기획 §2.1.1: "땅바닥은 항상 뷰포트 하단 변에 포함되며 뷰포트와 함께 이동한다").
-    /// 직렬화된 <see cref="_floorY"/>는 거주 영역이 없는 씬에서 쓰는 대체값이다.</summary>
-    private float FloorY => _hasLivingArea ? _livingArea.yMin : _floorY;
+    ///
+    /// private으로 둔다. 높이를 밖에 내주면 "발이 바닥에 있는가"를 호출자마다 다시 쓰게 되고,
+    /// 비교 방식이 갈라진다. 판정이 필요하면 <see cref="IsFootOnGround"/>를 쓴다.</summary>
+    private float FloorY => _hasLivingArea ? _livingArea.yMin : FallbackFloorY;
 
     public Animator Animator => _animator;
     public SpriteRenderer SpriteRenderer => _spriteRenderer;
@@ -72,12 +68,12 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public float NextIdleDuration() => _state.NextIdleDuration();
     public float NextWalkDuration() => _state.NextWalkDuration();
 
-    // ===== IStateOwner: Transform / 발 위치 =====
-    public Transform Transform => transform;
-    // 발 위치는 루트 transform + 고정 오프셋(_footOffset)으로 계산한다.
-    // 애니메이션 프레임마다 변하는 스프라이트/콜라이더 bounds에 의존하지 않아
-    // 매 프레임 안정적(상하 떨림 없음). 오프셋은 인스펙터에서 발 위치에 맞춰 조정.
-    public Vector2 FootWorldPosition => transform.TransformPoint(_footOffset);
+    // ===== IStateOwner: 위치 =====
+    // **루트가 곧 발이다.** 프리팹에서 Visual 자식을 올려 스프라이트 아래 끝을 루트 원점에 맞춰 둔다.
+    // 그래서 transform.position을 그냥 읽는 코드도 자동으로 발을 가리킨다 — 발 위치를 코드 필드로
+    // 들고 있으면 그 필드를 부르는 코드만 옳아지고 나머지는 조용히 틀린다.
+    // 왜 이 규약인지는 .claude/rules/unity/character-ground.md.
+    public Vector2 WorldPosition => transform.position;
 
     // ===== IStateOwner: 상태 전환 =====
     public void ChangeState(CharacterState nextId) => _state.ChangeState(nextId);
@@ -208,19 +204,18 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public bool MoveHorizontal(float deltaX)
     {
         Vector3 p = transform.position;
-        Vector2 foot = FootWorldPosition;
 
-        float desiredFootX = foot.x + deltaX;
-        // 발 기준으로 잡는다. 스프라이트 bounds는 애니메이션 프레임마다 달라져 경계가 떨린다
-        // (_footOffset이 존재하는 이유와 같다).
-        float allowedFootX = _hasLivingArea
-            ? Mathf.Clamp(desiredFootX, _livingArea.xMin, _livingArea.xMax)
-            : desiredFootX;
+        float desiredX = p.x + deltaX;
+        // 경계는 발 한 점 기준이다 — 몸통 폭은 보지 않는다. 몸의 좌우 절반이 영역을 넘는 것은
+        // 알고 있는 한계이지 버그가 아니다(character-ground.md).
+        float allowedX = _hasLivingArea
+            ? Mathf.Clamp(desiredX, _livingArea.xMin, _livingArea.xMax)
+            : desiredX;
 
-        p.x += allowedFootX - foot.x;
+        p.x = allowedX;
         transform.position = p;
 
-        return Mathf.Approximately(allowedFootX, desiredFootX);
+        return Mathf.Approximately(allowedX, desiredX);
     }
 
     public void ApplyVerticalDelta(float deltaY)
@@ -234,20 +229,16 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     {
         if (_hasLivingArea)
         {
-            // MoveHorizontal과 같은 경계(발 기준)를 쓴다. 세로는 바닥선이 아니라 영역 아래 변까지
-            // 허용한다 — 바닥 밑으로 끌어내렸다 놓는 기존 동작(놓으면 바닥으로 스냅)을 살리기 위해서다.
-            Vector2 footDelta = FootWorldPosition - (Vector2)transform.position;
-            Vector2 foot = worldPos + footDelta;
-            foot.x = Mathf.Clamp(foot.x, _livingArea.xMin, _livingArea.xMax);
-            foot.y = Mathf.Clamp(foot.y, _livingArea.yMin, _livingArea.yMax);
-            worldPos = foot - footDelta;
+            // MoveHorizontal과 같은 경계(발 한 점 기준)를 쓴다.
+            worldPos.x = Mathf.Clamp(worldPos.x, _livingArea.xMin, _livingArea.xMax);
+            worldPos.y = Mathf.Clamp(worldPos.y, _livingArea.yMin, _livingArea.yMax);
         }
         transform.position = new Vector3(worldPos.x, worldPos.y, transform.position.z);
     }
 
     /// <summary>
     /// 이 캐릭터가 머무를 수 있는 월드 영역을 지정한다. 걷기도 드래그도 이 밖으로 나가지 못하고,
-    /// 바닥선도 이 영역의 아래 변보다 내려가지 않는다.
+    /// **이 영역의 아래 변이 곧 지면**이다.
     ///
     /// 캐릭터는 이 사각형이 무엇에서 왔는지 모른다 — 월드 좌표로 환산된 결과만 받는다.
     /// 뷰포트에서 환산해 걸어주는 것은 <c>Gameplay/Viewport/ViewportLivingAreaBinder</c>다.
@@ -256,24 +247,18 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     /// </summary>
     public void SetLivingArea(Rect worldArea)
     {
-        // 영역을 바꾸기 **전** 기준으로 "바닥에 있었는가"를 먼저 판정한다.
-        // 서 있던 캐릭터는 새 바닥에 계속 서 있어야 한다 — 뷰포트 아래 변을 내리면 같이 내려가야 하는데,
-        // Idle/Walk 중에는 아무도 접지를 다시 보지 않아서(FallState·Grabbed 릴리즈·StartUp에서만 본다)
-        // 값만 바꿔두면 공중에 뜬 채로 남는다.
-        bool wasGrounded = IsFootOnGround(out _);
-
         _livingArea = worldArea;
         _hasLivingArea = true;
 
-        Vector2 foot = FootWorldPosition;
-        float x = Mathf.Clamp(foot.x, _livingArea.xMin, _livingArea.xMax);
-        // 공중에 있던 캐릭터(스폰 직후 낙하 등)는 높이를 건드리지 않고 영역 안으로만 넣는다.
-        float y = wasGrounded ? FloorY : Mathf.Clamp(foot.y, FloorY, _livingArea.yMax);
-
+        // 가로만 여기서 넣는다.
         Vector3 p = transform.position;
-        p.x += x - foot.x;
-        p.y += y - foot.y;
+        p.x = Mathf.Clamp(p.x, _livingArea.xMin, _livingArea.xMax);
         transform.position = p;
+
+        // 세로는 접지 규칙이 정한다 — 공중에 있는 캐릭터를 바닥으로 끌어내리면 안 되고, 그 판정은 상태가 안다.
+        // 다음 Update까지 미루지 않고 여기서 부른다. 미루면 뷰포트가 바뀐 그 프레임 동안
+        // 발이 지면에서 떨어진 채로 렌더된다.
+        _state.EnforceFloor();
     }
 
     public void SetFacing(float direction)
@@ -286,42 +271,26 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     // ===== IStateOwner: Ground =====
 
-    public bool TryGetGroundBelow(out Vector2 hitPoint)
-    {
-        // 무한 수평 바닥(y=FloorY): 발 바로 아래 바닥점은 항상 존재.
-        var foot = FootWorldPosition;
-        hitPoint = new Vector2(foot.x, FloorY);
-        return true;
-    }
+    /// <summary>발이 지면에 닿았거나 그 아래로 파묻혔으면 true.
+    /// 허용 오차가 없다 — 접지를 "추적하는 상태"가 아니라 매 프레임 강제되는 결과로 다루므로,
+    /// 낙하가 지면을 지나친 프레임에 정확히 걸리는 것으로 충분하다.</summary>
+    public bool IsFootOnGround() => transform.position.y <= FloorY;
 
-    public bool IsFootOnGround(out Vector2 hitPoint)
-    {
-        var foot = FootWorldPosition;
-        float floor = FloorY;
-        hitPoint = new Vector2(foot.x, floor);
-        // 발이 바닥선(허용오차 내)에 닿았거나 그 아래로 파묻혔으면 접지.
-        return foot.y <= floor + _groundContactThreshold;
-    }
-
-    public bool IsFootBelowGround(out Vector2 groundTop)
-    {
-        var foot = FootWorldPosition;
-        float floor = FloorY;
-        groundTop = new Vector2(foot.x, floor);
-        return foot.y < floor;
-    }
-
-    public void SnapToGround(Vector2 hitPoint)
+    public void SnapToFloor()
     {
         var p = transform.position;
-        p.y += hitPoint.y - FootWorldPosition.y;
+        float floor = FloorY;
+        // 이미 붙어 있으면 transform을 건드리지 않는다. 정확성 장치가 아니라 매 프레임 쓰기를 아끼는
+        // 최적화다 — 아래 대입이 정확한 값을 쓰므로 다음 프레임에는 반드시 걸린다.
+        if (Mathf.Approximately(p.y, floor)) return;
+        p.y = floor;
         transform.position = p;
     }
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        var foot = FootWorldPosition;
+        var foot = WorldPosition;
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(foot, 0.03f);
         // 바닥선(y=FloorY)과 발→바닥 거리 표시.

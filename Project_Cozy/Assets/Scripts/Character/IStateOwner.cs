@@ -15,13 +15,15 @@ public interface IStateOwner
     float NextIdleDuration();
     float NextWalkDuration();
 
-    Vector2 FootWorldPosition { get; }
-    Transform Transform { get; }
+    /// <summary>발이 지면에 닿았는가(파묻힌 경우 포함).
+    /// 지면 높이 자체는 노출하지 않는다 — 이 판정을 State마다 다시 쓰면 비교 방식이 갈라진다.</summary>
+    bool IsFootOnGround();
 
-    bool TryGetGroundBelow(out Vector2 hitPoint);
-    bool IsFootOnGround(out Vector2 hitPoint);
-    bool IsFootBelowGround(out Vector2 groundTop);
-    void SnapToGround(Vector2 hitPoint);
+    /// <summary>발을 지면 높이에 고정한다. 파묻혔으면 올리고, 떠 있으면 끌어내린다.</summary>
+    void SnapToFloor();
+
+    /// <summary>루트의 현재 월드 위치. 루트가 곧 발이다.</summary>
+    Vector2 WorldPosition { get; }
 
     /// <summary>수평 이동. 거주 영역 경계에 막혀 요청한 만큼 못 갔으면 false — 호출자가 방향을 되돌릴 수 있다.</summary>
     bool MoveHorizontal(float deltaX);

@@ -37,6 +37,8 @@
 
 현재 씬 상태의 실측치와 이관 순서는 `Docs/Development/`에 있습니다. 씬 파일을 직접 다룰 때의 규칙은 [.claude/rules/unity/scenes.md](.claude/rules/unity/scenes.md), 프리팹을 어디에 둘지는 [.claude/rules/unity/prefabs.md](.claude/rules/unity/prefabs.md)를 봅니다.
 
+**새 캐릭터 프리팹은 루트가 곧 발이어야 합니다** — Visual 자식을 올려 스프라이트 아래 끝을 루트 원점에 맞춥니다. 이유와 나머지 지면 규약은 [.claude/rules/unity/character-ground.md](.claude/rules/unity/character-ground.md)에 있는데, 그 파일은 기존 파일을 열 때만 로드되어 *새로 만드는* 순간에는 발화하지 않으므로 여기 한 줄 둡니다.
+
 ---
 
 ## 3. 코드 스타일
@@ -74,6 +76,7 @@
 - `git.md` — `paths` 없음, 항상 로드
 - `docs-conventions.md` — 문서·CLAUDE.md·rules를 쓸 때
 - `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/ui-panels.md`, `unity/platform.md`, `unity/project-settings.md` — 해당 파일을 열 때
+- `unity/character-ground.md` — 캐릭터 지면·발 규약. Character 스크립트·캐릭터 프리팹·캐릭터 스프라이트 임포트 설정을 열 때
 
 ---
 
