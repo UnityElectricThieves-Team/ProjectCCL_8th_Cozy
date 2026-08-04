@@ -192,7 +192,10 @@ public class WindowFeatureTestPanel : MonoBehaviour
         panelGo.GetComponent<Image>().color = new Color(0.10f, 0.14f, 0.22f, 0.92f);
         var prt = panelGo.GetComponent<RectTransform>();
         prt.anchorMin = prt.anchorMax = prt.pivot = new Vector2(1f, 0f); // 우하단 기준
-        prt.anchoredPosition = new Vector2(-20f, 90f);                    // 작업 표시줄 위
+        // 작업 표시줄 위 + 게임 메뉴바 위. 메뉴바는 우하단에 붙고 캔버스 기준 높이가 210인데,
+        // 그 캔버스가 폭 3840 기준으로 스케일되므로 실제 높이는 화면 폭에 비례해 최대 210px이다.
+        // 그보다 높게 잡아야 어떤 해상도에서도 메뉴바를 덮지 않는다.
+        prt.anchoredPosition = new Vector2(-20f, 240f);
         prt.sizeDelta = new Vector2(372f, 332f);
 
         float y = -10f; // 패널 상단부터 아래로 배치
