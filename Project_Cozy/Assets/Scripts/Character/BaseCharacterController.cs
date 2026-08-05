@@ -95,8 +95,6 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         RegisterExtraStates(_state);
 
         _state.StateChanged += OnStateChanged;
-        _affinity.SpecialActivated += OnAffinityActivated;
-        _affinity.SpecialReleased += OnAffinityReleased;
     }
 
     protected virtual void Start()
@@ -128,42 +126,15 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     {
         CharacterNames.Release(_name);
         _state.StateChanged -= OnStateChanged;
-        if (_affinity != null)
-        {
-            _affinity.SpecialActivated -= OnAffinityActivated;
-            _affinity.SpecialReleased -= OnAffinityReleased;
-        }
     }
 
     // ===== Hook (자식 클래스 확장점) =====
 
     protected virtual void RegisterExtraStates(StateModule state) { }
-    protected virtual void OnSpecialActivated() { }
-    protected virtual void OnSpecialReleased() { }
 
     private void OnStateChanged(CharacterState state)
     {
         _visual.Play(state);
-    }
-
-    // ===== Affinity 이벤트 핸들러 — SpecialMode 토글 + 현재 state Special 분기로 즉시 전환 =====
-
-    private void OnAffinityActivated()
-    {
-        _state.SpecialMode = true;
-        var cur = _state.CurrentStateId;
-        if (cur == CharacterState.Idle) _state.ChangeState(CharacterState.Idle);
-        else if (cur == CharacterState.Walk) _state.ChangeState(CharacterState.Walk);
-        OnSpecialActivated();
-    }
-
-    private void OnAffinityReleased()
-    {
-        _state.SpecialMode = false;
-        var cur = _state.CurrentStateId;
-        if (cur == CharacterState.SpecialIdle) _state.ChangeState(CharacterState.Idle);
-        else if (cur == CharacterState.SpecialWalk) _state.ChangeState(CharacterState.Walk);
-        OnSpecialReleased();
     }
 
     // ===== UnityEvent에서 호출 가능한 공개 메서드 (호버/언호버) =====

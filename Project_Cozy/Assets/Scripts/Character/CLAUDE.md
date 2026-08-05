@@ -4,7 +4,7 @@
 
 ## 책임
 
-- 한 캐릭터의 *상태 머신*과 *내부 수치*를 관리한다 — Idle/Walk/Run 사이클, Sleep 정책, 친밀도 누적·만점 시 Special 시각 전환, 폼(Animal/Girl) 변신.
+- 한 캐릭터의 *상태 머신*과 *내부 수치*를 관리한다 — Idle/Walk/Run 사이클, Sleep 정책, 친밀도 누적, 폼(Animal/Girl) 변신.
 - **단일 컴포넌트 부착 원칙** — GameObject에 사용자 정의 컴포넌트는 `BaseCharacterController` 하나만. 세부 책임은 4개 module(`StateModule`/`VisualModule`/`AffinityModule`/`ScaleModule`)이 nested로 분담.
 - 마우스/키 입력 자체는 다루지 않는다 — 마우스 라우팅은 [Interaction/CLAUDE.md](../Interaction/CLAUDE.md)의 인터페이스(`IHoverable` 등)를 통해, OS-wide 입력은 [Platform/Input/](../Platform/Input/)의 컴포넌트를 *구독*해서 받는다.
 - 캐릭터 *에셋*(스프라이트·애니메이션·프리팹) 자체는 [Characters/](../../Characters/CLAUDE.md)에. 이 폴더는 *코드만*.
@@ -40,33 +40,31 @@
 
 ## 통합 `CharacterState` enum
 
-게임 로직 상태와 시각 상태가 **같은 enum 공유** (13개). StateModule이 정본, VisualModule은 같은 값을 `Animator.SetInteger`로 직결.
+게임 로직 상태와 시각 상태가 **같은 enum 공유** (11개). StateModule이 정본, VisualModule은 같은 값을 `Animator.SetInteger`로 직결.
 
-`Idle / Walk / Run / Sleep / WakeUp / Pet / Grabbed / Fall / Land / Transform / Interact / SpecialIdle / SpecialWalk`
+`Idle / Walk / Run / Sleep / WakeUp / Pet / Grabbed / Fall / Land / Transform / Interact`
 
 Int 값은 [BaseCharacterAnimatorController.controller](../../Assets/Animations/AnimationSystem/BaseCharacterAnimatorController.controller) 자산의 State 인덱스와 1:1. 함부로 재정렬 금지.
 
+지금 Animator에는 11·12번 자리에 도달 불가능한 State 두 개(옛 SpecialIdle·SpecialWalk)가 남아 있다. 아무도 그 값을 넣지 않으므로 무해하며, 11번은 `IdleAction`으로 개조하고 12번은 지울 예정이다.
+
 ## 현재 들어 있는 것
 
-- **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`/`OnSpecialActivated`/`OnSpecialReleased`) + 공개 메서드(`OnHover`/`OnHoverEnd`/`Request{Sleep,WakeUp,Fall,Pet,Unpet,Grab}`).
+- **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`) + 공개 메서드(`OnHover`/`OnHoverEnd`/`Request{Sleep,WakeUp,Fall,Pet,Unpet,Grab}`).
 - **`CharacterState.cs`** — 통합 13-state enum + `CharacterForm` enum(Animal/Girl).
 - **`IStateOwner.cs`** — State 클래스가 의존할 owner 인터페이스. 정책 수치·물리·지면 판정·ChangeState API 노출. 지면 *높이*는 내주지 않는다 — 판정은 `IsFootOnGround` 하나로 모여 있다.
 - **`CharacterInteractionRelay.cs`** — 자식 Visual에 부착, `IShiftRightClickable`만 책임 (Shift+우클릭 → 친밀도 리셋). IHoverable/IClickable은 OpaqueHoverable/ClickableEvent에 양보.
-- **`Modules/StateModule.cs`** — State 머신 + Sleep 정책 + SpecialMode 분기. 12 State 인스턴스 + `Request*` API + 잠금 가드(`IsLockedState`) + 접지 강제(`EnforceFloor`) + 입력 4채널 구독(InFocus·OutFocus). `RegisterState(IState)` 확장점.
+- **`Modules/StateModule.cs`** — State 머신 + Sleep 정책. 10 State 인스턴스 + `Request*` API + 잠금 가드(`IsLockedState`) + 접지 강제(`EnforceFloor`) + 입력 4채널 구독(InFocus·OutFocus). `RegisterState(IState)` 확장점.
 - **`Modules/VisualModule.cs`** — Animator 단일 진입점. `Play(state)` / `PlayOneShot(state)` / `SetFacing` / `SetForm`. OneShot은 float timer 기반 (UniTask 미사용).
-- **`Modules/AffinityModule.cs`** — 친밀도 수치 + 이벤트 (`AffinityChanged`/`SpecialActivated`/`SpecialReleased`). 시각 직접 제어 금지.
+- **`Modules/AffinityModule.cs`** — 친밀도 수치 + `AffinityChanged` 이벤트. 시각 직접 제어 금지 — 값이 바뀌었다는 사실만 알리고 그걸로 무엇을 할지는 구독자가 정한다.
 - **`Modules/ScaleModule.cs`** — 루트 `transform.localScale = _baseScale * User * Extra` 갱신. `ScaleMultiplierSettings.Character.Changed` 구독 + 호버 강조 같은 일시 `ExtraMultiplier` 슬롯 제공.
 - **`ScaleMultiplier.cs` / `ScaleMultiplierSettings.cs`** — 직렬화 단위 + 종합 ScriptableObject. UI(`UI/CharacterScaleSlider.cs`)가 `Character.Value`를 set하면 `ScaleModule`이 구독해 적용. 단 그 슬라이더는 아직 어떤 씬·프리팹에도 배치되어 있지 않다.
 - **`States/BaseCharacterState.cs`** — abstract. `OnEnter(IStateOwner)` / `Tick(IStateOwner, dt)` / `OnExit(IStateOwner)`.
-- **`States/{Idle, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, Transform, SpecialIdle, SpecialWalk}State.cs`** — 12개 State 클래스. `RunState`는 `WalkState` 상속(속도만 다름). `Special{Idle,Walk}State`는 `IdleState`/`WalkState` 상속(enum만 다름). `Interact`만 State 클래스가 없다 — enum에는 있지만 OneShot이라 `VisualModule.PlayOneShot`을 직접 호출한다.
+- **`States/{Idle, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, Transform}State.cs`** — 10개 State 클래스. `RunState`는 `WalkState` 상속(속도만 다름). `Interact`만 State 클래스가 없다 — enum에는 있지만 OneShot이라 `VisualModule.PlayOneShot`을 직접 호출한다.
 
 ## 상태 잠금 (기획서 §🛡️ 준수)
 
 `StateModule.IsLockedState`가 `WakeUp`/`Land`/`Transform` 진행 중을 판정. 이들 중에는 `Request*` API 모두 무시 — 모션 중단 방지. Phase 8 이후 `Gift Drop`/`Consume`도 잠금 후보로 추가 검토.
-
-## SpecialMode 분기
-
-친밀도 만점 시 `AffinityModule.SpecialActivated` → `StateModule.SpecialMode = true` → 이후 `ChangeState(Idle/Walk)` 호출은 내부에서 `SpecialIdle/SpecialWalk`로 자동 변환. 외부(State 클래스 등)는 기본 enum만 호출하면 됨.
 
 ## 컨벤션
 

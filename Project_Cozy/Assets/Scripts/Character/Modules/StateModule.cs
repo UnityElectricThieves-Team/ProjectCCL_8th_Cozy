@@ -7,15 +7,12 @@ using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.Utilities;
 
 /// <summary>
-/// 캐릭터 상태 머신 + Sleep 정책 + SpecialMode 분기. 13개 <see cref="CharacterState"/> 중 지속적 상태를 State 클래스로 다룬다.
+/// 캐릭터 상태 머신 + Sleep 정책. 11개 <see cref="CharacterState"/> 중 지속적 상태를 State 클래스로 다룬다.
 /// 순수 C# <see cref="SerializableAttribute"/> 클래스 — <see cref="BaseCharacterController"/>가 <c>[SerializeField]</c>로 nested 보유.
 ///
 /// State 전환은 두 경로:
 ///  1) State.Tick에서 자체 결정 → owner.ChangeState 호출
 ///  2) 외부의 Request* API 호출
-///
-/// SpecialMode 분기: <see cref="SpecialMode"/>가 true이면 Idle/Walk 진입 요청은 SpecialIdle/SpecialWalk로 자동 변환.
-/// 외부(State 클래스 등)는 기본 enum만 호출하면 된다.
 /// </summary>
 [Serializable]
 public sealed class StateModule
@@ -63,7 +60,6 @@ public sealed class StateModule
 
     public CharacterState CurrentStateId => _current != null ? _current.Id : CharacterState.Idle;
     public string CurrentStateName => _current != null ? _current.Name : string.Empty;
-    public bool SpecialMode { get; set; }
 
     public event Action<CharacterState> StateChanged;
 
@@ -81,8 +77,6 @@ public sealed class StateModule
         RegisterState(new GrabbedState());
         RegisterState(new FallState());
         RegisterState(new LandState());
-        RegisterState(new SpecialIdleState());
-        RegisterState(new SpecialWalkState());
         RegisterState(new TransformState());
     }
 
@@ -237,12 +231,6 @@ public sealed class StateModule
 
     public void ChangeState(CharacterState nextId)
     {
-        if (SpecialMode)
-        {
-            if (nextId == CharacterState.Idle) nextId = CharacterState.SpecialIdle;
-            else if (nextId == CharacterState.Walk) nextId = CharacterState.SpecialWalk;
-        }
-
         if (_current != null && _current.Id == nextId) return;
         _current?.OnExit(_stateOwner);
         EnterState(nextId);

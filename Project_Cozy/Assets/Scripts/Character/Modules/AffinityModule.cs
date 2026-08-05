@@ -4,7 +4,7 @@ using UnityEngine.Serialization;
 
 /// <summary>
 /// 친밀도 수치 + 이벤트만. <see cref="UnityEngine.Animator"/>/<see cref="UnityEngine.SpriteRenderer"/> 직접 참조 금지 —
-/// 시각 전환은 <c>SpecialActivated</c>/<c>SpecialReleased</c> 이벤트로 위임한다.
+/// 값이 바뀌었다는 사실만 <c>AffinityChanged</c>로 알리고, 그걸로 무엇을 할지는 구독자가 정한다.
 /// 순수 C# <see cref="SerializableAttribute"/> 클래스 — <see cref="BaseCharacterController"/>가 <c>[SerializeField]</c>로 nested 보유.
 /// </summary>
 [Serializable]
@@ -34,17 +34,13 @@ public sealed class AffinityModule
 
     /// <summary>친밀도 값이 변할 때마다 새 값으로 호출.</summary>
     public event Action<int> AffinityChanged;
-    /// <summary>친밀도가 변신 임계에 진입한 순간 1회 발사. <see cref="StateModule.SpecialMode"/> ON 신호.</summary>
-    public event Action SpecialActivated;
-    /// <summary>친밀도가 변신 임계에서 해제된 순간 1회 발사.</summary>
-    public event Action SpecialReleased;
 
     public void Bind(BaseCharacterController owner)
     {
         _owner = owner;
     }
 
-    /// <summary>호버 진입 시 누적. 변신 임계 진입 시 SpecialActivated 발사, 하드 상한에서 멈춘다.</summary>
+    /// <summary>호버 진입 시 누적. 하드 상한에서 멈춘다.</summary>
     public void AddOnHoverEnter()
     {
         var cap = Mathf.Max(1, _affinityHardCap);
@@ -56,17 +52,12 @@ public sealed class AffinityModule
         _cumulativeAffinity = Mathf.Min(cap, _cumulativeAffinity + (_affinity - before));
 
         AffinityChanged?.Invoke(_affinity);
-
-        if (before < _humanTransformThreshold && _affinity >= _humanTransformThreshold)
-            SpecialActivated?.Invoke();
     }
 
-    /// <summary>현재 친밀도 0 리셋. 누적 친밀도는 유지. 변신 임계에서 해제 시 SpecialReleased 발사.</summary>
+    /// <summary>현재 친밀도 0 리셋. 누적 친밀도는 유지.</summary>
     public void Reset()
     {
-        var wasTransformable = CanHumanTransform;
         _affinity = 0;
         AffinityChanged?.Invoke(_affinity);
-        if (wasTransformable) SpecialReleased?.Invoke();
     }
 }
