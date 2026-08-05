@@ -19,6 +19,10 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
              "잡기 오프셋을 '누른 순간'의 커서로 재기 위해 참조한다.")]
     [SerializeField] private HoldClickEvent _holdInput;
 
+    [Tooltip("알파 호버 판정(자식 Visual에 부착). 비우면 Awake에서 자식에서 찾는다.\n" +
+             "좌클릭이 이 캐릭터를 향한 것인지 가리는 데 쓴다.")]
+    [SerializeField] private OpaqueHoverable _hoverGate;
+
     [Header("Gravity")]
     [Tooltip("아래 가속도. FallState가 매 프레임 -gravity*dt로 적용.")]
     [SerializeField] private float _gravity = 12f;
@@ -92,6 +96,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         if (_visualCollider == null && _spriteRenderer != null)
             _visualCollider = _spriteRenderer.GetComponent<Collider2D>();
         if (_holdInput == null) _holdInput = GetComponentInChildren<HoldClickEvent>();
+        if (_hoverGate == null) _hoverGate = GetComponentInChildren<OpaqueHoverable>();
 
         _name = CharacterNames.Acquire();
 
@@ -255,6 +260,15 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         maxX = _livingArea.xMax;
         return true;
     }
+
+    /// <summary>지금 커서가 이 캐릭터의 불투명 픽셀 위에 있는가.
+    /// 좌클릭이 캐릭터를 향한 것인지 가릴 때 쓴다 — 자는 캐릭터를 눌렀을 때 기상 대신 쓰담이
+    /// 뜨게 하려면 이 구분이 있어야 한다.
+    ///
+    /// **알려진 한계** — 커서가 캐릭터에 막 닿은 그 프레임에 누르면 호버 판정이 아직 서지 않아
+    /// false가 나오고, 그 클릭은 캐릭터 밖 입력으로 취급되어 캐릭터를 깨운다. 커서가 도착하는
+    /// 프레임과 클릭이 정확히 겹쳐야 하는 조건이라 손으로 재현하기 어렵다.</summary>
+    public bool IsPointerOnSelf => _hoverGate != null && _hoverGate.IsOpaqueHovered;
 
     /// <summary>지금 누르고 있는 좌클릭이 시작된 순간의 커서 월드 좌표. 누르는 중이 아니면 false.
     /// 잡기 오프셋의 기준점이다 — 자세한 이유는 <c>HoldClickEvent.TryGetPressWorld</c>.</summary>

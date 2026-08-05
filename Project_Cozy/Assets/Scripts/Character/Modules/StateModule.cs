@@ -63,11 +63,11 @@ public sealed class StateModule
     [SerializeField] private float _walkMinDistance = 0.5f;
 
     [Header("Sleep policy")]
-    [Tooltip("이 시간 동안 무입력이 누적되면 sleep 검사 시작.")]
-    [SerializeField] private float _idleThresholdSeconds = 30f;
-    [SerializeField] private float _sleepCheckInterval = 5f;
-    [Range(0f, 1f)]
-    [SerializeField] private float _sleepProbabilityPerCheck = 0.3f;
+    [Tooltip("이 시간 동안 유저 입력이 하나도 없으면 취침에 들어간다(초).\n" +
+             "확률 판정은 없다 — 시간이 차면 잔다. 기획 확정값은 30분 = 1800초.\n" +
+             "캐릭터를 향한 좌클릭은 이 시간을 초기화하지만 캐릭터를 깨우지는 않는다.\n" +
+             "동작을 확인할 때는 5초쯤으로 낮췄다가 되돌릴 것.")]
+    [SerializeField] private float _idleThresholdSeconds = 1800f;
 
     [Header("Debug")]
     [SerializeField] private bool _logStateChanges = true;
@@ -81,7 +81,6 @@ public sealed class StateModule
 
     private IDisposable _anyButtonSubscription;
     private float _lastInputAt;
-    private float _lastCheckAt;
 
     public float WalkSpeed => _walkSpeed;
     public float RunSpeed => _runSpeed;
@@ -132,7 +131,6 @@ public sealed class StateModule
         EnterState(startId);
 
         _lastInputAt = Time.time;
-        _lastCheckAt = Time.time;
     }
 
     public void Subscribe()
@@ -141,7 +139,8 @@ public sealed class StateModule
         OutFocusMouseHook.ButtonPressed += OnOutFocusMouseButton;
         _anyButtonSubscription = InputSystem.onAnyButtonPress.Call(ctrl =>
         {
-            if (ctrl is KeyControl) RecordInput();
+            // 키보드는 캐릭터를 향할 수 없다 — 언제나 기상 입력이다.
+            if (ctrl is KeyControl) RecordInput(false);
         });
     }
 
@@ -160,21 +159,29 @@ public sealed class StateModule
 
         EnforceFloor();
 
-        // InFocus 마우스 폴링
-        var mouse = Mouse.current;
-        if (mouse != null && (mouse.leftButton.wasPressedThisFrame
-            || mouse.rightButton.wasPressedThisFrame
-            || mouse.middleButton.wasPressedThisFrame))
-            RecordInput();
+        PollInFocusMouse();
 
-        // Sleep 정책 검사
+        // Sleep 정책 — 확률 판정은 없다. 무입력이 임계에 닿으면 잔다.
         if (CurrentStateId == CharacterState.Sleep) return;
         if (Time.time - _lastInputAt < _idleThresholdSeconds) return;
-        if (Time.time - _lastCheckAt < _sleepCheckInterval) return;
+        RequestSleep();
+    }
 
-        _lastCheckAt = Time.time;
-        if (UnityEngine.Random.value < _sleepProbabilityPerCheck)
-            RequestSleep();
+    /// <summary>창 안(InFocus) 마우스 버튼 폴링. 창 밖은 <see cref="OutFocusMouseHook"/>이 따로 방송한다.
+    ///
+    /// **좌클릭만 "캐릭터를 향한 것인가"를 가린다.** 확정안이 캐릭터 입력으로 규정한 것이
+    /// 좌클릭(쓰담·잡기)뿐이고, 우클릭까지 캐릭터 입력으로 치면 자는 중 우클릭이
+    /// 변신도 기상도 아닌 죽은 입력이 된다(변신은 수면 중 금지되어 있다).</summary>
+    private void PollInFocusMouse()
+    {
+        var mouse = Mouse.current;
+        if (mouse == null) return;
+
+        if (mouse.leftButton.wasPressedThisFrame)
+            RecordInput(_owner != null && _owner.IsPointerOnSelf);
+
+        if (mouse.rightButton.wasPressedThisFrame || mouse.middleButton.wasPressedThisFrame)
+            RecordInput(false);
     }
 
     // ===== 접지 규칙 =====
@@ -287,12 +294,24 @@ public sealed class StateModule
             Debug.Log($"[StateModule] {_owner.name} → {_current.Name}", _owner);
     }
 
-    private void OnOutFocusKey(Key _) => RecordInput();
-    private void OnOutFocusMouseButton(MouseButton _) => RecordInput();
+    // 창 밖에서 들어온 입력은 정의상 캐릭터를 향한 것이 아니다 — 언제나 기상 입력이다.
+    private void OnOutFocusKey(Key _) => RecordInput(false);
+    private void OnOutFocusMouseButton(MouseButton _) => RecordInput(false);
 
-    private void RecordInput()
+    /// <summary>입력이 있었음을 기록한다. 두 가지를 서로 다른 조건으로 처리한다.
+    ///
+    /// **무입력 타이머는 어떤 입력이든 초기화한다.** 유저가 캐릭터를 만지고 있다는 것도 자리에
+    /// 있다는 뜻이다. 여기서 갱신하지 않으면 쓰담이 끝나 대기로 돌아온 직후에 "마지막 입력이
+    /// 30분 전"이라는 이유로 곧바로 다시 잠든다.
+    ///
+    /// **기상은 캐릭터를 향하지 않은 입력에만 시킨다.** 확정안은 자는 캐릭터를 좌클릭하면
+    /// 깨우는 대신 쓰담이 뜨도록 정하고 있다. 쓰담 모션이 끝나면 대기로 나오므로 결과적으로는
+    /// 일어나지만, 기상 모션을 거치지 않는다는 점이 다르다.</summary>
+    private void RecordInput(bool aimedAtCharacter)
     {
         _lastInputAt = Time.time;
+
+        if (aimedAtCharacter) return;
         if (CurrentStateId == CharacterState.Sleep) RequestWakeUp();
     }
 
