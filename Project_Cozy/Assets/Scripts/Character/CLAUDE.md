@@ -24,8 +24,8 @@
 ├─ Animator                  (BaseCharacterAnimatorController 자산 연결)
 ├─ SpriteRenderer
 ├─ BoxCollider2D             (마우스 히트 판정용)
-├─ OpaqueHoverable           (IHoverable, 알파 검사 후 UnityEvent 발사)
-├─ ClickableEvent            (IClickable, UnityEvent 발사)
+├─ OpaqueHoverable           (IHoverable, 알파 검사 후 UnityEvent 발사 + 지금 호버 중인지 조회)
+├─ HoldClickEvent            (좌클릭을 "누른 순간"과 "2초 도달"로 갈라 UnityEvent 발사)
 └─ CharacterInteractionRelay (IShiftRightClickable — 친밀도 리셋만 위임)
 
 자식 Shadow GameObject
@@ -48,7 +48,7 @@ Int 값은 [BaseCharacterAnimatorController.controller](../../Assets/Animations/
 
 ## 현재 들어 있는 것
 
-- **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`) + 공개 메서드(`OnHover`/`OnHoverEnd`/`Request{Sleep,WakeUp,Fall,Pet,Unpet,Grab}`).
+- **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`) + 공개 메서드(`OnPetInput`/`Request{Sleep,WakeUp,Fall,Pet,Grab}`).
 - **`CharacterState.cs`** — 통합 13-state enum + `CharacterForm` enum(Animal/Girl).
 - **`IStateOwner.cs`** — State 클래스가 의존할 owner 인터페이스. 정책 수치·물리·지면 판정·ChangeState API 노출. 지면 *높이*는 내주지 않는다 — 판정은 `IsFootOnGround` 하나로 모여 있다. 걷기 목적지용으로 거주 영역의 *가로* 범위(`TryGetWalkRange`)만 내주는 것도 같은 이유다. 사각형을 통째로 주면 아래 변이 곧 지면 높이가 되어 버린다.
 - **`CharacterInteractionRelay.cs`** — 자식 Visual에 부착, `IShiftRightClickable`만 책임 (Shift+우클릭 → 친밀도 리셋). IHoverable/IClickable은 OpaqueHoverable/ClickableEvent에 양보.
@@ -58,7 +58,7 @@ Int 값은 [BaseCharacterAnimatorController.controller](../../Assets/Animations/
 - **`Modules/ScaleModule.cs`** — 루트 `transform.localScale = _baseScale * User * Extra` 갱신. `ScaleMultiplierSettings.Character.Changed` 구독 + 호버 강조 같은 일시 `ExtraMultiplier` 슬롯 제공.
 - **`ScaleMultiplier.cs` / `ScaleMultiplierSettings.cs`** — 직렬화 단위 + 종합 ScriptableObject. UI(`UI/CharacterScaleSlider.cs`)가 `Character.Value`를 set하면 `ScaleModule`이 구독해 적용. 단 그 슬라이더는 아직 어떤 씬·프리팹에도 배치되어 있지 않다.
 - **`States/BaseCharacterState.cs`** — abstract. `OnEnter(IStateOwner)` / `Tick(IStateOwner, dt)` / `OnExit(IStateOwner)`.
-- **`States/{Idle, IdleAction, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, Transform}State.cs`** — 11개 State 클래스. `RunState`는 `WalkState` 상속(속도만 다름). `WalkState`는 시간이 아니라 *목적지 도착*으로 끝난다 — 거주 영역 안에서 목적지를 뽑고 거기까지 간다. `Interact`만 State 클래스가 없다 — enum에는 있지만 OneShot이라 `VisualModule.PlayOneShot`을 직접 호출한다.
+- **`States/{Idle, IdleAction, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, Transform}State.cs`** — 11개 State 클래스. `RunState`는 `WalkState` 상속(속도만 다름). `WalkState`는 시간이 아니라 *목적지 도착*으로 끝난다 — 거주 영역 안에서 목적지를 뽑고 거기까지 간다. `PetState`는 모션 시간이 지나면 스스로 Idle로 돌아간다 — 밖에서 꺼주는 API는 없다. `Interact`만 State 클래스가 없다 — enum에는 있지만 OneShot이라 `VisualModule.PlayOneShot`을 직접 호출한다.
 
 ## 상태 잠금 (기획서 §🛡️ 준수)
 

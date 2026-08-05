@@ -13,6 +13,7 @@ public interface IStateOwner
     float LandDuration { get; }
     float TransformDuration { get; }
     float IdleActionDuration { get; }
+    float PetDuration { get; }
     float NextIdleDuration();
 
     /// <summary>대기 시간이 끝났을 때 특수 대기로 갈지 뽑는다. false면 걷기.
@@ -26,6 +27,10 @@ public interface IStateOwner
     /// 거주 영역을 통째로 내주지 않는 이유는 <see cref="IsFootOnGround"/> 아래 설명과 같다 —
     /// 그 사각형의 아래 변이 곧 지면 높이다.</summary>
     bool TryGetWalkRange(out float minX, out float maxX);
+
+    /// <summary>지금 누르고 있는 좌클릭이 *시작된 순간*의 커서 월드 좌표. 누르는 중이 아니면 false.
+    /// 잡기 오프셋을 이 좌표로 재야 캐릭터가 커서에서 떨어진 채 끌려다니지 않는다.</summary>
+    bool TryGetPressAnchor(out Vector2 world);
 
     /// <summary>발이 지면에 닿았는가(파묻힌 경우 포함).
     /// 지면 높이 자체는 노출하지 않는다 — 이 판정을 State마다 다시 쓰면 비교 방식이 갈라진다.</summary>

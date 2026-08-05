@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-/// <summary>잡힘. 잡은 지점을 유지한 채 마우스를 따라간다. 좌클릭 릴리즈 시 바닥이면 Idle, 아니면 Fall.</summary>
+/// <summary>잡힘. 잡은 지점을 유지한 채 마우스를 따라간다. 좌클릭을 떼면 낙하한다.</summary>
 public sealed class GrabbedState : BaseCharacterState
 {
     public override CharacterState Id => CharacterState.Grabbed;
@@ -18,8 +18,18 @@ public sealed class GrabbedState : BaseCharacterState
         _camera = Camera.main;
         _grabOffset = Vector2.zero;
 
-        if (!TryGetMouseWorld(out var world)) return;
-        _grabOffset = owner.WorldPosition - world;
+        // 기준은 **누른 순간**의 커서다. 홀드가 완료된 순간으로 재면, 누른 채 커서를 옮긴 거리가
+        // 그대로 오프셋에 굳어 캐릭터가 커서에서 떨어진 채 끌려다닌다. 누른 순간을 기준으로 하면
+        // 잡히는 순간 캐릭터가 커서 쪽으로 따라붙고, 그 뒤로는 누른 지점이 커서 아래 유지된다.
+        if (owner.TryGetPressAnchor(out var anchor))
+        {
+            _grabOffset = owner.WorldPosition - anchor;
+            return;
+        }
+
+        // 누르기를 거치지 않고 들어온 경우(코드가 RequestGrab을 직접 호출) — 지금 커서로 잰다.
+        if (TryGetMouseWorld(out var world))
+            _grabOffset = owner.WorldPosition - world;
     }
 
     public override void Tick(IStateOwner owner, float dt)
@@ -29,8 +39,10 @@ public sealed class GrabbedState : BaseCharacterState
 
         owner.SetWorldPosition(world + _grabOffset);
 
+        // 놓으면 무조건 낙하다 — 발이 이미 바닥에 있었는지 따지지 않는다(확정안).
+        // 바닥에 붙은 채 놓으면 Fall이 같은 프레임에 접지를 보고 Land로 넘어간다.
         if (mouse.leftButton.wasReleasedThisFrame)
-            owner.ChangeState(owner.IsFootOnGround() ? CharacterState.Idle : CharacterState.Fall);
+            owner.ChangeState(CharacterState.Fall);
     }
 
     private bool TryGetMouseWorld(out Vector2 world)

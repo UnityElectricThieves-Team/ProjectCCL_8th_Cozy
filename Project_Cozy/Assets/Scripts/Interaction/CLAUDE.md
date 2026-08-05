@@ -15,7 +15,8 @@
 - `MoonClickIdle2D.cs` — 별(가제) 컴포넌트. `K`키로 Active 진입 → 클릭 시 prefab 리스트의 다음 1개 스폰 → 다시 Idle. 한 번 다 쓰면 더 이상 스폰 안 함. 같은 GameObject에 `DraggableObject2D`가 있으면 스폰은 mouse up 시점·드래그 아니었을 때에만 발생 — 매니저가 mouse down에서 `OnClick`을 호출하는 구조에서 클릭과 드래그를 분리하기 위한 협력.
 - `DraggableObject2D.cs` — 마우스 좌클릭 드래그로 transform 위치를 갱신. 매니저 라우팅 대신 자체로 `Mouse.current`를 폴링하고 자기 `Collider2D.OverlapPoint`로 press 시작을 판정. `PressEnded(bool wasDrag)` 이벤트로 드래그/클릭 분리 신호를 같은 GameObject의 `IClickable` 측에 공급.
 - `InputInteractionTestProbe.cs` — 3개 인터페이스를 모두 구현하고 `Debug.Log`만 하는 시연/테스트용. 인터랙터블 셋업이 맞는지 확인할 때 GameObject에 부착.
-- `OpaqueHoverable.cs` — `IHoverable`을 받아 sprite 픽셀 알파를 검사한 뒤, *불투명 영역에서만* UnityEvent(`_onOpaqueHoverEnter` / `_onOpaqueHoverExit`)로 다시 발사. 사용 조건은 같은 GameObject에 `Collider2D` + sprite 텍스처의 `Read/Write Enabled = true`.
+- `OpaqueHoverable.cs` — `IHoverable`을 받아 sprite 픽셀 알파를 검사한 뒤, *불투명 영역에서만* UnityEvent(`_onOpaqueHoverEnter` / `_onOpaqueHoverExit`)로 다시 발사. 사용 조건은 같은 GameObject에 `Collider2D` + sprite 텍스처의 `Read/Write Enabled = true`. 이벤트를 구독하지 않고 *지금 호버 중인가*만 필요한 쪽을 위해 `IsOpaqueHovered`도 노출한다.
+- `HoldClickEvent.cs` — 좌클릭을 *누른 순간*과 *누른 채 임계 시간에 도달한 순간* 둘로 갈라 UnityEvent로 발사. 캐릭터의 쓰담·잡기가 이걸로 갈린다. `DraggableObject2D`와 같은 이유로 매니저 라우팅 대신 자체 폴링한다 — 매니저는 down에서 한 번 쏘고 끝이라 *누르고 있는 대상*을 붙잡아 두지 못한다. `OpaqueHoverable`이 같이 있으면 알파 판정을 빌려 쓴다.
 
 ## 컨벤션
 

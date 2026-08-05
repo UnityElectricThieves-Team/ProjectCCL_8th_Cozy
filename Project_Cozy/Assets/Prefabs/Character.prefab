@@ -51,11 +51,13 @@ MonoBehaviour:
   _animator: {fileID: 4113159975239720336}
   _spriteRenderer: {fileID: 5591664294296824350}
   _visualCollider: {fileID: 5416345582349782209}
+  _holdInput: {fileID: 0}
   _gravity: 20
   _state:
     _idleDurationRange: {x: 10, y: 12}
     _idleActionProbability: 0.1
     _idleActionDuration: 1.5
+    _petDuration: 1.2
     _wakeUpDuration: 0.6
     _landDuration: 0.4
     _transformDuration: 0.8
@@ -74,7 +76,7 @@ MonoBehaviour:
     _startState: 0
   _affinity:
     _humanTransformThreshold: 100
-    _affinityPerHoverEnter: 10
+    _affinityPerPet: 10
     _affinityHardCap: 100000000
   _scale:
     _settings: {fileID: 11400000, guid: f969c08165cf55b468e1f3a4f2c83e7b, type: 2}
@@ -92,9 +94,9 @@ GameObject:
   - component: {fileID: 5591664294296824350}
   - component: {fileID: 5416345582349782209}
   - component: {fileID: 4528180928151775974}
-  - component: {fileID: 3454434006092565042}
   - component: {fileID: 3200586724842295907}
   - component: {fileID: 1571698509915394532}
+  - component: {fileID: 4492434332927753031}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -262,61 +264,10 @@ MonoBehaviour:
   _cursorSource: {fileID: 0}
   _onOpaqueHoverEnter:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5990119214145366604}
-        m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
-        m_MethodName: OnHover
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   _onOpaqueHoverExit:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5990119214145366604}
-        m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
-        m_MethodName: OnHoverEnd
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
---- !u!114 &3454434006092565042
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5691119776310040808}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 155ac16b6906b5a439d4fa65f4ca9994, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ClickableEvent
-  _onClick:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5990119214145366604}
-        m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
-        m_MethodName: RequestGrab
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &3200586724842295907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -344,6 +295,52 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BridgeAffinityHeart
   _affinityStepSize: 100
   _heartsPerStep: 10
+--- !u!114 &4492434332927753031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5691119776310040808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d6f084bff55dbf4588dfb3ef9b66c78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoldClickEvent
+  _holdSeconds: 1
+  _opaqueGate: {fileID: 0}
+  _cursorSource: {fileID: 0}
+  _camera: {fileID: 0}
+  _onPressStart:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5990119214145366604}
+        m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
+        m_MethodName: OnPetInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  _onHoldReached:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5990119214145366604}
+        m_TargetAssemblyTypeName: BaseCharacterController, Assembly-CSharp
+        m_MethodName: RequestGrab
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &7139112986684070208
 GameObject:
   m_ObjectHideFlags: 0

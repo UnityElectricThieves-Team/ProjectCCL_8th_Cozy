@@ -33,6 +33,11 @@ public sealed class StateModule
              "실제 애니메이션 클립 길이에 맞춰 조정할 것.")]
     [SerializeField] private float _idleActionDuration = 1.5f;
 
+    [Tooltip("쓰담 모션을 재생하는 시간(초). 이 시간이 지나면 스스로 대기로 돌아온다.\n" +
+             "재생 중에 다시 클릭해도 모션이 처음부터 다시 시작하지 않는다.\n" +
+             "실제 애니메이션 클립 길이에 맞춰 조정할 것.")]
+    [SerializeField] private float _petDuration = 1.2f;
+
     [Tooltip("취침에서 깨어나 대기로 넘어가기까지의 기상 모션 시간(초).\n" +
              "이 동안에는 쓰담·잡기 같은 외부 요청을 모두 무시한다.")]
     [SerializeField] private float _wakeUpDuration = 0.6f;
@@ -85,6 +90,7 @@ public sealed class StateModule
     public float LandDuration => _landDuration;
     public float TransformDuration => _transformDuration;
     public float IdleActionDuration => _idleActionDuration;
+    public float PetDuration => _petDuration;
     public float NextIdleDuration() => RandomInRange(_idleDurationRange);
 
     /// <summary>대기 시간이 끝났을 때 특수 대기로 갈지 뽑는다. false면 걷기.</summary>
@@ -225,20 +231,17 @@ public sealed class StateModule
         ChangeState(CharacterState.Fall);
     }
 
+    /// <summary>쓰담 진입. **자는 중에도 허용한다** — 확정안은 자는 캐릭터를 눌러도 깨는 대신
+    /// 쓰담이 뜨고, 계속 누르면 잡힘으로 넘어가도록 정하고 있다.
+    ///
+    /// 이미 Pet이면 무시하는 것이 "추가 입력으로 모션이 재시작되지 않는다"를 만든다.</summary>
     public void RequestPet()
     {
         if (IsLockedState) return;
         if (CurrentStateId == CharacterState.Pet) return;
-        if (CurrentStateId == CharacterState.Sleep) return;
         if (CurrentStateId == CharacterState.Fall) return;
         if (CurrentStateId == CharacterState.Grabbed) return;
         ChangeState(CharacterState.Pet);
-    }
-
-    public void RequestUnpet()
-    {
-        if (CurrentStateId != CharacterState.Pet) return;
-        ChangeState(CharacterState.Idle);
     }
 
     public void RequestGrab()

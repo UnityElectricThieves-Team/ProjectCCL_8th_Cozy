@@ -14,8 +14,10 @@ public sealed class AffinityModule
     [Tooltip("이 친밀도에 도달하면 소녀로 변신할 수 있다.")]
     [FormerlySerializedAs("_maxAffinity")]
     [SerializeField] private int _humanTransformThreshold = 100;
-    [Tooltip("쓰다듬기(호버 진입) 1회당 오르는 친밀도.")]
-    [SerializeField] private int _affinityPerHoverEnter = 10;
+    [Tooltip("쓰담 1회당 오르는 친밀도.\n" +
+             "쓰담은 캐릭터를 좌클릭할 때 시작한다 — 마우스를 올려두기만 해서는 오르지 않는다.")]
+    [FormerlySerializedAs("_affinityPerHoverEnter")]
+    [SerializeField] private int _affinityPerPet = 10;
     [Tooltip("친밀도 최대치. 이 값을 넘으면 더 오르지 않는다(오버플로우 방지).")]
     [SerializeField] private int _affinityHardCap = 100_000_000;
 
@@ -40,14 +42,14 @@ public sealed class AffinityModule
         _owner = owner;
     }
 
-    /// <summary>호버 진입 시 누적. 하드 상한에서 멈춘다.</summary>
-    public void AddOnHoverEnter()
+    /// <summary>쓰담 1회당 누적. 하드 상한에서 멈춘다.</summary>
+    public void AddOnPet()
     {
         var cap = Mathf.Max(1, _affinityHardCap);
         if (_affinity >= cap) return;
 
         var before = _affinity;
-        var gain = Mathf.Max(0, _affinityPerHoverEnter);
+        var gain = Mathf.Max(0, _affinityPerPet);
         _affinity = Mathf.Min(cap, _affinity + gain);
         _cumulativeAffinity = Mathf.Min(cap, _cumulativeAffinity + (_affinity - before));
 

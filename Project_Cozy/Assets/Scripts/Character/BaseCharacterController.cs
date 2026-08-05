@@ -15,6 +15,10 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     [Tooltip("[미사용] 읽는 코드가 없다. 발 위치 계산에 쓰였으나 이제 루트가 곧 발이라 필요 없다. 제거 대기.")]
     [SerializeField] private Collider2D _visualCollider;
 
+    [Tooltip("좌클릭 입력 어댑터(자식 Visual에 부착). 비우면 Awake에서 자식에서 찾는다.\n" +
+             "잡기 오프셋을 '누른 순간'의 커서로 재기 위해 참조한다.")]
+    [SerializeField] private HoldClickEvent _holdInput;
+
     [Header("Gravity")]
     [Tooltip("아래 가속도. FallState가 매 프레임 -gravity*dt로 적용.")]
     [SerializeField] private float _gravity = 12f;
@@ -67,6 +71,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public float LandDuration => _state.LandDuration;
     public float TransformDuration => _state.TransformDuration;
     public float IdleActionDuration => _state.IdleActionDuration;
+    public float PetDuration => _state.PetDuration;
     public float NextIdleDuration() => _state.NextIdleDuration();
     public bool RollIdleAction() => _state.RollIdleAction();
 
@@ -86,6 +91,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         if (_spriteRenderer == null) _spriteRenderer = GetComponent<SpriteRenderer>();
         if (_visualCollider == null && _spriteRenderer != null)
             _visualCollider = _spriteRenderer.GetComponent<Collider2D>();
+        if (_holdInput == null) _holdInput = GetComponentInChildren<HoldClickEvent>();
 
         _name = CharacterNames.Acquire();
 
@@ -139,19 +145,17 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         _visual.Play(state);
     }
 
-    // ===== UnityEvent에서 호출 가능한 공개 메서드 (호버/언호버) =====
+    // ===== UnityEvent에서 호출 가능한 공개 메서드 =====
 
-    /// <summary>호버 진입 시: 친밀도 누적 + Pet 상태 진입. OpaqueHoverable.UnityEvent에서 m_Target으로 호출.</summary>
-    public void OnHover()
+    /// <summary>캐릭터를 좌클릭한 순간: 친밀도 누적 + 쓰담 진입.
+    /// <c>HoldClickEvent</c>의 On Press Start에서 호출한다.
+    ///
+    /// 호버가 아니라 클릭인 것이 핵심이다 — 마우스를 올려두기만 해서는 아무 일도 일어나지 않는다.
+    /// 쓰담은 모션이 끝나면 스스로 Idle로 돌아가므로 짝이 되는 "종료" 메서드가 없다.</summary>
+    public void OnPetInput()
     {
-        _affinity.AddOnHoverEnter();
+        _affinity.AddOnPet();
         RequestPet();
-    }
-
-    /// <summary>호버 종료 시: Pet 종료. OpaqueHoverable.UnityEvent에서 호출.</summary>
-    public void OnHoverEnd()
-    {
-        RequestUnpet();
     }
 
     // ===== External triggers — StateModule에 위임 =====
@@ -159,7 +163,6 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public void RequestWakeUp() => _state.RequestWakeUp();
     public void RequestFall() => _state.RequestFall();
     public void RequestPet() => _state.RequestPet();
-    public void RequestUnpet() => _state.RequestUnpet();
     public void RequestGrab() => _state.RequestGrab();
 
     /// <summary>우클릭 변신 토글. 동물→소녀는 친밀도 만점 필요, 소녀→동물은 언제든. CharacterInteractionRelay.OnRightClick에서 호출.</summary>
@@ -251,6 +254,16 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         minX = _livingArea.xMin;
         maxX = _livingArea.xMax;
         return true;
+    }
+
+    /// <summary>지금 누르고 있는 좌클릭이 시작된 순간의 커서 월드 좌표. 누르는 중이 아니면 false.
+    /// 잡기 오프셋의 기준점이다 — 자세한 이유는 <c>HoldClickEvent.TryGetPressWorld</c>.</summary>
+    public bool TryGetPressAnchor(out Vector2 world)
+    {
+        if (_holdInput != null) return _holdInput.TryGetPressWorld(out world);
+
+        world = Vector2.zero;
+        return false;
     }
 
     public void SetFacing(float direction)
