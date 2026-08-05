@@ -64,9 +64,7 @@ MonoBehaviour:
     _walkSpeed: 1.5
     _runSpeed: 3.5
     _walkMinDistance: 0.5
-    _idleThresholdSeconds: 3
-    _sleepCheckInterval: 5
-    _sleepProbabilityPerCheck: 0.3
+    _idleThresholdSeconds: 1800
     _logStateChanges: 1
   _visual:
     _visualStateParameter: VisualState
