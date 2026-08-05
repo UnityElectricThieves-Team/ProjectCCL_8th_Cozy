@@ -17,17 +17,45 @@ using UnityEngine.InputSystem.Utilities;
 [Serializable]
 public sealed class StateModule
 {
-    [Header("Phase durations (sec)")]
-    [SerializeField] private Vector2 _idleDurationRange = new Vector2(1f, 2f);
-    [SerializeField] private Vector2 _walkDurationRange = new Vector2(3f, 5f);
+    [Header("Durations (모두 초 단위)")]
+    [Tooltip("대기 상태에서 다음 행동을 고르기까지 기다리는 시간의 최소~최대(초).\n" +
+             "이 시간이 지나면 걷기와 특수 대기 중 하나를 확률로 고른다.\n" +
+             "기획 확정값 10~12초.")]
+    [SerializeField] private Vector2 _idleDurationRange = new Vector2(10f, 12f);
+
+    [Range(0f, 1f)]
+    [Tooltip("대기 시간이 끝났을 때 특수 대기(하품·기지개 등)를 고를 확률.\n" +
+             "나머지 확률로 걷기를 고른다. 기획 확정값 0.1.\n" +
+             "동작을 확인할 때는 0.5쯤으로 올렸다가 되돌릴 것.")]
+    [SerializeField] private float _idleActionProbability = 0.1f;
+
+    [Tooltip("특수 대기 모션을 재생하는 시간(초). 이 시간이 지나면 대기로 돌아온다.\n" +
+             "실제 애니메이션 클립 길이에 맞춰 조정할 것.")]
+    [SerializeField] private float _idleActionDuration = 1.5f;
+
+    [Tooltip("취침에서 깨어나 대기로 넘어가기까지의 기상 모션 시간(초).\n" +
+             "이 동안에는 쓰담·잡기 같은 외부 요청을 모두 무시한다.")]
     [SerializeField] private float _wakeUpDuration = 0.6f;
+
+    [Tooltip("낙하 후 착지 모션 시간(초).\n" +
+             "이 동안에는 쓰담·잡기 같은 외부 요청을 모두 무시한다.")]
     [SerializeField] private float _landDuration = 0.4f;
-    [Tooltip("변신(Transform) 이펙트 지속시간. 중간 지점에서 폼이 스왑된다.")]
+
+    [Tooltip("변신 이펙트 시간(초). 중간 지점에서 동물↔소녀 폼이 바뀐다.\n" +
+             "이 동안에는 쓰담·잡기 같은 외부 요청을 모두 무시한다.")]
     [SerializeField] private float _transformDuration = 0.8f;
 
     [Header("Movement")]
+    [Tooltip("걷기 속도(초당 월드 단위). 뷰포트 안 목적지까지 이 속도로 이동한다.")]
     [SerializeField] private float _walkSpeed = 1.5f;
+
+    [Tooltip("달리기 속도(초당 월드 단위). 지금은 이 상태로 전환하는 곳이 없어 쓰이지 않는다.")]
     [SerializeField] private float _runSpeed = 3.5f;
+
+    [Tooltip("걷기 목적지를 뽑을 때 현재 위치에서 최소한 이만큼 떨어진 곳을 고른다(월드 단위).\n" +
+             "너무 가까운 목적지를 뽑으면 걷자마자 도착해 제자리에서 멈칫거린다.\n" +
+             "거주 영역이 이 값의 두 배보다 좁으면 반대쪽 끝으로 간다.")]
+    [SerializeField] private float _walkMinDistance = 0.5f;
 
     [Header("Sleep policy")]
     [Tooltip("이 시간 동안 무입력이 누적되면 sleep 검사 시작.")]
@@ -52,11 +80,15 @@ public sealed class StateModule
 
     public float WalkSpeed => _walkSpeed;
     public float RunSpeed => _runSpeed;
+    public float WalkMinDistance => _walkMinDistance;
     public float WakeUpDuration => _wakeUpDuration;
     public float LandDuration => _landDuration;
     public float TransformDuration => _transformDuration;
+    public float IdleActionDuration => _idleActionDuration;
     public float NextIdleDuration() => RandomInRange(_idleDurationRange);
-    public float NextWalkDuration() => RandomInRange(_walkDurationRange);
+
+    /// <summary>대기 시간이 끝났을 때 특수 대기로 갈지 뽑는다. false면 걷기.</summary>
+    public bool RollIdleAction() => UnityEngine.Random.value < _idleActionProbability;
 
     public CharacterState CurrentStateId => _current != null ? _current.Id : CharacterState.Idle;
     public string CurrentStateName => _current != null ? _current.Name : string.Empty;
@@ -78,6 +110,7 @@ public sealed class StateModule
         RegisterState(new FallState());
         RegisterState(new LandState());
         RegisterState(new TransformState());
+        RegisterState(new IdleActionState());
     }
 
     /// <summary>자식 클래스의 종별 추가 state 확장점. <see cref="BaseCharacterController.RegisterExtraStates"/>에서 호출.</summary>

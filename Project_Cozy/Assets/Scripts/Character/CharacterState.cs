@@ -16,6 +16,7 @@ public enum CharacterState
     Land        = 8,
     Transform   = 9,
     Interact    = 10,
+    IdleAction  = 11,
 }
 
 /// <summary>캐릭터 폼. <see cref="UnityEngine.AnimatorOverrideController"/> 교체로 표현. Phase 8에서 본격 활용.</summary>

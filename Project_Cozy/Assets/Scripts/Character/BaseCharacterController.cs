@@ -61,12 +61,14 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     // ===== IStateOwner: 정책 수치 (StateModule에 위임) =====
     public float WalkSpeed => _state.WalkSpeed;
     public float RunSpeed => _state.RunSpeed;
+    public float WalkMinDistance => _state.WalkMinDistance;
     public float Gravity => _gravity;
     public float WakeUpDuration => _state.WakeUpDuration;
     public float LandDuration => _state.LandDuration;
     public float TransformDuration => _state.TransformDuration;
+    public float IdleActionDuration => _state.IdleActionDuration;
     public float NextIdleDuration() => _state.NextIdleDuration();
-    public float NextWalkDuration() => _state.NextWalkDuration();
+    public bool RollIdleAction() => _state.RollIdleAction();
 
     // ===== IStateOwner: 위치 =====
     // **루트가 곧 발이다.** 프리팹에서 Visual 자식을 올려 스프라이트 아래 끝을 루트 원점에 맞춰 둔다.
@@ -230,6 +232,25 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         // 다음 Update까지 미루지 않고 여기서 부른다. 미루면 뷰포트가 바뀐 그 프레임 동안
         // 발이 지면에서 떨어진 채로 렌더된다.
         _state.EnforceFloor();
+    }
+
+    /// <summary>걸어갈 목적지를 뽑을 가로 범위. 거주 영역이 아직 안 들어왔으면 false.
+    ///
+    /// 거주 영역 <see cref="Rect"/>를 통째로 내주지 않는다 — 그 아래 변이 곧 지면 높이인데,
+    /// 높이를 밖에 내주면 "발이 바닥에 있는가"를 호출자마다 다시 쓰게 되고 비교 방식이 갈라진다
+    /// (<see cref="IsFootOnGround"/> 참고). 가로만 내주면 그 규약을 건드리지 않는다.</summary>
+    public bool TryGetWalkRange(out float minX, out float maxX)
+    {
+        if (!_hasLivingArea)
+        {
+            minX = 0f;
+            maxX = 0f;
+            return false;
+        }
+
+        minX = _livingArea.xMin;
+        maxX = _livingArea.xMax;
+        return true;
     }
 
     public void SetFacing(float direction)

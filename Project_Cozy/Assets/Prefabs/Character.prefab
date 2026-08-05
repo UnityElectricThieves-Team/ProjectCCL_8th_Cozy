@@ -53,13 +53,15 @@ MonoBehaviour:
   _visualCollider: {fileID: 5416345582349782209}
   _gravity: 20
   _state:
-    _idleDurationRange: {x: 1, y: 2}
-    _walkDurationRange: {x: 3, y: 5}
+    _idleDurationRange: {x: 10, y: 12}
+    _idleActionProbability: 0.1
+    _idleActionDuration: 1.5
     _wakeUpDuration: 0.6
     _landDuration: 0.4
     _transformDuration: 0.8
     _walkSpeed: 1.5
     _runSpeed: 3.5
+    _walkMinDistance: 0.5
     _idleThresholdSeconds: 3
     _sleepCheckInterval: 5
     _sleepProbabilityPerCheck: 0.3
