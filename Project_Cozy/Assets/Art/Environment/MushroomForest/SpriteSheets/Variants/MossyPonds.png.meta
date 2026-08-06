@@ -1,0 +1,353 @@
+fileFormatVersion: 2
+guid: 0137add03a2c3004192c7b7b01df4f26
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6263730736934365461
+    second: MossyPonds_0
+  - first:
+      213: 7861443909796562047
+    second: MossyPonds_1
+  - first:
+      213: 1996200550935050977
+    second: MossyPonds_2
+  - first:
+      213: -2538296679646306925
+    second: MossyPonds_3
+  - first:
+      213: 4834506568647594144
+    second: MossyPonds_4
+  - first:
+      213: -9200953194319187501
+    second: MossyPonds_5
+  - first:
+      213: 8407177173109577112
+    second: MossyPonds_6
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: MossyPonds_0
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 714
+        width: 420
+        height: 268
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be6d458d412c219a0800000000000000
+      internalID: -6263730736934365461
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyPonds_1
+      rect:
+        serializedVersion: 2
+        x: 463
+        y: 586
+        width: 561
+        height: 438
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline:
+      - - {x: 280.5, y: 219}
+        - {x: 276.5, y: 219}
+        - {x: 278.5, y: 214}
+        - {x: 280.5, y: 214}
+      - - {x: 213.5, y: -169}
+        - {x: 213.5, y: 63}
+        - {x: 197.5, y: 99}
+        - {x: -56.5, y: 98}
+        - {x: -131.5, y: 45}
+        - {x: -131.5, y: 90}
+        - {x: -175.5, y: 128}
+        - {x: -202.5, y: 128}
+        - {x: -280.5, y: 15}
+        - {x: -280.5, y: -134}
+        - {x: -214.5, y: -219}
+        - {x: 179.5, y: -219}
+      - - {x: -230.5, y: -121}
+        - {x: -227.07143, y: -120.57143}
+        - {x: -227.5, y: -121}
+        - {x: -231.5, y: -122}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f7405119595791d60800000000000000
+      internalID: 7861443909796562047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyPonds_2
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 537
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ea3ce223dde3bb10800000000000000
+      internalID: 1996200550935050977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyPonds_3
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 402
+        width: 498
+        height: 248
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39dd02b4e9826ccd0800000000000000
+      internalID: -2538296679646306925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyPonds_4
+      rect:
+        serializedVersion: 2
+        x: 454
+        y: 243
+        width: 512
+        height: 323
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline:
+      - - {x: 168, y: -148.5}
+        - {x: 242, y: -120.5}
+        - {x: 256, y: -86.5}
+        - {x: 256, y: -15.5}
+        - {x: 246, y: 36.5}
+        - {x: 250, y: 64.5}
+        - {x: 238, y: 147.5}
+        - {x: 232, y: 161.5}
+        - {x: 110, y: 161.5}
+        - {x: -56, y: 136.5}
+        - {x: -107, y: 108.5}
+        - {x: -256, y: -52.5}
+        - {x: -256, y: -96.5}
+        - {x: -102, y: -161.5}
+        - {x: 113, y: -161.5}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0a058802c1e971340800000000000000
+      internalID: 4834506568647594144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyPonds_5
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 60
+        width: 532
+        height: 298
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline:
+      - - {x: 26, y: 149}
+        - {x: 25, y: 149}
+        - {x: 11, y: 139}
+        - {x: -102, y: 123}
+        - {x: -109, y: 132}
+        - {x: -140, y: 149}
+        - {x: -172, y: 149}
+        - {x: -222, y: 55}
+        - {x: -216, y: 38}
+        - {x: -266, y: -38}
+        - {x: -260, y: -88}
+        - {x: -222, y: -116}
+        - {x: -132, y: -149}
+        - {x: 136, y: -149}
+        - {x: 225, y: -120}
+        - {x: 266, y: -59}
+        - {x: 266, y: -9}
+        - {x: 262, y: 6}
+        - {x: 91, y: 115}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d1fb9981d5af4080800000000000000
+      internalID: -9200953194319187501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyPonds_6
+      rect:
+        serializedVersion: 2
+        x: 572
+        y: 0
+        width: 452
+        height: 244
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 89518f6881b4ca470800000000000000
+      internalID: 8407177173109577112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 1744b8ef0cbc24b41a14e0936df550cc
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      MossyPonds_0: -6263730736934365461
+      MossyPonds_1: 7861443909796562047
+      MossyPonds_2: 1996200550935050977
+      MossyPonds_3: -2538296679646306925
+      MossyPonds_4: 4834506568647594144
+      MossyPonds_5: -9200953194319187501
+      MossyPonds_6: 8407177173109577112
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
