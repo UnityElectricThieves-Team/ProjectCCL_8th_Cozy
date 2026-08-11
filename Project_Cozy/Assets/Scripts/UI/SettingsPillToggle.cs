@@ -15,6 +15,10 @@ using UnityEngine.UI;
 /// 글자 상자의 정렬은 프리팹에서 가운데로 두는 것을 전제로 한다.
 ///
 /// 상태는 <see cref="Toggle"/>이 들고 있고 이 컴포넌트는 그리기만 한다.
+///
+/// 기본값(처음에 켜짐인지 꺼짐인지)은 여기서 정하지 않는다. 프리팹의 Is On은 에디터에서 보이는 그림일 뿐이고,
+/// 진짜 기본값은 그 설정을 실제로 쓰는 쪽이 갖는다 — 예를 들어 '항상 위'는 <see cref="WindowManager"/>의
+/// <c>_alwaysOnTop</c>이 이미 들고 있다. 이 컴포넌트에 기본값 칸을 만들면 같은 값이 세 곳에 생겨 갈라진다.
 /// </summary>
 [RequireComponent(typeof(Toggle))]
 public sealed class SettingsPillToggle : MonoBehaviour

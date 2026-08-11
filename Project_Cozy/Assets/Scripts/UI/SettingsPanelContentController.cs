@@ -8,7 +8,8 @@ using UnityEngine.UI;
 /// 탭 전환 방식과 활성/비활성 색은 <see cref="ShopPanelContentController"/>와 같은 규칙을 따른다.
 /// 다만 상점과 달리 항목이 고정이라 행을 만들어 넣지 않고, 미리 배치된 루트를 켜고 끄기만 한다.
 ///
-/// 패널 루트에 붙는다. 패널은 CanvasGroup으로 숨기므로(SetActive 아님) 이 컴포넌트는 계속 살아 있다.
+/// <c>Area_Content</c>에 붙는다. 패널은 CanvasGroup으로 숨기므로(SetActive 아님) 이 컴포넌트는 계속 살아 있다.
+/// 그래서 다시 열 때 <see cref="OnEnable"/>은 불리지 않지만, 마지막으로 고른 탭은 필드와 루트의 활성 상태로 그대로 남는다.
 /// </summary>
 public sealed class SettingsPanelContentController : MonoBehaviour
 {
