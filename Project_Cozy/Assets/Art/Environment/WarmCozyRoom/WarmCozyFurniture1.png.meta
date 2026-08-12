@@ -1,0 +1,536 @@
+fileFormatVersion: 2
+guid: ee2896023d602434bbea64d0582080ed
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -60810037029899651
+    second: type2-1_0
+  - first:
+      213: -7582757570432247802
+    second: type2-1_1
+  - first:
+      213: -4189867672778435411
+    second: type2-1_2
+  - first:
+      213: 6837245046810918618
+    second: type2-1_3
+  - first:
+      213: 6765536022666527910
+    second: type2-1_4
+  - first:
+      213: -5773058774537392030
+    second: type2-1_5
+  - first:
+      213: -6909406777024799400
+    second: type2-1_6
+  - first:
+      213: -2649425317912151201
+    second: type2-1_7
+  - first:
+      213: 7136906170706447200
+    second: type2-1_8
+  - first:
+      213: -3685287858979021765
+    second: type2-1_9
+  - first:
+      213: -5237588282653247964
+    second: type2-1_10
+  - first:
+      213: -3086907720600369633
+    second: type2-1_11
+  - first:
+      213: -245805410894288046
+    second: type2-1_12
+  - first:
+      213: 2066908097250941480
+    second: type2-1_13
+  - first:
+      213: -5884523293717102392
+    second: type2-1_14
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Type2A_Fireplace
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 441
+        width: 187
+        height: 230
+      alignment: 9
+      pivot: {x: 0.5, y: 0.008695652}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d2a53e87c9f1a244b326fffefd76a6d
+      internalID: -2044341331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_Armchair
+      rect:
+        serializedVersion: 2
+        x: 276
+        y: 440
+        width: 182
+        height: 170
+      alignment: 9
+      pivot: {x: 0.5, y: 0.01764706}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8f25484852d6f9f4ba5c733a37d3f84a
+      internalID: 1966643757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_Sofa
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 440
+        width: 258
+        height: 165
+      alignment: 9
+      pivot: {x: 0.5, y: 0.012121212}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 86b7055c82937fe439b9b24f686f24cb
+      internalID: -1783358844
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_Cabinet
+      rect:
+        serializedVersion: 2
+        x: 755
+        y: 441
+        width: 107
+        height: 158
+      alignment: 9
+      pivot: {x: 0.5, y: 0.012658228}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c291f1da2a5e7d440b8048d5c3d859e0
+      internalID: -1763105528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_Bookcase
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 441
+        width: 104
+        height: 179
+      alignment: 9
+      pivot: {x: 0.5, y: 0.011173184}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ab5622b04f34b74d8113c5dadc578fe
+      internalID: 414666285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_Vanity
+      rect:
+        serializedVersion: 2
+        x: 1016
+        y: 440
+        width: 106
+        height: 178
+      alignment: 9
+      pivot: {x: 0.5, y: 0.011235955}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8e4217e655050c647932f0caae06b219
+      internalID: 48167974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_Window
+      rect:
+        serializedVersion: 2
+        x: 1153
+        y: 441
+        width: 164
+        height: 171
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d6b257058ce13e47b6a0f038f3031ef
+      internalID: -826201298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_Door
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 138
+        width: 151
+        height: 203
+      alignment: 9
+      pivot: {x: 0.5, y: 0.009852217}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d2684bc9ea3b0cf448d33a8f2738e7b7
+      internalID: 1282222667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_CoatRack
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 137
+        width: 131
+        height: 210
+      alignment: 9
+      pivot: {x: 0.5, y: 0.00952381}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39b0d334db5be64498d88d572232ab72
+      internalID: 2061770090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_FloorLamp
+      rect:
+        serializedVersion: 2
+        x: 428
+        y: 138
+        width: 92
+        height: 199
+      alignment: 9
+      pivot: {x: 0.5, y: 0.010050251}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04854bf4f53705c4f98b6d567218ec76
+      internalID: 1485193835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_WallShelf
+      rect:
+        serializedVersion: 2
+        x: 555
+        y: 229
+        width: 148
+        height: 83
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 33512068d6e86974bb798ae76f26d3d5
+      internalID: -361293529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_PetBed
+      rect:
+        serializedVersion: 2
+        x: 708
+        y: 135
+        width: 120
+        height: 158
+      alignment: 9
+      pivot: {x: 0.5, y: 0.01898734}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d5037be232ea1145b6fe4cc23f8602c
+      internalID: 1402152407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_GiftStack
+      rect:
+        serializedVersion: 2
+        x: 847
+        y: 139
+        width: 123
+        height: 141
+      alignment: 9
+      pivot: {x: 0.5, y: 0.014184397}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ef44df829b811943aaf4526da4e342b
+      internalID: -850086783
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_Chest
+      rect:
+        serializedVersion: 2
+        x: 993
+        y: 139
+        width: 130
+        height: 110
+      alignment: 9
+      pivot: {x: 0.5, y: 0.018181818}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: db5a458076d54854e8df43ce1bd872a8
+      internalID: 1613316872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Type2A_Rug
+      rect:
+        serializedVersion: 2
+        x: 1137
+        y: 140
+        width: 190
+        height: 92
+      alignment: 9
+      pivot: {x: 0.5, y: 0.04347826}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1db4f7aa1ed000144b8fbe387302ed67
+      internalID: -1850298228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 85c71538ceccd78479cb9cad9f174cf1
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Type2A_Armchair: 1966643757
+      Type2A_Bookcase: 414666285
+      Type2A_Cabinet: -1763105528
+      Type2A_Chest: 1613316872
+      Type2A_CoatRack: 2061770090
+      Type2A_Door: 1282222667
+      Type2A_Fireplace: -2044341331
+      Type2A_FloorLamp: 1485193835
+      Type2A_GiftStack: -850086783
+      Type2A_PetBed: 1402152407
+      Type2A_Rug: -1850298228
+      Type2A_Sofa: -1783358844
+      Type2A_Tree: -1443350943
+      Type2A_Vanity: 48167974
+      Type2A_WallShelf: -361293529
+      Type2A_Window: -826201298
+      type2-1_0: -60810037029899651
+      type2-1_1: -7582757570432247802
+      type2-1_10: -5237588282653247964
+      type2-1_11: -3086907720600369633
+      type2-1_12: -245805410894288046
+      type2-1_13: 2066908097250941480
+      type2-1_14: -5884523293717102392
+      type2-1_2: -4189867672778435411
+      type2-1_3: 6837245046810918618
+      type2-1_4: 6765536022666527910
+      type2-1_5: -5773058774537392030
+      type2-1_6: -6909406777024799400
+      type2-1_7: -2649425317912151201
+      type2-1_8: 7136906170706447200
+      type2-1_9: -3685287858979021765
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
