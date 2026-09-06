@@ -272,7 +272,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8217103258307828280}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4955332638342046048}
+        m_TargetAssemblyTypeName: SettingsPanelContentController, Assembly-CSharp
+        m_MethodName: ShowGraphicsTab
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &2146493825455211156
 GameObject:
   m_ObjectHideFlags: 0
@@ -393,7 +405,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4150867588986488374}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4955332638342046048}
+        m_TargetAssemblyTypeName: SettingsPanelContentController, Assembly-CSharp
+        m_MethodName: ShowGeneralTab
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &2164024888752346963
 GameObject:
   m_ObjectHideFlags: 0
@@ -908,7 +932,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4077000847314451487}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4955332638342046048}
+        m_TargetAssemblyTypeName: SettingsPanelContentController, Assembly-CSharp
+        m_MethodName: ShowSoundTab
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &5954456398731009981
 GameObject:
   m_ObjectHideFlags: 0
@@ -2753,9 +2789,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29a9473e9342f3f48940782f4811dbab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SettingsPanelContentController
-  _generalTab: {fileID: 150167033459219315}
-  _graphicsTab: {fileID: 4396005662502318697}
-  _soundTab: {fileID: 5068577702924737998}
   _generalTabImage: {fileID: 4150867588986488374}
   _graphicsTabImage: {fileID: 8217103258307828280}
   _soundTabImage: {fileID: 4077000847314451487}

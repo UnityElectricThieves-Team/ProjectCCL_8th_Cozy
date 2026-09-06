@@ -39,6 +39,18 @@ paths:
 
 **그 대가로 GameObject가 계속 활성 상태입니다.** 즉 `OnEnable`은 씬 로드 시 한 번만 불리고, **패널을 다시 열 때는 불리지 않습니다.** 열 때마다 갱신해야 하는 표시는 `OnEnable`에 두면 안 되고, 상태가 바뀔 때 울리는 이벤트를 구독해야 합니다.
 
+## 버튼 `OnClick`은 인스펙터에서 배선한다 — 코드의 `AddListener`가 아니다
+
+컨트롤러가 `Awake`에서 `onClick.AddListener`로 거는 방식은 프리팹만 봐서는 어느 버튼이 무엇을 하는지 보이지 않습니다. 버튼을 찾으려면 코드를, 동작을 찾으려면 프리팹을 번갈아 봐야 해서 유지보수할 때 헷갈립니다. 닫기 버튼이 이미 인스펙터에서 `RequestClose()`를 무는 것과 같은 방식으로, 버튼의 `OnClick()`에 컨트롤러의 public 메서드를 직접 겁니다.
+
+- 인스펙터 `OnClick()`은 enum 인자를 넘길 수 없습니다. `SetTab(SettingsTab)`처럼 enum을 받는 메서드는 `ShowGeneralTab()` 같은 버튼별 public 메서드로 쪼갭니다.
+- 코드에서는 `Button` 참조 자체를 들고 있을 이유가 없어지므로, 탭 버튼 `[SerializeField]`는 배선을 옮기면서 같이 걷어냅니다.
+
+> **TODO — 아직 코드로 배선된 곳.** 새로 만들 때는 위 규칙을 따르고, 아래는 손댈 때 옮깁니다.
+> - `ShopPanelContentController` — 탭 2개 (`Awake`)
+> - `MenuButtonBar` — 메뉴 버튼 → `UIManager.Toggle`
+> - `ShopItemSlot`, `CollectionEntrySlot`, `BackgroundItemSlot` — 슬롯 버튼. 슬롯은 코드로 생성되므로 인스펙터 배선 대상은 슬롯 프리팹 안의 버튼입니다.
+
 ## 닫기 버튼은 `UIPanel.RequestClose()`에 건다
 
 `UIPanel.Close()`를 직접 걸면 화면에서는 사라지지만 `UIManager`의 열린 패널 목록에는 남습니다. 그러면 ESC가 이미 닫힌 패널을 대상으로 헛 눌립니다. 패널이 자기 자신을 타깃으로 삼기 때문에 프리팹 안에서 배선이 완결되는 이점도 있습니다(씬의 `UIManager`를 프리팹에서 참조할 수 없습니다).

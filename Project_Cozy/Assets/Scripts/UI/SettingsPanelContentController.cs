@@ -15,11 +15,7 @@ public sealed class SettingsPanelContentController : MonoBehaviour
 {
     private enum SettingsTab { General, Graphics, Sound }
 
-    [Header("탭 버튼")]
-    [SerializeField] private Button _generalTab;
-    [SerializeField] private Button _graphicsTab;
-    [SerializeField] private Button _soundTab;
-
+    [Header("탭 배경 이미지")]
     [Tooltip("활성/비활성 색을 칠할 탭 배경 이미지.")]
     [SerializeField] private Image _generalTabImage;
     [SerializeField] private Image _graphicsTabImage;
@@ -36,14 +32,12 @@ public sealed class SettingsPanelContentController : MonoBehaviour
 
     private SettingsTab _tab = SettingsTab.General;
 
-    private void Awake()
-    {
-        if (_generalTab != null) _generalTab.onClick.AddListener(() => SetTab(SettingsTab.General));
-        if (_graphicsTab != null) _graphicsTab.onClick.AddListener(() => SetTab(SettingsTab.Graphics));
-        if (_soundTab != null) _soundTab.onClick.AddListener(() => SetTab(SettingsTab.Sound));
-    }
-
     private void OnEnable() => SetTab(_tab); // 다시 열릴 때 현재 탭으로 복원
+
+    // 탭 버튼의 OnClick()에 인스펙터로 거는 진입점. 인스펙터는 enum 인자를 넘길 수 없어 버튼별로 나눈다.
+    public void ShowGeneralTab() => SetTab(SettingsTab.General);
+    public void ShowGraphicsTab() => SetTab(SettingsTab.Graphics);
+    public void ShowSoundTab() => SetTab(SettingsTab.Sound);
 
     private void SetTab(SettingsTab tab)
     {
