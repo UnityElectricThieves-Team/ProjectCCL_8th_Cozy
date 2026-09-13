@@ -26,6 +26,12 @@ public sealed class BackgroundSystem : MonoBehaviour
     [Tooltip("게임에 존재하는 모든 배경. 여기 늘어놓은 순서는 상점 진열 순서와 무관하다 — 진열 순서는 상점이 따로 정한다.")]
     [SerializeField] private ShopItemDefinition[] _availableBackgrounds;
 
+    [Tooltip("배경 띠 높이(베이스 공간 px). 배경 높이를 정하는 유일한 지점이며, 배경 프리팹은 이 값을 받아 쓴다. 개발자가 임의로 정한 자리표시 값이다.")]
+    [SerializeField] private int _heightBasePx = 400;
+
+    /// <summary>배경 띠 높이(베이스 공간 px). 값의 소유자는 이 인스펙터 필드 하나다.</summary>
+    public int HeightBasePx => _heightBasePx;
+
     /// <summary>
     /// 게임에 존재하는 모든 배경 목록. 상점이 이걸 받아 자기 규칙대로 정렬해 진열한다.
     /// 카탈로그를 상점 패널이 아니라 이 시스템이 드는 이유는, 배경 상태를 들고 있는 쪽이

@@ -1,8 +1,9 @@
 using UnityEngine;
 
 /// <summary>
-/// <see cref="BackgroundSystem"/>의 활성 배경을 <see cref="BackgroundStrip"/>에 이어 주는 얇은 바인더.
+/// <see cref="BackgroundSystem"/>의 활성 배경과 띠 높이를 <see cref="BackgroundStrip"/>에 이어 주는 얇은 바인더.
 /// 활성 배경이 바뀌면 그 정의의 <see cref="ShopItemDefinition.backgroundSprite"/>를 띠에 넣고, 없으면 null을 넣어 숨긴다.
+/// 높이는 시작할 때 한 번 넘긴다 — 런타임에 바뀌는 값이 아니다.
 ///
 /// 띠(<see cref="BackgroundStrip"/>)는 상점을 모르고 기하만 책임진다. 상점 쪽 상태를 아는 것은 이 컴포넌트뿐이라,
 /// 뷰포트 → 캐릭터 거주 영역을 잇는 <see cref="ViewportLivingAreaBinder"/>와 같은 자리다.
@@ -31,6 +32,7 @@ public sealed class BackgroundBinder : MonoBehaviour
         }
 
         _system.ActiveBackgroundChanged += OnActiveBackgroundChanged;
+        _strip.SetHeight(_system.HeightBasePx); // 높이의 소유자는 BackgroundSystem — 띠는 받기만 한다
         Apply();
     }
 

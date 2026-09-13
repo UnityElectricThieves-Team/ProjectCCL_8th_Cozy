@@ -4,8 +4,8 @@ using UnityEngine;
 /// 뷰포트 아래 변에 붙는 배경 띠. 스프라이트를 고정 높이(베이스 공간 px)에 맞춰 키운 뒤,
 /// 뷰포트 폭을 꽉 채울 때까지 가로로 반복한다. 이미지의 원래 크기와 무관하게 같은 높이로 보인다.
 ///
-/// 이 컴포넌트는 <b>기하만</b> 책임진다 — 어떤 스프라이트를 보일지는 밖에서 <see cref="SetSprite"/>로 넣어 준다
-/// (상점·배경 시스템을 모른다). 스프라이트가 없으면 아무것도 그리지 않아 바탕화면이 그대로 비친다.
+/// 이 컴포넌트는 <b>기하만</b> 책임진다 — 어떤 스프라이트를 보일지와 띠 높이는 밖에서 <see cref="SetSprite"/>·<see cref="SetHeight"/>로
+/// 넣어 준다(상점·배경 시스템을 모른다). 스프라이트나 높이가 없으면 아무것도 그리지 않아 바탕화면이 그대로 비친다.
 ///
 /// 반복은 SpriteRenderer의 Tiled 드로우 모드로 한다. 그래서 배경 스프라이트는 Mesh Type을 Full Rect로
 /// 임포트해야 한다 — Tight 메시로는 타일이 제대로 그려지지 않는다. 아트 샘플 씬처럼 오브젝트 여러 개를
@@ -24,8 +24,9 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public sealed class BackgroundStrip : MonoBehaviour
 {
-    [SerializeField, Tooltip("띠 높이(베이스 공간 px). 개발자가 임의로 정한 자리표시 값이며 런타임에 바꾸지 않는다.")]
-    private int _heightBasePx = 400;
+    // 띠 높이(베이스 공간 px). 인스펙터 필드가 아니다 — 값의 소유자는 BackgroundSystem 하나이고,
+    // 이 컴포넌트는 SetHeight로 받기만 한다. 두 곳에서 각자 값을 들면 어느 쪽이 맞는지 알 수 없어서다.
+    private int _heightBasePx;
 
     private SpriteRenderer _renderer;
     private ViewportScreenSettings _viewportSettings;
@@ -69,6 +70,13 @@ public sealed class BackgroundStrip : MonoBehaviour
         if (_viewportSettings != null) _viewportSettings.ViewportApplied -= OnViewportApplied;
     }
 
+    /// <summary>띠 높이(베이스 공간 px)를 정한다. 0 이하이면 띠를 숨긴다.</summary>
+    public void SetHeight(int heightBasePx)
+    {
+        _heightBasePx = heightBasePx;
+        Relayout();
+    }
+
     /// <summary>보일 스프라이트를 바꾼다. null이면 띠를 숨긴다.</summary>
     public void SetSprite(Sprite sprite)
     {
@@ -83,11 +91,11 @@ public sealed class BackgroundStrip : MonoBehaviour
         Relayout();
     }
 
-    // 뷰포트와 스프라이트가 둘 다 있을 때만 그린다. 어느 쪽이 없어도 숨긴다.
+    // 뷰포트·스프라이트·높이가 모두 있을 때만 그린다. 하나라도 없으면 숨긴다.
     private void Relayout()
     {
         Sprite sprite = _renderer.sprite;
-        if (!_hasArea || sprite == null)
+        if (!_hasArea || sprite == null || _heightBasePx <= 0)
         {
             _renderer.enabled = false;
             return;
