@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// 상점에 진열되는 상품 하나의 "정의". 게임 내내 바뀌지 않는 카탈로그 데이터만 담는다 —
-/// 저장·조회에 쓰는 안정적 <see cref="id"/>, 표시 이름, 아이콘, 가격(하트).
+/// 저장·조회에 쓰는 안정적 <see cref="id"/>, 표시 이름, 아이콘, 가격(하트),
+/// 그리고 배경 상품이면 실제로 화면에 깔릴 스프라이트(<see cref="backgroundSprite"/>).
 ///
 /// 구매 여부 같은 플레이어별 런타임 상태는 여기 담지 않는다. ScriptableObject는 전역 공유 에셋이라
 /// 플레이어마다 다른 값을 담을 수 없고, 에디터에서는 그 변경이 .asset 파일에 눌러앉기 때문이다.
@@ -24,4 +25,7 @@ public class ShopItemDefinition : ScriptableObject
 
     [Tooltip("구매에 드는 하트 수.")]
     public int price;
+
+    [Tooltip("배경 전용. 사용 중일 때 화면에 깔리는 스프라이트(Mesh Type Full Rect, pivot Center). 장식은 비워 둔다.")]
+    public Sprite backgroundSprite;
 }
