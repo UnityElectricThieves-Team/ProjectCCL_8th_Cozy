@@ -74,6 +74,24 @@ public sealed class BackgroundSystem : MonoBehaviour
     public bool IsActive(string id) => !string.IsNullOrEmpty(id) && _data.activeId == id;
 
     /// <summary>
+    /// 지금 사용 중인 배경의 정의. 활성 배경이 없거나 카탈로그에서 그 id를 못 찾으면 null.
+    /// 부팅 복원은 이벤트를 쏘지 않으므로, 렌더러가 시작할 때 현재 상태를 읽는 지점이 필요하다.
+    /// </summary>
+    public ShopItemDefinition ActiveBackground
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_data.activeId) || _availableBackgrounds == null) return null;
+            for (int i = 0; i < _availableBackgrounds.Length; i++)
+            {
+                var item = _availableBackgrounds[i];
+                if (item != null && item.id == _data.activeId) return item;
+            }
+            return null;
+        }
+    }
+
+    /// <summary>
     /// 배경을 구매한다. 이미 샀거나 잔액이 모자라면 아무 일도 없이 false.
     /// 성공하면 하트를 차감하고 구매 집합에 넣은 뒤 <see cref="OwnedChanged"/>를 울린다.
     /// </summary>
