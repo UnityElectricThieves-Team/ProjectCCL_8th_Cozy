@@ -68,6 +68,21 @@ public sealed class BackgroundSystem : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
+#if UNITY_EDITOR
+    // 배경 상품인데 실제로 깔릴 스프라이트가 비어 있으면, 사용을 눌러도 화면에 아무것도 안 그려지고
+    // 어디서도 에러가 나지 않는다. 에셋을 새로 만들 때 빠뜨린 것을 여기서 시끄럽게 알린다.
+    private void OnValidate()
+    {
+        if (_availableBackgrounds == null) return;
+        for (int i = 0; i < _availableBackgrounds.Length; i++)
+        {
+            var item = _availableBackgrounds[i];
+            if (item != null && item.backgroundSprite == null)
+                Debug.LogWarning($"[{nameof(BackgroundSystem)}] 배경 '{item.id}'의 backgroundSprite가 비어 있음 — 사용해도 화면에 아무것도 안 그려진다.", item);
+        }
+    }
+#endif
+
     /// <summary>이 배경을 이미 샀는가.</summary>
     public bool IsOwned(string id) => _data.ownedIds.Contains(id);
 
