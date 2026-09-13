@@ -76,6 +76,7 @@
 
 ### .claude/rules/ 인덱스
 - `git.md` — `paths` 없음, 항상 로드
+- `figma.md` — `paths` 없음, 항상 로드. 기획 원본인 Figma 파일을 어떤 도구로 읽는지. **기본은 브라우저이고, MCP는 명시 요청이나 정확한 수치가 필요할 때만**
 - `docs-conventions.md` — 문서·CLAUDE.md·rules를 쓸 때
 - `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/ui-panels.md`, `unity/platform.md`, `unity/project-settings.md` — 해당 파일을 열 때
 - `unity/character-ground.md` — 캐릭터 지면·발 규약. Character 스크립트·캐릭터 프리팹·캐릭터 스프라이트 임포트 설정을 열 때
