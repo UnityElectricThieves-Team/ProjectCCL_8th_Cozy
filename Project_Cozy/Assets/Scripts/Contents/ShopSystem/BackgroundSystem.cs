@@ -7,8 +7,8 @@ using UnityEngine;
 /// 배경 아이템의 런타임 상태를 들고 있는 씬 단일 시스템. "무엇을 샀는가"(구매 집합)와
 /// "지금 어느 배경을 쓰는가"(활성 배경 하나)를 관리하고, 활성 배경이 바뀔 때 이벤트로 방송한다.
 ///
-/// 이 시스템은 <b>상태와 이벤트만</b> 책임진다 — 실제로 배경을 화면에 그리는 렌더러는 아직 없다.
-/// 나중에 배경을 그릴 컴포넌트가 <see cref="ActiveBackgroundChanged"/>를 구독해 sprite를 갈아끼우면 된다.
+/// 이 시스템은 <b>상태와 이벤트만</b> 책임진다 — 실제로 배경을 화면에 그리는 것은 <see cref="BackgroundStrip"/>이고,
+/// 그 사이를 <see cref="BackgroundBinder"/>가 잇는다(<see cref="ActiveBackgroundChanged"/> 구독 + 시작 시 <see cref="ActiveBackground"/> 읽기).
 ///
 /// Figma 배경 규칙(기획):
 /// - 배경은 <b>한 번에 하나만</b> 활성. 다른 배경을 쓰면 이전 배경은 자동으로 사용 해제된다(활성 id가 하나뿐이라 자연히 성립).
@@ -38,7 +38,8 @@ public sealed class BackgroundSystem : MonoBehaviour
     /// <summary>구매 집합이 바뀌었을 때(새 배경을 샀을 때) 울린다. 슬롯들이 버튼 상태를 갱신하는 신호.</summary>
     public event Action OwnedChanged;
 
-    /// <summary>활성 배경이 바뀌었을 때 현재 활성 배경 id로 울린다(없으면 빈 문자열). 렌더러가 구독할 지점.</summary>
+    /// <summary>활성 배경이 바뀌었을 때 현재 활성 배경 id로 울린다(없으면 빈 문자열).
+    /// 구독자는 보통 인자 대신 <see cref="ActiveBackground"/>를 다시 읽는다 — 부팅 복원과 같은 경로를 타기 위해서다.</summary>
     public event Action<string> ActiveBackgroundChanged;
 
     private void Awake()
