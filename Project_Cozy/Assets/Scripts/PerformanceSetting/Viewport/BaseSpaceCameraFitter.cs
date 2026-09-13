@@ -33,6 +33,9 @@ public class BaseSpaceCameraFitter : MonoBehaviour
 
     private Camera _camera;
 
+    /// <summary>1 월드 유닛이 몇 베이스 공간 픽셀인가. 픽셀 단위 값을 월드 길이로 바꿀 때 쓴다.</summary>
+    public float PixelsPerUnit => _pixelsPerUnit;
+
     private void Awake() => _camera = GetComponent<Camera>();
 
     /// <summary>

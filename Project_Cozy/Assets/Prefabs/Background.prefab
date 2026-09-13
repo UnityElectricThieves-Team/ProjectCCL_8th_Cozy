@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5085441201252433077}
   - component: {fileID: 7831176804668435799}
+  - component: {fileID: 7891808099726352860}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -91,3 +92,16 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &7891808099726352860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6733721026875197860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22bd937dda182ca44abb15dd57f8060b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BackgroundStrip
+  _heightBasePx: 400
