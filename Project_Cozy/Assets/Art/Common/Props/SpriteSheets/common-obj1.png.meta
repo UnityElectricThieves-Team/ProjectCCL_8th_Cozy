@@ -1,0 +1,441 @@
+fileFormatVersion: 2
+guid: d9633437059e11341aefc9ad03854f5c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5507333979275374338
+    second: common-obj1_0
+  - first:
+      213: -4734797260237722499
+    second: common-obj1_1
+  - first:
+      213: 8485046602907858386
+    second: common-obj1_2
+  - first:
+      213: -7565543567464463899
+    second: common-obj1_3
+  - first:
+      213: -423001156510831920
+    second: common-obj1_4
+  - first:
+      213: -1479222055289518902
+    second: common-obj1_5
+  - first:
+      213: 3785191358544806721
+    second: common-obj1_6
+  - first:
+      213: -5844294084242598002
+    second: common-obj1_7
+  - first:
+      213: 429202496699507931
+    second: common-obj1_8
+  - first:
+      213: -107794298827741110
+    second: common-obj1_9
+  - first:
+      213: -5766443368990731282
+    second: common-obj1_10
+  - first:
+      213: 7899558531572784951
+    second: common-obj1_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Common_PottedPlantTall
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 700
+        width: 191
+        height: 270
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d4cb307cacf83af4180a5d158f73512f
+      internalID: 1983771510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_PottedPlantBushy
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 693
+        width: 211
+        height: 277
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a86826ebf79e4564cb5c2f235ec368c6
+      internalID: -519503036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_TableLamp
+      rect:
+        serializedVersion: 2
+        x: 1059
+        y: 700
+        width: 169
+        height: 250
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6bb0d08685e85db408835f3a283a90a3
+      internalID: 788470100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_FloorLamp
+      rect:
+        serializedVersion: 2
+        x: 1487
+        y: 679
+        width: 182
+        height: 311
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 60b206a2a8dbcaa4695461a3351cf3e2
+      internalID: -1407284823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_LandscapeFrame
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 388
+        width: 303
+        height: 237
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a06347f109e36b44bb0986c4c48018f4
+      internalID: -1281327151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_OvalFrame
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 371
+        width: 211
+        height: 270
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5cca84d58a11d544582a74b812345255
+      internalID: 1446866673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_WallClock
+      rect:
+        serializedVersion: 2
+        x: 1015
+        y: 377
+        width: 260
+        height: 257
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a23555cce54482743a1a14f356f12358
+      internalID: 963306694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_FlowerVase
+      rect:
+        serializedVersion: 2
+        x: 1496
+        y: 364
+        width: 165
+        height: 279
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 908115168cbfe9a4d818ee4f7be3f25b
+      internalID: -884449613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_BookStack
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 61
+        width: 306
+        height: 207
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ba66bc3e722a0004b86be52d208518e0
+      internalID: -321857787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_ThrowPillow
+      rect:
+        serializedVersion: 2
+        x: 554
+        y: 60
+        width: 270
+        height: 213
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c431aad3de9d3834c8c3a5d721a24826
+      internalID: -1458322129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_WovenBasket
+      rect:
+        serializedVersion: 2
+        x: 1009
+        y: 63
+        width: 271
+        height: 202
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c97cf3876a5c2f4da87f10b470002b9
+      internalID: 1650302163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Common_WoodenStool
+      rect:
+        serializedVersion: 2
+        x: 1484
+        y: 54
+        width: 216
+        height: 210
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 82045010e04bde941ad1efe9504ce849
+      internalID: 1607996582
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 4313fe21fefdc3642ade46c80b71250c
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Common_BookStack: -321857787
+      Common_FloorLamp: -1407284823
+      Common_FlowerVase: -884449613
+      Common_LandscapeFrame: -1281327151
+      Common_OvalFrame: 1446866673
+      Common_PottedPlantBushy: -519503036
+      Common_PottedPlantTall: 1983771510
+      Common_TableLamp: 788470100
+      Common_ThrowPillow: -1458322129
+      Common_WallClock: 963306694
+      Common_WoodenStool: 1607996582
+      Common_WovenBasket: 1650302163
+      common-obj1_0: -5507333979275374338
+      common-obj1_1: -4734797260237722499
+      common-obj1_10: -5766443368990731282
+      common-obj1_11: 7899558531572784951
+      common-obj1_2: 8485046602907858386
+      common-obj1_3: -7565543567464463899
+      common-obj1_4: -423001156510831920
+      common-obj1_5: -1479222055289518902
+      common-obj1_6: 3785191358544806721
+      common-obj1_7: -5844294084242598002
+      common-obj1_8: 429202496699507931
+      common-obj1_9: -107794298827741110
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
