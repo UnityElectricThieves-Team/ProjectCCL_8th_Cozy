@@ -3,6 +3,8 @@ paths:
   - "Project_Cozy/Assets/Scripts/UI/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Contents/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Settings*.cs"
+  - "Project_Cozy/Assets/Scripts/Gameplay/Localization*.cs"
+  - "Project_Cozy/Assets/Localization/**"
   - "Project_Cozy/Assets/Scripts/Character/CharacterNames.cs"
   - "Project_Cozy/Assets/Prefabs/UIPanels/**/*.prefab"
   - "Project_Cozy/Assets/Fonts/**"
@@ -40,7 +42,9 @@ Unity Localization 패키지는 쓰지 않고 직접 만든 가벼운 표를 씁
 
 ## 화면 글자는 키로 찾아 씁니다
 
-- **프리팹·씬·코드에 표시용 문장을 직접 넣지 않습니다.** 텍스트는 키를 들고 있고, 실제 문장은 현재 언어의 표에서 가져옵니다.
+- **프리팹·씬·코드에 표시용 문장을 직접 넣지 않습니다.** 텍스트는 키(stringID)를 들고 있고, 실제 문장은 현재 언어의 표에서 가져옵니다.
+- **프리팹에 고정된 문구는 `LocalizedText`를 붙이고, 코드가 채우는 문구는 그 코드가 `LocalizationManager`에서 직접 가져옵니다.** 둘을 한 텍스트에 같이 쓰면 언어가 바뀔 때 서로 덮어씁니다.
+- **stringID는 `화면.구역.항목` 모양으로 점으로 나눕니다.** 첫 칸은 어느 화면인지를 PascalCase로 적고(`UISettings`, `UIShop`, `UIInventory`, `UICollection`, `UITutorial`), 나머지 칸은 소문자와 밑줄로 씁니다(예: `UISettings.row.always_on_top`). ID만 보고도 문구가 화면 어디에 있는지 알 수 있게 하려는 것입니다.
 - **문장을 조각내 이어 붙이지 않습니다.** 언어마다 어순이 달라 조각 단위로는 번역할 수 없습니다. 숫자·이름처럼 실행 중에 채워지는 부분이 있으면 문장 전체를 키 하나로 두고, 그 자리를 이름 붙인 변수로 비워 둡니다.
 - **변수 이름은 영어 대문자와 밑줄로 씁니다** (예: `{AGE}`, `{ITEM_COUNT}`). `{0}` 같은 번호보다 번역하는 사람이 무엇이 들어갈지 알기 쉽습니다.
 - 날짜·숫자 표기도 언어마다 다르므로, 한국어 형식(`M월 d일` 등)을 코드에 고정하지 않습니다.
@@ -53,9 +57,19 @@ Unity Localization 패키지는 쓰지 않고 직접 만든 가벼운 표를 씁
 
 캐릭터 이름과 도감 프로필도 번역 대상이라는 것을 놓치지 마세요. 지금 이들은 필드 하나에 한 언어 문장만 담는 구조라, 표에 키를 넣는 것만으로는 해결되지 않고 데이터 구조부터 바꿔야 합니다. 도감은 데이터를 만드는 WPF 툴도 함께 바뀝니다.
 
+## 번역 표는 한 번 읽어 전부 들고 있습니다
+
+표는 `Assets/Localization/Strings.json` 하나이고, `stringID → { 언어 태그 → 문장 }` 모양입니다. 시작할 때 한 번 읽고 다섯 언어를 전부 들고 있습니다. 빈 칸을 다른 언어로 채우려면 어차피 여러 언어를 함께 들고 있어야 하고, 문장 수백 개 규모에서는 수십 KB라 부담이 없기 때문입니다. 문장이 수천 개로 늘어 언어당 수 MB가 되면, 그때는 언어별 파일로 나눠 바꿀 때마다 읽는 방식으로 옮깁니다.
+
+## 빈 칸은 en-US, 그것도 비면 가짜 번역으로 채웁니다
+
+현재 언어 칸이 비어 있으면 en-US 문장을 보여줍니다. en-US도 비어 있으면 **가짜 번역**을 보여줍니다. 한국어 문장을 괄호로 감싸고 약 40% 늘린 것입니다(예: `[설정~~]`). 한국어도 비어 있으면 stringID를 같은 모양으로 보여줍니다.
+
+가짜 번역이 화면에 보이면 그 문장은 번역이 빠졌다는 뜻입니다. 무슨 문구인지는 읽을 수 있으면서 빠진 곳이 눈에 띄고, 늘어난 길이 때문에 긴 언어가 들어왔을 때 넘칠 UI도 함께 드러납니다. **그래서 출시 전에는 en-US 칸이 하나도 비어 있으면 안 됩니다.**
+
 ## 언어가 바뀌면 이벤트로 다시 그립니다
 
-텍스트는 `SettingsManager.Changed`를 구독해 언어가 바뀌면 스스로 글자를 다시 채웁니다. 언어를 바꾼 쪽이 화면의 텍스트를 찾아다니며 갱신하지 않습니다. 구독한 컴포넌트는 꺼지거나 파괴될 때 반드시 구독을 해제합니다.
+`LocalizationManager`는 `SettingsManager.Changed`를 구독하되, 언어가 실제로 바뀐 때만 자기 `LanguageChanged`를 울립니다. `Changed`는 토글 하나만 바뀌어도 울리기 때문입니다. 텍스트는 `LanguageChanged`를 구독해 스스로 글자를 다시 채우고, 언어를 바꾼 쪽이 화면의 텍스트를 찾아다니며 갱신하지 않습니다. 구독한 컴포넌트는 파괴될 때 반드시 구독을 해제합니다.
 
 ## 아직 지원하지 않는 언어
 

@@ -1909,6 +1909,7 @@ GameObject:
   m_Component:
   - component: {fileID: 800260095}
   - component: {fileID: 800260096}
+  - component: {fileID: 800260097}
   m_Layer: 0
   m_Name: SettingsManager
   m_TagString: Untagged
@@ -1943,6 +1944,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7889cef2e890bcc41a11b3d0d079f051, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SettingsManager
+--- !u!114 &800260097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800260094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de76d238f6351ff40abb6e64653f1c44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizationManager
+  _table: {fileID: 4900000, guid: 4954be27220c1cf41a0e0e7a11e7d407, type: 3}
 --- !u!1001 &829411603
 PrefabInstance:
   m_ObjectHideFlags: 0
