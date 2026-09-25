@@ -41,6 +41,10 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     private Rect _livingArea;
     private bool _hasLivingArea;
 
+    // 소녀 변신 금지 여부. 밖에서 SetGirlTransformBanned로 주입한다(기본은 허용).
+    // 거주 영역과 같은 방식이다 — 캐릭터는 이 값이 유저 설정에서 왔다는 것을 모른다.
+    private bool _girlTransformBanned;
+
     /// <summary>거주 영역이 아직 안 들어온 씬에서 쓰는 지면 높이. 인스펙터로 열지 않는다 —
     /// 조절 가능한 바닥이 있으면 그게 다른 오차(발 위치 어긋남 등)의 보정값 노릇을 하다가,
     /// 지면 정의가 바뀌는 순간 보정이 통째로 사라진다. 실제로 그렇게 어긋난 전례가 있다.</summary>
@@ -173,6 +177,8 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     /// <summary>우클릭 변신 토글. 동물→소녀는 친밀도 만점 필요, 소녀→동물은 언제든. CharacterInteractionRelay.OnRightClick에서 호출.</summary>
     public void RequestTransform()
     {
+        // 금지 중에는 변신 시스템 자체를 끈다(UserSettings.md). 소녀는 금지를 거는 순간 동물로 돌아가 있다.
+        if (_girlTransformBanned) return;
         // 동물 → 소녀: 친밀도가 변신 임계 이상일 때만 (AILogic.md §Transform). 소녀 → 동물: 무조건 허용.
         if (_visual.CurrentForm == CharacterForm.Animal && !_affinity.CanHumanTransform) return;
         _state.RequestTransform();
@@ -286,7 +292,23 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     }
 
     public CharacterForm CurrentForm => _visual.CurrentForm;
-    public void SetForm(CharacterForm form) => _visual.SetForm(form);
+    public void SetForm(CharacterForm form)
+    {
+        // 동물→소녀 변신 도중에 금지가 걸리면, 이펙트 중간의 폼 스왑이 소녀를 되살린다. 여기서 막는다.
+        if (form == CharacterForm.Girl && _girlTransformBanned) return;
+        _visual.SetForm(form);
+    }
+
+    /// <summary>
+    /// 소녀 변신을 금지하거나 푼다. 금지하는 순간 소녀인 캐릭터는 이펙트 없이 즉시 동물로 돌아간다 —
+    /// 정상 변신 요청으로 되돌리면 수면·낙하·들림 중에는 요청이 거부되어 소녀가 남는다.
+    /// 유저 설정에서 값을 읽어 걸어주는 것은 <see cref="CharacterManager"/>다.
+    /// </summary>
+    public void SetGirlTransformBanned(bool banned)
+    {
+        _girlTransformBanned = banned;
+        if (banned && _visual.CurrentForm == CharacterForm.Girl) _visual.SetForm(CharacterForm.Animal);
+    }
 
     // ===== IStateOwner: Ground =====
 

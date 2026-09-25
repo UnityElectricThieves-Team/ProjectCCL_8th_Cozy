@@ -48,7 +48,7 @@ Int 값은 [BaseCharacterAnimatorController.controller](../../Assets/Animations/
 
 ## 현재 들어 있는 것
 
-- **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`) + 공개 메서드(`OnPetInput`/`Request{Sleep,WakeUp,Fall,Pet,Grab}`).
+- **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`) + 공개 메서드(`OnPetInput`/`Request{Sleep,WakeUp,Fall,Pet,Grab,Transform}`). 소녀 변신 금지는 거주 영역처럼 밖에서 주입받는다(`SetGirlTransformBanned` — `CharacterManager`가 유저 설정을 읽어 건다).
 - **`CharacterState.cs`** — 통합 13-state enum + `CharacterForm` enum(Animal/Girl).
 - **`IStateOwner.cs`** — State 클래스가 의존할 owner 인터페이스. 정책 수치·물리·지면 판정·ChangeState API 노출. 지면 *높이*는 내주지 않는다 — 판정은 `IsFootOnGround` 하나로 모여 있다. 걷기 목적지용으로 거주 영역의 *가로* 범위(`TryGetWalkRange`)만 내주는 것도 같은 이유다. 사각형을 통째로 주면 아래 변이 곧 지면 높이가 되어 버린다.
 - **`CharacterInteractionRelay.cs`** — 자식 Visual에 부착, `IShiftRightClickable`만 책임 (Shift+우클릭 → 친밀도 리셋). `IHoverable`은 `OpaqueHoverable`에 양보하고, 좌클릭은 매니저 라우팅을 쓰지 않는다 — `HoldClickEvent`가 자체 폴링으로 누른 시간을 재야 하기 때문이다.

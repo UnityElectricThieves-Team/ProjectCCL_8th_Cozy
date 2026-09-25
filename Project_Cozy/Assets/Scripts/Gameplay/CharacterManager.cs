@@ -35,6 +35,7 @@ public class CharacterManager : MonoBehaviour
     private Vector3 _initialSpawnPosition = new Vector3(0f, 10f, 0f);
 
     private readonly List<GameObject> _alive = new List<GameObject>();
+    private SettingsManager _settings;
 
     /// <summary>현재 살아있는 캐릭터 수.</summary>
     public int AliveCount { get { Prune(); return _alive.Count; } }
@@ -71,6 +72,10 @@ public class CharacterManager : MonoBehaviour
 
     private void Start()
     {
+        // 유저 설정 중 캐릭터에 거는 것(소녀 변신 금지)을 따라간다. 등록 시점에는 Register가 직접 건다.
+        _settings = SettingsManager.Instance;
+        if (_settings != null) _settings.Changed += ApplyUserSettingsToAll;
+
         // 1) 씬에 미리 배치된 캐릭터는 Spawn을 거치지 않아 추적 목록에 없다. 먼저 찾아서 등록한다.
         //    빠뜨리면 "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 그 캐릭터만 비껴가고,
         //    증상은 "그 캐릭터만 제한이 안 걸린다"로 나타난다. 동시 존재 캡도 그만큼 헐거워진다.
@@ -85,6 +90,7 @@ public class CharacterManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_settings != null) _settings.Changed -= ApplyUserSettingsToAll;
         if (Instance == this) Instance = null;
     }
 
@@ -97,7 +103,25 @@ public class CharacterManager : MonoBehaviour
         if (_alive.Contains(character)) return;
 
         _alive.Add(character);
+        ApplyUserSettings(character);
         Registered?.Invoke(character);
+    }
+
+    /// <summary>설정이 바뀔 때 살아있는 캐릭터 전부에 다시 건다. 어느 항목이 바뀌었는지는 모르지만,
+    /// 캐릭터 쪽 setter가 같은 값이면 아무 일도 하지 않아서 전부 다시 걸어도 괜찮다.</summary>
+    private void ApplyUserSettingsToAll()
+    {
+        var alive = Alive;
+        for (int i = 0; i < alive.Count; i++) ApplyUserSettings(alive[i]);
+    }
+
+    /// <summary>캐릭터 하나에 유저 설정을 건다. 캐릭터는 설정을 모르므로 여기서 값을 읽어 밀어넣는다.</summary>
+    private static void ApplyUserSettings(GameObject character)
+    {
+        var settings = SettingsManager.Instance;
+        if (settings == null) return;
+        var controller = character.GetComponent<BaseCharacterController>();
+        if (controller != null) controller.SetGirlTransformBanned(settings.GirlTransformBanned);
     }
 
     /// <summary>
