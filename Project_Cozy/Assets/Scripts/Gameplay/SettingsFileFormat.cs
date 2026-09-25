@@ -41,7 +41,7 @@ public class SettingsFileFormat
     public bool alwaysOnTop = false;
     /// <summary>표시 언어의 BCP 47 태그(<see cref="LanguageCodes"/>).</summary>
     public string language = LanguageCodes.English;
-    /// <summary>스폰 지점의 스폰 기운 카운트 표기. 패널의 '구름 표기'.</summary>
+    /// <summary>스폰 지점의 스폰 기운 카운트 표기. 패널의 '구름 수치'.</summary>
     public CountVisibility spawnerCountVisibility = CountVisibility.AutoHide;
     /// <summary>캐릭터 친밀도 카운트 표기. 패널의 '친밀도 표기'.</summary>
     public CountVisibility affinityVisibility = CountVisibility.AutoHide;
