@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 64924789236297150}
   - component: {fileID: 4380799688492279945}
   - component: {fileID: 372786076682722800}
+  - component: {fileID: 3811582035863335282}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -258,6 +259,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &3811582035863335282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1160629107174910880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UIInventory.button.remove
 --- !u!1 &1640149702199195475
 GameObject:
   m_ObjectHideFlags: 0
@@ -420,6 +434,7 @@ GameObject:
   - component: {fileID: 8000807203166581105}
   - component: {fileID: 2884260011087985910}
   - component: {fileID: 8322215257993002824}
+  - component: {fileID: 5483104406979187648}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -546,6 +561,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &5483104406979187648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2885588192315733995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UIInventory.button.move
 --- !u!1 &3206041833547300860
 GameObject:
   m_ObjectHideFlags: 0
@@ -1274,6 +1302,7 @@ GameObject:
   - component: {fileID: 3979219719821257780}
   - component: {fileID: 4825072681227908668}
   - component: {fileID: 8357541793134996732}
+  - component: {fileID: 3949366480154030355}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1400,6 +1429,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &3949366480154030355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7599277628170093363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UIInventory.button.retrieve
 --- !u!1001 &7528324771698225239
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1411,6 +1453,10 @@ PrefabInstance:
     - target: {fileID: 593100062747560649, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_text
       value: "\uC778\uBCA4\uD1A0\uB9AC"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8195852062261182608, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
+      propertyPath: _stringId
+      value: UIInventory.title
       objectReference: {fileID: 0}
     - target: {fileID: 720830970228027634, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_AnchorMax.y

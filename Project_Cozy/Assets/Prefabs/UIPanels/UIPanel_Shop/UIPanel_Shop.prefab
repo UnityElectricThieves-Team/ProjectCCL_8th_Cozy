@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 2222769606319274022}
   - component: {fileID: 2340324019862291}
   - component: {fileID: 9058255265365251187}
+  - component: {fileID: 3534404893223076578}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -212,6 +213,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &3534404893223076578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1019387830643921499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UIShop.tab.decoration
 --- !u!1 &1343913983586922369
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,6 +583,7 @@ GameObject:
   - component: {fileID: 2395938872371086953}
   - component: {fileID: 6648839766525649318}
   - component: {fileID: 5011658826594529840}
+  - component: {fileID: 7237172174105544721}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -695,6 +710,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &7237172174105544721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3878944097853440863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UIShop.tab.background
 --- !u!1 &4793251077562443053
 GameObject:
   m_ObjectHideFlags: 0
@@ -1181,6 +1209,10 @@ PrefabInstance:
     - target: {fileID: 593100062747560649, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_text
       value: "\uC0C1\uC810"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8195852062261182608, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
+      propertyPath: _stringId
+      value: UIShop.title
       objectReference: {fileID: 0}
     - target: {fileID: 720830970228027634, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_AnchorMax.y

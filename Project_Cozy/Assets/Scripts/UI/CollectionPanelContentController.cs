@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Assets.Scripts.Contents.CollectionSystem.Model;
 using TMPro;
 using UnityEngine;
@@ -40,16 +39,27 @@ public sealed class CollectionPanelContentController : MonoBehaviour
     // 항목별 그림 캐시. 값이 null이면 "사진이 없거나 깨진 항목"이라는 뜻이라 다시 디코드하지 않는다.
     private readonly Dictionary<CollectionData, Sprite> _pictures = new();
     private CollectionEntrySlot _selected;
+    private LocalizationManager _localization;
 
     private void Awake()
     {
         BuildSlots(CollectionDataRuntime.Load());
+
+        // 상세의 항목 이름(나이·키 등)이 언어를 따르므로, 언어가 바뀌면 고른 항목을 다시 그린다.
+        _localization = LocalizationManager.Instance;
+        if (_localization != null) _localization.LanguageChanged += OnLanguageChanged;
     }
 
     private void OnDestroy()
     {
+        if (_localization != null) _localization.LanguageChanged -= OnLanguageChanged;
         foreach (var sprite in _pictures.Values) PhotoSprite.Destroy(sprite);
         _pictures.Clear();
+    }
+
+    private void OnLanguageChanged()
+    {
+        if (_selected != null) ShowDetail(_selected.Entry);
     }
 
     private void BuildSlots(CollectionBoolData data)
@@ -114,19 +124,20 @@ public sealed class CollectionPanelContentController : MonoBehaviour
 
         if (_nameText != null) _nameText.text = entry.Name;
         if (_infoText != null) _infoText.text = BuildInfo(entry);
-        if (_affinityText != null) _affinityText.text = "친밀도: -";
+        if (_affinityText != null) _affinityText.text = LocalizationManager.Localize("UICollection.affinity_empty");
     }
 
+    // 단위와 날짜 표기도 언어마다 달라서 조각마다 번역 표의 문장을 쓴다. 값이 없으면 "-".
     private static string BuildInfo(CollectionData entry)
     {
-        var age = entry.Age > 0 ? $"{entry.Age}세" : "-";
-        var height = entry.Height > 0 ? $"{entry.Height}cm" : "-";
+        var age = entry.Age > 0 ? LocalizationManager.Localize("UICollection.age_value", ("AGE", entry.Age)) : "-";
+        var height = entry.Height > 0 ? LocalizationManager.Localize("UICollection.height_value", ("HEIGHT", entry.Height)) : "-";
         var birthday = entry.Birthday == DateTime.MinValue
             ? "-"
-            : entry.Birthday.ToString("M'월' d'일'", CultureInfo.InvariantCulture);
+            : LocalizationManager.Localize("UICollection.birthday_value", ("MONTH", entry.Birthday.Month), ("DAY", entry.Birthday.Day));
         var hobby = string.IsNullOrEmpty(entry.Hobby) ? "-" : entry.Hobby;
 
-        return $"나이: {age}\n키: {height}\n생일: {birthday}\n취미: {hobby}";
+        return LocalizationManager.Localize("UICollection.profile", ("AGE", age), ("HEIGHT", height), ("BIRTHDAY", birthday), ("HOBBY", hobby));
     }
 
 #if UNITY_EDITOR

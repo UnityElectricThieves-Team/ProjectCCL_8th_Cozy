@@ -660,6 +660,7 @@ GameObject:
   - component: {fileID: 6902049284132824298}
   - component: {fileID: 8509050104044545498}
   - component: {fileID: 920912321655396134}
+  - component: {fileID: 6607381252215834435}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -786,6 +787,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &6607381252215834435
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4908092166427550784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UICollection.button.photobook
 --- !u!1 &5113886356076283666
 GameObject:
   m_ObjectHideFlags: 0
@@ -1653,6 +1667,7 @@ GameObject:
   - component: {fileID: 8369035793545215088}
   - component: {fileID: 2188242180817320076}
   - component: {fileID: 4368321796138690392}
+  - component: {fileID: 6372837160949369182}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1779,6 +1794,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &6372837160949369182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7871224000642493247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UICollection.button.return
 --- !u!1 &8469437816330155377
 GameObject:
   m_ObjectHideFlags: 0
@@ -1790,6 +1818,7 @@ GameObject:
   - component: {fileID: 2736015693771767574}
   - component: {fileID: 4141478556072325998}
   - component: {fileID: 303736396800563579}
+  - component: {fileID: 3545673389476237519}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1916,6 +1945,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &3545673389476237519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8469437816330155377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UICollection.button.memory
 --- !u!1 &9091544881440944338
 GameObject:
   m_ObjectHideFlags: 0
@@ -1927,6 +1969,7 @@ GameObject:
   - component: {fileID: 5154060480738107853}
   - component: {fileID: 752566870883929704}
   - component: {fileID: 103068885601337}
+  - component: {fileID: 3441100234911643718}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -2053,6 +2096,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &3441100234911643718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9091544881440944338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UICollection.button.wardrobe
 --- !u!1001 &562905778965457571
 PrefabInstance:
   m_ObjectHideFlags: 0

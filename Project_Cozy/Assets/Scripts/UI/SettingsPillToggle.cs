@@ -44,11 +44,15 @@ public sealed class SettingsPillToggle : MonoBehaviour
 
     private Toggle _toggle;
     private Coroutine _slide;
+    private LocalizationManager _localization;
 
     private void Awake()
     {
         _toggle = GetComponent<Toggle>();
         _toggle.onValueChanged.AddListener(OnToggled);
+
+        _localization = LocalizationManager.Instance;
+        if (_localization != null) _localization.LanguageChanged += OnLanguageChanged;
     }
 
     // 미끄러지는 중에 숨겨지면 어중간한 자리에 멈춘다. 다시 보일 때 현재 값으로 맞춘다.
@@ -57,7 +61,10 @@ public sealed class SettingsPillToggle : MonoBehaviour
     private void OnDestroy()
     {
         if (_toggle != null) _toggle.onValueChanged.RemoveListener(OnToggled);
+        if (_localization != null) _localization.LanguageChanged -= OnLanguageChanged;
     }
+
+    private void OnLanguageChanged() => ApplyColorAndText(_toggle.isOn);
 
     private void OnToggled(bool on)
     {
@@ -107,7 +114,7 @@ public sealed class SettingsPillToggle : MonoBehaviour
     private void ApplyColorAndText(bool on)
     {
         if (_background != null) _background.color = on ? _onBackgroundColor : _offBackgroundColor;
-        if (_label != null) _label.text = on ? "ON" : "OFF";
+        if (_label != null) _label.text = LocalizationManager.Localize(on ? "UISettings.toggle.on" : "UISettings.toggle.off");
     }
 
     private float KnobTargetX(bool on) => on ? _knobOnX : _knobOffX;

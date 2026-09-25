@@ -38,6 +38,12 @@ public sealed class LocalizationManager : MonoBehaviour
     /// <summary>언어가 실제로 바뀌었을 때만 울린다. 텍스트들이 받아서 글자를 다시 채운다.</summary>
     public event Action LanguageChanged;
 
+    /// <summary>코드가 글자를 채울 때 쓰는 진입점. 매니저가 없는 씬에서도 멈추지 않게 stringID를 그대로 돌려준다.</summary>
+    public static string Localize(string id) => Instance != null ? Instance.Get(id) : id;
+
+    /// <summary><see cref="Localize(string)"/>에 <see cref="Format"/>처럼 이름 붙은 자리 채우기를 더한 것.</summary>
+    public static string Localize(string id, params (string name, object value)[] args) => Instance != null ? Instance.Format(id, args) : id;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
