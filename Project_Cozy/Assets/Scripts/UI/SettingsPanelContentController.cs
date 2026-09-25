@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -72,7 +73,11 @@ public sealed class SettingsPanelContentController : MonoBehaviour
 
     // ===== 컨트롤 → 매니저. 각 컨트롤의 OnValueChanged()에 인스펙터로 거는 진입점(동적 bool/int 인자). =====
     public void OnAlwaysOnTopChanged(bool on) { if (_settings != null) _settings.AlwaysOnTop = on; }
-    public void OnLanguageChanged(int index) { if (_settings != null) _settings.Language = (Language)index; }
+    public void OnLanguageChanged(int index)
+    {
+        // 드롭다운 옵션은 프리팹에, 태그 목록은 코드에 있어 개수가 어긋날 수 있다. 범위 밖이면 무시한다.
+        if (_settings != null && index >= 0 && index < LanguageCodes.All.Length) _settings.Language = LanguageCodes.All[index];
+    }
     public void OnSpawnerCountVisibilityChanged(int index) { if (_settings != null) _settings.SpawnerCountVisibility = (CountVisibility)index; }
     public void OnAffinityVisibilityChanged(int index) { if (_settings != null) _settings.AffinityVisibility = (CountVisibility)index; }
     public void OnAutoStartChanged(bool on) { if (_settings != null) _settings.AutoStart = on; }
@@ -89,7 +94,7 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     private void RefreshControls()
     {
         if (_alwaysOnTopToggle != null) _alwaysOnTopToggle.isOn = _settings.AlwaysOnTop;
-        if (_languageDropdown != null) _languageDropdown.value = (int)_settings.Language;
+        if (_languageDropdown != null) _languageDropdown.value = Array.IndexOf(LanguageCodes.All, _settings.Language);
         if (_spawnerCountVisibilityDropdown != null) _spawnerCountVisibilityDropdown.value = (int)_settings.SpawnerCountVisibility;
         if (_affinityVisibilityDropdown != null) _affinityVisibilityDropdown.value = (int)_settings.AffinityVisibility;
         if (_autoStartToggle != null) _autoStartToggle.isOn = _settings.AutoStart;
