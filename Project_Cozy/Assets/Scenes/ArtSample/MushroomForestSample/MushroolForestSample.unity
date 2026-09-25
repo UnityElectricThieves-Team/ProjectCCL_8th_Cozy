@@ -253,6 +253,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 547597955481057128, guid: 76890f744d7a8c9429e8ba4809798ccc, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1873453560061898002, guid: 76890f744d7a8c9429e8ba4809798ccc, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2247506583202772323, guid: 76890f744d7a8c9429e8ba4809798ccc, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2829174082523039596, guid: 76890f744d7a8c9429e8ba4809798ccc, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -293,11 +305,23 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4037021667666047341, guid: 76890f744d7a8c9429e8ba4809798ccc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7611858824163948373, guid: 76890f744d7a8c9429e8ba4809798ccc, type: 3}
       propertyPath: m_Name
       value: Mushroom Forest 3
       objectReference: {fileID: 0}
     - target: {fileID: 7611858824163948373, guid: 76890f744d7a8c9429e8ba4809798ccc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7940835653634579398, guid: 76890f744d7a8c9429e8ba4809798ccc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8979513985387510986, guid: 76890f744d7a8c9429e8ba4809798ccc, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
