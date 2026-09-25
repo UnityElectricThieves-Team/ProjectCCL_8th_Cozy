@@ -1,0 +1,295 @@
+fileFormatVersion: 2
+guid: ccdcf8eed6b4b87489418132df10463a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5864320345352690395
+    second: ObservatoryProps_0
+  - first:
+      213: -2265881240093062184
+    second: ObservatoryProps_1
+  - first:
+      213: -575118938310164304
+    second: ObservatoryProps_2
+  - first:
+      213: 5803759998034573965
+    second: ObservatoryProps_3
+  - first:
+      213: 2360010689957766080
+    second: ObservatoryProps_4
+  - first:
+      213: -374302592746259186
+    second: ObservatoryProps_5
+  - first:
+      213: -2654081270150896698
+    second: ObservatoryProps_6
+  - first:
+      213: -8348799438655467848
+    second: ObservatoryProps_7
+  - first:
+      213: 1601810338658111971
+    second: ObservatoryProps_8
+  - first:
+      213: 3435524475937970096
+    second: ObservatoryProps_9
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Astronomy_Telescope
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 513
+        width: 490
+        height: 500
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b3ed38c5670b52438c99054a06a3202
+      internalID: -651965707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Astronomy_Globe
+      rect:
+        serializedVersion: 2
+        x: 719
+        y: 516
+        width: 347
+        height: 508
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de85b860bffb2db4f8af548814641bc0
+      internalID: 332223296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Astronomy_Desk
+      rect:
+        serializedVersion: 2
+        x: 1217
+        y: 517
+        width: 542
+        height: 408
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e702bd6124eca744ebe264c756693ab7
+      internalID: -1505432569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Astronomy_Bookcase
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 8
+        width: 293
+        height: 495
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fa6e9a42905391e438167dfadb3c6dd8
+      internalID: -1647368624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Astronomy_MoonChair
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 0
+        width: 483
+        height: 489
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7c662f466402b0240b3c25884abe8ae0
+      internalID: 2078379857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Astronomy_RockingChair
+      rect:
+        serializedVersion: 2
+        x: 1328
+        y: 7
+        width: 315
+        height: 492
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d9f3b88fe7787e408b44bce80e63cd3
+      internalID: 98936017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 4273de137a7b7794e92510972d0ead8e
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Astronomy_Bookcase: -1647368624
+      Astronomy_Desk: -1505432569
+      Astronomy_Globe: 332223296
+      Astronomy_MoonChair: 2078379857
+      Astronomy_RockingChair: 98936017
+      Astronomy_Telescope: -651965707
+      ObservatoryProps_0: 5864320345352690395
+      ObservatoryProps_1: -2265881240093062184
+      ObservatoryProps_2: -575118938310164304
+      ObservatoryProps_3: 5803759998034573965
+      ObservatoryProps_4: 2360010689957766080
+      ObservatoryProps_5: -374302592746259186
+      ObservatoryProps_6: -2654081270150896698
+      ObservatoryProps_7: -8348799438655467848
+      ObservatoryProps_8: 1601810338658111971
+      ObservatoryProps_9: 3435524475937970096
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
