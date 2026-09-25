@@ -126,6 +126,10 @@ InitTestScene*.unity*
 # Auto-generated cache in Assets folder
 /Project_Cozy/[Aa]ssets/[Ss]ceneDependencyCache*
 
+# Unity crash recovery scenes
+/Project_Cozy/[Aa]ssets/_[Rr]ecovery/
+/Project_Cozy/[Aa]ssets/_[Rr]ecovery.meta
+
 # OS-specific noise
 .DS_Store
 Thumbs.db
