@@ -1,13 +1,19 @@
 using System;
 
-/// <summary>표시 언어. 설정 패널 언어 드롭다운의 옵션 순서와 같아야 한다 — 드롭다운 인덱스를 그대로 캐스팅한다.</summary>
-public enum Language
+/// <summary>
+/// 지원하는 표시 언어의 BCP 47 태그. 설정 파일에는 순서 번호가 아니라 이 태그 문자열을 저장한다 —
+/// 번호로 저장하면 언어를 끼워 넣거나 순서를 바꾸는 순간 옛 파일이 다른 언어를 가리키게 된다.
+/// <see cref="All"/>의 순서는 설정 패널 언어 드롭다운의 옵션 순서와 같아야 한다 — 드롭다운 인덱스로 이 배열을 바로 찾는다.
+/// </summary>
+public static class LanguageCodes
 {
-    English,
-    Korean,
-    ChineseSimplified,
-    ChineseTraditional,
-    Japanese,
+    public const string English = "en-US";
+    public const string Korean = "ko-KR";
+    public const string ChineseSimplified = "zh-Hans";
+    public const string ChineseTraditional = "zh-Hant";
+    public const string Japanese = "ja-JP";
+
+    public static readonly string[] All = { English, Korean, ChineseSimplified, ChineseTraditional, Japanese };
 }
 
 /// <summary>카운트(스폰 기운·친밀도) 표기 방식. 설정 패널 드롭다운의 옵션 순서와 같아야 한다.</summary>
@@ -33,8 +39,9 @@ public enum CountVisibility
 public class SettingsFileFormat
 {
     public bool alwaysOnTop = false;
-    public Language language = Language.English;
-    /// <summary>스폰 지점의 스폰 기운 카운트 표기. 패널의 '구름 표기'.</summary>
+    /// <summary>표시 언어의 BCP 47 태그(<see cref="LanguageCodes"/>).</summary>
+    public string language = LanguageCodes.English;
+    /// <summary>스폰 지점의 스폰 기운 카운트 표기. 패널의 '구름 수치'.</summary>
     public CountVisibility spawnerCountVisibility = CountVisibility.AutoHide;
     /// <summary>캐릭터 친밀도 카운트 표기. 패널의 '친밀도 표기'.</summary>
     public CountVisibility affinityVisibility = CountVisibility.AutoHide;

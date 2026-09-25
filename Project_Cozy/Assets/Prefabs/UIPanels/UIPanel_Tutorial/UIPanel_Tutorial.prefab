@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uD29C\uD1A0\uB9AC\uC5BC"
       objectReference: {fileID: 0}
+    - target: {fileID: 8195852062261182608, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
+      propertyPath: _stringId
+      value: UITutorial.title
+      objectReference: {fileID: 0}
     - target: {fileID: 720830970228027634, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

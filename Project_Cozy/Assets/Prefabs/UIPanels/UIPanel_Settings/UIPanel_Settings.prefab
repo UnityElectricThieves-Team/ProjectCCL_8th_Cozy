@@ -690,6 +690,7 @@ GameObject:
   - component: {fileID: 4245124093731385017}
   - component: {fileID: 9104662004943813926}
   - component: {fileID: 3142364795609458061}
+  - component: {fileID: 8657508271815778127}
   m_Layer: 5
   m_Name: Notice
   m_TagString: Untagged
@@ -816,6 +817,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &8657508271815778127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3701363542655850711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UISettings.save_notice
 --- !u!1 &4582120159491539278
 GameObject:
   m_ObjectHideFlags: 0
@@ -960,6 +974,7 @@ GameObject:
   - component: {fileID: 6676123127033951835}
   - component: {fileID: 475052821249624414}
   - component: {fileID: 5349508883351040206}
+  - component: {fileID: 4563750817012319730}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1086,6 +1101,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &4563750817012319730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5954456398731009981}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UISettings.tab.graphics
 --- !u!1 &6922508982938991911
 GameObject:
   m_ObjectHideFlags: 0
@@ -1097,6 +1125,7 @@ GameObject:
   - component: {fileID: 5587626091684539649}
   - component: {fileID: 142560407911744178}
   - component: {fileID: 2044808323258572670}
+  - component: {fileID: 8231670072352443425}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1223,6 +1252,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &8231670072352443425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6922508982938991911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UISettings.tab.sound
 --- !u!1 &7060158596465744809
 GameObject:
   m_ObjectHideFlags: 0
@@ -1234,6 +1276,7 @@ GameObject:
   - component: {fileID: 9149551678920275049}
   - component: {fileID: 4041718109899196940}
   - component: {fileID: 5612196106204831542}
+  - component: {fileID: 5367068965900957500}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1360,6 +1403,19 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &5367068965900957500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7060158596465744809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  _stringId: UISettings.tab.general
 --- !u!1 &7300567027924687433
 GameObject:
   m_ObjectHideFlags: 0
@@ -1846,6 +1902,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uAD00\uB9AC\uC790 \uBAA8\uB4DC"
       objectReference: {fileID: 0}
+    - target: {fileID: 3978472195075799972, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.admin_mode
+      objectReference: {fileID: 0}
     - target: {fileID: 8154074238630975652, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
       propertyPath: m_fontAsset
       value: 
@@ -1926,6 +1986,10 @@ PrefabInstance:
     - target: {fileID: 1009903808193476731, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_text
       value: "\uCE90\uB9AD\uD130 \uD06C\uAE30"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5196219493032795003, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.character_size
       objectReference: {fileID: 0}
     - target: {fileID: 3936362321794701357, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_Name
@@ -2117,6 +2181,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uD6A8\uACFC\uC74C"
       objectReference: {fileID: 0}
+    - target: {fileID: 2736381817028415955, guid: 4f4f80bfb551f7d41b136c3022ff885a, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.sfx
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2223,6 +2291,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uC74C\uC545"
       objectReference: {fileID: 0}
+    - target: {fileID: 2736381817028415955, guid: 4f4f80bfb551f7d41b136c3022ff885a, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.music
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2244,6 +2316,10 @@ PrefabInstance:
     - target: {fileID: 1009903808193476731, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_text
       value: "\uBAA8\uB2C8\uD130"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5196219493032795003, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.monitor
       objectReference: {fileID: 0}
     - target: {fileID: 1108022580893693045, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_Sprite
@@ -2443,6 +2519,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uD56D\uC0C1 \uC704"
       objectReference: {fileID: 0}
+    - target: {fileID: 3978472195075799972, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.always_on_top
+      objectReference: {fileID: 0}
     - target: {fileID: 8154074238630975652, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
       propertyPath: m_fontAsset
       value: 
@@ -2604,6 +2684,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uC5B8\uC5B4"
       objectReference: {fileID: 0}
+    - target: {fileID: 2700184676501152304, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.language
+      objectReference: {fileID: 0}
     - target: {fileID: 7162891200579256624, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_fontAsset
       value: 
@@ -2638,15 +2722,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8821010863358326591, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_Options.m_Options.Array.data[2].m_Text
-      value: "\uC911\uAD6D\uC5B4 \uAC04\uCCB4 (\uD604\uC9C0\uC5B4)"
+      value: "\u7B80\u4F53\u4E2D\u6587"
       objectReference: {fileID: 0}
     - target: {fileID: 8821010863358326591, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_Options.m_Options.Array.data[3].m_Text
-      value: "\uC911\uAD6D\uC5B4 \uBC88\uCCB4 (\uD604\uC9C0\uC5B4)"
+      value: "\u7E41\u9AD4\u4E2D\u6587"
       objectReference: {fileID: 0}
     - target: {fileID: 8821010863358326591, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_Options.m_Options.Array.data[4].m_Text
-      value: "\uC77C\uBCF8\uC5B4 (\uD604\uC9C0\uC5B4)"
+      value: "\u65E5\u672C\u8A9E"
       objectReference: {fileID: 0}
     - target: {fileID: 8821010863358326591, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_Options.m_Options.Array.data[5].m_Text
@@ -2845,6 +2929,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uC804\uCCB4 \uBCFC\uB968"
       objectReference: {fileID: 0}
+    - target: {fileID: 2736381817028415955, guid: 4f4f80bfb551f7d41b136c3022ff885a, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.master_volume
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2951,6 +3039,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uAD6C\uB984 \uD45C\uAE30"
       objectReference: {fileID: 0}
+    - target: {fileID: 2700184676501152304, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.cloud_count
+      objectReference: {fileID: 0}
     - target: {fileID: 7162891200579256624, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_fontAsset
       value: 
@@ -3043,6 +3135,10 @@ PrefabInstance:
     - target: {fileID: 593100062747560649, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_text
       value: "\uC124\uC815"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8195852062261182608, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
+      propertyPath: _stringId
+      value: UISettings.title
       objectReference: {fileID: 0}
     - target: {fileID: 720830970228027634, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_AnchorMax.y
@@ -3376,6 +3472,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uC790\uB3D9 \uC2E4\uD589"
       objectReference: {fileID: 0}
+    - target: {fileID: 3978472195075799972, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.auto_start
+      objectReference: {fileID: 0}
     - target: {fileID: 8154074238630975652, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
       propertyPath: m_fontAsset
       value: 
@@ -3533,6 +3633,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uD654\uBA74 \uD06C\uAE30"
       objectReference: {fileID: 0}
+    - target: {fileID: 1703638696035759986, guid: 5ad0853b362e0e54a8de4ac8bdf8ca59, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.screen_size
+      objectReference: {fileID: 0}
     - target: {fileID: 7573050069288629284, guid: 5ad0853b362e0e54a8de4ac8bdf8ca59, type: 3}
       propertyPath: m_Name
       value: Row_ScreenSize
@@ -3558,6 +3662,10 @@ PrefabInstance:
     - target: {fileID: 1009903808193476731, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_text
       value: "UI \uD06C\uAE30"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5196219493032795003, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.ui_size
       objectReference: {fileID: 0}
     - target: {fileID: 3936362321794701357, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_Name
@@ -3749,6 +3857,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uCE5C\uBC00\uB3C4 \uD45C\uAE30"
       objectReference: {fileID: 0}
+    - target: {fileID: 2700184676501152304, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.affinity_count
+      objectReference: {fileID: 0}
     - target: {fileID: 7162891200579256624, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_fontAsset
       value: 
@@ -3926,6 +4038,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uC18C\uB140 \uBCC0\uC2E0 \uAE08\uC9C0"
       objectReference: {fileID: 0}
+    - target: {fileID: 3978472195075799972, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.girl_transform_ban
+      objectReference: {fileID: 0}
     - target: {fileID: 8154074238630975652, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
       propertyPath: m_fontAsset
       value: 
@@ -4091,6 +4207,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uBC30\uACBD\uC74C\uC545"
       objectReference: {fileID: 0}
+    - target: {fileID: 2700184676501152304, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.bgm
+      objectReference: {fileID: 0}
     - target: {fileID: 7633047392307007848, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_text
       value: '[TEMP] BGM 1'
@@ -4128,6 +4248,10 @@ PrefabInstance:
     - target: {fileID: 1009903808193476731, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_text
       value: "(00) \uD06C\uAE30"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5196219493032795003, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+      propertyPath: _stringId
+      value: UISettings.row.something_size
       objectReference: {fileID: 0}
     - target: {fileID: 3936362321794701357, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_Name

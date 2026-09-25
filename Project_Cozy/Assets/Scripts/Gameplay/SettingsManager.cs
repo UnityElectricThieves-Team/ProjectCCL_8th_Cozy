@@ -31,7 +31,8 @@ public sealed class SettingsManager : MonoBehaviour
         set { if (_data.alwaysOnTop == value) return; _data.alwaysOnTop = value; Commit(); }
     }
 
-    public Language Language
+    /// <summary>표시 언어의 BCP 47 태그(<see cref="LanguageCodes"/>).</summary>
+    public string Language
     {
         get => _data.language;
         set { if (_data.language == value) return; _data.language = value; Commit(); }
@@ -88,13 +89,14 @@ public sealed class SettingsManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 에디터 세이브는 사람이 열어 고칠 수 있는 평문 JSON이라 enum 범위 밖 정수가 들어올 수 있다.
+    /// 에디터 세이브는 사람이 열어 고칠 수 있는 평문 JSON이라 enum 범위 밖 정수나 지원하지 않는 언어 태그가 들어올 수 있다.
     /// 그대로 두면 매니저는 그 값을 들고 드롭다운은 옵션 수에 맞춰 잘라 보여줘 둘이 어긋난다. 기본값으로 되돌린다.
+    /// 언어를 정수로 저장하던 옛 파일도 여기서 기본 언어로 돌아간다.
     /// </summary>
     private void Sanitize()
     {
         var defaults = new SettingsFileFormat();
-        if (!Enum.IsDefined(typeof(Language), _data.language)) _data.language = defaults.language;
+        if (Array.IndexOf(LanguageCodes.All, _data.language) < 0) _data.language = defaults.language;
         if (!Enum.IsDefined(typeof(CountVisibility), _data.spawnerCountVisibility)) _data.spawnerCountVisibility = defaults.spawnerCountVisibility;
         if (!Enum.IsDefined(typeof(CountVisibility), _data.affinityVisibility)) _data.affinityVisibility = defaults.affinityVisibility;
     }

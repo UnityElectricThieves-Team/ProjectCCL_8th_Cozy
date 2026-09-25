@@ -35,6 +35,19 @@ public sealed class BackgroundItemSlot : MonoBehaviour
     private static readonly Color UnaffordableColor = new(0.537f, 0.537f, 0.537f);
 
     private ShopItemDefinition _item;
+    private LocalizationManager _localization;
+
+    // 버튼 글자("사용"/"사용 취소")가 언어를 따르므로, 언어가 바뀌면 다시 그린다.
+    private void Awake()
+    {
+        _localization = LocalizationManager.Instance;
+        if (_localization != null) _localization.LanguageChanged += RefreshState;
+    }
+
+    private void OnDestroy()
+    {
+        if (_localization != null) _localization.LanguageChanged -= RefreshState;
+    }
 
     /// <summary>슬롯을 배경 상품 하나로 채운다.</summary>
     public void Bind(ShopItemDefinition item)
@@ -71,7 +84,7 @@ public sealed class BackgroundItemSlot : MonoBehaviour
         }
         else
         {
-            SetLabel(active ? "사용 취소" : "사용", AffordableColor);
+            SetLabel(LocalizationManager.Localize(active ? "UIShop.button.unuse" : "UIShop.button.use"), AffordableColor);
             if (_heartIcon != null) _heartIcon.SetActive(false);
             if (_buttonImage != null && _buyableSprite != null)
                 _buttonImage.sprite = _buyableSprite; // 사용/사용취소는 활성 스프라이트 재사용

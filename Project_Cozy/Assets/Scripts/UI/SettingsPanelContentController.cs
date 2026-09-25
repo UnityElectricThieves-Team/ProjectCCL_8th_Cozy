@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -46,14 +47,28 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     private static readonly Color ActiveTab = new(0.224f, 0.788f, 0.902f);
     private static readonly Color InactiveTab = new(0.851f, 0.851f, 0.851f);
 
+    // 카운트 표기 드롭다운의 옵션 문구. CountVisibility 순서와 같아야 한다.
+    private static readonly string[] CountVisibilityOptionIds =
+    {
+        "UISettings.option.count_always",
+        "UISettings.option.count_autohide",
+        "UISettings.option.count_hidden",
+    };
+
     private SettingsTab _tab = SettingsTab.General;
     private SettingsManager _settings;
+    private LocalizationManager _localization;
 
     private void OnEnable() => SetTab(_tab); // 다시 열릴 때 현재 탭으로 복원
 
     // 매니저는 실행 순서 -100의 Awake에서 로드를 끝내므로, Start에서는 값이 준비되어 있다.
     private void Start()
     {
+        // 드롭다운 옵션은 LocalizedText를 붙일 수 없는 곳이라 여기서 채운다. 언어 드롭다운은 번역하지 않는다.
+        RefreshCountVisibilityLabels();
+        _localization = LocalizationManager.Instance;
+        if (_localization != null) _localization.LanguageChanged += RefreshCountVisibilityLabels;
+
         _settings = SettingsManager.Instance;
         if (_settings == null)
         {
@@ -68,11 +83,30 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     private void OnDestroy()
     {
         if (_settings != null) _settings.Changed -= RefreshControls;
+        if (_localization != null) _localization.LanguageChanged -= RefreshCountVisibilityLabels;
+    }
+
+    private void RefreshCountVisibilityLabels()
+    {
+        SetOptionLabels(_spawnerCountVisibilityDropdown, CountVisibilityOptionIds);
+        SetOptionLabels(_affinityVisibilityDropdown, CountVisibilityOptionIds);
+    }
+
+    private static void SetOptionLabels(TMP_Dropdown dropdown, string[] ids)
+    {
+        if (dropdown == null) return;
+        var options = dropdown.options;
+        for (int i = 0; i < options.Count && i < ids.Length; i++) options[i].text = LocalizationManager.Localize(ids[i]);
+        dropdown.RefreshShownValue(); // 닫힌 드롭다운에 보이는 선택 항목 글자도 다시 그린다
     }
 
     // ===== 컨트롤 → 매니저. 각 컨트롤의 OnValueChanged()에 인스펙터로 거는 진입점(동적 bool/int 인자). =====
     public void OnAlwaysOnTopChanged(bool on) { if (_settings != null) _settings.AlwaysOnTop = on; }
-    public void OnLanguageChanged(int index) { if (_settings != null) _settings.Language = (Language)index; }
+    public void OnLanguageChanged(int index)
+    {
+        // 드롭다운 옵션은 프리팹에, 태그 목록은 코드에 있어 개수가 어긋날 수 있다. 범위 밖이면 무시한다.
+        if (_settings != null && index >= 0 && index < LanguageCodes.All.Length) _settings.Language = LanguageCodes.All[index];
+    }
     public void OnSpawnerCountVisibilityChanged(int index) { if (_settings != null) _settings.SpawnerCountVisibility = (CountVisibility)index; }
     public void OnAffinityVisibilityChanged(int index) { if (_settings != null) _settings.AffinityVisibility = (CountVisibility)index; }
     public void OnAutoStartChanged(bool on) { if (_settings != null) _settings.AutoStart = on; }
@@ -89,7 +123,7 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     private void RefreshControls()
     {
         if (_alwaysOnTopToggle != null) _alwaysOnTopToggle.isOn = _settings.AlwaysOnTop;
-        if (_languageDropdown != null) _languageDropdown.value = (int)_settings.Language;
+        if (_languageDropdown != null) _languageDropdown.value = Array.IndexOf(LanguageCodes.All, _settings.Language);
         if (_spawnerCountVisibilityDropdown != null) _spawnerCountVisibilityDropdown.value = (int)_settings.SpawnerCountVisibility;
         if (_affinityVisibilityDropdown != null) _affinityVisibilityDropdown.value = (int)_settings.AffinityVisibility;
         if (_autoStartToggle != null) _autoStartToggle.isOn = _settings.AutoStart;
