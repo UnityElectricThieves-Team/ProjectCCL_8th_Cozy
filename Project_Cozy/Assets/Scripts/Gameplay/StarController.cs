@@ -4,11 +4,11 @@ using UnityEngine.Serialization;
 /// <summary>
 /// 별(스폰 포인트)의 중앙 컨트롤러 — <see cref="BaseCharacterController"/>에 대응하는 별 버전.
 ///
-/// - 스폰 기운(<see cref="SpawnPointManager.CurrentEnergy"/>)이 <see cref="_threshold"/> 이상인 동안 Activated,
+/// - 누적 스폰 기운(<see cref="SpawnPointManager.CumulativeEnergy"/>)이 <see cref="_threshold"/> 이상이면 Activated,
 ///   아니면 Idle인 2상태 머신. 상태가 바뀔 때만 Animator의 Int 파라미터(<see cref="StateParameter"/>)를 갱신한다
 ///   (Character의 VisualModule과 같은 방식이되 상태 클래스 없이 단순화).
-/// - 클릭(드래그가 아니었을 때) 시 캐릭터 1개 스폰을 요청한다. 생성·동시존재 캡 판정은 <see cref="CharacterManager"/>에 위임 —
-///   캡에 막혀 생성에 실패하면 기운을 차감하지 않는다.
+/// - 클릭(드래그가 아니었을 때) 시 캐릭터 1개 스폰을 요청한다. 생성·동시존재 캡 판정은 <see cref="CharacterManager"/>에 위임한다.
+///   스폰해도 기운은 차감하지 않는다.
 ///
 /// 같은 GameObject에 <see cref="Collider2D"/>가 있어야 <see cref="InputInteractionManager"/>가 클릭을 라우팅한다.
 /// 같은 GameObject에 <see cref="DraggableObject2D"/>가 있으면 드래그가 아니었을 때(mouse up 시점)에만 스폰한다.
@@ -24,7 +24,7 @@ public sealed class StarController : MonoBehaviour, IClickable
     [SerializeField, FormerlySerializedAs("_counter")] private SpawnPointManager _spawnPoint;
 
     [Header("Spawn")]
-    [Tooltip("기운이 이 값 이상이어야 Activated가 되고 클릭 스폰이 가능하다. 클릭 1회 스폰마다 이만큼 차감.")]
+    [Tooltip("누적 기운이 이 값 이상이어야 Activated가 되고 클릭 스폰이 가능하다.")]
     [SerializeField, Min(1)] private int _threshold = 100;
     [Tooltip("클릭마다 1개 생성할 캐릭터 프리팹.")]
     [SerializeField] private GameObject _characterPrefab;
@@ -72,8 +72,8 @@ public sealed class StarController : MonoBehaviour, IClickable
         if (desired != _current) ApplyState(desired);
     }
 
-    // 스폰 가능(=Activated) 여부. CurrentEnergy는 스폰으로 차감되므로 임계값 아래로 내려가면 다시 Idle.
-    private bool IsReady() => _spawnPoint != null && _spawnPoint.CurrentEnergy >= _threshold;
+    // 스폰 가능(=Activated) 여부. 누적값은 줄지 않으므로 한 번 넘으면 계속 Activated.
+    private bool IsReady() => _spawnPoint != null && _spawnPoint.CumulativeEnergy >= _threshold;
 
     /// <summary>현재 Activated(스폰 가능) 상태인가. 디버그 표시 등 외부 노출용.</summary>
     public bool IsActivated => IsReady();
@@ -99,7 +99,7 @@ public sealed class StarController : MonoBehaviour, IClickable
         RequestSpawn();
     }
 
-    /// <summary>기운이 임계값 이상이고 캡에 여유가 있으면 캐릭터 1개를 스폰하고 기운을 차감한다.</summary>
+    /// <summary>누적 기운이 임계값 이상이고 캡에 여유가 있으면 캐릭터 1개를 스폰한다.</summary>
     private void RequestSpawn()
     {
         if (_characterPrefab == null || CharacterManager.Instance == null) return;
@@ -110,9 +110,8 @@ public sealed class StarController : MonoBehaviour, IClickable
             Random.Range(_spawnOffsetMin.y, _spawnOffsetMax.y),
             0f);
 
-        // 생성·캡 판정은 CharacterManager에 위임. null이면 캡 도달이라 기운 차감 없음.
-        var instance = CharacterManager.Instance.Spawn(_characterPrefab, transform.position + offset, _spawnParent);
-        if (instance != null) _spawnPoint.Spend(_threshold);
+        // 생성·캡 판정은 CharacterManager에 위임. 캡에 닿으면 생성하지 않는다.
+        CharacterManager.Instance.Spawn(_characterPrefab, transform.position + offset, _spawnParent);
     }
 
     private void ApplyState(StarState next)

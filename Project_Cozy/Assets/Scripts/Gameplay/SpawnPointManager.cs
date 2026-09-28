@@ -6,7 +6,7 @@ using UnityEngine.InputSystem.LowLevel;  // MouseButton
 using UnityEngine.InputSystem.Utilities; // .Call() extension method
 
 /// <summary>
-/// 스폰 포인트의 '스폰 기운'을 관리한다. 포커스 무관 입력 4채널을 모아 스폰 기운을 누적하고, 스폰으로 차감한다.
+/// 스폰 포인트의 '스폰 기운'을 관리한다. 포커스 무관 입력 4채널을 모아 스폰 기운을 누적한다. 스폰해도 차감하지 않는다.
 /// 스폰 포인트(Star 오브젝트)의 <see cref="StarController"/>는 이 관리자를 참조해 활성 여부·소환을 판단한다.
 ///
 /// <list type="bullet">
@@ -22,24 +22,13 @@ public class SpawnPointManager : MonoBehaviour
 {
     private IDisposable _anyButtonSubscription;
 
-    /// <summary>현재 스폰 기운 — 소비형. 스폰으로 차감된다.</summary>
-    public int CurrentEnergy { get; private set; }
-
-    /// <summary>줄어들지 않는 누적 스폰 기운. 스폰으로 <see cref="CurrentEnergy"/>가 깎여도 유지된다(디버그 표시·캐릭터 해금 진행도용).</summary>
+    /// <summary>누적 스폰 기운. 쌓이기만 하고 스폰해도 차감되지 않는다.</summary>
     public int CumulativeEnergy { get; private set; }
 
-    /// <summary>입력 1회 — 소비형 <see cref="CurrentEnergy"/>와 누적 <see cref="CumulativeEnergy"/>를 함께 올린다. 모든 입력 채널이 이 메서드를 통한다.</summary>
+    /// <summary>입력 1회 — 누적 <see cref="CumulativeEnergy"/>를 올린다. 모든 입력 채널이 이 메서드를 통한다.</summary>
     private void Increment()
     {
-        CurrentEnergy++;
         CumulativeEnergy++;
-    }
-
-    /// <summary>스폰 기운 차감. 음수로 가지 않도록 0에서 클램프.</summary>
-    public void Spend(int amount)
-    {
-        if (amount <= 0) return;
-        CurrentEnergy = Mathf.Max(0, CurrentEnergy - amount);
     }
 
     private void OnEnable()
