@@ -35,6 +35,7 @@ Windows 창의 외형, 입력 통과, 이동·리사이즈를 관리한다.
 - **Editor 보호.** Win32 호출은 반드시 `#if !UNITY_EDITOR` 가드 안에서. Editor에서 실행하면 Unity Editor 자체의 창/입력이 망가진다.
 - **델리게이트 GC 방지.** OS에 함수 포인터로 넘기는 콜백(`WndProc`, `LowLevelKeyboardProc` 등)은 **static 필드**에 보관. 인스턴스 필드만 두면 GC 수거 후 OS가 함수 호출 시점에 액세스 위반.
 - **콜백 스레드 주의.** WndProc / LL 훅 콜백은 메시지 펌프 스레드에서 호출될 수 있다. `UnityEngine` API 직접 호출 금지 — `ConcurrentQueue`로 enqueue → 메인 스레드 `Update`에서 dequeue.
+- **창 동작 정지는 소유자별로 걸고 푼다.** `WindowManager`의 클릭 통과 정지와 가장자리 리사이즈 정지는 `Acquire…Suspend(owner)` / `Release…Suspend(owner)`로 쓴다. owner는 보통 호출하는 컴포넌트 자신(`this`)이다. 여러 곳(뷰포트 편집, 장식 배치 등)이 동시에 걸 수 있어서, 한쪽이 풀어도 다른 쪽이 건 정지는 유지되고 모든 소유자가 풀어야 재개된다. 개수 카운터가 아니라 소유자 집합인 이유는 같은 owner의 중복 걸기·중복 풀기를 한 번으로 쳐서 짝이 어긋나도 영구히 꼬이지 않게 하기 위해서다. 정지를 건 컴포넌트는 `OnDisable`에서도 반드시 자기 것을 푼다 — 클릭 통과 정지가 남으면 창이 바탕화면의 모든 클릭을 흡수하고, 사용자에게는 복구 수단이 없다. 리사이즈 쪽 집합은 메인 스레드에서만 고치고, WndProc은 "비었는가"를 미러한 volatile bool만 읽는다.
 - **순수 로직은 `UnityEngine` 의존 없이.** `HitTestCalculator`처럼 좌표 계산만 하는 헬퍼는 `using UnityEngine`을 빼서 EditMode 테스트가 가능하게.
 - **Namespace 미사용.** 팀 컨벤션에 따라 글로벌 namespace 유지.
 

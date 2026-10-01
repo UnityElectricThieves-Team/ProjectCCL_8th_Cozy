@@ -21,7 +21,7 @@ using UnityEngine.EventSystems;
 ///     ※ Unity 카메라 clear color가 검정(0,0,0)이어야 작동.
 ///
 /// 토글 변경은 부팅 시 1회만 반영 (런타임 변경 미지원).
-/// 예외 — 런타임 영역 API: ApplyRegion / TryGetWorkAreaRect / SetClickThroughSuspended 등.
+/// 예외 — 런타임 영역 API: ApplyRegion / TryGetWorkAreaRect / AcquireClickThroughSuspend 등.
 ///
 /// **창 배치의 주인은 정책 레이어(ViewportScreenSettings)다.** 이 클래스는 시키는 대로 놓기만 한다.
 /// 창은 작업 영역에 고정이고 평상시 크기가 바뀌지 않으며, 사용자가 "윈도우 크기 재조정"을 누를 때만
@@ -166,15 +166,20 @@ public class WindowManager : MonoBehaviour
     static int  _sEdge, _sCorner, _sCaptionH, _sCaptionW;
     static int  _sMinW, _sMinH, _sMaxW, _sMaxH;
     static bool _sAlwaysOnTopForExitSizeMove;
-    static volatile bool _sResizeSuspended; // 편집 모드 등에서 가장자리 리사이즈 히트테스트 정지
+    static volatile bool _sResizeSuspended; // _resizeSuspendOwners가 비어 있지 않은가의 미러 — 메인 스레드만 쓴다
     static volatile bool _sSizeMoveEnded;   // 메시지 스레드 → 메인 스레드 신호 (WM_EXITSIZEMOVE)
 
     // ===== 런타임 상태 =====
     IntPtr _hwnd             = IntPtr.Zero;
     bool   _wndProcInstalled = false;
     bool   _isClickThroughOn = false; // Win32의 WS_EX_TRANSPARENT 비트와 동기화된 캐시
-    bool   _clickThroughSuspended = false; // 편집 모드 등에서 hover 폴링을 잠시 정지
     Camera _camera;
+
+    // 정지를 건 소유자들. 하나라도 남아 있으면 정지 상태다 — 한 소유자가 풀어도 다른 소유자의 정지는 유지된다.
+    // 개수 카운터가 아니라 집합인 이유: 같은 소유자의 중복 걸기·중복 풀기를 한 번으로 쳐야
+    // 짝이 안 맞는 해제 한 번에 정지가 영구히 어긋나지 않는다.
+    readonly HashSet<object> _clickThroughSuspendOwners = new HashSet<object>();
+    readonly HashSet<object> _resizeSuspendOwners       = new HashSet<object>();
 
     void Awake()
     {
@@ -230,7 +235,7 @@ public class WindowManager : MonoBehaviour
             WindowRectChangedByUser?.Invoke();
         }
 
-        if (!_hoverAwareClickThrough || _clickThroughSuspended || _hwnd == IntPtr.Zero) return;
+        if (!_hoverAwareClickThrough || _clickThroughSuspendOwners.Count > 0 || _hwnd == IntPtr.Zero) return;
 
         // Camera.main이 씬 로드 직후엔 null일 수 있어 lazy로 가져옴.
         if (_camera == null)
@@ -372,22 +377,42 @@ public class WindowManager : MonoBehaviour
         return true;
     }
 
-    /// <summary>가장자리 리사이즈(WndProc NCHITTEST)를 잠시 정지/재개. 뷰포트 편집 중에는
-    /// 창이 모니터 전체 + 뷰포트 조정은 핸들 UI 담당이라 OS 리사이즈가 무의미하고,
-    /// 가장자리 클릭이 리사이즈로 오인되면 편집 핸들 조작과 충돌한다.</summary>
-    public void SetResizeSuspended(bool suspended) => _sResizeSuspended = suspended;
+    // 정지 API는 소유자별로 걸고 푼다. 소유자는 보통 호출하는 컴포넌트 자신(this)이다.
+    // 같은 소유자가 두 번 걸거나 두 번 풀어도 한 번으로 치고, 모든 소유자가 풀었을 때만 재개한다.
+    // 건 쪽은 파괴될 때(OnDisable)도 반드시 자기 것을 풀어야 한다 — 남으면 창이 모든 클릭을 흡수한다.
 
-    /// <summary>hover 클릭 통과 폴링을 잠시 정지/재개. 뷰포트 편집 중에는 빈 공간에서도
-    /// 핸들 드래그가 잡혀야 하므로 정지하고, 통과 상태면 즉시 해제한다.</summary>
-    public void SetClickThroughSuspended(bool suspended)
+    /// <summary>가장자리 리사이즈(WndProc NCHITTEST)를 정지한다. 뷰포트 편집 중에는
+    /// 뷰포트 조정을 핸들 UI가 맡아 OS 리사이즈가 무의미하고,
+    /// 가장자리 클릭이 리사이즈로 오인되면 편집 핸들 조작과 충돌한다.</summary>
+    public void AcquireResizeSuspend(object owner)
     {
-        _clickThroughSuspended = suspended;
-        if (suspended && _isClickThroughOn && _hwnd != IntPtr.Zero)
+        _resizeSuspendOwners.Add(owner);
+        _sResizeSuspended = true;
+    }
+
+    /// <summary>owner가 건 리사이즈 정지를 푼다. 다른 소유자가 남아 있으면 정지는 유지된다.
+    /// 걸지 않은 owner로 불러도 안전하다.</summary>
+    public void ReleaseResizeSuspend(object owner)
+    {
+        _resizeSuspendOwners.Remove(owner);
+        _sResizeSuspended = _resizeSuspendOwners.Count > 0;
+    }
+
+    /// <summary>hover 클릭 통과 폴링을 정지한다. 뷰포트 편집 중에는 빈 공간에서도
+    /// 핸들 드래그가 잡혀야 하므로 정지하고, 통과 상태면 즉시 해제한다.</summary>
+    public void AcquireClickThroughSuspend(object owner)
+    {
+        _clickThroughSuspendOwners.Add(owner);
+        if (_isClickThroughOn && _hwnd != IntPtr.Zero)
         {
             ApplyClickThrough(false);
             _isClickThroughOn = false;
         }
     }
+
+    /// <summary>owner가 건 클릭 통과 정지를 푼다. 모든 소유자가 풀면 다음 Update부터 폴링이 재개된다.
+    /// 걸지 않은 owner로 불러도 안전하다.</summary>
+    public void ReleaseClickThroughSuspend(object owner) => _clickThroughSuspendOwners.Remove(owner);
 
     /// <summary>현재 창 rect(스크린 좌표, 픽셀). Editor/획득 실패 시 false.</summary>
     public bool TryGetWindowRect(out RectInt windowRect)
