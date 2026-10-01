@@ -54,13 +54,21 @@ public class ViewportSaveBinder : MonoBehaviour
         // 안전한 경로를 타게 된다.
         if (data.width <= 0 || data.height <= 0) return;
 
-        _settings.SetViewport(new RectInt(data.x, data.y, data.width, data.height));
+        var rect = new RectInt(data.x, data.y, data.width, data.height);
+
+        // 파일 버전을 아는 곳은 여기뿐이다. 옛 파일(작업 영역 px)은 단위 이름으로 된 입구에 넣고,
+        // 정책 쪽은 버전이 아니라 단위만 보고 환산한다. 파일은 다음 저장 때 새 단위로 다시 써진다.
+        if (data.version < ViewportFileFormat.FormatVersion)
+            _settings.SetViewportFromWorkAreaPx(rect);
+        else
+            _settings.SetViewport(rect);
     }
 
     private void OnViewportSaved(RectInt viewport)
     {
         UserDataSaveIO.Save(GameDataPaths.Viewport, new ViewportFileFormat
         {
+            version = ViewportFileFormat.FormatVersion,
             x = viewport.x,
             y = viewport.y,
             width = viewport.width,

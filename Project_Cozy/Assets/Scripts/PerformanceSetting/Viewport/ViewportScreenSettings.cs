@@ -7,7 +7,12 @@ using UnityEngine;
 ///
 /// 창:          항상 현재 모니터의 **작업 영역**(작업표시줄을 뺀 영역)에 놓인다. 평상시에는 크기도
 ///              위치도 변하지 않고, ReadjustWindow()를 부를 때만 다시 잡는다.
-/// 베이스 공간: = 작업 영역. 카메라는 이 전체를 절대 픽셀 1:1로 비추며, 재조정 때 말고는 건드리지 않는다.
+/// 베이스 공간: 작업 영역을 **마스터 캔버스 기준 px**로 표현한 것. 폭은 항상 마스터 캔버스 폭이고,
+///              높이는 작업 영역의 종횡비를 따른다. 카메라는 이 전체를 비추며, 재조정 때 말고는
+///              건드리지 않는다. 화면에서는 베이스 px 하나가 (작업 영역 폭 / 마스터 캔버스 폭) 화면 px로
+///              보인다 — UI의 CanvasScaler(기준 폭 일치, Match=Width)와 같은 배율이라, 어느 해상도에서든
+///              월드와 UI가 같은 비율로 줄어든다. 이 클래스가 그 단위 정의의 유일한 원천이다
+///              (RefreshBaseSpace). px→월드 환산(앵커·PPU)은 BaseSpaceCameraFitter가 든다.
 /// 뷰포트:      베이스 공간 안의 논리적 사각형. **렌더링 파라미터가 아니다** — 창을 줄이지도 화면을
 ///              잘라내지도 않는다. 캐릭터가 살 수 있는 영역이자 지면·회수 판정의 기준이다.
 /// 편집:        조정값은 프리뷰일 뿐이며(PreviewChanged로 UI가 경계·딤·회수 예정 시각화),
@@ -17,13 +22,20 @@ using UnityEngine;
 ///
 /// Win32를 모른다 — 창 배치·클릭 통과는 WindowManager에 위임(HWND 접점은 그쪽 한 곳).
 /// 영속화도 모른다 — 확정 뷰포트는 ViewportSaved 구독 측(ViewportSaveBinder)이 저장하고,
-/// 로드 시 SetViewport()로 주입한다(베이스 공간 밖 값은 자동 클램프).
+/// 로드 시 SetViewport()로 주입한다(베이스 공간 밖 값은 자동 클램프). 작업 영역 px 단위로 저장된
+/// 옛 값은 SetViewportFromWorkAreaPx()로 넣으면 여기서 환산한다 — 파일 버전은 모르고 단위만 안다.
 /// </summary>
 [DisallowMultipleComponent]
 public class ViewportScreenSettings : MonoBehaviour
 {
-    /// <summary>§2.1.1 제약 — 뷰포트 최소 크기(절대 픽셀).</summary>
+    /// <summary>§2.1.1 제약 — 뷰포트 최소 크기(베이스 공간 px = 마스터 캔버스 기준 px).
+    /// 기획서의 "절대 픽셀"을 마스터 캔버스 좌표계의 픽셀로 해석한 것이라, 4K에서만 화면 px와 같다.</summary>
     public static readonly Vector2Int MinViewportSize = new Vector2Int(720, 480);
+
+    // 마스터 캔버스 폭(px). 베이스 공간의 폭이자 화면 배율의 분모다. GameScene의 UIRoot CanvasScaler
+    // 기준 해상도 폭과 같아야 월드와 UI가 같은 배율로 줄어든다 — 씬 값은 인스펙터에서 바뀌므로 코드로
+    // 강제하지 못한다. 규약은 .claude/rules/unity/viewport-coordinates.md.
+    private const int MasterCanvasWidthPx = 3840;
 
     [Header("협력자")]
     [SerializeField] private WindowManager _windowManager;
@@ -34,10 +46,15 @@ public class ViewportScreenSettings : MonoBehaviour
     private RectInt _viewport = new RectInt(0, 0, 0, 0);
 
     private RectInt _previewViewport;
-    private RectInt _baseSpaceScreenRect;      // 베이스 공간의 원점·크기를 스크린 좌표(Y 아래)로 표현한 것 = 작업 영역
-    private Vector2Int _baseSpaceSize;         // = 작업 영역 크기
+    private RectInt _baseSpaceScreenRect;      // 작업 영역을 스크린 좌표(화면 px, Y 아래)로 표현한 것 — 창 배치용
+    private Vector2Int _baseSpaceSize;         // 베이스 공간 크기(마스터 캔버스 기준 px) — 폭은 항상 MasterCanvasWidthPx
     private bool _isEditing;
     private bool _ready;                       // 초기 적용 완료 전 API 호출 가드
+
+    // ready 전에 작업 영역 px 단위로 들어온 뷰포트. 환산에 필요한 배율은 Start에서 작업 영역을 읽은 뒤에야
+    // 알 수 있어 그때까지 따로 들고 있는다. _viewport에 섞어 두면 어느 단위인지 알 수 없어진다.
+    private RectInt _pendingWorkAreaPx;
+    private bool _hasPendingWorkAreaPx;
 
     /// <summary>확정된 뷰포트(베이스 공간 px, 원점=좌하단).</summary>
     public RectInt Viewport => _viewport;
@@ -50,7 +67,8 @@ public class ViewportScreenSettings : MonoBehaviour
     /// <summary>초기 적용 완료 여부. false 동안 EnterEdit/ReadjustWindow는 거부된다 — UI는 이걸로 버튼을 잠글 것.</summary>
     public bool IsReady => _ready;
 
-    /// <summary>베이스 공간 크기(px) = 현재 모니터의 작업 영역 크기.</summary>
+    /// <summary>베이스 공간 크기(마스터 캔버스 기준 px). 폭은 항상 마스터 캔버스 폭이고 높이는 작업 영역의
+    /// 종횡비를 따른다. 화면 px가 아니다 — 화면 px로 바꾸려면 Screen 크기와의 비율을 곱한다.</summary>
     public Vector2Int BaseSpaceSize => _baseSpaceSize;
 
     /// <summary>편집 중 프리뷰 변경 — UI가 경계 핸들·바깥 딤·회수 예정 표시를 갱신하는 지점.</summary>
@@ -83,6 +101,20 @@ public class ViewportScreenSettings : MonoBehaviour
 
         ApplyScreenLayout();
 
+        // 창 배치가 Screen 크기에 반영되는 것은 다음 프레임이라, 진단 로그는 한 프레임 뒤에 찍는다.
+        // 부팅 1회뿐이라 영구로 둔다 — 해상도·DPI 문제 보고를 받았을 때 Player.log에서 바로 읽는 값이다.
+        yield return null;
+        Debug.Log($"[ViewportScreenSettings] 작업 영역 {_baseSpaceScreenRect} / 화면 {Screen.width}x{Screen.height} / " +
+                  $"베이스 공간 {_baseSpaceSize} / 베이스 px당 화면 px {ScreenPxPerBasePx:F4}");
+
+        // 작업 영역 px 단위로 들어온 옛 값은 배율을 안 지금 환산한다. 클램프보다 먼저여야 한다 —
+        // 클램프 뒤에 환산하면 다른 해상도에서 저장한 값이 베이스 공간을 넘칠 수 있다.
+        if (_hasPendingWorkAreaPx)
+        {
+            _viewport = WorkAreaPxToBasePx(_pendingWorkAreaPx);
+            _hasPendingWorkAreaPx = false;
+        }
+
         // 크기 0 = "베이스 공간 전체" 기본값 (§2.1.1 뷰포트 기본값).
         // 저장된 값이 Awake에 주입돼 있으면(ViewportSaveBinder) 그 값이 살아남는다.
         if (_viewport.width <= 0 || _viewport.height <= 0)
@@ -111,6 +143,9 @@ public class ViewportScreenSettings : MonoBehaviour
     /// 편집 중이면 확정 값만 갱신하고 반영은 편집을 벗어날 때까지 미룬다.</summary>
     public void SetViewport(RectInt viewport)
     {
+        // 뒤에 온 베이스 px 값이 이긴다 — 앞서 보류된 작업 영역 px 값을 Start가 또 환산해 덮지 않게.
+        _hasPendingWorkAreaPx = false;
+
         // ready 전엔 베이스 공간 크기를 아직 모르므로 클램프할 수 없다 — Start가 클램프·적용을 맡는다.
         if (!_ready) { _viewport = viewport; return; }
 
@@ -121,6 +156,20 @@ public class ViewportScreenSettings : MonoBehaviour
         if (_isEditing) return;
 
         PublishViewportApplied();
+    }
+
+    /// <summary>작업 영역 px(옛 단위) 뷰포트를 설정한다. 베이스 px로 환산해 SetViewport와 같은 경로를 탄다.
+    /// 환산 배율은 작업 영역을 읽은 뒤에야 알 수 있으므로 ready 전에는 보류했다가 Start에서 환산한다.
+    /// 옛 파일이 저장된 기기의 해상도는 알 수 없어 현재 배율을 쓴다 — 같은 기기에서 이어 쓰는 경우 정확히 복원된다.</summary>
+    public void SetViewportFromWorkAreaPx(RectInt workAreaPx)
+    {
+        if (!_ready)
+        {
+            _pendingWorkAreaPx = workAreaPx;
+            _hasPendingWorkAreaPx = true;
+            return;
+        }
+        SetViewport(WorkAreaPxToBasePx(workAreaPx));
     }
 
     /// <summary>
@@ -237,10 +286,26 @@ public class ViewportScreenSettings : MonoBehaviour
         }
         else
         {
-            // Editor 등 Win32 불가 환경 — 현재 화면 크기를 베이스 공간으로 간주(카메라 프레이밍은 검증 가능)
+            // Editor 등 Win32 불가 환경 — 현재 화면 크기를 작업 영역으로 간주(카메라 프레이밍은 검증 가능)
             _baseSpaceScreenRect = new RectInt(0, 0, Mathf.Max(Screen.width, 1), Mathf.Max(Screen.height, 1));
         }
-        _baseSpaceSize = new Vector2Int(_baseSpaceScreenRect.width, _baseSpaceScreenRect.height);
+
+        // 베이스 공간은 작업 영역을 마스터 캔버스 폭에 맞춰 늘인 것 — 폭 기준이라 작업표시줄 유무로
+        // 배율이 흔들리지 않고, UI CanvasScaler(Match=Width)와 같은 배율이 된다. 높이는 종횡비를 따른다.
+        _baseSpaceSize = new Vector2Int(
+            MasterCanvasWidthPx,
+            Mathf.RoundToInt(_baseSpaceScreenRect.height * (float)MasterCanvasWidthPx / _baseSpaceScreenRect.width));
+    }
+
+    /// <summary>베이스 px 하나가 화면에서 몇 px인가 = 작업 영역 폭 / 마스터 캔버스 폭. 4K에서 1.</summary>
+    private float ScreenPxPerBasePx => _baseSpaceScreenRect.width / (float)MasterCanvasWidthPx;
+
+    private RectInt WorkAreaPxToBasePx(RectInt r)
+    {
+        float s = ScreenPxPerBasePx;
+        return new RectInt(
+            Mathf.RoundToInt(r.x / s), Mathf.RoundToInt(r.y / s),
+            Mathf.RoundToInt(r.width / s), Mathf.RoundToInt(r.height / s));
     }
 
     private RectInt ClampToBaseSpace(RectInt r)

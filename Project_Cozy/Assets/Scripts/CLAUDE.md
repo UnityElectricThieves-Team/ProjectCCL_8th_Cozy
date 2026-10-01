@@ -28,7 +28,7 @@
 | `Platform/Input/` | `GlobalKeyInput.cs` — 포커스 무관 키 입력. OutFocus 전용은 `OutFocusKeyHook`/`OutFocusMouseHook`(둘 다 static 이벤트로 방송) |
 | `Platform/Data/` | `GameDataPaths.cs`(모든 저장 경로의 중앙 레지스트리) → `UserDataSaveIO.cs`(유저 데이터 단일 진입점) → `GameDataIO.cs`(직렬화·원자적 쓰기) |
 | `Interaction/` | `InteractionInterfaces.cs`(3개 계약) → `InputInteractionManager.cs`(라우팅) |
-| `PerformanceSetting/Viewport/` | `ViewportScreenSettings.cs`(평시·편집 뷰포트 정책) + `BaseSpaceCameraFitter.cs`(베이스 공간 좌표 규약의 소유자) |
+| `PerformanceSetting/Viewport/` | `ViewportScreenSettings.cs`(뷰포트 정책 + 베이스 공간 단위의 소유자) + `BaseSpaceCameraFitter.cs`(px→월드 환산 — 앵커·PPU의 소유자) |
 | `Animation/` | `SpriteAnimator.cs`(프레임 순환), `ShadowProjector.cs`(캐릭터 아래 바닥을 향해 판정해 그림자를 놓고, 멀어질수록 폭을 줄인다) |
 | `Character/` | `BaseCharacterController.cs` → `CharacterState.cs`(통합 enum) → `Modules/`, `States/` |
 | `Gameplay/` | `HeartSystem.cs`(하트 재화), `SpawnPointManager.cs`(스폰 기운), `Background/BackgroundStrip.cs`(뷰포트 아래 변에 붙는 배경 띠 — 고정 높이로 맞춰 가로로 반복), `LocalizationManager.cs`(번역 표 — stringID로 현재 언어 문장을 내준다. 프리팹 고정 문구는 `UI/LocalizedText.cs`가 붙어 받아 간다) |

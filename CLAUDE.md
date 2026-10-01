@@ -41,6 +41,8 @@
 
 **새 배경 스프라이트는 Mesh Type을 Full Rect, pivot을 Center로 임포트합니다** — 배경은 Tiled 드로우 모드로 가로 반복하므로 Tight 메시로는 타일이 깨집니다. 나머지 배경 규약은 [.claude/rules/unity/background.md](.claude/rules/unity/background.md)에 있고, 같은 이유로 여기 한 줄 둡니다.
 
+**월드의 px 값(뷰포트·배경 높이·최소 크기 등)은 마스터 캔버스 기준 px이고, 화면에서는 작업 영역 폭 비율로 줄어듭니다** — UI의 CanvasScaler와 같은 배율입니다. 새로 px 크기 필드를 갖는 소비자를 만들 때는 [.claude/rules/unity/viewport-coordinates.md](.claude/rules/unity/viewport-coordinates.md)를 봅니다. 새 파일에는 발화할 규칙이 없어 여기 한 줄 둡니다.
+
 ---
 
 ## 3. 코드 스타일
@@ -83,6 +85,7 @@
 - `unity/character-shadow.md` — 캐릭터 그림자 규약. `ShadowProjector`·캐릭터 프리팹을 열 때
 - `unity/character-state-machine.md` — 캐릭터 상태 전이 확정안. **캐릭터 행동 로직의 유일한 본.** Character 스크립트·캐릭터 프리팹·Animator 자산을 열 때
 - `unity/background.md` — 배경 띠 규약(뷰포트 아래 변 고정, 고정 높이, Tiled 반복, 콜라이더 금지). 배경 스크립트·`Background.prefab`·배경 아트 임포트 설정을 열 때
+- `unity/viewport-coordinates.md` — 월드 좌표 단위 규약(베이스 공간 px = 마스터 캔버스 기준 px, 폭 기준 배율, PPU·앵커 불변, 저장 단위). 뷰포트·배경 스크립트를 열 때
 
 ---
 

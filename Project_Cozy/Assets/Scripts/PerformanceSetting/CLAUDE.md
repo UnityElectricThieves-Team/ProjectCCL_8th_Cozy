@@ -11,8 +11,8 @@
 ## 현재 들어 있는 것
 
 - `PerformanceSettings.cs` — VSync OFF + 포커스 상태에 따라 `Application.targetFrameRate`를 foreground / background(기본 60/30)로 전환. `OnApplicationFocus`에 hook해 즉시 반응.
-- `Viewport/ViewportScreenSettings.cs` — "화면 설정" 정책. 평시 창=뷰포트, 편집 중 모니터 전체 프리뷰, 저장·취소 상태를 관리.
-- `Viewport/BaseSpaceCameraFitter.cs` — 베이스 공간 좌표 규약(마스터 캔버스 우하단 앵커 + PPU)의 소유자. `Frame()`으로 카메라를 지정 픽셀 영역에 프레이밍하고, `BaseRectToWorld()`로 베이스 공간 px rect를 월드 Rect로 변환한다(뷰포트 안팎 판정용).
+- `Viewport/ViewportScreenSettings.cs` — "화면 설정" 정책. 정적 창(작업 영역 고정), 뷰포트 편집·저장·취소 상태를 관리한다. **베이스 공간 단위의 소유자** — 작업 영역을 마스터 캔버스 기준 px로 바꾸는 계산(`RefreshBaseSpace`)과 마스터 캔버스 폭 상수가 여기 있다. 규약은 [.claude/rules/unity/viewport-coordinates.md](../../../../.claude/rules/unity/viewport-coordinates.md).
+- `Viewport/BaseSpaceCameraFitter.cs` — px→월드 환산(마스터 캔버스 우하단 앵커 + PPU)의 소유자. `Frame()`으로 카메라를 지정 픽셀 영역에 프레이밍하고, `BaseRectToWorld()`로 베이스 공간 px rect를 월드 Rect로 변환한다(뷰포트 안팎 판정용). 식은 px 단위를 모른다 — 단위는 위의 `ViewportScreenSettings`가 정한다.
 - `Viewport/ViewportEditHandles.cs` — 편집 중 뷰포트 이동·8방향 크기 조절 UI.
 - `Viewport/WindowMoveResizeGuide.cs` — 평시 창 이동 그립과 리사이즈 영역의 시각 안내.
 - `WindowAspectFitter.cs` — 구 구현. Win32로 HWND를 직접 만져 창을 띠 모양으로 도킹한다. 후속은 `Platform/`의 `WindowManager`이며(`Viewport/` 스택이 아니다), `PerformanceSystemScene.unity:149`에서 아직 쓰이고 있어 남아 있다. 신규 코드에서 사용 금지.
