@@ -129,12 +129,13 @@ public class ViewportScreenSettings : MonoBehaviour
     {
         // 편집 중에 이 컴포넌트가 비활성화·파괴되면 클릭 통과가 정지된 채로 남아, 창이 화면 위 모든
         // 클릭을 영구히 흡수한다(사용자에게는 바탕화면이 잠긴 것과 같고 복구 수단은 강제 종료뿐이다).
-        // 여기서 무조건 되돌린다. Unity는 파괴 시에도 OnDisable을 먼저 부르므로 이 한 곳으로 두 경우가 덮인다.
+        // 여기서 무조건 자기 정지를 푼다. Unity는 파괴 시에도 OnDisable을 먼저 부르므로 이 한 곳으로 두 경우가 덮인다.
+        // 정지는 소유자별이라 다른 컴포넌트가 건 정지는 풀지 않는다. 걸지 않았을 때 풀어도 안전하다.
         //
         // _isEditing은 건드리지 않는다 — 이벤트 없이 조용히 내리면 편집 UI가 상태를 잘못 알게 된다.
         if (_windowManager == null) return;
-        _windowManager.SetClickThroughSuspended(false);
-        _windowManager.SetResizeSuspended(false);
+        _windowManager.ReleaseClickThroughSuspend(this);
+        _windowManager.ReleaseResizeSuspend(this);
     }
 
     // ===== 외부 API =====
@@ -212,8 +213,8 @@ public class ViewportScreenSettings : MonoBehaviour
 
         if (_windowManager != null)
         {
-            _windowManager.SetClickThroughSuspended(true); // 빈 공간에서도 핸들 드래그가 잡히게
-            _windowManager.SetResizeSuspended(true);       // OS 가장자리 리사이즈가 켜져 있다면 핸들 UI와 충돌 방지
+            _windowManager.AcquireClickThroughSuspend(this); // 빈 공간에서도 핸들 드래그가 잡히게
+            _windowManager.AcquireResizeSuspend(this);       // OS 가장자리 리사이즈가 켜져 있다면 핸들 UI와 충돌 방지
         }
 
         EditModeChanged?.Invoke(true);
@@ -251,8 +252,8 @@ public class ViewportScreenSettings : MonoBehaviour
         _isEditing = false;
         if (_windowManager != null)
         {
-            _windowManager.SetClickThroughSuspended(false);
-            _windowManager.SetResizeSuspended(false);
+            _windowManager.ReleaseClickThroughSuspend(this);
+            _windowManager.ReleaseResizeSuspend(this);
         }
         PublishViewportApplied();
         EditModeChanged?.Invoke(false);

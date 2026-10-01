@@ -22,6 +22,7 @@
 - **씬에 1개씩.** 매니저성 컴포넌트지만 싱글톤은 아님 — 씬에 매니저 GameObject 1개. 다중 씬 전환이 생기면 `DontDestroyOnLoad` 또는 각 씬에 다시 두는 방식 중 결정.
 - **Win32 충돌 주의.** 구 `WindowAspectFitter`와 `BorderlessWindow`는 현행 `WindowManager`와 같은 HWND를 만진다. 본편 통합 씬에서는 함께 활성화하지 않는다.
 - **GameScene의 PPU는 10.8이다.** `BaseSpaceCameraFitter._pixelsPerUnit`의 설계 의도값은 100이지만, 옛 `CameraFitter`가 잡아둔 배치(1080px = 월드 100유닛)를 그대로 보존하려고 낮춰 잡았다. 100으로 되돌리려면 캐릭터 스프라이트 임포트 PPU와 프리팹의 발 정렬 오프셋·중력·이동 속도까지 함께 환산해야 한다 — 근거와 환산표는 [ViewportStackMigration.md](../../../../Docs/Development/ViewportStackMigration.md) §3.3.
+- **창 동작 정지는 자기 것만 걸고 푼다.** `ViewportScreenSettings`는 편집에 들어갈 때 자신을 소유자로 클릭 통과·리사이즈 정지를 걸고, 편집을 나갈 때와 `OnDisable`에서 자기 정지만 푼다. 다른 기능(장식 배치 등)이 같은 정지를 걸고 있어도 건드리지 않기 위해서다. 규칙의 정본은 [Platform/CLAUDE.md](../Platform/CLAUDE.md)의 "창 동작 정지" 항목.
 - **에디터 보호.** Win32 호출은 [Platform/CLAUDE.md](../Platform/CLAUDE.md)와 동일 원칙 — `#if !UNITY_EDITOR` 가드 또는 에디터에서 안전한 분기. 에디터에서 호출하면 Unity Editor 창 자체가 망가질 수 있다.
 - 그 외 네이밍 규칙은 [Scripts/CLAUDE.md](../CLAUDE.md) + [.claude/rules/unity/csharp.md](../../../../.claude/rules/unity/csharp.md) 참조.
 
