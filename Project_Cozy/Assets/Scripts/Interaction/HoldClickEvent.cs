@@ -99,6 +99,9 @@ public sealed class HoldClickEvent : MonoBehaviour
     {
         world = Vector2.zero;
 
+        // 뷰포트 편집 등 월드 입력 잠금 중에는 새 press를 받지 않는다. 이미 누르고 있던 press는 끊지 않는다.
+        if (WorldInputLock.IsLocked) return false;
+
         // UI(패널·버튼) 위에서 누른 press는 UI가 먹는다 — 뒤에 있는 캐릭터가 반응하지 않게 막는다.
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return false;
 

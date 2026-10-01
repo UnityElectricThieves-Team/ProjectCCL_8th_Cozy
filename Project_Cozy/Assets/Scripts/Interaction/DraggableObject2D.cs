@@ -46,8 +46,8 @@ public sealed class DraggableObject2D : MonoBehaviour
         var mouseWorld = _camera.ScreenToWorldPoint(mouseScreen);
 
         // UI(패널·버튼) 위에서 누른 press는 UI가 먹는다 — 뒤 캐릭터가 드래그로 끌려오지 않게 가드.
-        // 진행 중인 드래그는 첫 프레임에만 판정하므로 끊기지 않는다.
-        if (mouse.leftButton.wasPressedThisFrame && _collider.OverlapPoint(mouseWorld)
+        // 진행 중인 드래그는 첫 프레임에만 판정하므로 끊기지 않는다. 월드 입력 잠금도 같은 자리에서 본다.
+        if (mouse.leftButton.wasPressedThisFrame && !WorldInputLock.IsLocked && _collider.OverlapPoint(mouseWorld)
             && (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject()))
         {
             _pressActive = true;

@@ -133,6 +133,8 @@ public class ViewportScreenSettings : MonoBehaviour
         // 정지는 소유자별이라 다른 컴포넌트가 건 정지는 풀지 않는다. 걸지 않았을 때 풀어도 안전하다.
         //
         // _isEditing은 건드리지 않는다 — 이벤트 없이 조용히 내리면 편집 UI가 상태를 잘못 알게 된다.
+        // 월드 입력 잠금도 같은 이유로 푼다 — 남으면 캐릭터·별이 영영 반응하지 않는다.
+        WorldInputLock.Release(this);
         if (_windowManager == null) return;
         _windowManager.ReleaseClickThroughSuspend(this);
         _windowManager.ReleaseResizeSuspend(this);
@@ -216,6 +218,8 @@ public class ViewportScreenSettings : MonoBehaviour
             _windowManager.AcquireClickThroughSuspend(this); // 빈 공간에서도 핸들 드래그가 잡히게
             _windowManager.AcquireResizeSuspend(this);       // OS 가장자리 리사이즈가 켜져 있다면 핸들 UI와 충돌 방지
         }
+        // 핸들은 IMGUI라 월드 폴러의 "UI 위" 가드에 잡히지 않는다 — 핸들을 잡는 클릭이 뒤의 캐릭터로 새지 않게 막는다.
+        WorldInputLock.Acquire(this);
 
         EditModeChanged?.Invoke(true);
         PreviewChanged?.Invoke(_previewViewport);
@@ -255,6 +259,7 @@ public class ViewportScreenSettings : MonoBehaviour
             _windowManager.ReleaseClickThroughSuspend(this);
             _windowManager.ReleaseResizeSuspend(this);
         }
+        WorldInputLock.Release(this);
         PublishViewportApplied();
         EditModeChanged?.Invoke(false);
     }
