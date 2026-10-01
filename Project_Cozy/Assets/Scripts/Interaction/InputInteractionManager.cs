@@ -10,6 +10,7 @@
 // WindowsCursorToUnityScreen(OS 커서 기반)를 우선 사용하고, 없으면 Mouse.current로 폴백한다.
 // 한 프레임에 인터랙터블 하나만 승자. 각 인터페이스는 콜라이더의 첫 컴포넌트만 사용한다.
 // uGUI 위에 포인터가 있으면(EventSystem.IsPointerOverGameObject) 월드 라우팅을 건너뛴다(UI 우선).
+// WorldInputLock이 걸려 있어도 같은 방식으로 건너뛴다.
 // ============================================================
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -77,7 +78,9 @@ public class InputInteractionManager : MonoBehaviour
         // 포인터가 uGUI 위에 있으면(EventSystem 영역) 월드 콜라이더 라우팅을 건너뛴다.
         // UI를 누른 클릭이 뒤의 캐릭터로 새지 않도록. 단순 return이 아니라 현재 호버를 풀고
         // 다음 프레임에 강제 재스캔(_hasLastPointerPixel=false)되게 한다.
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        // 월드 입력 잠금(뷰포트 편집 등) 중에도 같은 처리 — 잠금이 풀리는 프레임에 커서가 멈춰 있어도 다시 스캔된다.
+        if (WorldInputLock.IsLocked
+            || (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()))
         {
             currentHover?.OnHoverExit();
             currentHover = null;

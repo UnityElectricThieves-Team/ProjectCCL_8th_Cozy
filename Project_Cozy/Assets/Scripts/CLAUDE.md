@@ -7,8 +7,8 @@
 | 폴더 | 책임 | 주로 참조하는 대상 |
 |---|---|---|
 | `Platform/` | OS 의존 인프라 — borderless·Always-on-Top 창, 비포커스 키보드 훅, Win32 / DwmApi 호출. 게임 로직을 모른다. | (없음) — 자세한 컨벤션은 [Platform/CLAUDE.md](Platform/CLAUDE.md) |
-| `Interaction/` | 마우스 입력 라우팅 + 인터랙터블 인터페이스 계약. 게임 객체가 `IHoverable` / `IClickable` / `IShiftRightClickable`을 구현하면 매니저가 자동 라우팅. | (없음) — 자세한 컨벤션은 [Interaction/CLAUDE.md](Interaction/CLAUDE.md) |
-| `PerformanceSetting/` | 프레임 레이트·뷰포트 등 런타임 *정책*. OS 조작은 `Platform/`에 위임. | `Platform/` — 자세한 컨벤션은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) |
+| `Interaction/` | 마우스 입력 라우팅 + 인터랙터블 인터페이스 계약. 게임 객체가 `IHoverable` / `IClickable` / `IRightClickable` / `IShiftRightClickable`을 구현하면 매니저가 자동 라우팅. | (없음) — 자세한 컨벤션은 [Interaction/CLAUDE.md](Interaction/CLAUDE.md) |
+| `PerformanceSetting/` | 프레임 레이트·뷰포트 등 런타임 *정책*. OS 조작은 `Platform/`에 위임. | `Platform/`, `Interaction/`(월드 입력 잠금) — 자세한 컨벤션은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) |
 | `Animation/` | 스프라이트 애니메이션 등 순수 표현 컴포넌트. 게임 로직·OS를 모른다. | (없음) |
 | `Character/` | 캐릭터 단일 개체의 자율 거동·친밀도·시각. `BaseCharacterController` 단일 컴포넌트 + nested module(`StateModule`/`VisualModule`/`AffinityModule`/`ScaleModule`). | `Interaction/`, `Animation/`, `Platform/Input/` — 자세한 컨벤션은 [Character/CLAUDE.md](Character/CLAUDE.md) |
 | `Gameplay/` | 게임 로직. `Platform/`의 인프라를 *소비*한다 (별 클릭 · 변신 등은 채워지는 중). 하트·스폰 기운처럼 씬에 하나만 두는 시스템이 여기 산다. | `Platform/`, `Animation/`, `Interaction/` |
@@ -27,7 +27,7 @@
 | `Platform/Window/` | `Core/WindowManager.cs` — HWND·WndProc의 단일 소유자. DWM 투명화, 클릭 통과, 창 영역 적용, 핫존 수치가 전부 여기 있다 |
 | `Platform/Input/` | `GlobalKeyInput.cs` — 포커스 무관 키 입력. OutFocus 전용은 `OutFocusKeyHook`/`OutFocusMouseHook`(둘 다 static 이벤트로 방송) |
 | `Platform/Data/` | `GameDataPaths.cs`(모든 저장 경로의 중앙 레지스트리) → `UserDataSaveIO.cs`(유저 데이터 단일 진입점) → `GameDataIO.cs`(직렬화·원자적 쓰기) |
-| `Interaction/` | `InteractionInterfaces.cs`(3개 계약) → `InputInteractionManager.cs`(라우팅) |
+| `Interaction/` | `InteractionInterfaces.cs`(4개 계약) → `InputInteractionManager.cs`(라우팅), `WorldInputLock.cs`(월드 마우스 입력 공용 잠금) |
 | `PerformanceSetting/Viewport/` | `ViewportScreenSettings.cs`(뷰포트 정책 + 베이스 공간 단위의 소유자) + `BaseSpaceCameraFitter.cs`(px→월드 환산 — 앵커·PPU의 소유자) |
 | `Animation/` | `SpriteAnimator.cs`(프레임 순환), `ShadowProjector.cs`(캐릭터 아래 바닥을 향해 판정해 그림자를 놓고, 멀어질수록 폭을 줄인다) |
 | `Character/` | `BaseCharacterController.cs` → `CharacterState.cs`(통합 enum) → `Modules/`, `States/` |
