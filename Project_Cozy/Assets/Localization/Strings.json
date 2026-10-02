@@ -49,5 +49,8 @@
   "UICollection.height_value": { "ko-KR": "{HEIGHT}cm", "en-US": "{HEIGHT} cm", "ja-JP": "{HEIGHT}cm", "zh-Hans": "{HEIGHT}cm", "zh-Hant": "{HEIGHT}cm" },
   "UICollection.birthday_value": { "ko-KR": "{MONTH}월 {DAY}일", "en-US": "{MONTH}/{DAY}", "ja-JP": "{MONTH}月{DAY}日", "zh-Hans": "{MONTH}月{DAY}日", "zh-Hant": "{MONTH}月{DAY}日" },
 
-  "UITutorial.title": { "ko-KR": "튜토리얼", "en-US": "Tutorial", "ja-JP": "チュートリアル", "zh-Hans": "教程", "zh-Hant": "教學" }
+  "UITutorial.title": { "ko-KR": "튜토리얼", "en-US": "Tutorial", "ja-JP": "チュートリアル", "zh-Hans": "教程", "zh-Hant": "教學" },
+
+  "UIPlacement.guide.install": { "ko-KR": "설치", "en-US": "Place", "ja-JP": "設置", "zh-Hans": "放置", "zh-Hant": "放置" },
+  "UIPlacement.guide.cancel": { "ko-KR": "취소", "en-US": "Cancel", "ja-JP": "キャンセル", "zh-Hans": "取消", "zh-Hant": "取消" }
 }

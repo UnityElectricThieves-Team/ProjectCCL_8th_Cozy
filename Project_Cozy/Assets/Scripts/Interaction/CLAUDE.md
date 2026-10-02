@@ -11,7 +11,7 @@
 ## 현재 들어 있는 것
 
 - `InteractionInterfaces.cs` — `IHoverable` / `IClickable` / `IRightClickable` / `IShiftRightClickable` 4개 계약. 모든 인터랙터블은 이 중 필요한 것만 구현하면 매니저가 자동 라우팅.
-- `WorldInputLock.cs` — "지금은 월드 오브젝트가 마우스에 반응하면 안 된다"를 거는 공용 잠금(static). 뷰포트 편집 모드가 건다. `Acquire(owner)` / `Release(owner)` / `IsLocked`.
+- `WorldInputLock.cs` — "지금은 월드 오브젝트가 마우스에 반응하면 안 된다"를 거는 공용 잠금(static). 뷰포트 편집 모드와 장식 설치 모드가 건다. `Acquire(owner)` / `Release(owner)` / `IsLocked`.
 - `InputInteractionManager.cs` — 마우스 위치 → 월드좌표 → `Physics2D.OverlapPointNonAlloc` → sortingLayer/sortingOrder가 가장 높은 콜라이더에 라우팅. 마우스 픽셀 변화 없으면 재스캔 스킵하는 최적화 내장(`_skipRescanWhenPointerUnchanged`).
 - `MoonClickIdle2D.cs` — 별(가제) 컴포넌트. `K`키로 Active 진입 → 클릭 시 prefab 리스트의 다음 1개 스폰 → 다시 Idle. 한 번 다 쓰면 더 이상 스폰 안 함. 같은 GameObject에 `DraggableObject2D`가 있으면 스폰은 mouse up 시점·드래그 아니었을 때에만 발생 — 매니저가 mouse down에서 `OnClick`을 호출하는 구조에서 클릭과 드래그를 분리하기 위한 협력.
 - `DraggableObject2D.cs` — 마우스 좌클릭 드래그로 transform 위치를 갱신. 매니저 라우팅 대신 자체로 `Mouse.current`를 폴링하고 자기 `Collider2D.OverlapPoint`로 press 시작을 판정. `PressEnded(bool wasDrag)` 이벤트로 드래그/클릭 분리 신호를 같은 GameObject의 `IClickable` 측에 공급.
@@ -23,7 +23,7 @@
 ## 컨벤션
 
 - **콜라이더 필수.** 모든 인터랙터블은 같은 GameObject에 `Collider2D`가 있어야 매니저가 잡아낼 수 있다. `InputInteractionTestProbe`의 `OnValidate` 경고 패턴을 참고해 새 인터랙터블에도 같은 가드를 두면 셋업 실수를 빨리 잡는다.
-- **월드 마우스 폴러는 반드시 `WorldInputLock.IsLocked`를 본다.** 월드 마우스 입력은 매니저 한 곳이 아니라 매니저·`DraggableObject2D`·`HoldClickEvent`가 각자 폴링한다. 그래서 "지금은 반응하지 마"를 모드 쪽이 컴포넌트를 찾아 하나씩 꺼서 처리하면, 새 폴러가 생길 때마다 빠뜨린다. 반대로 폴러가 잠금 하나를 보게 했다. `Mouse.current`를 직접 읽어 월드 오브젝트를 반응시키는 컴포넌트를 새로 만들면 새 press를 받기 전에 이 잠금을 확인한다. 이미 진행 중인 press(드래그·홀드)는 끊지 않는다 — 잠금을 거는 모드는 UI 버튼으로 들어가므로 그 순간 월드 press가 진행 중일 수 없고, 도중에 끊으면 캐릭터 상태(잡힘 등)만 어긋난다.
+- **월드 마우스 폴러는 반드시 `WorldInputLock.IsLocked`를 본다.** 월드 마우스 입력은 매니저 한 곳이 아니라 매니저·`DraggableObject2D`·`HoldClickEvent`가 각자 폴링한다. 그래서 "지금은 반응하지 마"를 모드 쪽이 컴포넌트를 찾아 하나씩 꺼서 처리하면, 새 폴러가 생길 때마다 빠뜨린다. 반대로 폴러가 잠금 하나를 보게 했다. `Mouse.current`를 직접 읽어 월드 오브젝트를 반응시키는 컴포넌트를 새로 만들면 새 press를 받기 전에 이 잠금을 확인한다. 이미 진행 중인 press(드래그·홀드)는 끊지 않는다 — 잠금을 거는 모드는 UI 버튼으로 들어가므로 그 순간 월드 press가 진행 중일 수 없고, 도중에 끊으면 캐릭터 상태(잡힘 등)만 어긋난다. 반대로 **모드 안의 클릭으로 모드를 끝내는 쪽**(장식 설치의 확정·취소)은 버튼을 뗄 때 처리한다. 폴러는 누른 순간에만 반응하므로, 누를 때 아직 잠겨 있으면 그 클릭이 모드가 끝난 프레임에 캐릭터로 새지 않는다.
 - **잠금은 소유자별로 걸고 푼다.** 의미론은 `WindowManager`의 창 동작 정지와 같다([Platform/CLAUDE.md](../Platform/CLAUDE.md)의 "창 동작 정지"). 같은 owner의 중복 걸기·풀기는 한 번으로 치고, 걸지 않은 owner로 풀어도 무해하며, 모든 소유자가 풀어야 풀린다. 건 컴포넌트는 `OnDisable`에서도 자기 것을 푼다 — 남으면 캐릭터가 영영 반응하지 않는다. 이 프로젝트는 도메인 리로드 없이 플레이 모드에 들어가므로, 정적 집합은 플레이 시작마다 비운다.
 - **인터페이스는 작게.** 새 상호작용 종류가 생길 때마다 인터페이스를 늘리기보다, 기존 넷 중 의미가 맞는 게 있으면 재사용. 정말 새 의미면 같은 파일에 추가.
 - **매니저는 *어떤 객체가 무엇을 하는지* 모른다.** 매니저는 콜라이더 위치와 sortingOrder만 본다. 구체 행동은 인터페이스 구현 측. 매니저에 게임 로직을 직접 넣지 말 것.

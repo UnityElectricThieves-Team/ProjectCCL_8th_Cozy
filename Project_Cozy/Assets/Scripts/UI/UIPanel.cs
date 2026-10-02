@@ -5,18 +5,25 @@ using UnityEngine;
 /// 숨길 때 Destroy/SetActive(false) 대신 alpha=0 + 클릭 차단으로 끄므로
 /// 재생성 비용이 없고 내부 상태(슬라이더 값 등)가 보존되며, 추후 페이드 연출 여지도 남는다.
 /// 설정 등 구체 패널은 이 클래스를 상속해 내용물을 채운다.
+///
+/// 보이는지는 두 상태로 정한다 — 열려 있는가(<see cref="IsOpen"/>)와 잠시 숨겨졌는가(<see cref="SetSuspended"/>).
+/// 장식 설치 모드처럼 패널을 닫지 않고 잠시 비켜 두는 경우가 있어서다. 숨김을 열림과 같은 값(알파)으로 표현하면,
+/// 숨긴 동안 열린 패널이 "닫힌 패널"로 읽혀 열림 상태의 뜻이 깨진다.
 /// </summary>
 [RequireComponent(typeof(CanvasGroup))]
 public class UIPanel : MonoBehaviour
 {
     private CanvasGroup _group;
+    private bool _isOpen;
+    private bool _isSuspended;
 
-    public bool IsOpen => _group != null && _group.alpha > 0f;
+    /// <summary>열려 있는가. 잠시 숨겨져 있어도 열려 있으면 true다.</summary>
+    public bool IsOpen => _isOpen;
 
     protected virtual void Awake()
     {
         _group = GetComponent<CanvasGroup>();
-        ApplyVisible(false); // 기본은 닫힘 상태
+        ApplyVisible(); // 기본은 닫힘 상태
     }
 
     /// <summary>
@@ -27,12 +34,29 @@ public class UIPanel : MonoBehaviour
     /// </summary>
     public void RequestClose() => UIManager.Instance?.Close(this);
 
-    public virtual void Open() => ApplyVisible(true);
-    public virtual void Close() => ApplyVisible(false);
+    public virtual void Open()
+    {
+        _isOpen = true;
+        ApplyVisible();
+    }
 
-    private void ApplyVisible(bool visible)
+    public virtual void Close()
+    {
+        _isOpen = false;
+        ApplyVisible();
+    }
+
+    /// <summary>열림 상태는 그대로 두고 잠시 숨기거나(true) 되살린다(false). <see cref="UIManager"/>가 부른다.</summary>
+    public void SetSuspended(bool suspended)
+    {
+        _isSuspended = suspended;
+        ApplyVisible();
+    }
+
+    private void ApplyVisible()
     {
         if (_group == null) _group = GetComponent<CanvasGroup>();
+        bool visible = _isOpen && !_isSuspended;
         _group.alpha = visible ? 1f : 0f;
         _group.interactable = visible;
         _group.blocksRaycasts = visible;

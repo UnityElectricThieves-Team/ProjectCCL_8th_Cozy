@@ -4,6 +4,10 @@ paths:
   - "Project_Cozy/Assets/Scripts/Gameplay/Viewport/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Background/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Contents/ShopSystem/Background*.cs"
+  - "Project_Cozy/Assets/Scripts/Gameplay/Decoration/**/*.cs"
+  - "Project_Cozy/Assets/Scripts/Contents/ShopSystem/Decoration*.cs"
+  - "Project_Cozy/Assets/Scripts/Contents/ShopSystem/ShopSystem.cs"
+  - "Project_Cozy/Assets/Scripts/Contents/ShopSystem/ShopInventoryFileFormat.cs"
 ---
 
 # 월드 좌표 단위 규약
@@ -24,7 +28,7 @@ paths:
 
 `BaseSpaceCameraFitter`는 앵커(마스터 캔버스 우하단의 월드 좌표)와 PPU로 베이스 px를 월드 길이로 바꿉니다. 이 식은 px가 어떤 단위인지 모릅니다. 그래서 단위를 바꿔도 이 클래스와 소비자들은 손대지 않았습니다.
 
-새 소비자가 베이스 px 사각형을 월드로 옮길 때는 `BaseRectToWorld`를 쓰고, 길이 하나를 옮길 때는 `PixelsPerUnit`으로 나눕니다. 직접 `Screen.width`나 작업 영역 크기를 섞어 계산하지 않습니다 — 그 순간 단위가 둘이 됩니다.
+새 소비자가 베이스 px 사각형을 월드로 옮길 때는 `BaseRectToWorld`를 쓰고, 가로 위치 하나는 `BaseXToWorldX`(역변환 `WorldXToBaseX`)를, 길이 하나를 옮길 때는 `PixelsPerUnit`으로 나눕니다. 위치는 앵커를 거쳐야 해서 길이처럼 나누기만 하면 틀립니다. 직접 `Screen.width`나 작업 영역 크기를 섞어 계산하지 않습니다 — 그 순간 단위가 둘이 됩니다.
 
 ## 월드 PPU는 코드 상수 100입니다
 
@@ -41,5 +45,7 @@ paths:
 ## 저장 파일의 단위
 
 뷰포트 저장 파일의 값도 베이스 공간 px입니다. 파일에 버전 필드가 있고, 버전이 없던 옛 파일은 작업 영역 절대 px로 저장된 것이라 불러올 때 현재 배율로 환산합니다. 옛 파일에는 저장 당시 해상도가 없으므로 다른 해상도에서 열면 크기가 달라질 수 있습니다. 같은 기기에서 이어 쓰는 경우는 정확히 복원됩니다.
+
+화면에 놓인 장식의 위치도 베이스 공간 px로 저장합니다. 월드 좌표로 저장하면 앵커나 PPU가 바뀔 때 저장된 값이 모두 낡습니다.
 
 파일 버전을 아는 곳은 `ViewportSaveBinder`뿐입니다. `ViewportScreenSettings`는 버전을 모르고 단위만 압니다 — 옛 단위 값은 "작업 영역 px" 입구로 받아 환산합니다. 정책 쪽에 영속화 지식이 새지 않게 하기 위해서입니다.
