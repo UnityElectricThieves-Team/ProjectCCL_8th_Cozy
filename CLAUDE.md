@@ -39,6 +39,8 @@
 
 **새 캐릭터 프리팹은 루트가 곧 발이어야 합니다** — Visual 자식을 올려 스프라이트 아래 끝을 루트 원점에 맞춥니다. 이유와 나머지 지면 규약은 [.claude/rules/unity/character-ground.md](.claude/rules/unity/character-ground.md)에 있는데, 그 파일은 기존 파일을 열 때만 로드되어 *새로 만드는* 순간에는 발화하지 않으므로 여기 한 줄 둡니다.
 
+**마우스로 만지는 새 월드 오브젝트의 판정은 `PolygonCollider2D` + `SpritePhysicsShapeSync`로 그림에서 가져옵니다** — 콜라이더 크기를 숫자로 적어 넣지 않습니다. 이유와 픽셀 검사와의 역할 분담은 [.claude/rules/unity/interaction-hit.md](.claude/rules/unity/interaction-hit.md)에 있고, 새 프리팹을 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다.
+
 **새 배경 스프라이트는 Mesh Type을 Full Rect, pivot을 Center로 임포트합니다** — 배경은 Tiled 드로우 모드로 가로 반복하므로 Tight 메시로는 타일이 깨집니다. 나머지 배경 규약은 [.claude/rules/unity/background.md](.claude/rules/unity/background.md)에 있고, 같은 이유로 여기 한 줄 둡니다.
 
 **월드의 px 값(뷰포트·배경 높이·최소 크기 등)은 마스터 캔버스 기준 px이고, 화면에서는 작업 영역 폭 비율로 줄어듭니다** — UI의 CanvasScaler와 같은 배율입니다. 새로 px 크기 필드를 갖는 소비자를 만들 때는 [.claude/rules/unity/viewport-coordinates.md](.claude/rules/unity/viewport-coordinates.md)를 봅니다. 새 파일에는 발화할 규칙이 없어 여기 한 줄 둡니다. 프리팹의 월드 위치값은 ×100 하면 마스터 캔버스 px입니다.
@@ -86,6 +88,7 @@
 - `unity/character-ground.md` — 캐릭터 지면·발 규약. Character 스크립트·캐릭터 프리팹·캐릭터 스프라이트 임포트 설정을 열 때
 - `unity/character-shadow.md` — 캐릭터 그림자 규약. `ShadowProjector`·캐릭터 프리팹을 열 때
 - `unity/character-state-machine.md` — 캐릭터 상태 전이 확정안. **캐릭터 행동 로직의 유일한 본.** Character 스크립트·캐릭터 프리팹·Animator 자산을 열 때
+- `unity/interaction-hit.md` — 월드 오브젝트의 마우스 판정 규약(판정은 그림 외곽선에서, 콜라이더와 픽셀 검사의 역할 분담, 콜라이더 위치). Interaction 스크립트·`StarController`·캐릭터·별 프리팹·캐릭터 그림 임포트 설정을 열 때
 - `unity/background.md` — 배경 띠 규약(뷰포트 아래 변 고정, 고정 높이, Tiled 반복, 콜라이더 금지). 배경 스크립트·`Background.prefab`·배경 아트 임포트 설정을 열 때
 - `unity/viewport-coordinates.md` — 월드 좌표 단위 규약(베이스 공간 px = 마스터 캔버스 기준 px, 폭 기준 배율, 월드 PPU 상수 100·앵커 불변, 저장 단위). 뷰포트·배경 스크립트를 열 때
 
