@@ -17,6 +17,7 @@
 - `DraggableObject2D.cs` — 마우스 좌클릭 드래그로 transform 위치를 갱신. 매니저 라우팅 대신 자체로 `Mouse.current`를 폴링하고 자기 `Collider2D.OverlapPoint`로 press 시작을 판정. `PressEnded(bool wasDrag)` 이벤트로 드래그/클릭 분리 신호를 같은 GameObject의 `IClickable` 측에 공급.
 - `InputInteractionTestProbe.cs` — `IRightClickable`을 뺀 3개 인터페이스를 구현하고 `Debug.Log`만 하는 시연/테스트용. 인터랙터블 셋업이 맞는지 확인할 때 GameObject에 부착.
 - `OpaqueHoverable.cs` — `IHoverable`을 받아 sprite 픽셀 알파를 검사한 뒤, *불투명 영역에서만* UnityEvent(`_onOpaqueHoverEnter` / `_onOpaqueHoverExit`)로 다시 발사. 사용 조건은 같은 GameObject에 `Collider2D` + sprite 텍스처의 `Read/Write Enabled = true`. 이벤트를 구독하지 않고 *지금 호버 중인가*만 필요한 쪽을 위해 `IsOpaqueHovered`도 노출한다.
+- `SpritePhysicsShapeSync.cs` — 인터랙터블이 아니라 콜라이더 모양 도우미. 지금 보이는 스프라이트 프레임의 외곽선(physics shape)을 같은 GameObject의 `PolygonCollider2D`에 옮겨 담는다. 프레임·좌우 반전이 바뀔 때만 다시 담는다. 그림이 자식에 있으면 `_spriteRenderer`를 연결한다. 반전 처리는 `SpriteFlip.cs`를 `OpaqueHoverable`과 같이 쓴다.
 - `HoldClickEvent.cs` — 좌클릭을 *누른 순간*과 *누른 채 임계 시간에 도달한 순간* 둘로 갈라 UnityEvent로 발사. 캐릭터의 쓰담·잡기가 이걸로 갈린다. `DraggableObject2D`와 같은 이유로 매니저 라우팅 대신 자체 폴링한다 — 매니저는 down에서 한 번 쏘고 끝이라 *누르고 있는 대상*을 붙잡아 두지 못한다. `OpaqueHoverable`이 같이 있으면 알파 판정을 빌려 쓴다.
 
 ## 컨벤션

@@ -114,11 +114,10 @@ public sealed class OpaqueHoverable : MonoBehaviour, IHoverable
         Vector3 mouseWorld = cam.ScreenToWorldPoint(new Vector3(mouseScreen.x, mouseScreen.y, 0f));
 
         // 월드 → SpriteRenderer 로컬 (transform.localScale, 회전 모두 자동 보정됨)
-        Vector3 local = _spriteRenderer.transform.InverseTransformPoint(mouseWorld);
+        Vector2 local = _spriteRenderer.transform.InverseTransformPoint(mouseWorld);
 
         // flipX/flipY는 SpriteRenderer 옵션이라 transform 외부에서 따로 보정
-        if (_spriteRenderer.flipX) local.x = -local.x;
-        if (_spriteRenderer.flipY) local.y = -local.y;
+        local = SpriteFlip.Apply(local, _spriteRenderer.flipX, _spriteRenderer.flipY);
 
         Sprite sp = _spriteRenderer.sprite;
         float ppu = sp.pixelsPerUnit;
