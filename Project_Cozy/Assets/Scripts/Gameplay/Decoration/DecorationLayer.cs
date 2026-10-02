@@ -84,6 +84,20 @@ public sealed class DecorationLayer : MonoBehaviour
         Rebuild();
     }
 
+    /// <summary>
+    /// 지금 화면에 그려진 장식들의 월드 사각형을 results에 채운다(먼저 비운다). 설치 모드의 겹침 판정용.
+    /// 매 프레임 할당을 피하려고 호출한 쪽의 리스트를 받는다.
+    /// </summary>
+    public void CollectBounds(List<Bounds> results)
+    {
+        results.Clear();
+        for (int i = 0; i < _instances.Count; i++)
+        {
+            SpriteRenderer renderer = _instances[i];
+            if (renderer != null && renderer.enabled) results.Add(renderer.bounds);
+        }
+    }
+
     private void OnViewportApplied(RectInt viewportPx)
     {
         _area = _cameraFitter.BaseRectToWorld(viewportPx, _viewportSettings.BaseSpaceSize);
