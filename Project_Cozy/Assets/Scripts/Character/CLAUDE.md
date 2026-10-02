@@ -23,13 +23,20 @@
 자식 Visual GameObject — 보이는 것과 마우스 판정이 전부 여기
 ├─ Animator                  (BaseCharacterAnimatorController 자산 연결)
 ├─ SpriteRenderer
-├─ BoxCollider2D             (마우스 히트 판정용)
+├─ PolygonCollider2D         (마우스 히트 판정용 — 모양은 아래 컴포넌트가 채운다)
+├─ SpritePhysicsShapeSync    (지금 프레임의 그림 외곽선을 콜라이더에 옮겨 담음)
 ├─ OpaqueHoverable           (IHoverable, 알파 검사 후 UnityEvent 발사 + 지금 호버 중인지 조회)
 ├─ HoldClickEvent            (좌클릭을 "누른 순간"과 "2초 도달"로 갈라 UnityEvent 발사)
 └─ CharacterInteractionRelay (IShiftRightClickable — 친밀도 리셋만 위임)
 
 자식 Shadow GameObject
 └─ ShadowProjector           (바닥을 향해 판정해 그림자를 놓고, 멀어지면 폭을 줄인다)
+
+자식 HeadAnchor GameObject   (머리 위 글자 자리 — 눈으로 배치)
+└─ NameTextBox               (CharacterNameLabel, 위치는 앵커 기준 0)
+
+자식 StateLabelAnchor GameObject (상태 디버그 글자 자리 — 좌우 반전을 따라가지 않음)
+└─ StateTextBox              (CharacterStateLabel, 위치는 앵커 기준 0)
 ```
 
 **루트가 곧 발이다.** 발 위치를 나타내는 필드는 없다 — 프리팹에서 Visual 자식을 올려 스프라이트 아래 끝을
