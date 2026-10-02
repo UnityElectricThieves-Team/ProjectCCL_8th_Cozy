@@ -52,15 +52,15 @@ public sealed class StateModule
 
     [Header("Movement")]
     [Tooltip("걷기 속도(초당 월드 단위). 뷰포트 안 목적지까지 이 속도로 이동한다.")]
-    [SerializeField] private float _walkSpeed = 1.5f;
+    [SerializeField] private float _walkSpeed = 0.162f;
 
     [Tooltip("달리기 속도(초당 월드 단위). 지금은 이 상태로 전환하는 곳이 없어 쓰이지 않는다.")]
-    [SerializeField] private float _runSpeed = 3.5f;
+    [SerializeField] private float _runSpeed = 0.378f;
 
     [Tooltip("걷기 목적지를 뽑을 때 현재 위치에서 최소한 이만큼 떨어진 곳을 고른다(월드 단위).\n" +
              "너무 가까운 목적지를 뽑으면 걷자마자 도착해 제자리에서 멈칫거린다.\n" +
              "거주 영역이 이 값의 두 배보다 좁으면 반대쪽 끝으로 간다.")]
-    [SerializeField] private float _walkMinDistance = 0.5f;
+    [SerializeField] private float _walkMinDistance = 0.054f;
 
     [Header("Sleep policy")]
     [Tooltip("이 시간 동안 유저 입력이 하나도 없으면 취침에 들어간다(초).\n" +

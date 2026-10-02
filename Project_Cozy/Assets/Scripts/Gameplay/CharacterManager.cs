@@ -32,7 +32,7 @@ public class CharacterManager : MonoBehaviour
 
     [SerializeField, Tooltip("최초 캐릭터를 놓을 위치(월드). 바닥보다 위면 떨어져서 착지한다. " +
         "뷰포트 밖이어도 ViewportLivingAreaBinder가 안으로 끌어들이므로 정확할 필요는 없다.")]
-    private Vector3 _initialSpawnPosition = new Vector3(0f, 10f, 0f);
+    private Vector3 _initialSpawnPosition = new Vector3(0f, 1.08f, 0f);
 
     private readonly List<GameObject> _alive = new List<GameObject>();
     private SettingsManager _settings;

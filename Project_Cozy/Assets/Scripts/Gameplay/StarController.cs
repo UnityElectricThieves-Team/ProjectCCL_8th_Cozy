@@ -31,8 +31,8 @@ public sealed class StarController : MonoBehaviour, IClickable
     [Tooltip("스폰 시 부모 Transform (선택). 비우면 Hierarchy 루트에 스폰.")]
     [SerializeField] private Transform _spawnParent;
     [Tooltip("스폰 위치 = 별 위치 + Random(Min..Max). Y는 위쪽(+)이 자연 낙하에 적합.")]
-    [SerializeField] private Vector2 _spawnOffsetMin = new Vector2(-0.5f, 1f);
-    [SerializeField] private Vector2 _spawnOffsetMax = new Vector2(0.5f, 2f);
+    [SerializeField] private Vector2 _spawnOffsetMin = new Vector2(-0.24f, 0.48f);
+    [SerializeField] private Vector2 _spawnOffsetMax = new Vector2(0.24f, 0.96f);
 
     // Animator 파라미터 이름 — StarAnimation 컨트롤러의 Int 파라미터 이름과 글자까지 일치해야 한다.
     private const string StateParameter = "StarState";

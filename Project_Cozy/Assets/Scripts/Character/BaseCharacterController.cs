@@ -25,7 +25,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     [Header("Gravity")]
     [Tooltip("아래 가속도. FallState가 매 프레임 -gravity*dt로 적용.")]
-    [SerializeField] private float _gravity = 12f;
+    [SerializeField] private float _gravity = 1.296f;
 
     [Header("Modules")]
     [SerializeField] private StateModule _state = new StateModule();

@@ -20,7 +20,7 @@
 | `WindowManager._maxSize` | `1920 × 1080` | `:691` |
 | `ViewportScreenSettings._viewport` | `(0, 0, 0, 0)` = 베이스 공간 전체 | `:712-716` |
 | `ViewportScreenSettings._windowManager` / `_cameraFitter` | 둘 다 **미할당** (`fileID: 0`) — 자동 탐색에 의존 | `:710-711` |
-| `BaseSpaceCameraFitter._pixelsPerUnit` / `_masterCanvasBottomRight` | `10.8` / `(88.8889, 0)` | `:1716-1717` |
+| `BaseSpaceCameraFitter._pixelsPerUnit` / `_masterCanvasBottomRight` | `10.8` / `(88.8889, 0)` (2026-10-02 변경: PPU는 코드 상수 100, 앵커 `(9.6, 0)`) | `:1716-1717` |
 | `Character.prefab._floorY` / `_footOffset` | `11.4444` / `(0, 0)` | `Character.prefab:55, :61` |
 | `UIRoot`의 `CanvasScaler` | ScaleWithScreenSize / 3840×2160 / match=Width | `:1499-1504` |
 | `MenuBar` 앵커·피벗 | `(1, 0)`, `anchoredPosition (0,0)` — 결정 문서 §2.1의 전제와 일치 | `:2643-2647` |
@@ -467,7 +467,7 @@ suspend만 켜진 채 남는다. 그러면 창이 작업 영역 전체의 클릭
 | 항목 | 왜 |
 |---|---|
 | `CanvasScaler` 정책 + "UI 크기 0.5x~1.5x" | 창이 상수가 되면 위험이 사라져 급하지 않다 (`UIMenuBarDesign.md` §7) |
-| PPU 10.8 → 100 정규화 | `ViewportStackMigration.md` §3.3 |
+| PPU 10.8 → 100 정규화 (2026-10-02 완료) | `ViewportStackMigration.md` §3.3 |
 | "공간 크기(줌) 0.5x~1.5x" | 결정 문서 §7.3 |
 | 월드 배경 클리핑 | 결정 문서 §7.4 — 배경 렌더러가 없다 |
 | `WindowFeatureTestPanel` 제거 | 편집 모드의 **유일한** 진입점이다. 정식 진입점이 생긴 뒤에 뺀다 |

@@ -19,9 +19,9 @@ public class ViewportResidencyEnforcer : MonoBehaviour
 
     [Header("판정/회수")]
     [SerializeField, Tooltip("이탈 판정 여유(월드 유닛). 경계에 걸친 캐릭터를 이탈로 치지 않게.")]
-    private float _exitTolerance = 0.1f;
+    private float _exitTolerance = 0.0108f;
     [SerializeField, Tooltip("기본 회수 시 경계에서 안쪽으로 들여놓는 거리(월드 유닛).")]
-    private float _recallPadding = 0.5f;
+    private float _recallPadding = 0.054f;
     [SerializeField] private bool _debugLogs;
 
     private readonly List<IViewportExitListener> _listenerBuffer = new List<IViewportExitListener>();

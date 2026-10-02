@@ -25,17 +25,18 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class BaseSpaceCameraFitter : MonoBehaviour
 {
-    [Header("Master Canvas (design)")]
-    [SerializeField, Tooltip("1 월드 유닛이 몇 베이스 공간 픽셀인가. 스프라이트 임포트 PPU와 동일해야 스프라이트 1px = 베이스 1px가 성립")]
-    private float _pixelsPerUnit = 100f;
+    // 1 월드 유닛이 몇 베이스 공간 픽셀인가. Unity 기본 임포트 PPU(100)와 같아서,
+    // 임포트 PPU를 그대로 둔 스프라이트는 그림 1px = 베이스(마스터 캔버스) 1px가 된다.
+    private const float PIXELS_PER_UNIT = 100f;
 
+    [Header("Master Canvas (design)")]
     [SerializeField, Tooltip("마스터 캔버스 우하단 모서리의 월드 좌표. 모든 프레이밍의 앵커")]
     private Vector2 _masterCanvasBottomRight = Vector2.zero;
 
     private Camera _camera;
 
     /// <summary>1 월드 유닛이 몇 베이스 공간 픽셀인가. 픽셀 단위 값을 월드 길이로 바꿀 때 쓴다.</summary>
-    public float PixelsPerUnit => _pixelsPerUnit;
+    public float PixelsPerUnit => PIXELS_PER_UNIT;
 
     private void Awake() => _camera = GetComponent<Camera>();
 
@@ -45,13 +46,13 @@ public class BaseSpaceCameraFitter : MonoBehaviour
     /// </summary>
     public Rect BaseRectToWorld(RectInt basePx, Vector2Int baseSpaceSize)
     {
-        float baseLeft   = _masterCanvasBottomRight.x - baseSpaceSize.x / _pixelsPerUnit;
+        float baseLeft   = _masterCanvasBottomRight.x - baseSpaceSize.x / PIXELS_PER_UNIT;
         float baseBottom = _masterCanvasBottomRight.y;
         return new Rect(
-            baseLeft   + basePx.x / _pixelsPerUnit,
-            baseBottom + basePx.y / _pixelsPerUnit,
-            basePx.width  / _pixelsPerUnit,
-            basePx.height / _pixelsPerUnit);
+            baseLeft   + basePx.x / PIXELS_PER_UNIT,
+            baseBottom + basePx.y / PIXELS_PER_UNIT,
+            basePx.width  / PIXELS_PER_UNIT,
+            basePx.height / PIXELS_PER_UNIT);
     }
 
     /// <summary>
@@ -68,21 +69,21 @@ public class BaseSpaceCameraFitter : MonoBehaviour
             return;
         }
 
-        if (_pixelsPerUnit <= 0f || viewportPx.width <= 0 || viewportPx.height <= 0)
+        if (viewportPx.width <= 0 || viewportPx.height <= 0)
         {
-            Debug.LogWarning($"[BaseSpaceCameraFitter] 잘못된 파라미터(ppu {_pixelsPerUnit}, viewport {viewportPx}) — 적용 스킵");
+            Debug.LogWarning($"[BaseSpaceCameraFitter] 잘못된 파라미터(viewport {viewportPx}) — 적용 스킵");
             return;
         }
 
         // 베이스 공간은 마스터 캔버스 우하단 크롭 → 좌하단 월드 좌표는 앵커에서 모니터 폭만큼 왼쪽.
-        float baseLeft   = _masterCanvasBottomRight.x - baseSpaceSize.x / _pixelsPerUnit;
+        float baseLeft   = _masterCanvasBottomRight.x - baseSpaceSize.x / PIXELS_PER_UNIT;
         float baseBottom = _masterCanvasBottomRight.y;
 
-        _camera.orthographicSize = viewportPx.height / _pixelsPerUnit * 0.5f;
+        _camera.orthographicSize = viewportPx.height / PIXELS_PER_UNIT * 0.5f;
 
         var pos = transform.position;
-        pos.x = baseLeft   + (viewportPx.x + viewportPx.width  * 0.5f) / _pixelsPerUnit;
-        pos.y = baseBottom + (viewportPx.y + viewportPx.height * 0.5f) / _pixelsPerUnit;
+        pos.x = baseLeft   + (viewportPx.x + viewportPx.width  * 0.5f) / PIXELS_PER_UNIT;
+        pos.y = baseBottom + (viewportPx.y + viewportPx.height * 0.5f) / PIXELS_PER_UNIT;
         transform.position = pos;
     }
 }
