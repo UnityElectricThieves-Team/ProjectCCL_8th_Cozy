@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6111ad88a1bd97647bb7ebdd01ee283e, type: 3}
-  m_Name: ShopItem_2_Postbox
+  m_Name: ShopItem_6_SideTable
   m_EditorClassIdentifier: Assembly-CSharp::ShopItemDefinition
-  id: shop_item_2_postbox
-  displayName: "\uC6B0\uCCB4\uD1B5"
-  icon: {fileID: 21300000, guid: 0079a59d2b0122c4cac304f24f596464, type: 3}
-  price: 300
+  id: shop_item_6_sidetable
+  displayName: "\uC0AC\uC774\uB4DC \uD14C\uC774\uBE14"
+  icon: {fileID: 21300000, guid: 2e3277a18b09d4340bdb01722700e47e, type: 3}
+  price: 1
   backgroundSprite: {fileID: 0}
-  decorationPrefab: {fileID: 5367728051196975360, guid: a7f11c3c715adf741877d50f4a500bb5, type: 3}
+  decorationPrefab: {fileID: 5503930546097905412, guid: e29ad9b37a3ec594480bfc02f509027e, type: 3}
   placementKind: 0

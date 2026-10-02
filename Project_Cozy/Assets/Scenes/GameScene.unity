@@ -2994,9 +2994,11 @@ MonoBehaviour:
   _availableDecorations:
   - {fileID: 11400000, guid: 4196878441c755b49b33e447c8fd35dd, type: 2}
   - {fileID: 11400000, guid: c113c621cc54e8b4083cda366133312b, type: 2}
-  - {fileID: 11400000, guid: 55a303c58ed450647af79e0625771ba5, type: 2}
-  - {fileID: 11400000, guid: 19bf07ad7f6243642b518f5fe4f6850d, type: 2}
-  - {fileID: 11400000, guid: d189dddd9236bae4fa9007b5febbf4fb, type: 2}
+  - {fileID: 11400000, guid: fc19bc79f2691424f9d1bb87dbc9f700, type: 2}
+  - {fileID: 11400000, guid: 5fd6dbf9344fccc41a5effa68b2730eb, type: 2}
+  - {fileID: 11400000, guid: df86d8beca335ec49aff46078bef5305, type: 2}
+  - {fileID: 11400000, guid: 89edf458b3f76b24f96036d162ead986, type: 2}
+  - {fileID: 11400000, guid: 82e148a98af8b6343abf631c8a77196e, type: 2}
 --- !u!1 &1492600940
 GameObject:
   m_ObjectHideFlags: 0

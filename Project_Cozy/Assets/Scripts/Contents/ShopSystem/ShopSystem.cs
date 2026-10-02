@@ -4,7 +4,8 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// 상점 '장식'의 소유 상태를 들고 있는 씬 단일 시스템. 무엇을 몇 개 샀는지를 관리하고 파일에 기록한다.
+/// 상점 '장식'의 소유 상태를 들고 있는 씬 단일 시스템. 무엇을 몇 개 샀는지와 어느 장식이 화면 어디에
+/// 놓였는지를 관리하고 파일에 기록한다.
 /// 배경 쪽의 <see cref="BackgroundSystem"/>과 대칭이며, 장식은 "사용/사용 취소"가 없어 더 단순하다.
 ///
 /// 이 시스템이 생기기 전에는 장식 구매가 <see cref="HeartSystem.TrySpend"/>만 부르고 소유를 어디에도
@@ -50,6 +51,7 @@ public sealed class ShopSystem : MonoBehaviour
 
         // 에디터 세이브는 사람이 열어 고칠 수 있는 평문 JSON이라, 필드가 null인 파일이 들어올 수 있다.
         _inventory.ownedCounts ??= new Dictionary<string, int>();
+        _inventory.placed ??= new List<PlacedDecorationData>();
     }
 
     private void OnDestroy()
@@ -62,6 +64,12 @@ public sealed class ShopSystem : MonoBehaviour
 
     /// <summary>이 장식을 하나라도 가지고 있는가.</summary>
     public bool IsOwned(string id) => GetCount(id) > 0;
+
+    /// <summary>
+    /// 화면에 놓인 장식 목록(놓은 순서). 개수(<see cref="GetCount"/>)와는 별개다 — 개수는 산 것 전체,
+    /// 이 목록은 그중 화면에 놓인 것이다.
+    /// </summary>
+    public IReadOnlyList<PlacedDecorationData> Placed => _inventory.placed;
 
     /// <summary>
     /// 장식을 구매한다. 잔액이 모자라면 아무 일도 없이 false.

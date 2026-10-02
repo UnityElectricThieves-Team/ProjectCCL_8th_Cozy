@@ -32,7 +32,7 @@
 | `Animation/` | `SpriteAnimator.cs`(프레임 순환), `ShadowProjector.cs`(캐릭터 아래 바닥을 향해 판정해 그림자를 놓고, 멀어질수록 폭을 줄인다) |
 | `Character/` | `BaseCharacterController.cs` → `CharacterState.cs`(통합 enum) → `Modules/`, `States/` |
 | `Gameplay/` | `HeartSystem.cs`(하트 재화), `SpawnPointManager.cs`(스폰 기운), `Background/BackgroundStrip.cs`(뷰포트 아래 변에 붙는 배경 띠 — 고정 높이로 맞춰 가로로 반복), `LocalizationManager.cs`(번역 표 — stringID로 현재 언어 문장을 내준다. 프리팹 고정 문구는 `UI/LocalizedText.cs`가 붙어 받아 간다) |
-| `Contents/` | `ShopSystem/ShopSystem.cs`(장식 소유), `ShopSystem/BackgroundSystem.cs`(배경 소유 + 활성 1개) → `ShopSystem/BackgroundBinder.cs`(활성 배경을 `Gameplay/Background/BackgroundStrip`에 잇는다), `CollectionSystem/Model/CollectionData.cs`(도감 정의 — WPF 툴이 만든 JSON을 읽는다) |
+| `Contents/` | `ShopSystem/ShopSystem.cs`(장식 소유 — 산 개수와 화면에 놓인 목록), `ShopSystem/BackgroundSystem.cs`(배경 소유 + 활성 1개) → `ShopSystem/BackgroundBinder.cs`(활성 배경을 `Gameplay/Background/BackgroundStrip`에 잇는다), `CollectionSystem/Model/CollectionData.cs`(도감 정의 — WPF 툴이 만든 JSON을 읽는다) |
 | `UI/` | `UIManager.cs`(열린 패널 스택 + ESC) → `UIPanel.cs`(패널 공통 동작) |
 
 ## 사용 금지 · 제거 대기

@@ -10,9 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6111ad88a1bd97647bb7ebdd01ee283e, type: 3}
-  m_Name: ShopItem_4_testItem2
+  m_Name: ShopItem_7_Armchair
   m_EditorClassIdentifier: Assembly-CSharp::ShopItemDefinition
-  id: shop_item_4_testItem2
-  displayName: "\uD14C\uC2A4\uD2B82"
-  icon: {fileID: 21300000, guid: 1469049cff6dd8d4080e6d8cbbf87d38, type: 3}
-  price: 500
+  id: shop_item_7_armchair
+  displayName: "\uC548\uB77D\uC758\uC790"
+  icon: {fileID: 21300000, guid: 7366225909f9ec64ca577363dd188683, type: 3}
+  price: 2
+  backgroundSprite: {fileID: 0}
+  decorationPrefab: {fileID: 496522293083197305, guid: 91b019a551dd3514bb4b0d43544c6b60, type: 3}
+  placementKind: 0
