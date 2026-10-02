@@ -3,6 +3,8 @@ paths:
   - "Project_Cozy/Assets/Scripts/UI/Inventory*.cs"
   - "Project_Cozy/Assets/Scripts/UI/Shop*.cs"
   - "Project_Cozy/Assets/Scripts/UI/UIManager.cs"
+  - "Project_Cozy/Assets/Scripts/UI/PlacementGuide.cs"
+  - "Project_Cozy/Assets/Prefabs/UIPanels/UIObjects/PlacementGuide*"
   - "Project_Cozy/Assets/Scripts/Contents/ShopSystem/*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Decoration/**/*.cs"
   - "Project_Cozy/Assets/Prefabs/UIPanels/*Inventory*"
@@ -114,15 +116,21 @@ paths:
 
 안내 문구가 그대로 못 박고 있습니다 — **"제거된 장식은 하트를 돌려주지 않습니다."** 회수는 인벤토리로 되돌리는 것이고, 제거는 영구 삭제이며 환불이 없습니다. 이 둘을 같은 동작으로 묶지 않는 이유가 여기 있습니다.
 
-## 모드에 들어가면 안내 쥐가 한 줄로 알려준다
+## 모드에 들어가면 안내가 붙는다
 
 각 모드의 안내 문구는 기획에 확정돼 있습니다. 문구를 새로 짓지 말고 이것을 씁니다.
 
+- 설치 — 문장이 아니라 라벨 두 개입니다. 왼쪽에 `설치`, 오른쪽에 `취소`. 왼쪽 클릭이 설치, 오른쪽 클릭이 취소라는 뜻입니다. 번역 키는 `UIPlacement.guide.install` / `UIPlacement.guide.cancel`입니다.
 - 이동 — "장식을 클릭하여 이동시킬 수 있어요."
 - 회수 — "배치된 장식들을 인벤토리로 회수할 수 있어요."
 - 제거 — "장식을 클릭하여 제거할 수 있어요. * 주의: 제거된 장식은 하트를 돌려주지 않습니다."
 
 `이동` / `회수` / `제거` 버튼의 호버 색은 `#640000` + 투명도 30%입니다.
+
+**설치 모드 동안에는 마우스 커서를 전용 그림으로 바꾸고, 라벨을 커서 옆에 붙여 다닙니다.** 기본과 다른 커서가 "지금은 설치 모드"라는 신호이기 때문입니다. 모드가 어떻게 끝나든 기본 커서로 되돌립니다. Figma의 안내 그림(쥐 얼굴)은 기획·아트가 확정하기 전의 시안이라, 커서 그림은 프리팹의 칸만 바꾸면 되게 둡니다.
+
+- 커서 그림은 텍스처 임포트 설정을 Cursor로 둡니다. 다른 타입이면 Unity가 하드웨어 커서로 쓰지 못하고 경고만 남깁니다.
+- 안내 UI는 클릭을 받지 않게 둡니다. 받으면 "커서가 UI 위면 놓을 수 없음" 판정에 안내 자신이 걸려 늘 빨강이 됩니다.
 
 ## 아직 정해지지 않은 것
 
