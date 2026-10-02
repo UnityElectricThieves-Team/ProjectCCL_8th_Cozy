@@ -47,6 +47,8 @@
 
 **새 그림은 임포트 PPU를 Unity 기본값(100)으로 두고, 시트의 긴 변이 Max Size를 넘지 않게 합니다** — 월드 PPU가 코드 상수 100이라 그대로 두면 그림 1px = 마스터 캔버스 1px가 됩니다. 크기가 안 맞으면 PPU가 아니라 그림을 고칩니다. 새 그림을 임포트하는 순간에도 발화할 규칙이 없어 여기 한 줄 둡니다. 이유는 같은 viewport-coordinates.md에 있습니다.
 
+**새 TMP 폰트 에셋은 Multi Atlas Textures를 켭니다** — Dynamic 아틀라스가 한 장뿐이면 꽉 찬 뒤 처음 나오는 글자가 네모(□)가 되고, 한글 UI는 빌드에서도 한 번 실행 중에 한계를 넘습니다. 이유와 메모리 비용은 [.claude/rules/unity/localization.md](.claude/rules/unity/localization.md)의 폰트 절에 있고, 새 에셋을 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다.
+
 ---
 
 ## 3. 코드 스타일
