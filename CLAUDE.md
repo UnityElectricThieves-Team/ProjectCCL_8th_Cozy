@@ -41,9 +41,9 @@
 
 **새 배경 스프라이트는 Mesh Type을 Full Rect, pivot을 Center로 임포트합니다** — 배경은 Tiled 드로우 모드로 가로 반복하므로 Tight 메시로는 타일이 깨집니다. 나머지 배경 규약은 [.claude/rules/unity/background.md](.claude/rules/unity/background.md)에 있고, 같은 이유로 여기 한 줄 둡니다.
 
-**월드의 px 값(뷰포트·배경 높이·최소 크기 등)은 마스터 캔버스 기준 px이고, 화면에서는 작업 영역 폭 비율로 줄어듭니다** — UI의 CanvasScaler와 같은 배율입니다. 새로 px 크기 필드를 갖는 소비자를 만들 때는 [.claude/rules/unity/viewport-coordinates.md](.claude/rules/unity/viewport-coordinates.md)를 봅니다. 새 파일에는 발화할 규칙이 없어 여기 한 줄 둡니다.
+**월드의 px 값(뷰포트·배경 높이·최소 크기 등)은 마스터 캔버스 기준 px이고, 화면에서는 작업 영역 폭 비율로 줄어듭니다** — UI의 CanvasScaler와 같은 배율입니다. 새로 px 크기 필드를 갖는 소비자를 만들 때는 [.claude/rules/unity/viewport-coordinates.md](.claude/rules/unity/viewport-coordinates.md)를 봅니다. 새 파일에는 발화할 규칙이 없어 여기 한 줄 둡니다. 프리팹의 월드 위치값은 ×100 하면 마스터 캔버스 px입니다.
 
-**새 그림은 임포트 PPU를 Unity 기본값(100)으로 둡니다** — 월드 PPU가 코드 상수 100이라 그대로 두면 그림 1px = 마스터 캔버스 1px가 됩니다. 새 그림을 임포트하는 순간에도 발화할 규칙이 없어 여기 한 줄 둡니다. 이유와 예외는 같은 viewport-coordinates.md에 있습니다.
+**새 그림은 임포트 PPU를 Unity 기본값(100)으로 두고, 시트의 긴 변이 Max Size를 넘지 않게 합니다** — 월드 PPU가 코드 상수 100이라 그대로 두면 그림 1px = 마스터 캔버스 1px가 됩니다. 크기가 안 맞으면 PPU가 아니라 그림을 고칩니다. 새 그림을 임포트하는 순간에도 발화할 규칙이 없어 여기 한 줄 둡니다. 이유는 같은 viewport-coordinates.md에 있습니다.
 
 ---
 

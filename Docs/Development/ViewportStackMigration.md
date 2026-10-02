@@ -1,6 +1,6 @@
 # 뷰포트 편집 스택 GameScene 이관 계획
 
-> **2026-10 월드 PPU 100 전환으로 대체됨** — §3.3의 PPU 10.8과 환산표는 더 이상 현재 상태가 아니다. 현재 규칙은 [.claude/rules/unity/viewport-coordinates.md](../../.claude/rules/unity/viewport-coordinates.md).
+> **2026-10-02 변경 — 월드 PPU 100 전환으로 일부 대체됨.** 이 문서의 `_pixelsPerUnit = 10.8`, `_masterCanvasBottomRight = (88.8889, 0)`, §3.3 환산표는 더 이상 현재 상태가 아니다. `_pixelsPerUnit` 필드는 없어졌고 월드 PPU는 `BaseSpaceCameraFitter`의 코드 상수 100이다. 현재 규칙은 [.claude/rules/unity/viewport-coordinates.md](../../.claude/rules/unity/viewport-coordinates.md).
 
 > **범위**: `CameraFitter` → `BaseSpaceCameraFitter` 좌표 모델 교체와, 뷰포트 편집 스택
 > (`ViewportScreenSettings` / `ViewportEditHandles` / `WindowMoveResizeGuide`)을 GameScene에 넣는 작업.
@@ -79,6 +79,8 @@ ppu = _referenceHeight / (_maxY - _minY) = 1080 / 100 = 10.8
 
 > **`_pixelsPerUnit = 10.8`**
 
+> **2026-10-02 변경** — `_pixelsPerUnit` 필드는 없어졌고, 월드 PPU는 코드 상수 100이다. 아래 검산의 PPU 14도 함께 환산됐다.
+
 검산: 캐릭터 스프라이트(`white-animal-cat-sprite-sheet.png`)는 프레임 256×256, 임포트 PPU 14다.
 - 월드 크기 = 256 / 14 = 18.286 유닛
 - 화면 크기 = 18.286 × 10.8 = **197.5 px** ← 지금 보이는 크기
@@ -132,6 +134,8 @@ BR.x = W / (2 × 10.8) = W / 21.6
 _pixelsPerUnit          = 10.8
 _masterCanvasBottomRight = (88.8889, 0)      ← 1920 가로 모니터 기준
 ```
+
+> **2026-10-02 변경** — 지금은 PPU 100(코드 상수), `_masterCanvasBottomRight = (9.6, 0)`이다.
 
 ---
 
@@ -216,6 +220,8 @@ _masterCanvasBottomRight = (88.8889, 0)      ← 1920 가로 모니터 기준
 현상을 확인만 하고, 후속 작업으로 남긴다.
 
 ### 3.3 `_pixelsPerUnit = 10.8`은 "절대 픽셀 1:1"이 아니다
+
+> **2026-10-02 변경 — 이 절의 "별도 작업"이 실행됐다.** 월드 PPU는 코드 상수 100이 됐다. 아래 표는 이 시점의 스냅샷이라 발 정렬·월드 글자 크기 등이 빠져 있고, `_floorY`·`_groundContactThreshold`는 그 사이 코드에서 없어졌다. 실제 환산 내역은 해당 커밋을 본다.
 
 `BaseSpaceCameraFitter._pixelsPerUnit`의 툴팁은 *"스프라이트 임포트 PPU와 동일해야 절대 픽셀
 1:1이 성립"*이라고 적혀 있고, 기획서의 마스터 캔버스도 "에셋을 1:1 절대 픽셀로 배치"를 전제한다.
@@ -310,6 +316,7 @@ Unity Editor 작업:
 2. 같은 오브젝트에 **`BaseSpaceCameraFitter` 추가**
    - `_pixelsPerUnit` = `10.8`
    - `_masterCanvasBottomRight` = `(88.8889, 0)`
+   - (2026-10-02 변경: `_pixelsPerUnit`은 코드 상수 100이 되어 인스펙터에서 사라졌고, 앵커는 `(9.6, 0)`이다)
 3. `Platform/OverlayWindow`의 `WindowManager`에서 **`_maximizeToWorkArea` 체크 해제**
 
 > ⚠️ 이 상태에서는 `ViewportScreenSettings`가 없어 `Frame()`을 부르는 사람이 아무도 없다.
@@ -501,8 +508,8 @@ Editor에서 확인 가능: 카메라 `orthographicSize`가 런타임에 `1080/1
 
 | 대상 | 값 | 씬 라인 |
 |---|---|---|
-| `BaseSpaceCameraFitter._pixelsPerUnit` | `10.8` | :1716 |
-| `BaseSpaceCameraFitter._masterCanvasBottomRight` | `(88.8889, 0)` | :1717 |
+| `BaseSpaceCameraFitter._pixelsPerUnit` | `10.8` (2026-10-02 변경: 필드 삭제, 코드 상수 100) | :1716 |
+| `BaseSpaceCameraFitter._masterCanvasBottomRight` | `(88.8889, 0)` (2026-10-02 변경: `(9.6, 0)`) | :1717 |
 | `WindowManager._maximizeToWorkArea` | `0` | :688 |
 | `WindowManager._resizable` | `1` | :689 |
 | `ViewportScreenSettings` | `Platform/OverlayWindow`에 부착, `_viewport` = `(0,0,0,0)` | :698-716 |

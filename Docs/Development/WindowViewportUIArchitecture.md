@@ -188,7 +188,7 @@
 | 1 베이스 px | 1 화면 px | s 화면 px |
 | 뷰포트·`MinViewportSize` 720×480·배경 높이 400·핸들 히트 반경 | 작업 영역 px | 베이스 px. **값은 그대로** |
 | `orthographicSize` | 작업 영역 높이 / ppu / 2 | 베이스 높이 / ppu / 2 — 화면 높이가 작업 영역 높이라 자동으로 s배 축소 |
-| `_masterCanvasBottomRight`, PPU 10.8, 캐릭터 프리팹·스프라이트 PPU | 유지 | 유지 |
+| `_masterCanvasBottomRight`, PPU 10.8, 캐릭터 프리팹·스프라이트 PPU | 유지 | 유지 (2026-10-02 변경: 이후 PPU 100 전환으로 셋 다 환산됨) |
 
 바뀐 코드는 `ViewportScreenSettings.RefreshBaseSpace` 한 곳이다. `BaseSpaceCameraFitter`의 식과
 `BaseRectToWorld`를 쓰는 소비자(거주 영역·배경 띠)는 px 단위를 모르므로 손대지 않았다. 편집 핸들은
