@@ -1,5 +1,7 @@
 # 뷰포트 편집 스택 GameScene 이관 계획
 
+> **2026-10 월드 PPU 100 전환으로 대체됨** — §3.3의 PPU 10.8과 환산표는 더 이상 현재 상태가 아니다. 현재 규칙은 [.claude/rules/unity/viewport-coordinates.md](../../.claude/rules/unity/viewport-coordinates.md).
+
 > **범위**: `CameraFitter` → `BaseSpaceCameraFitter` 좌표 모델 교체와, 뷰포트 편집 스택
 > (`ViewportScreenSettings` / `ViewportEditHandles` / `WindowMoveResizeGuide`)을 GameScene에 넣는 작업.
 > **전제**: 창 스택(`WindowManager`)은 이미 GameScene에 들어가 있다 (커밋 `98738da`, `8c3de6f`).

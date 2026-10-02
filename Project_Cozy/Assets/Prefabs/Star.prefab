@@ -149,8 +149,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 5, y: 0}
-  m_SizeDelta: {x: 20, y: 5}
+  m_AnchoredPosition: {x: 0.54, y: 0}
+  m_SizeDelta: {x: 2.16, y: 0.54}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!23 &3971738411214137930
 MeshRenderer:
@@ -248,8 +248,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 12
-  m_fontSizeBase: 12
+  m_fontSize: 1.296
+  m_fontSizeBase: 1.296
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -340,7 +340,7 @@ Transform:
   m_GameObject: {fileID: 8430567564375317691}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 30, y: 60, z: 0}
+  m_LocalPosition: {x: 3.24, y: 6.48, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -383,7 +383,7 @@ CapsuleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 2.5, y: 2.5}
+  m_Size: {x: 0.27, y: 0.27}
   m_Direction: 0
 --- !u!114 &7167739134718551443
 MonoBehaviour:
@@ -402,8 +402,8 @@ MonoBehaviour:
   _threshold: 100
   _characterPrefab: {fileID: 2249430935833052887, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
   _spawnParent: {fileID: 0}
-  _spawnOffsetMin: {x: -0.5, y: 1}
-  _spawnOffsetMax: {x: 0.5, y: 2}
+  _spawnOffsetMin: {x: -0.054, y: 0.108}
+  _spawnOffsetMax: {x: 0.054, y: 0.216}
 --- !u!114 &6259409690066820168
 MonoBehaviour:
   m_ObjectHideFlags: 0

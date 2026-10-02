@@ -15,7 +15,7 @@ public class WalkState : BaseCharacterState
 
     /// <summary>거주 영역이 아직 없는 씬에서 쓸 목적지 거리. 본편에서는 뷰포트가 항상 영역을
     /// 걸어주므로 쓰이지 않는다 — 바인더 없는 테스트 씬에서 캐릭터가 굳어 보이지 않게 하는 용도다.</summary>
-    private const float FALLBACK_DISTANCE = 3f;
+    private const float FALLBACK_DISTANCE = 0.324f;
 
     private float _targetX;
 
