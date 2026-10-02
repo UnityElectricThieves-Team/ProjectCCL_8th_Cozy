@@ -55,6 +55,14 @@ public class BaseSpaceCameraFitter : MonoBehaviour
             basePx.height / PIXELS_PER_UNIT);
     }
 
+    /// <summary>베이스 공간 px의 가로 위치 하나를 월드 x로 바꾼다. <see cref="BaseRectToWorld"/>와 같은 앵커 식.</summary>
+    public float BaseXToWorldX(float baseX, Vector2Int baseSpaceSize)
+        => _masterCanvasBottomRight.x - baseSpaceSize.x / PIXELS_PER_UNIT + baseX / PIXELS_PER_UNIT;
+
+    /// <summary>월드 x를 베이스 공간 px의 가로 위치로 바꾼다. <see cref="BaseXToWorldX"/>의 역변환 — 저장할 값을 만들 때 쓴다.</summary>
+    public float WorldXToBaseX(float worldX, Vector2Int baseSpaceSize)
+        => (worldX - (_masterCanvasBottomRight.x - baseSpaceSize.x / PIXELS_PER_UNIT)) * PIXELS_PER_UNIT;
+
     /// <summary>
     /// 베이스 공간 내 픽셀 rect(원점=베이스 공간 좌하단, Y 위 방향)를 화면에 꽉 차게 프레이밍.
     /// baseSpaceSize = 베이스 공간 크기(마스터 캔버스 기준 px) — ViewportScreenSettings.BaseSpaceSize.

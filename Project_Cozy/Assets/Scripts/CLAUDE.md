@@ -11,7 +11,7 @@
 | `PerformanceSetting/` | 프레임 레이트·뷰포트 등 런타임 *정책*. OS 조작은 `Platform/`에 위임. | `Platform/`, `Interaction/`(월드 입력 잠금) — 자세한 컨벤션은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) |
 | `Animation/` | 스프라이트 애니메이션 등 순수 표현 컴포넌트. 게임 로직·OS를 모른다. | (없음) |
 | `Character/` | 캐릭터 단일 개체의 자율 거동·친밀도·시각. `BaseCharacterController` 단일 컴포넌트 + nested module(`StateModule`/`VisualModule`/`AffinityModule`/`ScaleModule`). | `Interaction/`, `Animation/`, `Platform/Input/` — 자세한 컨벤션은 [Character/CLAUDE.md](Character/CLAUDE.md) |
-| `Gameplay/` | 게임 로직. `Platform/`의 인프라를 *소비*한다 (별 클릭 · 변신 등은 채워지는 중). 하트·스폰 기운처럼 씬에 하나만 두는 시스템이 여기 산다. | `Platform/`, `Animation/`, `Interaction/` |
+| `Gameplay/` | 게임 로직. `Platform/`의 인프라를 *소비*한다 (별 클릭 · 변신 등은 채워지는 중). 하트·스폰 기운처럼 씬에 하나만 두는 시스템이 여기 산다. | `Platform/`, `Animation/`, `Interaction/`, `PerformanceSetting/`(뷰포트·좌표 환산 — 배경·장식 배치) |
 | `Contents/` | 상점·도감 같은 *콘텐츠* 시스템. 무엇을 가졌고 무엇을 쓰는 중인지를 들고 파일에 기록한다. 정의(ScriptableObject·JSON)와 상태(저장 파일)를 분리한다. | `Platform/Data/`, `Gameplay/` |
 | `UI/` | HUD·메뉴 표시. TextMeshPro 사용. | 하위 레이어 자유 참조 (`Gameplay/`·`Character/`·`Interaction/`·`PerformanceSetting/`·`Platform/` 등) — UI는 최상위 표현층이라 하위를 향한 참조에 제한을 두지 않는다. 설정 UI가 창·뷰포트 정책(`PerformanceSetting/`의 `ViewportScreenSettings` 등)을 직접 제어하는 교차가 잦기 때문. |
 | `Examples/` | 기능 확인용 하니스. 본편 동작에 필요한 것을 여기 두지 않는다. | 자유 |
@@ -31,8 +31,8 @@
 | `PerformanceSetting/Viewport/` | `ViewportScreenSettings.cs`(뷰포트 정책 + 베이스 공간 단위의 소유자) + `BaseSpaceCameraFitter.cs`(px→월드 환산 — 앵커·PPU의 소유자) |
 | `Animation/` | `SpriteAnimator.cs`(프레임 순환), `ShadowProjector.cs`(캐릭터 아래 바닥을 향해 판정해 그림자를 놓고, 멀어질수록 폭을 줄인다) |
 | `Character/` | `BaseCharacterController.cs` → `CharacterState.cs`(통합 enum) → `Modules/`, `States/` |
-| `Gameplay/` | `HeartSystem.cs`(하트 재화), `SpawnPointManager.cs`(스폰 기운), `Background/BackgroundStrip.cs`(뷰포트 아래 변에 붙는 배경 띠 — 고정 높이로 맞춰 가로로 반복), `LocalizationManager.cs`(번역 표 — stringID로 현재 언어 문장을 내준다. 프리팹 고정 문구는 `UI/LocalizedText.cs`가 붙어 받아 간다) |
-| `Contents/` | `ShopSystem/ShopSystem.cs`(장식 소유 — 산 개수와 화면에 놓인 목록), `ShopSystem/BackgroundSystem.cs`(배경 소유 + 활성 1개) → `ShopSystem/BackgroundBinder.cs`(활성 배경을 `Gameplay/Background/BackgroundStrip`에 잇는다), `CollectionSystem/Model/CollectionData.cs`(도감 정의 — WPF 툴이 만든 JSON을 읽는다) |
+| `Gameplay/` | `HeartSystem.cs`(하트 재화), `SpawnPointManager.cs`(스폰 기운), `Background/BackgroundStrip.cs`(뷰포트 아래 변에 붙는 배경 띠 — 고정 높이로 맞춰 가로로 반복), `Decoration/DecorationLayer.cs`(화면에 놓인 장식을 지면에 맞춰 그린다 — 상점을 모른다), `LocalizationManager.cs`(번역 표 — stringID로 현재 언어 문장을 내준다. 프리팹 고정 문구는 `UI/LocalizedText.cs`가 붙어 받아 간다) |
+| `Contents/` | `ShopSystem/ShopSystem.cs`(장식 소유 — 산 개수와 화면에 놓인 목록) → `ShopSystem/DecorationBinder.cs`(놓인 목록을 `Gameplay/Decoration/DecorationLayer`에 잇는다), `ShopSystem/BackgroundSystem.cs`(배경 소유 + 활성 1개) → `ShopSystem/BackgroundBinder.cs`(활성 배경을 `Gameplay/Background/BackgroundStrip`에 잇는다), `CollectionSystem/Model/CollectionData.cs`(도감 정의 — WPF 툴이 만든 JSON을 읽는다) |
 | `UI/` | `UIManager.cs`(열린 패널 스택 + ESC) → `UIPanel.cs`(패널 공통 동작) |
 
 ## 사용 금지 · 제거 대기
