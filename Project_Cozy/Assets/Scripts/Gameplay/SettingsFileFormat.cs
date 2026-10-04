@@ -48,4 +48,21 @@ public class SettingsFileFormat
     public bool autoStart = false;
     public bool administratorMode = false;
     public bool girlTransformBanned = false;
+
+    // ===== 소리 탭. 볼륨은 0~1 슬라이더 값 그대로(데시벨 변환은 BgmPlayer가 한다). =====
+    public float masterVolume = 1f;
+    public float musicVolume = 1f;
+    public float sfxVolume = 1f;
+    /// <summary>볼륨과 따로 둔다 — 음소거를 풀면 저장된 볼륨으로 돌아간다.</summary>
+    public bool muted = false;
+    /// <summary><see cref="BgmCatalog"/>의 곡 id. 빈 문자열이면 목록의 첫 곡.</summary>
+    public string bgmTrackId = "";
+}
+
+/// <summary>설정 패널 소리 탭의 볼륨 슬라이더 하나에 대응하는 믹서 채널.</summary>
+public enum VolumeChannel
+{
+    Master,
+    Music,
+    Sfx,
 }
