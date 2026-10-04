@@ -1,8 +1,9 @@
 ---
 paths:
   - "Project_Cozy/Assets/Scripts/Character/**/*.cs"
-  - "Project_Cozy/Assets/Prefabs/Character*.prefab"
+  - "Project_Cozy/Assets/Prefabs/Characters/*.prefab"
   - "Project_Cozy/Assets/Assets/ProtoTypeCharacter/**"
+  - "Project_Cozy/Assets/Art/*/Image/**"
 ---
 
 # 캐릭터 지면·발 규약
@@ -47,3 +48,11 @@ paths:
 발 정렬 값은 스프라이트에서 유도됩니다 — 프레임 안에서 캐릭터의 아래 끝이 어디인지, 그리고 임포트 PPU가 얼마인지로 정해집니다. 그래서 **임포트 PPU나 프레임 여백을 바꾸면 발 정렬이 조용히 깨집니다.** 컴파일 에러도 경고도 나지 않고, 캐릭터가 뜨거나 파묻힌 채로 돌아갑니다. 둘 중 하나라도 건드렸으면 프리팹의 Visual 오프셋을 다시 재세요.
 
 프레임마다 캐릭터의 실제 크기가 다르면 오프셋 하나로는 다 맞출 수 없습니다. 편차가 눈에 띄게 커지면 고칠 곳은 프리팹이 아니라 아트이거나, Unity 스프라이트 에디터의 프레임별 피벗입니다.
+
+## 폼이 둘이면 피벗에서 발까지의 거리를 맞춥니다
+
+동물 폼과 소녀 폼은 한 프리팹 안에서 클립 세트만 갈아 끼웁니다. 그래서 **Visual 오프셋 하나를 두 폼이 같이 씁니다.** 두 폼의 시트에서 피벗과 발 사이 거리가 다르면, 변신하는 순간 한쪽 폼이 뜨거나 파묻힙니다.
+
+PPU는 100으로 고정이라([viewport-coordinates.md](viewport-coordinates.md)) 이 거리는 **피벗으로 맞춥니다.** 칸 높이와 발밑 여백을 재고, 다른 폼과 같은 거리만큼 발 위에 피벗이 오도록 Custom 피벗을 넣습니다. 시트를 다시 자를 때 Slice의 Pivot을 Custom으로 주면 모든 프레임에 한 번에 들어갑니다.
+
+다른 캐릭터의 폼을 빌려 쓰는 경우도 같습니다. 그 캐릭터 시트에 맞춰야 하는 쪽은 빌려 쓰는 쪽입니다.

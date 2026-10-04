@@ -11,9 +11,9 @@ using UnityEngine;
 /// - 캐릭터가 Destroy되면 슬롯이 비어 재스폰 가능.
 /// - **추적 목록에 들어오는 문은 <see cref="Register"/> 하나다.** 스폰이든 씬 배치든 여기를 지나므로,
 ///   "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 새는 경로가 없다.
-/// - 시작 시 캐릭터가 하나도 없으면 최초 캐릭터를 한 마리 스폰한다. 게임에는 항상 캐릭터가
-///   최소 한 마리 있어야 하고, 그 보장을 스폰 지점이 함께 갖는 편이 씬에 캐릭터를 직접
-///   놓는 것보다 안전하다(씬 배치는 추적 목록을 지나지 않아 규칙에서 빠졌던 전례가 있다).
+/// - 시작 시 최초 캐릭터를 한 마리 스폰한다. 씬에 미리 놓인 캐릭터가 있어도 스폰한다 —
+///   씬 배치 캐릭터(헤라·치즈)와 최초 캐릭터(흰 고양이)는 서로 다른 캐릭터라 한쪽이 다른 쪽을 대신하지 않는다.
+///   씬 배치 캐릭터도 시작 시 찾아 <see cref="Register"/>를 지나므로 규칙에서 빠지지 않는다.
 /// - 씬 단일 인스턴스(Singleton). 스폰 호출자(StarClickCharacterSpawner / 데모 버튼 등)는
 ///   <see cref="Instance"/>.Spawn(...) 만 호출하면 되며 별도 참조 wiring이 필요 없다.
 /// </summary>
@@ -27,7 +27,7 @@ public class CharacterManager : MonoBehaviour
     [SerializeField, Min(1)] private int _maxCount = 10;
 
     [Header("최초 캐릭터")]
-    [SerializeField, Tooltip("시작 시 캐릭터가 하나도 없으면 이 프리팹으로 한 마리 스폰한다. 비우면 스폰하지 않는다.")]
+    [SerializeField, Tooltip("시작 시 이 프리팹으로 한 마리 스폰한다. 씬에 놓인 캐릭터와 상관없이 스폰한다. 비우면 스폰하지 않는다.")]
     private GameObject _initialCharacterPrefab;
 
     [SerializeField, Tooltip("최초 캐릭터를 놓을 위치(월드). 바닥보다 위면 떨어져서 착지한다. " +
@@ -82,9 +82,9 @@ public class CharacterManager : MonoBehaviour
         var placed = FindObjectsByType<BaseCharacterController>(FindObjectsSortMode.None);
         for (int i = 0; i < placed.Length; i++) Register(placed[i].gameObject);
 
-        // 2) 그래도 한 마리도 없으면 최초 캐릭터를 스폰한다. 순서가 이렇게 되어야
-        //    씬에 배치된 캐릭터가 남아 있을 때 두 마리가 되지 않는다.
-        if (_initialCharacterPrefab != null && _alive.Count == 0)
+        // 2) 최초 캐릭터를 스폰한다. 씬에 놓인 캐릭터는 다른 캐릭터라 개수로 거르지 않는다.
+        //    같은 프리팹을 씬에도 놓으면 두 마리가 되니, 최초 캐릭터는 씬에 놓지 않는다.
+        if (_initialCharacterPrefab != null)
             Spawn(_initialCharacterPrefab, _initialSpawnPosition);
     }
 
