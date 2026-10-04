@@ -5,8 +5,8 @@ using UnityEngine;
 /// 게임에 들어 있는 배경음악 목록. 게임 내내 바뀌지 않는 정의 데이터만 담는다 —
 /// 지금 어떤 곡을 고르고 있는지는 유저 설정(<see cref="SettingsManager"/>)이 곡 id로 든다.
 ///
-/// 첫 항목이 기본 곡이다. 설정 패널 배경음악 드롭다운의 N번째 옵션이 이 목록의 N번째 곡이므로,
-/// 드롭다운 옵션(곡 이름 — 프리팹 인스펙터에서 직접 적는다)과 같은 순서를 유지해야 한다.
+/// 첫 항목이 기본 곡이다. 설정 패널 배경음악 드롭다운은 시작할 때 이 목록의 순서와 이름으로 옵션을 만든다 —
+/// 곡을 추가하거나 순서를 바꿀 때 고칠 곳은 여기 하나뿐이다.
 /// 곡마다 .asset을 나누지 않고 한 에셋에 모은 것은, 이 순서를 한 곳에서 보이게 하려는 것이다.
 ///
 /// 곡은 파일 경로가 아니라 <see cref="AudioClip"/>을 직접 참조한다 — 경로 문자열은 파일을 옮기거나
@@ -22,6 +22,9 @@ public sealed class BgmCatalog : ScriptableObject
     {
         [Tooltip("설정 파일에 저장되는 안정적 식별자. 예: bgm_cozy_morning. 한번 정하면 바꾸지 않는다.")]
         public string id;
+
+        [Tooltip("드롭다운에 보일 곡 이름. 번역하지 않고 모든 언어에서 이 글자 그대로 보인다.")]
+        public string displayName;
 
         [Tooltip("Assets/Audio/BGM/ 의 음원.")]
         public AudioClip clip;
