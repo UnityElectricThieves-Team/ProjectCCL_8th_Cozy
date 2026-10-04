@@ -38,7 +38,7 @@ public class BridgeAffinityHeart : MonoBehaviour
     }
 
     // 친밀도가 바뀔 때마다 누적값 기준으로 새로 넘긴 스텝 수를 계산해 그만큼 하트를 적립.
-    // 누적 친밀도는 Reset으로 줄지 않으므로, 리셋 후 재획득(파밍)은 발생하지 않는다.
+    // 누적 친밀도는 줄어들지 않으므로 같은 스텝을 두 번 넘는 일은 없다.
     private void OnAffinityChanged(int _)
     {
         var step = Mathf.Max(1, _affinityStepSize);
