@@ -129,7 +129,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -177,7 +177,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 8192
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -192,7 +192,7 @@ TextureImporter:
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: -1
+    textureFormat: 12
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
@@ -208,12 +208,12 @@ TextureImporter:
       name: petting_0
       rect:
         serializedVersion: 2
-        x: 492
-        y: 3748
-        width: 260
-        height: 477
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 3600
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -230,12 +230,12 @@ TextureImporter:
       name: petting_1
       rect:
         serializedVersion: 2
-        x: 1772
-        y: 3748
-        width: 260
-        height: 477
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1280
+        y: 3600
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -252,12 +252,12 @@ TextureImporter:
       name: petting_2
       rect:
         serializedVersion: 2
-        x: 3051
-        y: 3748
-        width: 260
-        height: 477
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 2560
+        y: 3600
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -274,12 +274,12 @@ TextureImporter:
       name: petting_3
       rect:
         serializedVersion: 2
-        x: 4327
-        y: 3748
-        width: 262
-        height: 476
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 3840
+        y: 3600
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -296,12 +296,12 @@ TextureImporter:
       name: petting_4
       rect:
         serializedVersion: 2
-        x: 5602
-        y: 3748
-        width: 269
-        height: 473
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 5120
+        y: 3600
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -318,12 +318,12 @@ TextureImporter:
       name: petting_5
       rect:
         serializedVersion: 2
-        x: 6879
-        y: 3748
-        width: 283
-        height: 470
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 6400
+        y: 3600
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -340,12 +340,12 @@ TextureImporter:
       name: petting_6
       rect:
         serializedVersion: 2
-        x: 472
-        y: 3028
-        width: 294
-        height: 473
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 2880
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -362,12 +362,12 @@ TextureImporter:
       name: petting_7
       rect:
         serializedVersion: 2
-        x: 1743
-        y: 3028
-        width: 302
-        height: 480
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1280
+        y: 2880
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -384,12 +384,12 @@ TextureImporter:
       name: petting_8
       rect:
         serializedVersion: 2
-        x: 3013
-        y: 3028
-        width: 309
-        height: 490
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 2560
+        y: 2880
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -406,12 +406,12 @@ TextureImporter:
       name: petting_9
       rect:
         serializedVersion: 2
-        x: 4285
-        y: 3028
-        width: 314
-        height: 497
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 3840
+        y: 2880
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -428,12 +428,12 @@ TextureImporter:
       name: petting_10
       rect:
         serializedVersion: 2
-        x: 5559
-        y: 3028
-        width: 316
-        height: 501
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 5120
+        y: 2880
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -450,12 +450,12 @@ TextureImporter:
       name: petting_11
       rect:
         serializedVersion: 2
-        x: 6834
-        y: 3028
-        width: 316
-        height: 500
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 6400
+        y: 2880
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -472,12 +472,12 @@ TextureImporter:
       name: petting_12
       rect:
         serializedVersion: 2
-        x: 432
-        y: 2308
-        width: 314
-        height: 498
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 2160
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -494,12 +494,12 @@ TextureImporter:
       name: petting_13
       rect:
         serializedVersion: 2
-        x: 1710
-        y: 2308
-        width: 314
-        height: 497
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1280
+        y: 2160
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -516,12 +516,12 @@ TextureImporter:
       name: petting_14
       rect:
         serializedVersion: 2
-        x: 2990
-        y: 2308
-        width: 315
-        height: 497
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 2560
+        y: 2160
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -538,12 +538,12 @@ TextureImporter:
       name: petting_15
       rect:
         serializedVersion: 2
-        x: 4271
-        y: 2308
-        width: 316
-        height: 497
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 3840
+        y: 2160
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -560,12 +560,12 @@ TextureImporter:
       name: petting_16
       rect:
         serializedVersion: 2
-        x: 5551
-        y: 2308
-        width: 317
-        height: 497
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 5120
+        y: 2160
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -582,12 +582,12 @@ TextureImporter:
       name: petting_17
       rect:
         serializedVersion: 2
-        x: 6831
-        y: 2308
-        width: 317
-        height: 497
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 6400
+        y: 2160
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -604,12 +604,12 @@ TextureImporter:
       name: petting_18
       rect:
         serializedVersion: 2
-        x: 431
-        y: 1588
-        width: 317
-        height: 497
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 1440
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -626,12 +626,12 @@ TextureImporter:
       name: petting_19
       rect:
         serializedVersion: 2
-        x: 1712
-        y: 1588
-        width: 316
-        height: 497
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1280
+        y: 1440
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -648,12 +648,12 @@ TextureImporter:
       name: petting_20
       rect:
         serializedVersion: 2
-        x: 2996
-        y: 1588
-        width: 315
-        height: 495
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 2560
+        y: 1440
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -670,12 +670,12 @@ TextureImporter:
       name: petting_21
       rect:
         serializedVersion: 2
-        x: 4283
-        y: 1588
-        width: 311
-        height: 492
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 3840
+        y: 1440
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -692,12 +692,12 @@ TextureImporter:
       name: petting_22
       rect:
         serializedVersion: 2
-        x: 5571
-        y: 1588
-        width: 305
-        height: 489
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 5120
+        y: 1440
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -714,12 +714,12 @@ TextureImporter:
       name: petting_23
       rect:
         serializedVersion: 2
-        x: 6857
-        y: 1588
-        width: 298
-        height: 487
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 6400
+        y: 1440
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -736,12 +736,12 @@ TextureImporter:
       name: petting_24
       rect:
         serializedVersion: 2
-        x: 463
-        y: 868
-        width: 289
-        height: 484
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 720
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -758,12 +758,12 @@ TextureImporter:
       name: petting_25
       rect:
         serializedVersion: 2
-        x: 1747
-        y: 868
-        width: 280
-        height: 481
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1280
+        y: 720
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -780,12 +780,12 @@ TextureImporter:
       name: petting_26
       rect:
         serializedVersion: 2
-        x: 3029
-        y: 868
-        width: 275
-        height: 481
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 2560
+        y: 720
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -802,12 +802,12 @@ TextureImporter:
       name: petting_27
       rect:
         serializedVersion: 2
-        x: 4311
-        y: 868
-        width: 273
-        height: 483
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 3840
+        y: 720
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -824,12 +824,12 @@ TextureImporter:
       name: petting_28
       rect:
         serializedVersion: 2
-        x: 5593
-        y: 868
-        width: 272
-        height: 485
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 5120
+        y: 720
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -846,12 +846,12 @@ TextureImporter:
       name: petting_29
       rect:
         serializedVersion: 2
-        x: 6874
-        y: 868
-        width: 273
-        height: 485
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 6400
+        y: 720
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -868,12 +868,12 @@ TextureImporter:
       name: petting_30
       rect:
         serializedVersion: 2
-        x: 473
-        y: 148
-        width: 275
-        height: 483
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -890,12 +890,12 @@ TextureImporter:
       name: petting_31
       rect:
         serializedVersion: 2
-        x: 1752
-        y: 148
-        width: 277
-        height: 482
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1280
+        y: 0
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -912,12 +912,12 @@ TextureImporter:
       name: petting_32
       rect:
         serializedVersion: 2
-        x: 3031
-        y: 148
-        width: 278
-        height: 481
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 2560
+        y: 0
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -934,12 +934,12 @@ TextureImporter:
       name: petting_33
       rect:
         serializedVersion: 2
-        x: 4311
-        y: 148
-        width: 278
-        height: 481
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 3840
+        y: 0
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -956,12 +956,12 @@ TextureImporter:
       name: petting_34
       rect:
         serializedVersion: 2
-        x: 5591
-        y: 148
-        width: 278
-        height: 481
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 5120
+        y: 0
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -978,12 +978,12 @@ TextureImporter:
       name: petting_35
       rect:
         serializedVersion: 2
-        x: 6871
-        y: 148
-        width: 289
-        height: 481
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 6400
+        y: 0
+        width: 1280
+        height: 720
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3569}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -1000,7 +1000,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: fa51e65c973e2624998f582af464bea0
     internalID: 0
     vertices: []
     indices: 
@@ -1008,7 +1008,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":1280.0,"y":720.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.35690000653266909},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":1,"spriteAlignment":9,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       petting_0: 1022452586586800002
       petting_1: 2637716575324485528
