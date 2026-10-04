@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using TMPro;
 using UnityEngine;
 
 /// <summary>
@@ -26,6 +27,13 @@ public sealed class LocalizationManager : MonoBehaviour
     [Tooltip("번역 표 JSON(Assets/Localization/Strings.json).")]
     [SerializeField] private TextAsset _table;
 
+    [Header("언어별 대표 폰트 — 비워 두면 한국어 폰트를 쓴다")]
+    [SerializeField] private TMP_FontAsset _koreanFont;
+    [SerializeField] private TMP_FontAsset _englishFont;
+    [SerializeField] private TMP_FontAsset _japaneseFont;
+    [SerializeField] private TMP_FontAsset _chineseSimplifiedFont;
+    [SerializeField] private TMP_FontAsset _chineseTraditionalFont;
+
     // 현재 언어 칸이 비었을 때 대신 쓰는 언어.
     private const string FallbackLanguage = LanguageCodes.English;
     // 가짜 번역의 재료. 번역을 요청하는 쪽(기획)이 채우는 원문 언어다.
@@ -35,8 +43,28 @@ public sealed class LocalizationManager : MonoBehaviour
     private SettingsManager _settings;
     private string _language = FallbackLanguage;
 
-    /// <summary>언어가 실제로 바뀌었을 때만 울린다. 텍스트들이 받아서 글자를 다시 채운다.</summary>
+    /// <summary>언어가 실제로 바뀌었을 때만 울린다. 텍스트들이 받아서 글자와 폰트를 다시 채운다.</summary>
     public event Action LanguageChanged;
+
+    /// <summary>
+    /// 현재 언어의 대표 폰트. 번역되는 텍스트는 글자와 함께 이 폰트로 바꾼다.
+    /// 대표 폰트에 없는 글자는 TMP 전역 대체 폰트가 채운다.
+    /// </summary>
+    public TMP_FontAsset Font
+    {
+        get
+        {
+            var font = _language switch
+            {
+                LanguageCodes.English => _englishFont,
+                LanguageCodes.Japanese => _japaneseFont,
+                LanguageCodes.ChineseSimplified => _chineseSimplifiedFont,
+                LanguageCodes.ChineseTraditional => _chineseTraditionalFont,
+                _ => null,
+            };
+            return font != null ? font : _koreanFont;
+        }
+    }
 
     /// <summary>코드가 글자를 채울 때 쓰는 진입점. 매니저가 없는 씬에서도 멈추지 않게 stringID를 그대로 돌려준다.</summary>
     public static string Localize(string id) => Instance != null ? Instance.Get(id) : id;
