@@ -27,7 +27,7 @@ public readonly struct PlacedDecoration
 /// 목록이 바뀌면 인스턴스를 전부 지우고 다시 만든다. 바뀌는 순간이 설치를 확정할 때뿐이라 드물고 개수도 적다.
 /// 놓인 장식에는 고유 id가 없어서, 차이만 골라 만드는 방식은 지금 상점에 없는 상품이 섞이면 어긋난다.
 ///
-/// 배치는 뷰포트가 확정될 때(<see cref="ViewportScreenSettings.ViewportApplied"/>)와 목록이 바뀔 때만 다시 계산한다.
+/// 배치는 뷰포트가 확정될 때(<see cref="ViewportScreenSettings.ViewportConfirmed"/>)와 목록이 바뀔 때만 다시 계산한다.
 /// 매 프레임 하는 일은 없다. 편집 중 프리뷰에는 따라가지 않는다(배경과 같은 판단).
 ///
 /// 지면 맞춤은 transform 위치가 아니라 그림의 아래 끝으로 한다. 장식마다 그림의 피벗이 달라서다(가구는 아래 끝, 임시 그림은 가운데).
@@ -65,15 +65,15 @@ public sealed class DecorationLayer : MonoBehaviour
             return;
         }
 
-        _viewportSettings.ViewportApplied += OnViewportApplied;
+        _viewportSettings.ViewportConfirmed += OnViewportConfirmed;
 
-        // 초기 적용이 이미 끝난 뒤에 이 컴포넌트가 붙었을 수 있다(ViewportApplied는 다시 오지 않는다).
-        if (_viewportSettings.IsReady) OnViewportApplied(_viewportSettings.Viewport);
+        // 초기 적용이 이미 끝난 뒤에 이 컴포넌트가 붙었을 수 있다(첫 확정 신호는 이미 지나갔으면 다시 오지 않는다).
+        if (_viewportSettings.IsReady) OnViewportConfirmed(_viewportSettings.Viewport);
     }
 
     private void OnDestroy()
     {
-        if (_viewportSettings != null) _viewportSettings.ViewportApplied -= OnViewportApplied;
+        if (_viewportSettings != null) _viewportSettings.ViewportConfirmed -= OnViewportConfirmed;
     }
 
     /// <summary>놓인 장식 목록을 통째로 바꾼다. 넘긴 목록은 복사해 두므로 호출한 쪽이 다시 써도 된다.</summary>
@@ -98,7 +98,7 @@ public sealed class DecorationLayer : MonoBehaviour
         }
     }
 
-    private void OnViewportApplied(RectInt viewportPx)
+    private void OnViewportConfirmed(RectInt viewportPx)
     {
         _area = _cameraFitter.BaseRectToWorld(viewportPx, _viewportSettings.BaseSpaceSize);
         _hasArea = true;

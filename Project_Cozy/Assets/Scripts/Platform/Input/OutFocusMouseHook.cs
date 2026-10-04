@@ -42,7 +42,7 @@ public class OutFocusMouseHook : OutFocusLowLevelHook
     /// static 이벤트 — 소비자는 인스턴스 참조 없이 <c>OutFocusMouseHook.ButtonPressed += ...</c>로 구독한다.</summary>
     public static event Action<MouseButton> ButtonPressed;
 
-    // 도메인 리로드 끄기 상황에서 static 상태가 세션 간 잔존하는 것을 방지(CharacterNames.ResetState와 같은 패턴).
+    // Enter Play Mode에서 도메인 리로드를 끄면 static 필드가 이전 Play의 값을 그대로 들고 있으므로, 시작할 때 비운다.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetState()
     {

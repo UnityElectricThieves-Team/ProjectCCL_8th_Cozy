@@ -33,9 +33,6 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     [SerializeField] private AffinityModule _affinity = new AffinityModule();
     [SerializeField] private ScaleModule _scale = new ScaleModule();
 
-    // 스폰 시 CharacterNames에서 할당받는 고유 이름(정체성). 표현(머리 위 라벨)과 분리.
-    private string _name;
-
     // 이 캐릭터가 머무를 수 있는 월드 영역. 밖에서 SetLivingArea로 주입한다(기본은 제한 없음).
     // 캐릭터는 이 사각형이 무엇에서 왔는지 모른다 — 뷰포트를 아는 것은 Gameplay/Viewport 쪽이다.
     private Rect _livingArea;
@@ -61,9 +58,6 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public Animator Animator => _animator;
     public SpriteRenderer SpriteRenderer => _spriteRenderer;
     public Collider2D VisualCollider => _visualCollider;
-
-    /// <summary>스폰 시 할당된 이름. 머리 위 라벨(<see cref="CharacterNameLabel"/>)이 표시한다.</summary>
-    public string Name => _name;
 
     public StateModule State => _state;
     public VisualModule Visual => _visual;
@@ -102,8 +96,6 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         if (_holdInput == null) _holdInput = GetComponentInChildren<HoldClickEvent>();
         if (_hoverGate == null) _hoverGate = GetComponentInChildren<OpaqueHoverable>();
 
-        _name = CharacterNames.Acquire();
-
         _state.Bind(this);
         _visual.Bind(this);
         _affinity.Bind(this);
@@ -141,7 +133,6 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     protected virtual void OnDestroy()
     {
-        CharacterNames.Release(_name);
         _state.StateChanged -= OnStateChanged;
     }
 

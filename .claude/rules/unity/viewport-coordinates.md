@@ -2,6 +2,7 @@
 paths:
   - "Project_Cozy/Assets/Scripts/PerformanceSetting/Viewport/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Viewport/**/*.cs"
+  - "Project_Cozy/Assets/Scripts/Gameplay/CharacterOwnership.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Background/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Contents/ShopSystem/Background*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Decoration/**/*.cs"
@@ -29,6 +30,14 @@ paths:
 `BaseSpaceCameraFitter`는 앵커(마스터 캔버스 우하단의 월드 좌표)와 PPU로 베이스 px를 월드 길이로 바꿉니다. 이 식은 px가 어떤 단위인지 모릅니다. 그래서 단위를 바꿔도 이 클래스와 소비자들은 손대지 않았습니다.
 
 새 소비자가 베이스 px 사각형을 월드로 옮길 때는 `BaseRectToWorld`를 쓰고, 가로 위치 하나는 `BaseXToWorldX`(역변환 `WorldXToBaseX`)를, 길이 하나를 옮길 때는 `PixelsPerUnit`으로 나눕니다. 위치는 앵커를 거쳐야 해서 길이처럼 나누기만 하면 틀립니다. 직접 `Screen.width`나 작업 영역 크기를 섞어 계산하지 않습니다 — 그 순간 단위가 둘이 됩니다.
+
+## 뷰포트가 처음 확정되기 전에는 위치를 정하지 않습니다
+
+`ViewportScreenSettings`는 시작하고 몇 프레임 뒤에야 뷰포트를 확정합니다. 창 배치가 끝난 뒤에 작업 영역을 읽어야 값이 안정적이기 때문입니다. 그 전에 뷰포트로 위치를 계산하면 기본값이나 0으로 계산되어 엉뚱한 자리에 놓이고, 에러는 나지 않습니다.
+
+그래서 뷰포트를 기준으로 무언가를 놓는 소비자는 `IsReady`를 먼저 봅니다. 준비됐으면 바로 계산하고, 아니면 `ViewportConfirmed`를 구독해 신호가 올 때 계산합니다. 시작 시점에 컴포넌트가 붙는 순서는 정해져 있지 않아서, 둘 중 하나만 쓰면 첫 확정을 놓치거나 아직 없는 값을 읽습니다.
+
+`ViewportConfirmed`는 한 번만 울리는 준비 신호가 아닙니다. 첫 확정 뒤에도 편집을 저장·취소할 때와 창을 다시 맞출 때마다 울립니다. 매번 다시 계산해야 하는 소비자(배경 띠, 장식, 거주 영역)는 계속 구독하고, 처음 한 번만 필요한 소비자는 첫 신호에서 구독을 풉니다.
 
 ## 월드 PPU는 코드 상수 100입니다
 

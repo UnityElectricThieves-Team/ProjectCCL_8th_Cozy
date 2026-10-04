@@ -82,9 +82,10 @@ public class ViewportScreenSettings : MonoBehaviour
     /// <summary>편집 모드 진입(true)/이탈(false) — 편집 UI 표시 토글 지점.</summary>
     public event Action<bool> EditModeChanged;
 
-    /// <summary>확정 뷰포트가 적용된 직후 — 초기 적용, SetViewport, 저장/취소 복귀, 창 재조정 전부 포함.
-    /// 뷰포트 밖 캐릭터 회수(ViewportResidencyEnforcer) 등이 구독.</summary>
-    public event Action<RectInt> ViewportApplied;
+    /// <summary>뷰포트가 확정된 직후 — 시작 시 초기 적용, SetViewport, 편집 저장/취소 복귀, 창 재조정 때마다 울린다.
+    /// 한 번만 울리는 "준비 완료" 신호가 아니다. 첫 확정이 이미 지났는지는 <see cref="IsReady"/>로 본다.
+    /// 거주 영역(ViewportLivingAreaBinder)·배경 띠·장식 레이어가 구독한다.</summary>
+    public event Action<RectInt> ViewportConfirmed;
 
     private IEnumerator Start()
     {
@@ -122,7 +123,7 @@ public class ViewportScreenSettings : MonoBehaviour
 
         _viewport = ClampToBaseSpace(_viewport);
         _ready = true;
-        PublishViewportApplied();
+        PublishViewportConfirmed();
     }
 
     private void OnDisable()
@@ -158,7 +159,7 @@ public class ViewportScreenSettings : MonoBehaviour
         // ExitEdit이 이 확정 값을 반영한다.
         if (_isEditing) return;
 
-        PublishViewportApplied();
+        PublishViewportConfirmed();
     }
 
     /// <summary>작업 영역 px(옛 단위) 뷰포트를 설정한다. 베이스 px로 환산해 SetViewport와 같은 경로를 탄다.
@@ -196,7 +197,7 @@ public class ViewportScreenSettings : MonoBehaviour
         // 작업 영역이 줄었으면 뷰포트가 베이스 공간을 넘칠 수 있다. 줄여서 맞추되 저장하지는 않는다
         // (큰 모니터로 돌아가면 저장된 원래 크기가 복원되어야 한다).
         _viewport = ClampToBaseSpace(_viewport);
-        PublishViewportApplied();
+        PublishViewportConfirmed();
     }
 
     /// <summary>화면 설정 진입 — 뷰포트 조정을 시작한다.
@@ -260,7 +261,7 @@ public class ViewportScreenSettings : MonoBehaviour
             _windowManager.ReleaseResizeSuspend(this);
         }
         WorldInputLock.Release(this);
-        PublishViewportApplied();
+        PublishViewportConfirmed();
         EditModeChanged?.Invoke(false);
     }
 
@@ -282,7 +283,7 @@ public class ViewportScreenSettings : MonoBehaviour
 
     /// <summary>확정 뷰포트가 적용됐음을 알린다. 창·카메라는 건드리지 않는다 —
     /// 뷰포트는 렌더링이 아니라 게임플레이 규칙의 기준이기 때문이다.</summary>
-    private void PublishViewportApplied() => ViewportApplied?.Invoke(_viewport);
+    private void PublishViewportConfirmed() => ViewportConfirmed?.Invoke(_viewport);
 
     private void RefreshBaseSpace()
     {

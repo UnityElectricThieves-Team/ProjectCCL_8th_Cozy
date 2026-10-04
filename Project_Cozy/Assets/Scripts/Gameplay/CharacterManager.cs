@@ -12,10 +12,11 @@ using UnityEngine;
 /// - **추적 목록에 들어오는 문은 <see cref="Register"/> 하나다.** 스폰이든 씬 배치든 여기를 지나므로,
 ///   "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 새는 경로가 없다.
 /// - 씬 배치 캐릭터도 시작 시 찾아 <see cref="Register"/>를 지나므로 규칙에서 빠지지 않는다.
-/// - "어떤 캐릭터를 가졌고 누가 나와 있어야 하는가"(최초 캐릭터 스폰 등)는 <see cref="CharacterOwnership"/>이 맡는다.
+/// - "어떤 캐릭터를 가졌고 누가 나와 있어야 하는가"(보유·배치 기록과 저장, 시작 시 등장)는 <see cref="CharacterOwnership"/>이 맡는다.
 ///   이 클래스는 지금 살아 움직이는 캐릭터만 다룬다.
-/// - 씬 단일 인스턴스(Singleton). 스폰 호출자(StarClickCharacterSpawner / 데모 버튼 등)는
-///   <see cref="Instance"/>.Spawn(...) 만 호출하면 되며 별도 참조 wiring이 필요 없다.
+/// - 씬 단일 인스턴스(Singleton). 스폰 호출자는 <see cref="Instance"/>.Spawn(...)을 부르면 되며 별도 참조 wiring이 필요 없다.
+///   단 <see cref="Spawn"/>은 저수준 입구라 보유 기록을 남기지 않는다. 게임 진행으로 캐릭터가 나오는 경우(해금 등)는
+///   <see cref="CharacterOwnership"/>을 거쳐야 재시작해도 남는다.
 /// </summary>
 [DefaultExecutionOrder(-100)]
 [DisallowMultipleComponent]

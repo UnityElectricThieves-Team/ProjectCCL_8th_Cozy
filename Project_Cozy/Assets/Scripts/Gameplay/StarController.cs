@@ -9,6 +9,8 @@ using UnityEngine.Serialization;
 ///   (Character의 VisualModule과 같은 방식이되 상태 클래스 없이 단순화).
 /// - 클릭(드래그가 아니었을 때) 시 캐릭터 1개 스폰을 요청한다. 생성·동시존재 캡 판정은 <see cref="CharacterManager"/>에 위임한다.
 ///   스폰해도 기운은 차감하지 않는다.
+/// - 지금 Star.prefab은 <see cref="_characterPrefab"/>을 비워 두어 캐릭터를 소환하지 않는다. 이유는
+///   .claude/rules/unity/character-ownership.md의 별 항목.
 ///
 /// 같은 GameObject에 <see cref="Collider2D"/>가 있어야 <see cref="InputInteractionManager"/>가 클릭을 라우팅한다.
 /// 같은 GameObject에 <see cref="DraggableObject2D"/>가 있으면 드래그가 아니었을 때(mouse up 시점)에만 스폰한다.

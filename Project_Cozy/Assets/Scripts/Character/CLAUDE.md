@@ -32,9 +32,6 @@
 자식 Shadow GameObject
 └─ ShadowProjector           (바닥을 향해 판정해 그림자를 놓고, 멀어지면 폭을 줄인다)
 
-자식 HeadAnchor GameObject   (머리 위 글자 자리 — 눈으로 배치)
-└─ NameTextBox               (CharacterNameLabel, 위치는 앵커 기준 0)
-
 자식 StateLabelAnchor GameObject (상태 디버그 글자 자리 — 좌우 반전을 따라가지 않음)
 └─ StateTextBox              (CharacterStateLabel, 위치는 앵커 기준 0)
 ```

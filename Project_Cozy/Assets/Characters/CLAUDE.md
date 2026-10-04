@@ -26,6 +26,7 @@ Characters/
 2. **오버라이드 컨트롤러를 만든다.** 베이스는 `BaseCharacterAnimatorController`이고, 그 캐릭터에 있는 클립만 채운다. 클립이 없는 칸은 비워 둔다. 다른 캐릭터의 클립으로 채우면 그 상태에서 다른 캐릭터 그림이 튀어나온다.
 3. **프리팹은 `Character.prefab`의 배리언트로 만든다.** 구조(Visual·판정·앵커)는 물려받고, 오버라이드·시작 폼·기본 스프라이트·모션 시간처럼 캐릭터마다 다른 값만 바꾼다.
 4. **모션 시간을 클립 길이에 맞춘다.** 쓰담·특수 대기는 클립이 끝나는 시점이 아니라 프리팹 인스펙터의 시간 값으로 끝난다. 클립의 프레임 수나 fps를 바꾸면 이 값도 함께 바꾼다.
+5. **씬에 놓지 않고 `CharacterOwnership`의 대응표에 id와 프리팹을 등록한다.** id는 저장 키라 한번 정하면 바꾸지 않는다. 이유는 [character-ownership.md](../../../.claude/rules/unity/character-ownership.md).
 
 캐릭터 코드(컨트롤러 / AI / 친밀도)는 [Scripts/Character/](../Scripts/Character/CLAUDE.md)에 있다. 아트 폴더에 스크립트를 두지 않는다.
 

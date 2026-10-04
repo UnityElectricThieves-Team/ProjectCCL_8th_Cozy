@@ -5,7 +5,6 @@ paths:
   - "Project_Cozy/Assets/Scripts/Gameplay/Settings*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Localization*.cs"
   - "Project_Cozy/Assets/Localization/**"
-  - "Project_Cozy/Assets/Scripts/Character/CharacterNames.cs"
   - "Project_Cozy/Assets/Prefabs/UIPanels/**/*.prefab"
   - "Project_Cozy/Assets/Fonts/**"
 ---

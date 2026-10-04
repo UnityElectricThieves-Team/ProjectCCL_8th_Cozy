@@ -7,12 +7,13 @@ paths:
 
 ## 어디에 두는가
 
-**씬에 배치되는 프리팹은 `Assets/Prefabs/` 아래에 둔다.** 캐릭터는 `Assets/Prefabs/Characters/`에, 별·달 같은 나머지 게임 오브젝트는 그 폴더 직하에, UI는 `Assets/Prefabs/UIPanels/` 아래에 둔다.
+**씬에 배치되거나 실행 중에 스폰되는 프리팹은 `Assets/Prefabs/` 아래에 둔다.** 캐릭터는 `Assets/Prefabs/Characters/`에(캐릭터는 씬에 놓지 않고 스폰한다 — [character-ownership.md](character-ownership.md)), 별·달 같은 나머지 게임 오브젝트는 그 폴더 직하에, UI는 `Assets/Prefabs/UIPanels/` 아래에 둔다.
 
 ```
 Assets/Prefabs/
 ├── Characters/
 │   ├── Character.prefab        # 캐릭터 베이스. 캐릭터별 프리팹은 이것의 배리언트
+│   ├── Character_Cheese.prefab
 │   └── Character_Hera.prefab
 ├── Star.prefab                 # 나머지 게임 오브젝트는 여기 직하
 └── UIPanels/

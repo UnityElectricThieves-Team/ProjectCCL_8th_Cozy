@@ -39,6 +39,8 @@
 
 **새 캐릭터 프리팹은 루트가 곧 발이어야 합니다** — Visual 자식을 올려 스프라이트 아래 끝을 루트 원점에 맞춥니다. 이유와 나머지 지면 규약은 [.claude/rules/unity/character-ground.md](.claude/rules/unity/character-ground.md)에 있는데, 그 파일은 기존 파일을 열 때만 로드되어 *새로 만드는* 순간에는 발화하지 않으므로 여기 한 줄 둡니다.
 
+**새 캐릭터는 씬에 놓지 않고 `CharacterOwnership`의 대응표에 id와 프리팹을 등록합니다** — 화면에 나오는 캐릭터는 저장 기록이 정합니다. id는 저장 키라 한번 정하면 바꾸지 않습니다. 이유는 [.claude/rules/unity/character-ownership.md](.claude/rules/unity/character-ownership.md)에 있고, 새 캐릭터를 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다.
+
 **마우스로 만지는 새 월드 오브젝트의 판정은 `PolygonCollider2D` + `SpritePhysicsShapeSync`로 그림에서 가져옵니다** — 콜라이더 크기를 숫자로 적어 넣지 않습니다. 이유와 픽셀 검사와의 역할 분담은 [.claude/rules/unity/interaction-hit.md](.claude/rules/unity/interaction-hit.md)에 있고, 새 프리팹을 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다.
 
 **새 장식 프리팹에는 콜라이더를 달지 않습니다** — 장식은 배경처럼 평소 클릭을 바탕화면으로 통과시켜야 하는 오브젝트라 위 판정 규약의 대상이 아닙니다. 콜라이더가 있으면 그 자리의 바탕화면이 눌리지 않습니다. 이유와 나머지 장식 규약은 [.claude/rules/unity/decoration-placement.md](.claude/rules/unity/decoration-placement.md)에 있고, 새 장식 프리팹을 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다.
@@ -94,6 +96,7 @@
 - `docs-conventions.md` — 문서·CLAUDE.md·rules를 쓸 때
 - `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/ui-panels.md`, `unity/platform.md`, `unity/project-settings.md` — 해당 파일을 열 때
 - `unity/character-ground.md` — 캐릭터 지면·발 규약. Character 스크립트·캐릭터 프리팹·캐릭터 스프라이트 임포트 설정을 열 때
+- `unity/character-ownership.md` — 캐릭터 보유·배치 기록 규약(캐릭터는 씬에 두지 않음, id는 저장 키라 불변, 첫 실행은 빈 화면이 정상, 등장은 뷰포트 확정 후, 별은 지금 소환하지 않음). `CharacterOwnership`·`CharacterManager`·`StarController`, GameScene, 캐릭터·별 프리팹을 열 때
 - `unity/character-shadow.md` — 캐릭터 그림자 규약. `ShadowProjector`·캐릭터 프리팹을 열 때
 - `unity/character-state-machine.md` — 캐릭터 상태 전이 확정안. **캐릭터 행동 로직의 유일한 본.** Character 스크립트·캐릭터 프리팹·Animator 자산을 열 때
 - `unity/interaction-hit.md` — 월드 오브젝트의 마우스 판정 규약(판정은 그림 외곽선에서, 콜라이더와 픽셀 검사의 역할 분담, 콜라이더 위치). Interaction 스크립트·`StarController`·캐릭터·별 프리팹·캐릭터 그림 임포트 설정을 열 때
