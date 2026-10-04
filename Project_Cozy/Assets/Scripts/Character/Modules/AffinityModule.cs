@@ -6,6 +6,8 @@ using UnityEngine.Serialization;
 /// 친밀도 수치 + 이벤트만. <see cref="UnityEngine.Animator"/>/<see cref="UnityEngine.SpriteRenderer"/> 직접 참조 금지 —
 /// 값이 바뀌었다는 사실만 <c>AffinityChanged</c>로 알리고, 그걸로 무엇을 할지는 구독자가 정한다.
 /// 순수 C# <see cref="SerializableAttribute"/> 클래스 — <see cref="BaseCharacterController"/>가 <c>[SerializeField]</c>로 nested 보유.
+///
+/// 친밀도는 누적값 하나뿐이고 줄어들지 않는다. 기획에 친밀도가 감소·소모되는 경우가 없다.
 /// </summary>
 [Serializable]
 public sealed class AffinityModule
@@ -22,17 +24,14 @@ public sealed class AffinityModule
     [SerializeField] private int _affinityHardCap = 100_000_000;
 
     private BaseCharacterController _owner;
-    private int _affinity;
     private int _cumulativeAffinity;
 
-    /// <summary>현재 친밀도. <see cref="Reset"/>로 0으로 돌아간다.</summary>
-    public int Current => _affinity;
-    /// <summary>줄어들지 않는 누적 친밀도. <see cref="Reset"/>에도 유지된다(디버그 표시·향후 활용용).</summary>
+    /// <summary>누적 친밀도. 쓰담으로만 오르고 줄어들지 않는다.</summary>
     public int CumulativeAffinity => _cumulativeAffinity;
     /// <summary>친밀도 최대치(하드 상한).</summary>
     public int Max => _affinityHardCap;
-    /// <summary>소녀 변신 가능 여부 — 친밀도가 변신 임계 이상인가.</summary>
-    public bool CanHumanTransform => _affinity >= Mathf.Max(1, _humanTransformThreshold);
+    /// <summary>소녀 변신 가능 여부 — 누적 친밀도가 변신 임계 이상인가.</summary>
+    public bool CanHumanTransform => _cumulativeAffinity >= Mathf.Max(1, _humanTransformThreshold);
 
     /// <summary>친밀도 값이 변할 때마다 새 값으로 호출.</summary>
     public event Action<int> AffinityChanged;
@@ -46,20 +45,21 @@ public sealed class AffinityModule
     public void AddOnPet()
     {
         var cap = Mathf.Max(1, _affinityHardCap);
-        if (_affinity >= cap) return;
+        if (_cumulativeAffinity >= cap) return;
 
-        var before = _affinity;
         var gain = Mathf.Max(0, _affinityPerPet);
-        _affinity = Mathf.Min(cap, _affinity + gain);
-        _cumulativeAffinity = Mathf.Min(cap, _cumulativeAffinity + (_affinity - before));
+        _cumulativeAffinity = Mathf.Min(cap, _cumulativeAffinity + gain);
 
-        AffinityChanged?.Invoke(_affinity);
+        AffinityChanged?.Invoke(_cumulativeAffinity);
     }
 
-    /// <summary>현재 친밀도 0 리셋. 누적 친밀도는 유지.</summary>
-    public void Reset()
+    /// <summary>
+    /// 저장된 친밀도를 되돌린다. 스폰 직후 한 번만 부른다.
+    /// <see cref="AffinityChanged"/>를 울리지 않는다 — 울리면 하트 지급(<see cref="BridgeAffinityHeart"/>)이
+    /// 복원된 값만큼의 하트를 그 자리에서 다시 지급한다. 구독자는 자기 Start에서 현재 값을 읽는다.
+    /// </summary>
+    public void Restore(int cumulativeAffinity)
     {
-        _affinity = 0;
-        AffinityChanged?.Invoke(_affinity);
+        _cumulativeAffinity = Mathf.Clamp(cumulativeAffinity, 0, Mathf.Max(1, _affinityHardCap));
     }
 }

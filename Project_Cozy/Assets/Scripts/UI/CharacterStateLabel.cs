@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// <see cref="BaseCharacterController"/>의 현재 상태 이름과 친밀도를 캐릭터 옆 TextMeshPro 라벨에 두 줄로 표시.
+/// <see cref="BaseCharacterController"/>의 현재 상태 이름과 친밀도를 캐릭터 옆 TextMeshPro 라벨에 표시.
 /// 부모 계층에서 캐릭터를 자동 탐색하므로 prefab variant 안에 그대로 배치하면 동작.
 /// 위치·스케일은 부모(ROOT) transform에 그대로 종속 — prefab에서 anchoredPosition·Pivot으로 배치를 결정한다.
 /// </summary>
@@ -29,6 +29,12 @@ public sealed class CharacterStateLabel : MonoBehaviour
         Refresh();
     }
 
+    // 저장된 친밀도는 스폰 직후(OnEnable 뒤) 이벤트 없이 복원되므로, Start에서 한 번 더 그린다.
+    private void Start()
+    {
+        if (_character != null && _label != null) Refresh();
+    }
+
     private void OnDisable()
     {
         if (_character == null) return;
@@ -41,6 +47,6 @@ public sealed class CharacterStateLabel : MonoBehaviour
 
     private void Refresh()
     {
-        _label.text = $"State: {_character.State.CurrentStateName}\nAffinity: {_character.Affinity.Current}\nCumulative: {_character.Affinity.CumulativeAffinity}";
+        _label.text = $"State: {_character.State.CurrentStateName}\nAffinity: {_character.Affinity.CumulativeAffinity}";
     }
 }

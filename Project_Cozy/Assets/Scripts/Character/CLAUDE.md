@@ -27,7 +27,7 @@
 ├─ SpritePhysicsShapeSync    (지금 프레임의 그림 외곽선을 콜라이더에 옮겨 담음)
 ├─ OpaqueHoverable           (IHoverable, 알파 검사 후 UnityEvent 발사 + 지금 호버 중인지 조회)
 ├─ HoldClickEvent            (좌클릭을 "누른 순간"과 "2초 도달"로 갈라 UnityEvent 발사)
-└─ CharacterInteractionRelay (IShiftRightClickable — 친밀도 리셋만 위임)
+└─ CharacterInteractionRelay (IRightClickable — 우클릭 변신만 위임)
 
 자식 Shadow GameObject
 └─ ShadowProjector           (바닥을 향해 판정해 그림자를 놓고, 멀어지면 폭을 줄인다)
@@ -55,10 +55,10 @@ Int 값은 [BaseCharacterAnimatorController.controller](../../Assets/Animations/
 - **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`) + 공개 메서드(`OnPetInput`/`Request{Sleep,WakeUp,Fall,Pet,Grab,Transform}`). 소녀 변신 금지는 거주 영역처럼 밖에서 주입받는다(`SetGirlTransformBanned` — `CharacterManager`가 유저 설정을 읽어 건다).
 - **`CharacterState.cs`** — 통합 13-state enum + `CharacterForm` enum(Animal/Girl).
 - **`IStateOwner.cs`** — State 클래스가 의존할 owner 인터페이스. 정책 수치·물리·지면 판정·ChangeState API 노출. 지면 *높이*는 내주지 않는다 — 판정은 `IsFootOnGround` 하나로 모여 있다. 걷기 목적지용으로 거주 영역의 *가로* 범위(`TryGetWalkRange`)만 내주는 것도 같은 이유다. 사각형을 통째로 주면 아래 변이 곧 지면 높이가 되어 버린다.
-- **`CharacterInteractionRelay.cs`** — 자식 Visual에 부착, `IShiftRightClickable`만 책임 (Shift+우클릭 → 친밀도 리셋). `IHoverable`은 `OpaqueHoverable`에 양보하고, 좌클릭은 매니저 라우팅을 쓰지 않는다 — `HoldClickEvent`가 자체 폴링으로 누른 시간을 재야 하기 때문이다.
+- **`CharacterInteractionRelay.cs`** — 자식 Visual에 부착, `IRightClickable`만 책임 (우클릭 → 변신 토글). `IHoverable`은 `OpaqueHoverable`에 양보하고, 좌클릭은 매니저 라우팅을 쓰지 않는다 — `HoldClickEvent`가 자체 폴링으로 누른 시간을 재야 하기 때문이다.
 - **`Modules/StateModule.cs`** — State 머신 + Sleep 정책. 11 State 인스턴스 + `Request*` API + 잠금 가드(`IsLockedState`) + 접지 강제(`EnforceFloor`) + 입력 4채널 구독(InFocus·OutFocus). `RegisterState(IState)` 확장점. 수면은 확률이 아니라 무입력 시간만으로 결정되고, **캐릭터를 향한 좌클릭은 무입력 타이머를 초기화하되 캐릭터를 깨우지는 않는다**(자는 캐릭터를 누르면 기상 대신 쓰담이 뜬다).
 - **`Modules/VisualModule.cs`** — Animator 단일 진입점. `Play(state)` / `PlayOneShot(state)` / `SetFacing` / `SetForm`. OneShot은 float timer 기반 (UniTask 미사용).
-- **`Modules/AffinityModule.cs`** — 친밀도 수치 + `AffinityChanged` 이벤트. 시각 직접 제어 금지 — 값이 바뀌었다는 사실만 알리고 그걸로 무엇을 할지는 구독자가 정한다.
+- **`Modules/AffinityModule.cs`** — 친밀도 수치 + `AffinityChanged` 이벤트. 값은 누적 친밀도 하나뿐이고 줄어들지 않는다(기획에 감소·소모가 없다). 저장은 `CharacterOwnership`이 하고, 스폰 직후 `Restore`로 이벤트 없이 되돌린다 — 이유는 [character-affinity.md](../../../../.claude/rules/unity/character-affinity.md). 시각 직접 제어 금지 — 값이 바뀌었다는 사실만 알리고 그걸로 무엇을 할지는 구독자가 정한다.
 - **`Modules/ScaleModule.cs`** — 루트 `transform.localScale = _baseScale * User * Extra` 갱신. `ScaleMultiplierSettings.Character.Changed` 구독 + 호버 강조 같은 일시 `ExtraMultiplier` 슬롯 제공.
 - **`ScaleMultiplier.cs` / `ScaleMultiplierSettings.cs`** — 직렬화 단위 + 종합 ScriptableObject. UI(`UI/CharacterScaleSlider.cs`)가 `Character.Value`를 set하면 `ScaleModule`이 구독해 적용. 단 그 슬라이더는 아직 어떤 씬·프리팹에도 배치되어 있지 않다.
 - **`States/BaseCharacterState.cs`** — abstract. `OnEnter(IStateOwner)` / `Tick(IStateOwner, dt)` / `OnExit(IStateOwner)`.
@@ -70,7 +70,7 @@ Int 값은 [BaseCharacterAnimatorController.controller](../../Assets/Animations/
 
 ## 컨벤션
 
-- **마우스 상호작용은 인터페이스로만.** `InputInteractionManager`로의 직접 의존 금지. `IHoverable` / `IClickable` / `IShiftRightClickable`(→ [Interaction/InteractionInterfaces.cs](../Interaction/InteractionInterfaces.cs))만 구현.
+- **마우스 상호작용은 인터페이스로만.** `InputInteractionManager`로의 직접 의존 금지. `IHoverable` / `IClickable` / `IRightClickable`(→ [Interaction/InteractionInterfaces.cs](../Interaction/InteractionInterfaces.cs))만 구현.
 - **OS-wide 입력은 [Platform/Input/](../Platform/Input/)의 컴포넌트 또는 `InputSystem` API를 *구독*해서 받는다**. Character는 *추상화된 입력 결과만 소비* — OS 호출(Win32 P/Invoke 등)은 직접 하지 않는다. `OutFocusKeyHook`/`OutFocusMouseHook`은 static 이벤트를 방송하므로, `StateModule`은 참조 없이 `OutFocusKeyHook.KeyPressed += ...`로 구독한다.
 - **State 결정은 항상 코드 (StateModule)**. Animator 그래프는 시각만 — Int 파라미터 `VisualState` 하나만 받아 Any State → 각 state 트랜지션.
 - **물리는 직접 갱신 — Rigidbody2D 미사용.** 매 프레임 `transform.position += ...` 패턴. 지면은 콜라이더가 아니라 수평선 하나이고, 접지는 매 프레임 강제된다(`StateModule.EnforceFloor`) — 세로를 스스로 쥐는 상태만 예외다. 게임 이벤트(착지, 먼지 등)는 Physics 발화가 아니라 State 전환에 묶는다. 지면 규약의 정본은 [character-ground.md](../../../../.claude/rules/unity/character-ground.md).

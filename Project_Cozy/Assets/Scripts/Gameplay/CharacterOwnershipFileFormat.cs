@@ -25,4 +25,7 @@ public class CharacterRecord
 
     /// <summary>화면에 나와 있어야 하는가. false면 보유했지만 회수된 상태다.</summary>
     public bool placed;
+
+    /// <summary>누적 친밀도. 줄어들지 않는다. 이 필드가 없던 옛 파일은 0으로 읽힌다.</summary>
+    public int cumulativeAffinity;
 }

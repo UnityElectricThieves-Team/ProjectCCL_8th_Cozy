@@ -4,8 +4,10 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// "어떤 캐릭터를 가졌고, 그중 누가 화면에 나와 있어야 하는가"의 주인. 캐릭터별 기록을 파일에 들고,
-/// 시작할 때 화면에 나와 있어야 하는 캐릭터를 다시 등장시킨다.
+/// "어떤 캐릭터를 가졌고, 그중 누가 화면에 나와 있어야 하는가"의 주인. 캐릭터별 기록(보유·배치·누적 친밀도)을
+/// 파일에 들고, 시작할 때 화면에 나와 있어야 하는 캐릭터를 다시 등장시키며 친밀도를 되돌린다.
+/// 친밀도를 캐릭터(AffinityModule)가 직접 저장하지 않는 이유: Character 레이어는 저장소(Platform/Data)를
+/// 부르지 않고, 캐릭터 모듈은 캐릭터마다 따로 있어 파일 하나에 대응하지 않는다.
 ///
 /// <see cref="CharacterManager"/>와 나눈 이유: 그쪽은 "지금 살아 움직이는 캐릭터"(살아있는 목록,
 /// 동시 존재 상한, 스폰 단일 지점, 유저 설정 적용)를 맡는다. 반면 이쪽은 재시작해도 남아야 하는 기록이다.
@@ -54,6 +56,9 @@ public class CharacterOwnership : MonoBehaviour
     // 뷰포트가 처음 확정되기를 기다리는 중인가. 첫 신호에서 등장시키고 구독을 푼다.
     private bool _waitingForViewport;
 
+    // 등장시킨 캐릭터의 친밀도 구독. 파괴될 때 풀기 위해 들고 있다.
+    private readonly List<(AffinityModule affinity, Action<int> handler)> _affinitySubscriptions = new();
+
     private void Awake()
     {
         _data = UserDataSaveIO.Load<CharacterOwnershipFileFormat>(GameDataPaths.CharacterOwnership);
@@ -90,6 +95,10 @@ public class CharacterOwnership : MonoBehaviour
     {
         if (_waitingForViewport && _viewportSettings != null)
             _viewportSettings.ViewportConfirmed -= OnFirstViewportConfirmed;
+
+        for (int i = 0; i < _affinitySubscriptions.Count; i++)
+            _affinitySubscriptions[i].affinity.AffinityChanged -= _affinitySubscriptions[i].handler;
+        _affinitySubscriptions.Clear();
     }
 
     // ViewportConfirmed는 확정될 때마다 울리지만, 등장은 처음 한 번만 필요하다.
@@ -155,8 +164,27 @@ public class CharacterOwnership : MonoBehaviour
             Mathf.Min(area.yMin + _dropHeight, area.yMax),
             0f);
 
-        if (CharacterManager.Instance.Spawn(prefab, position) == null)
+        var instance = CharacterManager.Instance.Spawn(prefab, position);
+        if (instance == null)
+        {
             Debug.LogWarning($"[{nameof(CharacterOwnership)}] 동시 존재 상한에 걸려 '{id}'를 등장시키지 못했습니다.", this);
+            return;
+        }
+
+        if (!instance.TryGetComponent(out BaseCharacterController controller)) return;
+
+        // 저장된 친밀도를 되돌리고, 오를 때마다 기록에 써서 바로 저장한다(쓰담마다 저장).
+        // 복원은 이벤트를 울리지 않는다 — 이유는 AffinityModule.Restore 주석.
+        var record = FindRecord(id);
+        var affinity = controller.Affinity;
+        affinity.Restore(record.cumulativeAffinity);
+        Action<int> onChanged = value =>
+        {
+            record.cumulativeAffinity = value;
+            Save();
+        };
+        affinity.AffinityChanged += onChanged;
+        _affinitySubscriptions.Add((affinity, onChanged));
     }
 
     private CharacterRecord FindRecord(string id)
