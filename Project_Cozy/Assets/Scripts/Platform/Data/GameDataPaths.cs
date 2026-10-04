@@ -32,6 +32,7 @@ public static class GameDataPaths
     public static string Hearts => Path.Combine(SaveRoot, "hearts" + UserDataExtension);
     public static string ShopInventory => Path.Combine(SaveRoot, "shopInventory" + UserDataExtension);
     public static string Backgrounds => Path.Combine(SaveRoot, "backgrounds" + UserDataExtension);
+    public static string CharacterOwnership => Path.Combine(SaveRoot, "characterOwnership" + UserDataExtension);
     public static string Viewport => Path.Combine(SaveRoot, "viewport" + UserDataExtension);
     public static string Settings => Path.Combine(SaveRoot, "settings" + UserDataExtension);
 }

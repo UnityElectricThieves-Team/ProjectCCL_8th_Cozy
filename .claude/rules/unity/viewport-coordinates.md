@@ -2,6 +2,7 @@
 paths:
   - "Project_Cozy/Assets/Scripts/PerformanceSetting/Viewport/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Viewport/**/*.cs"
+  - "Project_Cozy/Assets/Scripts/Gameplay/CharacterOwnership.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Background/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Contents/ShopSystem/Background*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Decoration/**/*.cs"
