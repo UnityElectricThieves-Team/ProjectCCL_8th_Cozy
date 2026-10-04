@@ -364,7 +364,7 @@ MonoBehaviour:
   _animator: {fileID: 2463182645505033677}
   _spawnPoint: {fileID: 6259409690066820168}
   _threshold: 100
-  _characterPrefab: {fileID: 2249430935833052887, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
+  _characterPrefab: {fileID: 0}
   _spawnParent: {fileID: 0}
   _spawnOffsetMin: {x: -0.24, y: 0.48}
   _spawnOffsetMax: {x: 0.24, y: 0.96}
