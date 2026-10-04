@@ -25,8 +25,6 @@
   "UISettings.option.count_always": { "ko-KR": "항상 표시", "en-US": "Always Show", "ja-JP": "常に表示", "zh-Hans": "始终显示", "zh-Hant": "始終顯示" },
   "UISettings.option.count_autohide": { "ko-KR": "자동 숨기기", "en-US": "Auto-Hide", "ja-JP": "自動で隠す", "zh-Hans": "自动隐藏", "zh-Hant": "自動隱藏" },
   "UISettings.option.count_hidden": { "ko-KR": "표시 안함", "en-US": "Hide", "ja-JP": "表示しない", "zh-Hans": "不显示", "zh-Hant": "不顯示" },
-  "UISettings.toggle.on": { "ko-KR": "ON", "en-US": "ON", "ja-JP": "ON", "zh-Hans": "ON", "zh-Hant": "ON" },
-  "UISettings.toggle.off": { "ko-KR": "OFF", "en-US": "OFF", "ja-JP": "OFF", "zh-Hans": "OFF", "zh-Hant": "OFF" },
 
   "UIShop.title": { "ko-KR": "상점", "en-US": "Shop", "ja-JP": "ショップ", "zh-Hans": "商店", "zh-Hant": "商店" },
   "UIShop.tab.decoration": { "ko-KR": "장식", "en-US": "Decor", "ja-JP": "インテリア", "zh-Hans": "装饰", "zh-Hant": "裝飾" },

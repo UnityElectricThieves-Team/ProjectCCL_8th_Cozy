@@ -41,8 +41,7 @@ public sealed class LocalizedText : MonoBehaviour
 
     private void Refresh()
     {
-        var font = _localization.Font;
-        if (font != null && _text.font != font) _text.font = font;
+        LocalizationManager.ApplyFont(_text);
         _text.text = _localization.Get(_stringId);
     }
 }

@@ -72,6 +72,34 @@ public sealed class LocalizationManager : MonoBehaviour
     /// <summary><see cref="Localize(string)"/>에 <see cref="Format"/>처럼 이름 붙은 자리 채우기를 더한 것.</summary>
     public static string Localize(string id, params (string name, object value)[] args) => Instance != null ? Instance.Format(id, args) : id;
 
+    /// <summary>
+    /// 코드가 키로 텍스트를 채울 때 쓰는 진입점. 글자와 함께 현재 언어의 대표 폰트도 넣는다.
+    /// <c>.text = Localize(...)</c>로 글자만 넣으면 언어가 바뀌어도 폰트가 그대로 남는다.
+    /// </summary>
+    public static void SetText(TMP_Text text, string id)
+    {
+        ApplyFont(text);
+        text.text = Localize(id);
+    }
+
+    /// <summary><see cref="SetText(TMP_Text, string)"/>에 이름 붙은 자리 채우기를 더한 것.</summary>
+    public static void SetText(TMP_Text text, string id, params (string name, object value)[] args)
+    {
+        ApplyFont(text);
+        text.text = Localize(id, args);
+    }
+
+    /// <summary>
+    /// 텍스트의 폰트를 현재 언어의 대표 폰트로 바꾼다. 드롭다운 옵션처럼 글자를 따로 채우는 곳에서 쓴다.
+    /// 폰트가 이미 같으면 건드리지 않는다 — 대입하면 TMP가 메시를 다시 만든다.
+    /// </summary>
+    public static void ApplyFont(TMP_Text text)
+    {
+        if (Instance == null || text == null) return;
+        var font = Instance.Font;
+        if (font != null && text.font != font) text.font = font;
+    }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)

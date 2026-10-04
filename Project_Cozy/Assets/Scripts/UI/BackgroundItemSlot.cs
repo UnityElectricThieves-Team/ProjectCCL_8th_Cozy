@@ -94,6 +94,8 @@ public sealed class BackgroundItemSlot : MonoBehaviour
     private void SetLabel(string text, Color color)
     {
         if (_buttonLabel == null) return;
+        // 같은 라벨이 가격과 "사용" 문구를 오가므로, 가격일 때도 언어 폰트에 맞춰 둔다.
+        LocalizationManager.ApplyFont(_buttonLabel);
         _buttonLabel.text = text;
         _buttonLabel.color = color;
     }
