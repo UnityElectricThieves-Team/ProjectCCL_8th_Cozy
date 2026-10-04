@@ -50,7 +50,7 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     [SerializeField] private Slider _sfxVolumeSlider;
     [SerializeField] private Toggle _mutedToggle;
     [SerializeField] private TMP_Dropdown _bgmTrackDropdown;
-    [Tooltip("배경음악 드롭다운의 N번째 옵션이 이 목록의 N번째 곡이다. 옵션(곡 이름)은 드롭다운 인스펙터에서 같은 순서로 직접 적는다.")]
+    [Tooltip("배경음악 드롭다운의 옵션을 채울 곡 목록. 시작할 때 이 목록의 순서·이름으로 옵션을 만든다.")]
     [SerializeField] private BgmCatalog _bgmCatalog;
 
     // Figma: 활성 탭=시안(#39C9E6), 비활성=회색(#D9D9D9). 상점 탭과 같은 값.
@@ -79,7 +79,8 @@ public sealed class SettingsPanelContentController : MonoBehaviour
         _localization = LocalizationManager.Instance;
         if (_localization != null) _localization.LanguageChanged += RefreshCountVisibilityLabels;
 
-        WarnIfBgmOptionsMismatch();
+        // 첫 RefreshControls보다 먼저 만들어야 저장된 곡 위치가 옵션 수에 잘리지 않는다.
+        BuildBgmTrackOptions();
 
         _settings = SettingsManager.Instance;
         if (_settings == null)
@@ -105,15 +106,39 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     }
 
     /// <summary>
-    /// 배경음악 드롭다운의 옵션(곡 이름)은 프리팹 인스펙터에서 직접 적고, 코드는 건드리지 않는다.
-    /// N번째 옵션 = <see cref="BgmCatalog"/>의 N번째 곡이라 둘의 개수가 다르면 어긋난 것이다. 고치지 않고 알리기만 한다.
+    /// 곡 목록(<see cref="BgmCatalog"/>)으로 배경음악 드롭다운 옵션을 만든다. 곡 목록이 이름·순서의 유일한 정본이라
+    /// 프리팹의 Options에 무엇이 적혀 있든 덮는다 — 두 곳에 따로 적으면 순서가 어긋나 고른 이름과 나오는 곡이 달라진다.
+    /// 곡 이름은 번역하지 않는 고유명사라 언어가 바뀌어도 다시 만들지 않는다(ClearOptions는 선택을 첫 항목으로 돌린다).
     /// </summary>
-    private void WarnIfBgmOptionsMismatch()
+    private void BuildBgmTrackOptions()
     {
-        if (_bgmTrackDropdown == null || _bgmCatalog == null) return;
-        if (_bgmTrackDropdown.options.Count != _bgmCatalog.Count)
-            Debug.LogWarning($"[{nameof(SettingsPanelContentController)}] 배경음악 드롭다운 옵션 {_bgmTrackDropdown.options.Count}개와 곡 목록 {_bgmCatalog.Count}곡의 개수가 다릅니다. 같은 순서로 맞춰 주세요.", this);
+        if (_bgmTrackDropdown == null) return;
+#if UNITY_EDITOR
+        WarnIfBgmOptionsEdited();
+#endif
+        _bgmTrackDropdown.ClearOptions();
+        int count = _bgmCatalog != null ? _bgmCatalog.Count : 0;
+        for (int i = 0; i < count; i++) _bgmTrackDropdown.options.Add(new TMP_Dropdown.OptionData(_bgmCatalog[i].displayName));
+        _bgmTrackDropdown.interactable = count > 0; // 곡이 없으면 고를 것도 없다
+        _bgmTrackDropdown.RefreshShownValue();
     }
+
+#if UNITY_EDITOR
+    // 실행 중에는 BuildBgmTrackOptions가 채운 옵션이 있으므로 검사하지 않는다.
+    // OnValidate는 이 컴포넌트가 바뀌거나 프리팹·씬을 불러올 때만 불려, 드롭다운 쪽을 고친 직후에는 안 불린다.
+    // 그래서 실행 시작 때(BuildBgmTrackOptions가 지우기 직전)에도 같은 검사를 한다.
+    private void OnValidate()
+    {
+        if (!Application.isPlaying) WarnIfBgmOptionsEdited();
+    }
+
+    // 배경음악 드롭다운의 Options를 인스펙터에서 고쳐도 실행할 때 곡 목록으로 덮어써진다. 헷갈리지 않게 알린다.
+    private void WarnIfBgmOptionsEdited()
+    {
+        if (_bgmTrackDropdown == null || _bgmTrackDropdown.options.Count == 0) return;
+        Debug.LogWarning($"[{nameof(SettingsPanelContentController)}] 배경음악 드롭다운의 Options는 실행할 때 덮어써집니다. 곡 목록은 Assets/Audio/BgmCatalog에서 고치고, 여기 Options는 비워 두세요.", _bgmTrackDropdown);
+    }
+#endif
 
     private static void SetOptionLabels(TMP_Dropdown dropdown, string[] ids)
     {

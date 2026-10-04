@@ -4607,7 +4607,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8821010863358326591, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_Options.m_Options.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8821010863358326591, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_Options.m_Options.Array.data[0].m_Text
