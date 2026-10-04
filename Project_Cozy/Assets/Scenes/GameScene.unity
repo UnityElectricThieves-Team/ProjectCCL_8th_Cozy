@@ -1076,6 +1076,7 @@ GameObject:
   m_Component:
   - component: {fileID: 337577132}
   - component: {fileID: 337577131}
+  - component: {fileID: 337577133}
   m_Layer: 0
   m_Name: CharacterManager
   m_TagString: Untagged
@@ -1096,8 +1097,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterManager
   _maxCount: 10
-  _initialCharacterPrefab: {fileID: 2249430935833052887, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
-  _initialSpawnPosition: {x: 0, y: 1.08, z: 0}
 --- !u!4 &337577132
 Transform:
   m_ObjectHideFlags: 0
@@ -1113,6 +1112,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1156403278}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &337577133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337577130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62bdcad571a457740ab4a6d764c1e442, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterOwnership
+  _initialCharacterPrefab: {fileID: 2249430935833052887, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
+  _initialSpawnPosition: {x: 0, y: 1.08, z: 0}
 --- !u!1 &355942831
 GameObject:
   m_ObjectHideFlags: 0
