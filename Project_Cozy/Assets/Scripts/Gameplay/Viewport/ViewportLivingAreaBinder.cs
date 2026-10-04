@@ -9,8 +9,8 @@ using UnityEngine;
 /// (Character/CLAUDE.md의 "캐릭터는 화면 정책을 모른다" 원칙).
 ///
 /// 거는 시점이 둘이다.
-///   - <c>ViewportApplied</c> — 뷰포트가 확정될 때. 이때 이미 밖에 있던 캐릭터는 안으로 끌려온다.
-///   - <c>CharacterManager.Registered</c> — 그 뒤에 등록된 캐릭터. ViewportApplied는 등록 시점에
+///   - <c>ViewportConfirmed</c> — 뷰포트가 확정될 때. 이때 이미 밖에 있던 캐릭터는 안으로 끌려온다.
+///   - <c>CharacterManager.Registered</c> — 그 뒤에 등록된 캐릭터. ViewportConfirmed는 등록 시점에
 ///     다시 오지 않으므로, 이게 없으면 나중에 들어온 캐릭터만 제한 없이 돌아다닌다.
 ///
 /// **편집 중 프리뷰에는 반응하지 않는다.** 저장·취소로 확정된 순간에만 적용한다 —
@@ -40,20 +40,20 @@ public class ViewportLivingAreaBinder : MonoBehaviour
             return;
         }
 
-        _viewportSettings.ViewportApplied += OnViewportApplied;
+        _viewportSettings.ViewportConfirmed += OnViewportConfirmed;
         if (CharacterManager.Instance != null) CharacterManager.Instance.Registered += OnCharacterRegistered;
 
-        // 초기 적용이 이미 끝난 뒤에 이 컴포넌트가 붙었을 수 있다(ViewportApplied는 다시 오지 않는다).
-        if (_viewportSettings.IsReady) OnViewportApplied(_viewportSettings.Viewport);
+        // 초기 적용이 이미 끝난 뒤에 이 컴포넌트가 붙었을 수 있다(첫 확정 신호는 이미 지나갔으면 다시 오지 않는다).
+        if (_viewportSettings.IsReady) OnViewportConfirmed(_viewportSettings.Viewport);
     }
 
     private void OnDestroy()
     {
-        if (_viewportSettings != null) _viewportSettings.ViewportApplied -= OnViewportApplied;
+        if (_viewportSettings != null) _viewportSettings.ViewportConfirmed -= OnViewportConfirmed;
         if (CharacterManager.Instance != null) CharacterManager.Instance.Registered -= OnCharacterRegistered;
     }
 
-    private void OnViewportApplied(RectInt viewportPx)
+    private void OnViewportConfirmed(RectInt viewportPx)
     {
         _area = _cameraFitter.BaseRectToWorld(viewportPx, _viewportSettings.BaseSpaceSize);
         _hasArea = true;

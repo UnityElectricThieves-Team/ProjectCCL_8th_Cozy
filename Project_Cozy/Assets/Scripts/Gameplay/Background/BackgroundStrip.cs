@@ -11,7 +11,7 @@ using UnityEngine;
 /// 임포트해야 한다 — Tight 메시로는 타일이 제대로 그려지지 않는다. 아트 샘플 씬처럼 오브젝트 여러 개를
 /// 나란히 놓는 방식은 쓰지 않는다. 뷰포트 폭이 바뀔 때마다 개수를 다시 맞춰야 해서다.
 ///
-/// 배치는 뷰포트가 확정될 때(<see cref="ViewportScreenSettings.ViewportApplied"/>)와 스프라이트가 바뀔 때만
+/// 배치는 뷰포트가 확정될 때(<see cref="ViewportScreenSettings.ViewportConfirmed"/>)와 스프라이트가 바뀔 때만
 /// 다시 계산한다. 편집 중 프리뷰에는 따라가지 않는다(<see cref="ViewportLivingAreaBinder"/>와 같은 판단).
 /// 매 프레임 하는 일은 없다.
 ///
@@ -59,15 +59,15 @@ public sealed class BackgroundStrip : MonoBehaviour
             return;
         }
 
-        _viewportSettings.ViewportApplied += OnViewportApplied;
+        _viewportSettings.ViewportConfirmed += OnViewportConfirmed;
 
-        // 초기 적용이 이미 끝난 뒤에 이 컴포넌트가 붙었을 수 있다(ViewportApplied는 다시 오지 않는다).
-        if (_viewportSettings.IsReady) OnViewportApplied(_viewportSettings.Viewport);
+        // 초기 적용이 이미 끝난 뒤에 이 컴포넌트가 붙었을 수 있다(첫 확정 신호는 이미 지나갔으면 다시 오지 않는다).
+        if (_viewportSettings.IsReady) OnViewportConfirmed(_viewportSettings.Viewport);
     }
 
     private void OnDestroy()
     {
-        if (_viewportSettings != null) _viewportSettings.ViewportApplied -= OnViewportApplied;
+        if (_viewportSettings != null) _viewportSettings.ViewportConfirmed -= OnViewportConfirmed;
     }
 
     /// <summary>띠 높이(베이스 공간 px)를 정한다. 0 이하이면 띠를 숨긴다.</summary>
@@ -84,7 +84,7 @@ public sealed class BackgroundStrip : MonoBehaviour
         Relayout();
     }
 
-    private void OnViewportApplied(RectInt viewportPx)
+    private void OnViewportConfirmed(RectInt viewportPx)
     {
         _area = _cameraFitter.BaseRectToWorld(viewportPx, _viewportSettings.BaseSpaceSize);
         _hasArea = true;
