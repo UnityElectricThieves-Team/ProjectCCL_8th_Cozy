@@ -31,7 +31,7 @@
 | `PerformanceSetting/Viewport/` | `ViewportScreenSettings.cs`(뷰포트 정책 + 베이스 공간 단위의 소유자) + `BaseSpaceCameraFitter.cs`(px→월드 환산 — 앵커·PPU의 소유자) |
 | `Animation/` | `SpriteAnimator.cs`(프레임 순환), `ShadowProjector.cs`(캐릭터 아래 바닥을 향해 판정해 그림자를 놓고, 멀어질수록 폭을 줄인다) |
 | `Character/` | `BaseCharacterController.cs` → `CharacterState.cs`(통합 enum) → `Modules/`, `States/` |
-| `Gameplay/` | `HeartSystem.cs`(하트 재화), `SpawnPointManager.cs`(스폰 기운), `Background/BackgroundStrip.cs`(뷰포트 아래 변에 붙는 배경 띠 — 고정 높이로 맞춰 가로로 반복), `Decoration/DecorationLayer.cs`(화면에 놓인 장식을 지면에 맞춰 그린다 — 상점을 모른다), `Decoration/DecorationPlacementController.cs`(장식 설치 모드 — 고스트·판정·확정/취소, 시작·종료를 이벤트로 알린다), `LocalizationManager.cs`(번역 표 — stringID로 현재 언어 문장을 내준다. 프리팹 고정 문구는 `UI/LocalizedText.cs`가 붙어 받아 간다) |
+| `Gameplay/` | `HeartSystem.cs`(하트 재화), `SpawnPointManager.cs`(스폰 기운), `Background/BackgroundStrip.cs`(뷰포트 아래 변에 붙는 배경 띠 — 고정 높이로 맞춰 가로로 반복), `Decoration/DecorationLayer.cs`(화면에 놓인 장식을 지면에 맞춰 그린다 — 상점을 모른다), `Decoration/DecorationPlacementController.cs`(장식 설치 모드 — 고스트·판정·확정/취소, 시작·종료를 이벤트로 알린다), `LocalizationManager.cs`(번역 표 — stringID로 현재 언어 문장을 내준다. 프리팹 고정 문구는 `UI/LocalizedText.cs`가 붙어 받아 간다), `Audio/BgmPlayer.cs`(설정의 소리 값을 믹서·배경음악 재생에 반영 — 곡 목록은 `Audio/BgmCatalog.cs`) |
 | `Contents/` | `ShopSystem/ShopSystem.cs`(장식 소유 — 산 개수와 화면에 놓인 목록) → `ShopSystem/DecorationBinder.cs`(놓인 목록을 `Gameplay/Decoration/DecorationLayer`에 잇는다), `ShopSystem/BackgroundSystem.cs`(배경 소유 + 활성 1개) → `ShopSystem/BackgroundBinder.cs`(활성 배경을 `Gameplay/Background/BackgroundStrip`에 잇는다), `CollectionSystem/Model/CollectionData.cs`(도감 정의 — WPF 툴이 만든 JSON을 읽는다) |
 | `UI/` | `UIManager.cs`(열린 패널 스택 + ESC, 장식 설치 모드 중 패널 잠시 숨김) → `UIPanel.cs`(패널 공통 동작 — 열림과 잠시 숨김을 따로 든다), `PlacementGuide.cs`(설치 모드 커서·안내 라벨) |
 
@@ -42,7 +42,7 @@
 - `Animation/SpriteAnimator.cs` — **캐릭터 외 사용처 전용**(별·달 등). `BaseCharacterController` 시스템은 `VisualModule`을 쓴다.
 - `Platform/Window/Core/BorderlessWindow.cs`, `Platform/Window/Input/ClickThroughProbe.cs` — 구 프로토타입. 현행 스택과 같은 HWND를 만지므로 함께 활성화하면 충돌한다. 제거 대기.
 - `PerformanceSetting/WindowAspectFitter.cs` — 구 구현. 후속은 `Platform/`의 `WindowManager`다. 제거 조건은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) 참조.
-- `Platform/Data/SaveScheduler.cs` — 인프라만 있고 **고객이 0명이다.** `IPeriodicSaveable` 구현체도, 씬 배치도 없다. 여기 등록하면 조용히 저장이 안 된다. 새 저장은 `HeartSystem`/`ShopSystem` 골격(값이 바뀔 때 즉시 저장)을 따른다.
+- `Platform/Data/SaveScheduler.cs` — 인프라만 있고 **고객이 0명이다.** `IPeriodicSaveable` 구현체도, 씬 배치도 없다. 여기 등록하면 조용히 저장이 안 된다. 새 저장은 `HeartSystem`/`ShopSystem` 골격(값이 바뀔 때 즉시 저장)을 따른다. 예외는 슬라이더처럼 매 프레임 값이 오는 볼륨으로, 손 뗄 때 저장한다([audio.md](../../../.claude/rules/unity/audio.md)).
 - `Gameplay/Viewport/ViewportResidencyEnforcer.cs` — 본문이 전부 주석 처리되어 **아무 일도 하지 않는다.** 씬에도 배치돼 있지 않다.
 
 ## 컨벤션

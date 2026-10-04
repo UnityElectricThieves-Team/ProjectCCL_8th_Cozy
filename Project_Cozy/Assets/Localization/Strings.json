@@ -20,6 +20,7 @@
   "UISettings.row.bgm": { "ko-KR": "배경음악", "en-US": "Background Music", "ja-JP": "BGM", "zh-Hans": "背景音乐", "zh-Hant": "背景音樂" },
   "UISettings.row.sfx": { "ko-KR": "효과음", "en-US": "Sound Effects", "ja-JP": "効果音", "zh-Hans": "音效", "zh-Hant": "音效" },
   "UISettings.row.music": { "ko-KR": "음악", "en-US": "Music", "ja-JP": "音楽", "zh-Hans": "音乐", "zh-Hant": "音樂" },
+  "UISettings.row.mute":{ "ko-KR": "음소거", "en-US": "Mute", "ja-JP": "ミュート", "zh-Hans": "静音", "zh-Hant": "靜音" },
   "UISettings.row.something_size": { "ko-KR": "(00) 크기", "en-US": "(00) Size", "ja-JP": "(00)サイズ", "zh-Hans": "(00) 大小", "zh-Hant": "(00) 大小" },
   "UISettings.option.count_always": { "ko-KR": "항상 표시", "en-US": "Always Show", "ja-JP": "常に表示", "zh-Hans": "始终显示", "zh-Hant": "始終顯示" },
   "UISettings.option.count_autohide": { "ko-KR": "자동 숨기기", "en-US": "Auto-Hide", "ja-JP": "自動で隠す", "zh-Hans": "自动隐藏", "zh-Hant": "自動隱藏" },

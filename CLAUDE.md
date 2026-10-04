@@ -49,6 +49,8 @@
 
 **새 그림은 임포트 PPU를 Unity 기본값(100)으로 두고, 시트의 긴 변이 Max Size를 넘지 않게 합니다** — 월드 PPU가 코드 상수 100이라 그대로 두면 그림 1px = 마스터 캔버스 1px가 됩니다. 크기가 안 맞으면 PPU가 아니라 그림을 고칩니다. 새 그림을 임포트하는 순간에도 발화할 규칙이 없어 여기 한 줄 둡니다. 이유는 같은 viewport-coordinates.md에 있습니다.
 
+**새 배경음악은 `Assets/Audio/BGM/`에 넣습니다** — 이 폴더에만 Streaming 임포트 프리셋이 자동으로 걸리고, 다른 곳에 넣으면 곡 전체가 메모리에 풀려 상주합니다. 이유와 곡 목록 규약은 [.claude/rules/unity/audio.md](.claude/rules/unity/audio.md)에 있고, 새 음원을 넣는 순간에는 발화하지 않아 여기 한 줄 둡니다.
+
 **새 TMP 폰트 에셋은 Multi Atlas Textures를 켭니다** — Dynamic 아틀라스가 한 장뿐이면 꽉 찬 뒤 처음 나오는 글자가 네모(□)가 되고, 한글 UI는 빌드에서도 한 번 실행 중에 한계를 넘습니다. 이유와 메모리 비용은 [.claude/rules/unity/localization.md](.claude/rules/unity/localization.md)의 폰트 절에 있고, 새 에셋을 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다.
 
 ---
@@ -98,6 +100,7 @@
 - `unity/background.md` — 배경 띠 규약(뷰포트 아래 변 고정, 고정 높이, Tiled 반복, 콜라이더 금지). 배경 스크립트·`Background.prefab`·배경 아트 임포트 설정을 열 때
 - `unity/viewport-coordinates.md` — 월드 좌표 단위 규약(베이스 공간 px = 마스터 캔버스 기준 px, 폭 기준 배율, 월드 PPU 상수 100·앵커 불변, 저장 단위). 뷰포트·배경·장식 스크립트를 열 때
 - `unity/decoration-placement.md` — 장식 배치 모드(설치·이동·회수·제거)의 공통 골격, 설치 가능 판정과 색, 앞뒤 순서, 구매 시점과 저장, 장식에 콜라이더를 달지 않는 이유, 인벤토리 갱신 시점. 상점·인벤토리·장식 스크립트, 장식 프리팹을 열 때
+- `unity/audio.md` — 오디오 규약(음원은 Assets에·StreamingAssets 아님, `Assets/Audio/BGM/`의 Streaming 프리셋, 곡 목록 `BgmCatalog`, 믹서 구성, 볼륨만 손 뗄 때 저장하는 이유). 오디오 폴더·오디오 스크립트·설정 스크립트·Preset Manager 설정을 열 때
 - `unity/localization.md` — 다중 언어 규약(지원 언어 5개와 BCP 47 태그 저장, 번역 원본은 Figma, 키 기반 문자열·변수 이름 규칙, 번역 대상 범위, 미지원 언어 안내). UI·Contents 스크립트, 설정 스크립트, UI 패널 프리팹, 폰트를 열 때
 
 ---
