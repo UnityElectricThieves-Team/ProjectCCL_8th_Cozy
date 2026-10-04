@@ -52,4 +52,14 @@ public sealed class AffinityModule
 
         AffinityChanged?.Invoke(_cumulativeAffinity);
     }
+
+    /// <summary>
+    /// 저장된 친밀도를 되돌린다. 스폰 직후 한 번만 부른다.
+    /// <see cref="AffinityChanged"/>를 울리지 않는다 — 울리면 하트 지급(<see cref="BridgeAffinityHeart"/>)이
+    /// 복원된 값만큼의 하트를 그 자리에서 다시 지급한다. 구독자는 자기 Start에서 현재 값을 읽는다.
+    /// </summary>
+    public void Restore(int cumulativeAffinity)
+    {
+        _cumulativeAffinity = Mathf.Clamp(cumulativeAffinity, 0, Mathf.Max(1, _affinityHardCap));
+    }
 }

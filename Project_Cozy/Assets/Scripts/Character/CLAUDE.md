@@ -58,7 +58,7 @@ Int 값은 [BaseCharacterAnimatorController.controller](../../Assets/Animations/
 - **`CharacterInteractionRelay.cs`** — 자식 Visual에 부착, `IRightClickable`만 책임 (우클릭 → 변신 토글). `IHoverable`은 `OpaqueHoverable`에 양보하고, 좌클릭은 매니저 라우팅을 쓰지 않는다 — `HoldClickEvent`가 자체 폴링으로 누른 시간을 재야 하기 때문이다.
 - **`Modules/StateModule.cs`** — State 머신 + Sleep 정책. 11 State 인스턴스 + `Request*` API + 잠금 가드(`IsLockedState`) + 접지 강제(`EnforceFloor`) + 입력 4채널 구독(InFocus·OutFocus). `RegisterState(IState)` 확장점. 수면은 확률이 아니라 무입력 시간만으로 결정되고, **캐릭터를 향한 좌클릭은 무입력 타이머를 초기화하되 캐릭터를 깨우지는 않는다**(자는 캐릭터를 누르면 기상 대신 쓰담이 뜬다).
 - **`Modules/VisualModule.cs`** — Animator 단일 진입점. `Play(state)` / `PlayOneShot(state)` / `SetFacing` / `SetForm`. OneShot은 float timer 기반 (UniTask 미사용).
-- **`Modules/AffinityModule.cs`** — 친밀도 수치 + `AffinityChanged` 이벤트. 값은 누적 친밀도 하나뿐이고 줄어들지 않는다(기획에 감소·소모가 없다). 시각 직접 제어 금지 — 값이 바뀌었다는 사실만 알리고 그걸로 무엇을 할지는 구독자가 정한다.
+- **`Modules/AffinityModule.cs`** — 친밀도 수치 + `AffinityChanged` 이벤트. 값은 누적 친밀도 하나뿐이고 줄어들지 않는다(기획에 감소·소모가 없다). 저장은 `CharacterOwnership`이 하고, 스폰 직후 `Restore`로 이벤트 없이 되돌린다 — 이유는 [character-affinity.md](../../../../.claude/rules/unity/character-affinity.md). 시각 직접 제어 금지 — 값이 바뀌었다는 사실만 알리고 그걸로 무엇을 할지는 구독자가 정한다.
 - **`Modules/ScaleModule.cs`** — 루트 `transform.localScale = _baseScale * User * Extra` 갱신. `ScaleMultiplierSettings.Character.Changed` 구독 + 호버 강조 같은 일시 `ExtraMultiplier` 슬롯 제공.
 - **`ScaleMultiplier.cs` / `ScaleMultiplierSettings.cs`** — 직렬화 단위 + 종합 ScriptableObject. UI(`UI/CharacterScaleSlider.cs`)가 `Character.Value`를 set하면 `ScaleModule`이 구독해 적용. 단 그 슬라이더는 아직 어떤 씬·프리팹에도 배치되어 있지 않다.
 - **`States/BaseCharacterState.cs`** — abstract. `OnEnter(IStateOwner)` / `Tick(IStateOwner, dt)` / `OnExit(IStateOwner)`.

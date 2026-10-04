@@ -29,6 +29,12 @@ public sealed class CharacterStateLabel : MonoBehaviour
         Refresh();
     }
 
+    // 저장된 친밀도는 스폰 직후(OnEnable 뒤) 이벤트 없이 복원되므로, Start에서 한 번 더 그린다.
+    private void Start()
+    {
+        if (_character != null && _label != null) Refresh();
+    }
+
     private void OnDisable()
     {
         if (_character == null) return;

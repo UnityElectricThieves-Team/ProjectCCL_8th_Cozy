@@ -26,6 +26,15 @@ public class BridgeAffinityHeart : MonoBehaviour
         _controller = GetComponentInParent<BaseCharacterController>();
     }
 
+    // 이미 지급한 스텝을 지금 친밀도로 맞춘다. 저장된 친밀도가 복원된 캐릭터에서 0부터 세면,
+    // 첫 쓰담에 지난 실행에서 받은 하트를 전부 다시 받는다. Awake가 아니라 Start인 이유: 복원은
+    // CharacterOwnership이 스폰(Instantiate, 이때 Awake) 직후에 하므로 Awake 시점엔 아직 0이다.
+    private void Start()
+    {
+        if (_controller != null)
+            _rewardedSteps = _controller.Affinity.CumulativeAffinity / Mathf.Max(1, _affinityStepSize);
+    }
+
     private void OnEnable()
     {
         if (_controller != null) _controller.Affinity.AffinityChanged += OnAffinityChanged;
