@@ -11,9 +11,9 @@ using UnityEngine;
 /// - 캐릭터가 Destroy되면 슬롯이 비어 재스폰 가능.
 /// - **추적 목록에 들어오는 문은 <see cref="Register"/> 하나다.** 스폰이든 씬 배치든 여기를 지나므로,
 ///   "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 새는 경로가 없다.
-/// - 시작 시 최초 캐릭터를 한 마리 스폰한다. 씬에 미리 놓인 캐릭터가 있어도 스폰한다 —
-///   씬 배치 캐릭터(헤라·치즈)와 최초 캐릭터(흰 고양이)는 서로 다른 캐릭터라 한쪽이 다른 쪽을 대신하지 않는다.
-///   씬 배치 캐릭터도 시작 시 찾아 <see cref="Register"/>를 지나므로 규칙에서 빠지지 않는다.
+/// - 씬 배치 캐릭터도 시작 시 찾아 <see cref="Register"/>를 지나므로 규칙에서 빠지지 않는다.
+/// - "어떤 캐릭터를 가졌고 누가 나와 있어야 하는가"(최초 캐릭터 스폰 등)는 <see cref="CharacterOwnership"/>이 맡는다.
+///   이 클래스는 지금 살아 움직이는 캐릭터만 다룬다.
 /// - 씬 단일 인스턴스(Singleton). 스폰 호출자(StarClickCharacterSpawner / 데모 버튼 등)는
 ///   <see cref="Instance"/>.Spawn(...) 만 호출하면 되며 별도 참조 wiring이 필요 없다.
 /// </summary>
@@ -25,14 +25,6 @@ public class CharacterManager : MonoBehaviour
 
     [Tooltip("맵에 동시 존재 가능한 최대 캐릭터 수(prefab 무관 총량). 파괴되면 슬롯이 빈다.")]
     [SerializeField, Min(1)] private int _maxCount = 10;
-
-    [Header("최초 캐릭터")]
-    [SerializeField, Tooltip("시작 시 이 프리팹으로 한 마리 스폰한다. 씬에 놓인 캐릭터와 상관없이 스폰한다. 비우면 스폰하지 않는다.")]
-    private GameObject _initialCharacterPrefab;
-
-    [SerializeField, Tooltip("최초 캐릭터를 놓을 위치(월드). 바닥보다 위면 떨어져서 착지한다. " +
-        "뷰포트 밖이어도 ViewportLivingAreaBinder가 안으로 끌어들이므로 정확할 필요는 없다.")]
-    private Vector3 _initialSpawnPosition = new Vector3(0f, 1.08f, 0f);
 
     private readonly List<GameObject> _alive = new List<GameObject>();
     private SettingsManager _settings;
@@ -76,16 +68,11 @@ public class CharacterManager : MonoBehaviour
         _settings = SettingsManager.Instance;
         if (_settings != null) _settings.Changed += ApplyUserSettingsToAll;
 
-        // 1) 씬에 미리 배치된 캐릭터는 Spawn을 거치지 않아 추적 목록에 없다. 먼저 찾아서 등록한다.
-        //    빠뜨리면 "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 그 캐릭터만 비껴가고,
-        //    증상은 "그 캐릭터만 제한이 안 걸린다"로 나타난다. 동시 존재 캡도 그만큼 헐거워진다.
+        // 씬에 미리 배치된 캐릭터는 Spawn을 거치지 않아 추적 목록에 없다. 먼저 찾아서 등록한다.
+        // 빠뜨리면 "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 그 캐릭터만 비껴가고,
+        // 증상은 "그 캐릭터만 제한이 안 걸린다"로 나타난다. 동시 존재 캡도 그만큼 헐거워진다.
         var placed = FindObjectsByType<BaseCharacterController>(FindObjectsSortMode.None);
         for (int i = 0; i < placed.Length; i++) Register(placed[i].gameObject);
-
-        // 2) 최초 캐릭터를 스폰한다. 씬에 놓인 캐릭터는 다른 캐릭터라 개수로 거르지 않는다.
-        //    같은 프리팹을 씬에도 놓으면 두 마리가 되니, 최초 캐릭터는 씬에 놓지 않는다.
-        if (_initialCharacterPrefab != null)
-            Spawn(_initialCharacterPrefab, _initialSpawnPosition);
     }
 
     private void OnDestroy()
