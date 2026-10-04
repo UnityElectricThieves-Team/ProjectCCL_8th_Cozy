@@ -10,7 +10,7 @@ using UnityEngine.UI;
 /// 탭 전환 방식과 활성/비활성 색은 <see cref="ShopPanelContentController"/>와 같은 규칙을 따른다.
 /// 다만 상점과 달리 항목이 고정이라 행을 만들어 넣지 않고, 미리 배치된 루트를 켜고 끄기만 한다.
 ///
-/// 일반 탭의 설정 컨트롤은 <see cref="SettingsManager"/>와 양방향으로 맞춘다.
+/// 일반 탭과 소리 탭의 설정 컨트롤은 <see cref="SettingsManager"/>와 양방향으로 맞춘다.
 /// - 컨트롤 → 매니저: 각 컨트롤의 OnValueChanged에 인스펙터로 건 <c>On*Changed</c> 메서드가 값을 넘긴다.
 /// - 매니저 → 컨트롤: 시작 시와 매니저의 <see cref="SettingsManager.Changed"/> 때 <see cref="RefreshControls"/>가 값을 밀어넣는다.
 /// 밀어넣을 때 되돌아오는 알림은 매니저 setter가 같은 값을 무시하므로 저장이나 재귀를 일으키지 않는다.
@@ -43,6 +43,16 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     [SerializeField] private Toggle _administratorModeToggle;
     [SerializeField] private Toggle _girlTransformBannedToggle;
 
+    [Header("소리 탭 컨트롤")]
+    [Tooltip("볼륨 슬라이더는 OnValueChanged에 On*VolumeChanged를, Slider 오브젝트의 SliderReleaseEvent에 OnVolumeReleased를 건다.")]
+    [SerializeField] private Slider _masterVolumeSlider;
+    [SerializeField] private Slider _musicVolumeSlider;
+    [SerializeField] private Slider _sfxVolumeSlider;
+    [SerializeField] private Toggle _mutedToggle;
+    [SerializeField] private TMP_Dropdown _bgmTrackDropdown;
+    [Tooltip("배경음악 드롭다운의 N번째 옵션이 이 목록의 N번째 곡이다. 옵션(곡 이름)은 드롭다운 인스펙터에서 같은 순서로 직접 적는다.")]
+    [SerializeField] private BgmCatalog _bgmCatalog;
+
     // Figma: 활성 탭=시안(#39C9E6), 비활성=회색(#D9D9D9). 상점 탭과 같은 값.
     private static readonly Color ActiveTab = new(0.224f, 0.788f, 0.902f);
     private static readonly Color InactiveTab = new(0.851f, 0.851f, 0.851f);
@@ -69,6 +79,8 @@ public sealed class SettingsPanelContentController : MonoBehaviour
         _localization = LocalizationManager.Instance;
         if (_localization != null) _localization.LanguageChanged += RefreshCountVisibilityLabels;
 
+        WarnIfBgmOptionsMismatch();
+
         _settings = SettingsManager.Instance;
         if (_settings == null)
         {
@@ -92,6 +104,17 @@ public sealed class SettingsPanelContentController : MonoBehaviour
         SetOptionLabels(_affinityVisibilityDropdown, CountVisibilityOptionIds);
     }
 
+    /// <summary>
+    /// 배경음악 드롭다운의 옵션(곡 이름)은 프리팹 인스펙터에서 직접 적고, 코드는 건드리지 않는다.
+    /// N번째 옵션 = <see cref="BgmCatalog"/>의 N번째 곡이라 둘의 개수가 다르면 어긋난 것이다. 고치지 않고 알리기만 한다.
+    /// </summary>
+    private void WarnIfBgmOptionsMismatch()
+    {
+        if (_bgmTrackDropdown == null || _bgmCatalog == null) return;
+        if (_bgmTrackDropdown.options.Count != _bgmCatalog.Count)
+            Debug.LogWarning($"[{nameof(SettingsPanelContentController)}] 배경음악 드롭다운 옵션 {_bgmTrackDropdown.options.Count}개와 곡 목록 {_bgmCatalog.Count}곡의 개수가 다릅니다. 같은 순서로 맞춰 주세요.", this);
+    }
+
     private static void SetOptionLabels(TMP_Dropdown dropdown, string[] ids)
     {
         if (dropdown == null) return;
@@ -113,6 +136,17 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     public void OnAdministratorModeChanged(bool on) { if (_settings != null) _settings.AdministratorMode = on; }
     public void OnGirlTransformBannedChanged(bool on) { if (_settings != null) _settings.GirlTransformBanned = on; }
 
+    // 볼륨은 끄는 동안 소리에만 반영하고, 파일 저장은 손 뗄 때(OnVolumeReleased) 한다.
+    public void OnMasterVolumeChanged(float value) { if (_settings != null) _settings.SetVolume(VolumeChannel.Master, value); }
+    public void OnMusicVolumeChanged(float value) { if (_settings != null) _settings.SetVolume(VolumeChannel.Music, value); }
+    public void OnSfxVolumeChanged(float value) { if (_settings != null) _settings.SetVolume(VolumeChannel.Sfx, value); }
+    public void OnVolumeReleased() { if (_settings != null) _settings.CommitVolume(); }
+    public void OnMutedChanged(bool on) { if (_settings != null) _settings.Muted = on; }
+    public void OnBgmTrackChanged(int index)
+    {
+        if (_settings != null && _bgmCatalog != null && index >= 0 && index < _bgmCatalog.Count) _settings.BgmTrackId = _bgmCatalog[index].id;
+    }
+
     // ===== 매니저 → 컨트롤 =====
 
     /// <summary>
@@ -129,6 +163,17 @@ public sealed class SettingsPanelContentController : MonoBehaviour
         if (_autoStartToggle != null) _autoStartToggle.isOn = _settings.AutoStart;
         if (_administratorModeToggle != null) _administratorModeToggle.isOn = _settings.AdministratorMode;
         if (_girlTransformBannedToggle != null) _girlTransformBannedToggle.isOn = _settings.GirlTransformBanned;
+
+        // 슬라이더 값 대입이 되돌려 보내는 SetVolume은 같은 값이라 무시된다(dirty가 생기지 않는다).
+        if (_masterVolumeSlider != null) _masterVolumeSlider.value = _settings.GetVolume(VolumeChannel.Master);
+        if (_musicVolumeSlider != null) _musicVolumeSlider.value = _settings.GetVolume(VolumeChannel.Music);
+        if (_sfxVolumeSlider != null) _sfxVolumeSlider.value = _settings.GetVolume(VolumeChannel.Sfx);
+        if (_mutedToggle != null) _mutedToggle.isOn = _settings.Muted;
+        if (_bgmTrackDropdown != null && _bgmCatalog != null)
+        {
+            int index = _bgmCatalog.IndexOf(_settings.BgmTrackId);
+            if (index >= 0 && index < _bgmTrackDropdown.options.Count) _bgmTrackDropdown.value = index;
+        }
     }
 
     // 탭 버튼의 OnClick()에 인스펙터로 거는 진입점. 인스펙터는 enum 인자를 넘길 수 없어 버튼별로 나눈다.

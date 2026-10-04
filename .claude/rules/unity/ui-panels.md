@@ -84,6 +84,13 @@ Unity는 프리팹 인스턴스 안에서 레이아웃이 크기를 정하는 �
 > - `MenuButtonBar` — 메뉴 버튼 → `UIManager.Toggle`
 > - `ShopItemSlot`, `CollectionEntrySlot`, `BackgroundItemSlot` — 슬롯 버튼. 슬롯은 코드로 생성되므로 인스펙터 배선 대상은 슬롯 프리팹 안의 버튼입니다.
 
+## 슬라이더의 손 뗌은 `SliderReleaseEvent`로 받는다
+
+uGUI Slider는 값이 바뀔 때의 `onValueChanged`만 있고 손 뗌 이벤트가 없습니다. 저장처럼 손 뗄 때 한 번만 할 일은 `SliderReleaseEvent`의 이벤트에 인스펙터로 겁니다.
+
+- **내장 `EventTrigger`를 쓰지 않습니다.** 모든 이벤트 인터페이스를 구현해서, 슬라이더 위에서 굴린 마우스 휠이 스크롤 뷰로 올라가지 못하고 막힙니다.
+- **Slider 컴포넌트가 붙은 오브젝트에 붙입니다.** 손 뗌은 처음 눌린 오브젝트로만 가는데, 그 오브젝트가 Slider입니다. 줄 루트나 Handle에 붙이면 불리지 않습니다.
+
 ## 닫기 버튼은 `UIPanel.RequestClose()`에 건다
 
 `UIPanel.Close()`를 직접 걸면 화면에서는 사라지지만 `UIManager`의 열린 패널 목록에는 남습니다. 그러면 ESC가 이미 닫힌 패널을 대상으로 헛 눌립니다. 패널이 자기 자신을 타깃으로 삼기 때문에 프리팹 안에서 배선이 완결되는 이점도 있습니다(씬의 `UIManager`를 프리팹에서 참조할 수 없습니다).
