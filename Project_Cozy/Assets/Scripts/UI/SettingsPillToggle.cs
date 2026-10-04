@@ -42,17 +42,18 @@ public sealed class SettingsPillToggle : MonoBehaviour
     [SerializeField] private Color _onBackgroundColor = new(0.580f, 0.557f, 0.922f);
     [SerializeField] private Color _offBackgroundColor = new(0.812f, 0.812f, 0.812f);
 
+    // 모든 언어에서 같은 기호라 번역하지 않는다. 언어 폰트를 따라가면 폰트마다 글자 크기가 달라 보여서,
+    // 폰트도 프리팹 것을 그대로 둔다.
+    private const string OnText = "ON";
+    private const string OffText = "OFF";
+
     private Toggle _toggle;
     private Coroutine _slide;
-    private LocalizationManager _localization;
 
     private void Awake()
     {
         _toggle = GetComponent<Toggle>();
         _toggle.onValueChanged.AddListener(OnToggled);
-
-        _localization = LocalizationManager.Instance;
-        if (_localization != null) _localization.LanguageChanged += OnLanguageChanged;
     }
 
     // 미끄러지는 중에 숨겨지면 어중간한 자리에 멈춘다. 다시 보일 때 현재 값으로 맞춘다.
@@ -61,10 +62,7 @@ public sealed class SettingsPillToggle : MonoBehaviour
     private void OnDestroy()
     {
         if (_toggle != null) _toggle.onValueChanged.RemoveListener(OnToggled);
-        if (_localization != null) _localization.LanguageChanged -= OnLanguageChanged;
     }
-
-    private void OnLanguageChanged() => ApplyColorAndText(_toggle.isOn);
 
     private void OnToggled(bool on)
     {
@@ -114,7 +112,7 @@ public sealed class SettingsPillToggle : MonoBehaviour
     private void ApplyColorAndText(bool on)
     {
         if (_background != null) _background.color = on ? _onBackgroundColor : _offBackgroundColor;
-        if (_label != null) _label.text = LocalizationManager.Localize(on ? "UISettings.toggle.on" : "UISettings.toggle.off");
+        if (_label != null) _label.text = on ? OnText : OffText;
     }
 
     private float KnobTargetX(bool on) => on ? _knobOnX : _knobOffX;

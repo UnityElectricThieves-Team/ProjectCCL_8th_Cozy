@@ -2,7 +2,8 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// 같은 GameObject의 TMP 텍스트를 stringID의 현재 언어 문장으로 채운다.
+/// 같은 GameObject의 TMP 텍스트를 stringID의 현재 언어 문장과 그 언어의 대표 폰트로 채운다.
+/// 하트 숫자처럼 언어와 무관하게 폰트를 유지할 텍스트에는 붙이지 않는다.
 /// 프리팹에 고정된 문구(탭 이름, 버튼 글자 등)에 붙인다. 코드가 글자를 채우는 텍스트에는 붙이지 않는다 —
 /// 그런 곳은 채우는 코드가 <see cref="LocalizationManager.Get"/>을 직접 부르고 언어 변경을 구독한다.
 ///
@@ -38,5 +39,9 @@ public sealed class LocalizedText : MonoBehaviour
         if (_localization != null) _localization.LanguageChanged -= Refresh;
     }
 
-    private void Refresh() => _text.text = _localization.Get(_stringId);
+    private void Refresh()
+    {
+        LocalizationManager.ApplyFont(_text);
+        _text.text = _localization.Get(_stringId);
+    }
 }

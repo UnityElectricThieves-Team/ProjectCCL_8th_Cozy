@@ -145,6 +145,9 @@ public sealed class SettingsPanelContentController : MonoBehaviour
         if (dropdown == null) return;
         var options = dropdown.options;
         for (int i = 0; i < options.Count && i < ids.Length; i++) options[i].text = LocalizationManager.Localize(ids[i]);
+        // 닫힌 상태의 글자와, 펼칠 때 복제되는 항목 템플릿의 글자를 언어 폰트로 맞춘다.
+        LocalizationManager.ApplyFont(dropdown.captionText);
+        LocalizationManager.ApplyFont(dropdown.itemText);
         dropdown.RefreshShownValue(); // 닫힌 드롭다운에 보이는 선택 항목 글자도 다시 그린다
     }
 

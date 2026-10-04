@@ -2194,6 +2194,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LocalizationManager
   _table: {fileID: 4900000, guid: 4954be27220c1cf41a0e0e7a11e7d407, type: 3}
+  _koreanFont: {fileID: 11400000, guid: a589948ac1718674883f0a8d894798c7, type: 2}
+  _englishFont: {fileID: 11400000, guid: a22ac35576fb3ee44bbfb3f848fce05c, type: 2}
+  _japaneseFont: {fileID: 11400000, guid: d8b3a0f3d2003d943a114a5b31ef58a7, type: 2}
+  _chineseSimplifiedFont: {fileID: 11400000, guid: c82fa2b024e7c224698e36b692e13698, type: 2}
+  _chineseTraditionalFont: {fileID: 11400000, guid: 195a4aa41db7fc04bb896e13ff6ac0df, type: 2}
 --- !u!1001 &829411603
 PrefabInstance:
   m_ObjectHideFlags: 0

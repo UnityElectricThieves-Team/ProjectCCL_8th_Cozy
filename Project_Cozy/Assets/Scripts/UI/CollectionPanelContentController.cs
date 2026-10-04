@@ -123,8 +123,12 @@ public sealed class CollectionPanelContentController : MonoBehaviour
         }
 
         if (_nameText != null) _nameText.text = entry.Name;
-        if (_infoText != null) _infoText.text = BuildInfo(entry);
-        if (_affinityText != null) _affinityText.text = LocalizationManager.Localize("UICollection.affinity_empty");
+        if (_infoText != null)
+        {
+            LocalizationManager.ApplyFont(_infoText);
+            _infoText.text = BuildInfo(entry);
+        }
+        if (_affinityText != null) LocalizationManager.SetText(_affinityText, "UICollection.affinity_empty");
     }
 
     // 단위와 날짜 표기도 언어마다 달라서 조각마다 번역 표의 문장을 쓴다. 값이 없으면 "-".
