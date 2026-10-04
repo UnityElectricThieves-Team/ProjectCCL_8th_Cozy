@@ -2,7 +2,7 @@
 paths:
   - "Project_Cozy/Assets/Scripts/Interaction/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/StarController.cs"
-  - "Project_Cozy/Assets/Prefabs/Character*.prefab"
+  - "Project_Cozy/Assets/Prefabs/Characters/*.prefab"
   - "Project_Cozy/Assets/Prefabs/Star.prefab"
   - "Project_Cozy/Assets/Assets/ProtoTypeCharacter/**"
   - "Project_Cozy/Assets/Art/**"

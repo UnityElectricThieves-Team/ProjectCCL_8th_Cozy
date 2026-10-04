@@ -1,7 +1,7 @@
 ---
 paths:
   - "Project_Cozy/Assets/Scripts/Character/**/*.cs"
-  - "Project_Cozy/Assets/Prefabs/Character*.prefab"
+  - "Project_Cozy/Assets/Prefabs/Characters/*.prefab"
   - "Project_Cozy/Assets/Assets/ProtoTypeCharacter/**"
 ---
 
