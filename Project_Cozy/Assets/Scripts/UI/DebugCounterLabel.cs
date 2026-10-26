@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 /// <summary>
-/// SpawnPointManager의 누적/현재 스폰 기운과 (선택) StarController의 Activated 상태를 매 프레임 TMP 라벨에 표시한다. 디버그 표시 전용.
+/// SpawnPointManager의 누적 스폰 기운과 (선택) StarController의 Activated 상태를 매 프레임 TMP 라벨에 표시한다. 디버그 표시 전용.
 /// </summary>
 public class DebugCounterLabel : MonoBehaviour
 {
@@ -28,6 +28,6 @@ public class DebugCounterLabel : MonoBehaviour
     {
         if (_spawnPoint == null || _label == null) return;
         string activated = _star != null ? (_star.IsActivated ? "True" : "False") : "-";
-        _label.text = $"Cumulative: {_spawnPoint.CumulativeEnergy}\nCurrent: {_spawnPoint.CurrentEnergy}\nActivated: {activated}";
+        _label.text = $"Cumulative: {_spawnPoint.CumulativeEnergy}\nActivated: {activated}";
     }
 }

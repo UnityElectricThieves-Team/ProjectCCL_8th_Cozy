@@ -16,3 +16,4 @@ MonoBehaviour:
   displayName: "\uD06C\uB9AC\uC2A4\uB9C8\uC2A45"
   icon: {fileID: 21300000, guid: 02461c2acfaf2a84ab923005db40abf2, type: 3}
   price: 500
+  backgroundSprite: {fileID: 21300000, guid: 284dbe503b4593040bafd7ac50de3d21, type: 3}

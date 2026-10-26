@@ -8,7 +8,7 @@ using UnityEngine.UI;
 /// 선택된 탭에 따라 진열 상품·행 프리팹·열 수·버튼 동작이 달라진다.
 /// 탭을 누르면 <see cref="SetMode"/>가 기존 행을 비우고 그 모드로 다시 채운다.
 ///
-/// - 장식: <see cref="ShopItemRow"/>에 <see cref="ShopItemSlot"/>을 3개씩. 버튼=구매(하트 차감).
+/// - 장식: <see cref="ShopItemRow"/>에 <see cref="ShopItemSlot"/>을 3개씩. 버튼=설치 모드 진입, 자리를 확정할 때 하트 차감.
 /// - 배경: <see cref="BackgroundItemRow"/>에 <see cref="BackgroundItemSlot"/>을 2개씩. 버튼=구매→사용→사용취소(<see cref="BackgroundSystem"/>).
 ///
 /// 패널 루트에 붙는다. 패널은 CanvasGroup으로 숨기므로(SetActive 아님) 이 컴포넌트는 계속 살아 있다.
@@ -71,7 +71,7 @@ public sealed class ShopPanelContentController : MonoBehaviour
             bg.ActiveBackgroundChanged += OnActiveBackgroundChanged;
         }
 
-        // 장식 보유 개수 갱신. HeartsChanged로는 부족하다 — TryBuy가 하트를 먼저 차감하므로
+        // 장식 보유 개수 갱신. HeartsChanged로는 부족하다 — TryBuyAndPlace가 하트를 먼저 차감하므로
         // 그쪽 갱신은 개수가 올라가기 전에 돌아 옛 개수를 그린다.
         var shop = ShopSystem.Instance;
         if (shop != null) shop.OwnedChanged += OnShopOwnedChanged;
@@ -202,13 +202,27 @@ public sealed class ShopPanelContentController : MonoBehaviour
         return byPrice != 0 ? byPrice : string.CompareOrdinal(a.id, b.id);
     }
 
+    // 구매 버튼은 바로 사지 않고 설치 모드에 들어간다. 기획의 구매 시나리오가
+    // "구매 버튼 → 설치 모드 → 설치 확정 시 재화 차감 및 설치"이기 때문이다. 취소하면 아무것도 바뀌지 않는다.
     private void TryPurchase(ShopItemDefinition item)
     {
         if (item == null) return;
-        // 하트 차감은 ShopSystem이 소유 기록과 함께 처리한다 — 여기서 TrySpend를 직접 부르면
+
+        // 하트가 모자라면 모드에 들어가지 않는다. 확정 순간에 다시 확인하는 것은 ShopSystem이 한다.
+        var hearts = HeartSystem.Instance;
+        if (hearts == null || hearts.CurrentHearts < item.price) return;
+
+        var placement = DecorationPlacementController.Instance;
+        if (placement == null)
+        {
+            Debug.LogWarning($"[{nameof(ShopPanelContentController)}] 씬에 {nameof(DecorationPlacementController)}가 없어 설치 모드에 들어갈 수 없음.", this);
+            return;
+        }
+
+        // 하트 차감·소유 기록·놓인 목록·저장은 ShopSystem이 한 번에 처리한다 — 여기서 TrySpend를 직접 부르면
         // 하트만 빠져나가고 산 물건이 아무 데도 남지 않는다(배경 탭이 BackgroundSystem에 맡기는 것과 같은 구조).
-        ShopSystem.Instance?.TryBuy(item);
-        // 성공하면 HeartsChanged가 울려 Refresh로 이어진다. 실패(잔액 부족)면 아무 변화 없음.
+        // 성공하면 OwnedChanged가 울려 Refresh와 장식 레이어 갱신으로 이어진다.
+        placement.Enter(item.decorationPrefab, baseX => ShopSystem.Instance?.TryBuyAndPlace(item, baseX));
     }
 
     private void UpdateTabVisuals()

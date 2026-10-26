@@ -4,7 +4,8 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// 상점 '장식'의 소유 상태를 들고 있는 씬 단일 시스템. 무엇을 몇 개 샀는지를 관리하고 파일에 기록한다.
+/// 상점 '장식'의 소유 상태를 들고 있는 씬 단일 시스템. 무엇을 몇 개 샀는지와 어느 장식이 화면 어디에
+/// 놓였는지를 관리하고 파일에 기록한다.
 /// 배경 쪽의 <see cref="BackgroundSystem"/>과 대칭이며, 장식은 "사용/사용 취소"가 없어 더 단순하다.
 ///
 /// 이 시스템이 생기기 전에는 장식 구매가 <see cref="HeartSystem.TrySpend"/>만 부르고 소유를 어디에도
@@ -32,7 +33,10 @@ public sealed class ShopSystem : MonoBehaviour
 
     private ShopInventoryFileFormat _inventory = new();
 
-    /// <summary>소유가 바뀌었을 때(장식을 샀을 때) 울린다. 슬롯들이 표시를 갱신하는 신호.</summary>
+    /// <summary>
+    /// 장식을 사서 화면에 놓았을 때 울린다. 산 개수와 놓인 목록이 함께 바뀐 뒤에 울리므로,
+    /// 상점 슬롯(개수)과 장식 레이어(놓인 목록)가 같은 신호로 갱신한다.
+    /// </summary>
     public event Action OwnedChanged;
 
     private void Awake()
@@ -50,6 +54,7 @@ public sealed class ShopSystem : MonoBehaviour
 
         // 에디터 세이브는 사람이 열어 고칠 수 있는 평문 JSON이라, 필드가 null인 파일이 들어올 수 있다.
         _inventory.ownedCounts ??= new Dictionary<string, int>();
+        _inventory.placed ??= new List<PlacedDecorationData>();
     }
 
     private void OnDestroy()
@@ -64,15 +69,27 @@ public sealed class ShopSystem : MonoBehaviour
     public bool IsOwned(string id) => GetCount(id) > 0;
 
     /// <summary>
-    /// 장식을 구매한다. 잔액이 모자라면 아무 일도 없이 false.
-    /// 성공하면 하트를 차감하고 개수를 하나 늘린 뒤 저장하고 <see cref="OwnedChanged"/>를 울린다.
+    /// 화면에 놓인 장식 목록(놓은 순서). 개수(<see cref="GetCount"/>)와는 별개다 — 개수는 산 것 전체,
+    /// 이 목록은 그중 화면에 놓인 것이다.
     /// </summary>
-    public bool TryBuy(ShopItemDefinition item)
+    public IReadOnlyList<PlacedDecorationData> Placed => _inventory.placed;
+
+    /// <summary>
+    /// 장식을 사서 baseX(베이스 공간 px, 그림의 가로 중앙) 자리에 놓는다. 설치 모드에서 자리를 확정한 순간에 부른다.
+    /// 하트 차감, 개수 증가, 놓인 목록 추가, 저장을 한 번에 하고 마지막에 <see cref="OwnedChanged"/>를 울린다 —
+    /// 지불과 인도가 함께 파일에 남아야 거래가 성립한다. 잔액이 모자라면 아무것도 바꾸지 않고 false.
+    /// </summary>
+    public bool TryBuyAndPlace(ShopItemDefinition item, float baseX)
     {
         if (item == null) return false;
-        if (HeartSystem.Instance == null || !HeartSystem.Instance.TrySpend(item.price)) return false;
+        if (HeartSystem.Instance == null || !HeartSystem.Instance.TrySpend(item.price))
+        {
+            Debug.LogWarning($"[{nameof(ShopSystem)}] '{item.id}' 설치를 확정했지만 하트가 모자라 사지 못했습니다.", this);
+            return false;
+        }
 
         _inventory.ownedCounts[item.id] = GetCount(item.id) + 1;
+        _inventory.placed.Add(new PlacedDecorationData { itemId = item.id, x = baseX });
         Save();
         OwnedChanged?.Invoke();
         return true;

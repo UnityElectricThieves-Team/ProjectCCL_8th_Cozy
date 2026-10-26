@@ -19,13 +19,13 @@ public sealed class ShadowProjector : MonoBehaviour
 
     [Header("Probe")]
     [SerializeField, Tooltip("raycast 최대 거리. 이 거리 안에 ground 없으면 그림자 숨김.")]
-    private float _maxProbeDistance = 100f;
+    private float _maxProbeDistance = 10.8f;
 
     [Header("Visibility & Size")]
     [SerializeField, Tooltip("Visual 발 ~ ground 거리가 이 값 이상이면 그림자 숨김.")]
-    private float _maxVisibleDistance = 3f;
+    private float _maxVisibleDistance = 0.324f;
     [SerializeField, Tooltip("그림자 Y 두께 (월드 단위).")]
-    private float _height = 0.1f;
+    private float _height = 0.0108f;
     [SerializeField, Tooltip("ground 위/아래 미세 조정 (월드 단위, 양수=위).")]
     private float _yOffset = 0f;
 

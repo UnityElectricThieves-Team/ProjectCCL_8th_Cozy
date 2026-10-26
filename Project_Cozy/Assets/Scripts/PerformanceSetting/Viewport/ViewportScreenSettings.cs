@@ -3,24 +3,39 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// "화면 설정"(UserSettings.md §2.1.1)의 정책 레이어 — 평시/편집 절충안.
+/// "화면 설정"(UserSettings.md §2.1.1)의 정책 레이어 — 정적 창 모델.
 ///
-/// 평시(Normal):   OS 창 자체를 뷰포트 rect로 배치 → 뷰포트 밖 픽셀은 렌더링·DWM 합성 비용 0.
-/// 편집(Editing):  창을 모니터 전체로 확장하고 카메라는 베이스 공간 전체를 프레이밍.
-///                 조정값은 프리뷰일 뿐이며(PreviewChanged로 UI가 경계·딤·회수 예정 시각화),
-///                 SaveEdit()로만 확정, CancelEdit()는 폐기(§2.1.1 "저장하지 않고 나가면 폐기").
-/// 저장/취소:      확정(또는 기존) 뷰포트로 창을 재계산·재적용. 배치가 결정론적이라
-///                 "이전 상태 백업"이 필요 없다.
+/// 창:          항상 현재 모니터의 **작업 영역**(작업표시줄을 뺀 영역)에 놓인다. 평상시에는 크기도
+///              위치도 변하지 않고, ReadjustWindow()를 부를 때만 다시 잡는다.
+/// 베이스 공간: 작업 영역을 **마스터 캔버스 기준 px**로 표현한 것. 폭은 항상 마스터 캔버스 폭이고,
+///              높이는 작업 영역의 종횡비를 따른다. 카메라는 이 전체를 비추며, 재조정 때 말고는
+///              건드리지 않는다. 화면에서는 베이스 px 하나가 (작업 영역 폭 / 마스터 캔버스 폭) 화면 px로
+///              보인다 — UI의 CanvasScaler(기준 폭 일치, Match=Width)와 같은 배율이라, 어느 해상도에서든
+///              월드와 UI가 같은 비율로 줄어든다. 이 클래스가 그 단위 정의의 유일한 원천이다
+///              (RefreshBaseSpace). px→월드 환산(앵커·PPU)은 BaseSpaceCameraFitter가 든다.
+/// 뷰포트:      베이스 공간 안의 논리적 사각형. **렌더링 파라미터가 아니다** — 창을 줄이지도 화면을
+///              잘라내지도 않는다. 캐릭터가 살 수 있는 영역이자 지면·회수 판정의 기준이다.
+/// 편집:        조정값은 프리뷰일 뿐이며(PreviewChanged로 UI가 경계·딤·회수 예정 시각화),
+///              SaveEdit()로만 확정, CancelEdit()는 폐기(§2.1.1 "저장하지 않고 나가면 폐기").
+///
+/// 이 모델을 고른 이유는 Docs/Development/WindowViewportUIArchitecture.md.
 ///
 /// Win32를 모른다 — 창 배치·클릭 통과는 WindowManager에 위임(HWND 접점은 그쪽 한 곳).
-/// 영속화도 모른다 — 확정 뷰포트는 ViewportSaved 구독 측(SaveSystem)이 저장하고,
-/// 로드 시 SetViewport()로 주입한다(베이스 공간 밖 값은 자동 클램프).
+/// 영속화도 모른다 — 확정 뷰포트는 ViewportSaved 구독 측(ViewportSaveBinder)이 저장하고,
+/// 로드 시 SetViewport()로 주입한다(베이스 공간 밖 값은 자동 클램프). 작업 영역 px 단위로 저장된
+/// 옛 값은 SetViewportFromWorkAreaPx()로 넣으면 여기서 환산한다 — 파일 버전은 모르고 단위만 안다.
 /// </summary>
 [DisallowMultipleComponent]
 public class ViewportScreenSettings : MonoBehaviour
 {
-    /// <summary>§2.1.1 제약 — 뷰포트 최소 크기(절대 픽셀).</summary>
+    /// <summary>§2.1.1 제약 — 뷰포트 최소 크기(베이스 공간 px = 마스터 캔버스 기준 px).
+    /// 기획서의 "절대 픽셀"을 마스터 캔버스 좌표계의 픽셀로 해석한 것이라, 4K에서만 화면 px와 같다.</summary>
     public static readonly Vector2Int MinViewportSize = new Vector2Int(720, 480);
+
+    // 마스터 캔버스 폭(px). 베이스 공간의 폭이자 화면 배율의 분모다. GameScene의 UIRoot CanvasScaler
+    // 기준 해상도 폭과 같아야 월드와 UI가 같은 배율로 줄어든다 — 씬 값은 인스펙터에서 바뀌므로 코드로
+    // 강제하지 못한다. 규약은 .claude/rules/unity/viewport-coordinates.md.
+    private const int MasterCanvasWidthPx = 3840;
 
     [Header("협력자")]
     [SerializeField] private WindowManager _windowManager;
@@ -31,10 +46,15 @@ public class ViewportScreenSettings : MonoBehaviour
     private RectInt _viewport = new RectInt(0, 0, 0, 0);
 
     private RectInt _previewViewport;
-    private RectInt _monitorRect;              // 스크린 좌표(Y 아래 방향) — 창 배치 계산용
-    private Vector2Int _baseSpaceSize;         // = 현재 모니터 해상도
+    private RectInt _baseSpaceScreenRect;      // 작업 영역을 스크린 좌표(화면 px, Y 아래)로 표현한 것 — 창 배치용
+    private Vector2Int _baseSpaceSize;         // 베이스 공간 크기(마스터 캔버스 기준 px) — 폭은 항상 MasterCanvasWidthPx
     private bool _isEditing;
     private bool _ready;                       // 초기 적용 완료 전 API 호출 가드
+
+    // ready 전에 작업 영역 px 단위로 들어온 뷰포트. 환산에 필요한 배율은 Start에서 작업 영역을 읽은 뒤에야
+    // 알 수 있어 그때까지 따로 들고 있는다. _viewport에 섞어 두면 어느 단위인지 알 수 없어진다.
+    private RectInt _pendingWorkAreaPx;
+    private bool _hasPendingWorkAreaPx;
 
     /// <summary>확정된 뷰포트(베이스 공간 px, 원점=좌하단).</summary>
     public RectInt Viewport => _viewport;
@@ -44,132 +64,169 @@ public class ViewportScreenSettings : MonoBehaviour
 
     public bool IsEditing => _isEditing;
 
-    /// <summary>초기 적용 완료 여부. false 동안 EnterEdit/SetViewport는 거부된다 — UI는 이걸로 버튼을 잠글 것.</summary>
+    /// <summary>초기 적용 완료 여부. false 동안 EnterEdit/ReadjustWindow는 거부된다 — UI는 이걸로 버튼을 잠글 것.</summary>
     public bool IsReady => _ready;
 
-    /// <summary>베이스 공간 크기(px) = 현재 모니터 해상도.</summary>
+    /// <summary>베이스 공간 크기(마스터 캔버스 기준 px). 폭은 항상 마스터 캔버스 폭이고 높이는 작업 영역의
+    /// 종횡비를 따른다. 화면 px가 아니다 — 화면 px로 바꾸려면 Screen 크기와의 비율을 곱한다.</summary>
     public Vector2Int BaseSpaceSize => _baseSpaceSize;
 
     /// <summary>편집 중 프리뷰 변경 — UI가 경계 핸들·바깥 딤·회수 예정 표시를 갱신하는 지점.</summary>
     public event Action<RectInt> PreviewChanged;
 
-    /// <summary>저장 확정 — SaveSystem이 구독해 영속화하는 지점.</summary>
+    /// <summary>저장 확정 — ViewportSaveBinder가 구독해 영속화하는 지점.
+    /// 사용자가 편집 모드에서 명시적으로 저장했을 때만 발행한다. 클램프로 값이 줄어든 것은
+    /// 사용자의 뜻이 아니므로 발행하지 않는다 — 작은 화면에 한 번 열었다고 설정이 깎이면 안 된다.</summary>
     public event Action<RectInt> ViewportSaved;
 
     /// <summary>편집 모드 진입(true)/이탈(false) — 편집 UI 표시 토글 지점.</summary>
     public event Action<bool> EditModeChanged;
 
-    /// <summary>확정 뷰포트가 실제로 화면에 적용된 직후 — 초기 적용, SetViewport, 저장/취소 복귀,
-    /// OS 창 드래그 역동기화 전부 포함. 뷰포트 밖 캐릭터 회수(ViewportResidencyEnforcer) 등이 구독.</summary>
-    public event Action<RectInt> ViewportApplied;
+    /// <summary>뷰포트가 확정된 직후 — 시작 시 초기 적용, SetViewport, 편집 저장/취소 복귀, 창 재조정 때마다 울린다.
+    /// 한 번만 울리는 "준비 완료" 신호가 아니다. 첫 확정이 이미 지났는지는 <see cref="IsReady"/>로 본다.
+    /// 거주 영역(ViewportLivingAreaBinder)·배경 띠·장식 레이어가 구독한다.</summary>
+    public event Action<RectInt> ViewportConfirmed;
 
     private IEnumerator Start()
     {
-        // 인스펙터 미할당 배선 실수가 EnterEdit/ApplyNormal 전체를 죽이지 않게 자동 탐색으로 보강.
+        // 인스펙터 미할당 배선 실수가 초기 적용 전체를 죽이지 않게 자동 탐색으로 보강.
         if (_windowManager == null) _windowManager = FindFirstObjectByType<WindowManager>();
         if (_cameraFitter == null)  _cameraFitter  = FindFirstObjectByType<BaseSpaceCameraFitter>();
         if (_cameraFitter == null)
             Debug.LogError("[ViewportScreenSettings] BaseSpaceCameraFitter 없음 — 카메라 프레이밍 불가. " +
                            "메인 카메라에 BaseSpaceCameraFitter를 붙여주세요.");
 
-        // WindowManager가 창 스타일·표시를 잡은 뒤에 모니터를 읽어야 안정적
+        // WindowManager가 창 스타일·표시를 잡은 뒤에 작업 영역을 읽어야 안정적
         // (WindowManager.ApplyMaximizeAfterReady와 같은 이유의 지연).
         for (int i = 0; i < 10; i++) yield return null;
 
-        RefreshBaseSpace();
+        ApplyScreenLayout();
 
-        // 크기 0 = "베이스 공간 전체" 기본값 (§2.1.1 뷰포트 기본값)
+        // 창 배치가 Screen 크기에 반영되는 것은 다음 프레임이라, 진단 로그는 한 프레임 뒤에 찍는다.
+        // 부팅 1회뿐이라 영구로 둔다 — 해상도·DPI 문제 보고를 받았을 때 Player.log에서 바로 읽는 값이다.
+        yield return null;
+        Debug.Log($"[ViewportScreenSettings] 작업 영역 {_baseSpaceScreenRect} / 화면 {Screen.width}x{Screen.height} / " +
+                  $"베이스 공간 {_baseSpaceSize} / 베이스 px당 화면 px {ScreenPxPerBasePx:F4}");
+
+        // 작업 영역 px 단위로 들어온 옛 값은 배율을 안 지금 환산한다. 클램프보다 먼저여야 한다 —
+        // 클램프 뒤에 환산하면 다른 해상도에서 저장한 값이 베이스 공간을 넘칠 수 있다.
+        if (_hasPendingWorkAreaPx)
+        {
+            _viewport = WorkAreaPxToBasePx(_pendingWorkAreaPx);
+            _hasPendingWorkAreaPx = false;
+        }
+
+        // 크기 0 = "베이스 공간 전체" 기본값 (§2.1.1 뷰포트 기본값).
+        // 저장된 값이 Awake에 주입돼 있으면(ViewportSaveBinder) 그 값이 살아남는다.
         if (_viewport.width <= 0 || _viewport.height <= 0)
             _viewport = new RectInt(0, 0, _baseSpaceSize.x, _baseSpaceSize.y);
 
         _viewport = ClampToBaseSpace(_viewport);
         _ready = true;
-        ApplyNormal();
-
-        // 사용자가 캡션 드래그(이동)나 가장자리 드래그(리사이즈)로 창을 직접 바꾸면
-        // 창 rect가 곧 새 뷰포트다 — 역동기화해서 카메라도 그 영역을 비추게 한다.
-        if (_windowManager != null)
-            _windowManager.WindowRectChangedByUser += OnWindowRectChangedByUser;
+        PublishViewportConfirmed();
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
-        if (_windowManager != null)
-            _windowManager.WindowRectChangedByUser -= OnWindowRectChangedByUser;
-    }
-
-    private void OnWindowRectChangedByUser()
-    {
-        if (!_ready || _isEditing) return;
-        if (!_windowManager.TryGetWindowRect(out RectInt win)) return;
-
-        // 창이 다른 모니터로 드래그됐을 수 있음 — stale 모니터 기준으로 계산하면
-        // 옛 모니터로 스냅백하는 버그가 되므로 반드시 먼저 갱신 (리뷰 합의).
-        RefreshBaseSpace();
-
-        // 스크린 좌표(모니터 좌상단 원점, Y 아래) → 베이스 공간 px(좌하단 원점, Y 위)
-        RectInt v = new RectInt(
-            win.x - _monitorRect.x,
-            _baseSpaceSize.y - (win.y - _monitorRect.y) - win.height,
-            win.width, win.height);
-
-        _viewport = ClampToBaseSpace(v);
-        // 창은 사용자가 이미 놓은 자리 그대로 두고(클램프로 달라졌을 때만 재배치), 카메라만 따라간다.
-        if (_viewport != v) ApplyNormal();
-        else
-        {
-            if (_cameraFitter != null) _cameraFitter.Frame(_viewport, _baseSpaceSize);
-            ViewportApplied?.Invoke(_viewport);
-        }
-        ViewportSaved?.Invoke(_viewport); // 사용자가 직접 확정한 배치 — 영속화 대상
+        // 편집 중에 이 컴포넌트가 비활성화·파괴되면 클릭 통과가 정지된 채로 남아, 창이 화면 위 모든
+        // 클릭을 영구히 흡수한다(사용자에게는 바탕화면이 잠긴 것과 같고 복구 수단은 강제 종료뿐이다).
+        // 여기서 무조건 자기 정지를 푼다. Unity는 파괴 시에도 OnDisable을 먼저 부르므로 이 한 곳으로 두 경우가 덮인다.
+        // 정지는 소유자별이라 다른 컴포넌트가 건 정지는 풀지 않는다. 걸지 않았을 때 풀어도 안전하다.
+        //
+        // _isEditing은 건드리지 않는다 — 이벤트 없이 조용히 내리면 편집 UI가 상태를 잘못 알게 된다.
+        // 월드 입력 잠금도 같은 이유로 푼다 — 남으면 캐릭터·별이 영영 반응하지 않는다.
+        WorldInputLock.Release(this);
+        if (_windowManager == null) return;
+        _windowManager.ReleaseClickThroughSuspend(this);
+        _windowManager.ReleaseResizeSuspend(this);
     }
 
     // ===== 외부 API =====
 
     /// <summary>확정 뷰포트를 직접 설정(로드 경로). 베이스 공간 밖 값은 클램프.
-    /// 편집 중이면 확정 값만 갱신하고 화면 적용은 편집을 벗어날 때까지 미룬다.</summary>
+    /// 편집 중이면 확정 값만 갱신하고 반영은 편집을 벗어날 때까지 미룬다.</summary>
     public void SetViewport(RectInt viewport)
     {
+        // 뒤에 온 베이스 px 값이 이긴다 — 앞서 보류된 작업 영역 px 값을 Start가 또 환산해 덮지 않게.
+        _hasPendingWorkAreaPx = false;
+
         // ready 전엔 베이스 공간 크기를 아직 모르므로 클램프할 수 없다 — Start가 클램프·적용을 맡는다.
         if (!_ready) { _viewport = viewport; return; }
 
         _viewport = ClampToBaseSpace(viewport);
 
         // 편집 중에는 진행 중인 프리뷰를 건드리지 않는다. 저장/취소로 빠져나올 때
-        // ExitEdit → ApplyNormal이 이 확정 값을 화면에 반영한다.
+        // ExitEdit이 이 확정 값을 반영한다.
         if (_isEditing) return;
 
-        ApplyNormal();
+        PublishViewportConfirmed();
     }
 
-    /// <summary>화면 설정 진입 — 창을 모니터 전체로 확장, 카메라는 베이스 공간 전체 프레이밍.</summary>
+    /// <summary>작업 영역 px(옛 단위) 뷰포트를 설정한다. 베이스 px로 환산해 SetViewport와 같은 경로를 탄다.
+    /// 환산 배율은 작업 영역을 읽은 뒤에야 알 수 있으므로 ready 전에는 보류했다가 Start에서 환산한다.
+    /// 옛 파일이 저장된 기기의 해상도는 알 수 없어 현재 배율을 쓴다 — 같은 기기에서 이어 쓰는 경우 정확히 복원된다.</summary>
+    public void SetViewportFromWorkAreaPx(RectInt workAreaPx)
+    {
+        if (!_ready)
+        {
+            _pendingWorkAreaPx = workAreaPx;
+            _hasPendingWorkAreaPx = true;
+            return;
+        }
+        SetViewport(WorkAreaPxToBasePx(workAreaPx));
+    }
+
+    /// <summary>
+    /// "윈도우 크기 재조정" — 작업 영역을 다시 읽어 창과 카메라를 맞춘다.
+    /// 모니터 해상도가 바뀌었거나 작업표시줄을 옮겼을 때 사용자가 직접 부르는 유일한 경로다.
+    /// 평상시에는 창이 저절로 바뀌지 않는다.
+    ///
+    /// 창 rect는 저장하지 않는다 — 작업 영역에서 언제든 다시 유도할 수 있는 값이라 저장하면
+    /// 원본과 어긋날 위험만 생긴다. 부팅 때마다 Start가 같은 계산을 한다.
+    /// </summary>
+    public void ReadjustWindow()
+    {
+        if (!_ready)
+        {
+            Debug.LogWarning("[ViewportScreenSettings] 초기화 전 ReadjustWindow 호출 — 무시. IsReady로 버튼을 잠그세요.");
+            return;
+        }
+
+        ApplyScreenLayout();
+
+        // 작업 영역이 줄었으면 뷰포트가 베이스 공간을 넘칠 수 있다. 줄여서 맞추되 저장하지는 않는다
+        // (큰 모니터로 돌아가면 저장된 원래 크기가 복원되어야 한다).
+        _viewport = ClampToBaseSpace(_viewport);
+        PublishViewportConfirmed();
+    }
+
+    /// <summary>화면 설정 진입 — 뷰포트 조정을 시작한다.
+    /// 창과 카메라는 그대로다(이미 작업 영역 전체를 차지하고 비추고 있다).</summary>
     public void EnterEdit()
     {
         if (_isEditing) return;
         if (!_ready)
         {
-            // 무음 무시 금지 (리뷰 합의: 큐잉보다 로그+거부 — 10프레임 뒤 갑자기 전체화면 전환되는 UX가 더 나쁨)
+            // 무음 무시 금지 (리뷰 합의: 큐잉보다 로그+거부 — 10프레임 뒤 갑자기 상태가 바뀌는 UX가 더 나쁨)
             Debug.LogWarning("[ViewportScreenSettings] 초기화 전 EnterEdit 호출 — 무시. IsReady로 버튼을 잠그세요.");
             return;
         }
         _isEditing = true;
         _previewViewport = _viewport;
 
-        RefreshBaseSpace();
         if (_windowManager != null)
         {
-            // suspend를 풀스크린 확장보다 먼저 — 확장 직후 큐잉된 클릭이 통과 상태로 새는 창을 차단 (리뷰 합의)
-            _windowManager.SetClickThroughSuspended(true); // 빈 공간에서도 핸들 드래그가 잡히게
-            _windowManager.SetResizeSuspended(true);       // OS 가장자리 리사이즈는 편집 중 무의미 — 핸들 UI와 충돌 방지
-            _windowManager.ApplyMonitorFullscreen();
+            _windowManager.AcquireClickThroughSuspend(this); // 빈 공간에서도 핸들 드래그가 잡히게
+            _windowManager.AcquireResizeSuspend(this);       // OS 가장자리 리사이즈가 켜져 있다면 핸들 UI와 충돌 방지
         }
-        if (_cameraFitter != null) _cameraFitter.Frame(new RectInt(0, 0, _baseSpaceSize.x, _baseSpaceSize.y), _baseSpaceSize);
+        // 핸들은 IMGUI라 월드 폴러의 "UI 위" 가드에 잡히지 않는다 — 핸들을 잡는 클릭이 뒤의 캐릭터로 새지 않게 막는다.
+        WorldInputLock.Acquire(this);
 
         EditModeChanged?.Invoke(true);
         PreviewChanged?.Invoke(_previewViewport);
     }
 
-    /// <summary>편집 중 프리뷰 갱신(핸들 드래그·슬라이더). 창·카메라는 그대로, 이벤트만 발행.</summary>
+    /// <summary>편집 중 프리뷰 갱신(핸들 드래그·슬라이더). 이벤트만 발행한다.</summary>
     public void SetPreviewViewport(RectInt viewport)
     {
         if (!_isEditing) return;
@@ -200,37 +257,62 @@ public class ViewportScreenSettings : MonoBehaviour
         _isEditing = false;
         if (_windowManager != null)
         {
-            _windowManager.SetClickThroughSuspended(false);
-            _windowManager.SetResizeSuspended(false);
+            _windowManager.ReleaseClickThroughSuspend(this);
+            _windowManager.ReleaseResizeSuspend(this);
         }
-        ApplyNormal();
+        WorldInputLock.Release(this);
+        PublishViewportConfirmed();
         EditModeChanged?.Invoke(false);
     }
 
-    /// <summary>평시 상태 적용: 창 = 뷰포트 rect, 카메라 = 뷰포트 영역 프레이밍.</summary>
-    private void ApplyNormal()
+    /// <summary>창을 작업 영역에 놓고 카메라를 베이스 공간 전체에 프레이밍한다.
+    /// 부팅 시 1회와 ReadjustWindow에서만 부른다 — 뷰포트가 바뀌어도 창·카메라는 그대로다.</summary>
+    private void ApplyScreenLayout()
     {
-        // 베이스 공간 px(좌하단 원점, Y 위) → 스크린 좌표(모니터 좌상단 원점, Y 아래)
-        int x = _monitorRect.x + _viewport.x;
-        int y = _monitorRect.y + (_baseSpaceSize.y - _viewport.y - _viewport.height);
+        RefreshBaseSpace();
 
-        if (_windowManager != null) _windowManager.ApplyRegion(x, y, _viewport.width, _viewport.height);
-        if (_cameraFitter != null) _cameraFitter.Frame(_viewport, _baseSpaceSize);
-        ViewportApplied?.Invoke(_viewport);
+        if (_windowManager != null)
+        {
+            _windowManager.ApplyRegion(
+                _baseSpaceScreenRect.x, _baseSpaceScreenRect.y,
+                _baseSpaceScreenRect.width, _baseSpaceScreenRect.height);
+        }
+        if (_cameraFitter != null)
+            _cameraFitter.Frame(new RectInt(0, 0, _baseSpaceSize.x, _baseSpaceSize.y), _baseSpaceSize);
     }
+
+    /// <summary>확정 뷰포트가 적용됐음을 알린다. 창·카메라는 건드리지 않는다 —
+    /// 뷰포트는 렌더링이 아니라 게임플레이 규칙의 기준이기 때문이다.</summary>
+    private void PublishViewportConfirmed() => ViewportConfirmed?.Invoke(_viewport);
 
     private void RefreshBaseSpace()
     {
-        if (_windowManager != null && _windowManager.TryGetMonitorRect(out RectInt monitor))
+        if (_windowManager != null && _windowManager.TryGetWorkAreaRect(out RectInt workArea))
         {
-            _monitorRect = monitor;
+            _baseSpaceScreenRect = workArea;
         }
         else
         {
-            // Editor 등 Win32 불가 환경 — 현재 화면 크기를 베이스 공간으로 간주(카메라 프레이밍은 검증 가능)
-            _monitorRect = new RectInt(0, 0, Mathf.Max(Screen.width, 1), Mathf.Max(Screen.height, 1));
+            // Editor 등 Win32 불가 환경 — 현재 화면 크기를 작업 영역으로 간주(카메라 프레이밍은 검증 가능)
+            _baseSpaceScreenRect = new RectInt(0, 0, Mathf.Max(Screen.width, 1), Mathf.Max(Screen.height, 1));
         }
-        _baseSpaceSize = new Vector2Int(_monitorRect.width, _monitorRect.height);
+
+        // 베이스 공간은 작업 영역을 마스터 캔버스 폭에 맞춰 늘인 것 — 폭 기준이라 작업표시줄 유무로
+        // 배율이 흔들리지 않고, UI CanvasScaler(Match=Width)와 같은 배율이 된다. 높이는 종횡비를 따른다.
+        _baseSpaceSize = new Vector2Int(
+            MasterCanvasWidthPx,
+            Mathf.RoundToInt(_baseSpaceScreenRect.height * (float)MasterCanvasWidthPx / _baseSpaceScreenRect.width));
+    }
+
+    /// <summary>베이스 px 하나가 화면에서 몇 px인가 = 작업 영역 폭 / 마스터 캔버스 폭. 4K에서 1.</summary>
+    private float ScreenPxPerBasePx => _baseSpaceScreenRect.width / (float)MasterCanvasWidthPx;
+
+    private RectInt WorkAreaPxToBasePx(RectInt r)
+    {
+        float s = ScreenPxPerBasePx;
+        return new RectInt(
+            Mathf.RoundToInt(r.x / s), Mathf.RoundToInt(r.y / s),
+            Mathf.RoundToInt(r.width / s), Mathf.RoundToInt(r.height / s));
     }
 
     private RectInt ClampToBaseSpace(RectInt r)

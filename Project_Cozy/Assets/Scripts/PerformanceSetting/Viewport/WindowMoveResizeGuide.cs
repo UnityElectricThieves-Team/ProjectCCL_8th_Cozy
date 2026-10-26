@@ -11,6 +11,14 @@ using UnityEngine;
 ///
 /// 핸들 크기는 WindowManager에서 직접 읽는다 — 값을 복제해 두면 한쪽만 바뀔 때
 /// "보이는 곳 ≠ 잡히는 곳"이 되기 때문이다.
+///
+/// ⚠️ **창이 정적인 현행 모델에서는 스스로 비활성화된다** (WindowManager.IsWindowUserResizable이
+/// false이므로). 창을 사용자가 옮길 수 없는데 "창 이동" 그립을 그리면 없는 조작을 있는 것처럼
+/// 안내하게 되고, 이 컴포넌트는 IMGUI라 클릭 통과 판정(UGUI 레이캐스트)에도 안 잡혀
+/// 그려진 자리를 눌러도 클릭이 바탕화면으로 새어 나간다.
+///
+/// 뷰포트 조작 안내로 되살리는 계획은 Docs/Development/StaticWindowMigrationPlan.md §7.3.
+/// 그때는 기준 rect가 창(Screen.width/height)이 아니라 뷰포트가 된다.
 /// </summary>
 [DisallowMultipleComponent]
 public class WindowMoveResizeGuide : MonoBehaviour
@@ -44,6 +52,14 @@ public class WindowMoveResizeGuide : MonoBehaviour
         {
             // 핫존을 만드는 주체가 없으면 안내할 것도 없다 — 없는 조작을 있는 것처럼 그리지 않는다.
             Debug.LogWarning("[WindowMoveResizeGuide] WindowManager 없음 — 비활성.");
+            enabled = false;
+            return;
+        }
+
+        if (!_windowManager.IsWindowUserResizable)
+        {
+            // 창이 정적이면 안내할 조작이 없다. 같은 이유(없는 조작을 그리지 않는다)이고,
+            // 경고가 아니라 정상 경로라 로그를 남기지 않는다.
             enabled = false;
         }
     }

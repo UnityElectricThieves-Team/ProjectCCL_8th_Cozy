@@ -15,6 +15,10 @@ using UnityEngine.UI;
 /// 글자 상자의 정렬은 프리팹에서 가운데로 두는 것을 전제로 한다.
 ///
 /// 상태는 <see cref="Toggle"/>이 들고 있고 이 컴포넌트는 그리기만 한다.
+///
+/// 기본값(처음에 켜짐인지 꺼짐인지)은 여기서 정하지 않는다. 프리팹의 Is On은 에디터에서 보이는 그림일 뿐이고,
+/// 진짜 기본값은 <see cref="SettingsFileFormat"/>이 들고 있다 — 설정 패널이 시작 시 그 값을 토글에 밀어넣는다.
+/// 이 컴포넌트에 기본값 칸을 만들면 같은 값이 두 곳에 생겨 갈라진다.
 /// </summary>
 [RequireComponent(typeof(Toggle))]
 public sealed class SettingsPillToggle : MonoBehaviour
@@ -37,6 +41,11 @@ public sealed class SettingsPillToggle : MonoBehaviour
     [Tooltip("배경 알약의 색. 기본값은 Figma 기준 — 켜짐 #948EEB, 꺼짐 #CFCFCF.")]
     [SerializeField] private Color _onBackgroundColor = new(0.580f, 0.557f, 0.922f);
     [SerializeField] private Color _offBackgroundColor = new(0.812f, 0.812f, 0.812f);
+
+    // 모든 언어에서 같은 기호라 번역하지 않는다. 언어 폰트를 따라가면 폰트마다 글자 크기가 달라 보여서,
+    // 폰트도 프리팹 것을 그대로 둔다.
+    private const string OnText = "ON";
+    private const string OffText = "OFF";
 
     private Toggle _toggle;
     private Coroutine _slide;
@@ -103,7 +112,7 @@ public sealed class SettingsPillToggle : MonoBehaviour
     private void ApplyColorAndText(bool on)
     {
         if (_background != null) _background.color = on ? _onBackgroundColor : _offBackgroundColor;
-        if (_label != null) _label.text = on ? "ON" : "OFF";
+        if (_label != null) _label.text = on ? OnText : OffText;
     }
 
     private float KnobTargetX(bool on) => on ? _knobOnX : _knobOffX;

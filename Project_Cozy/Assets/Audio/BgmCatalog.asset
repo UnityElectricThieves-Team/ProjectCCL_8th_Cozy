@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6f98d0f78067f4489a59d52f62336be, type: 3}
+  m_Name: BgmCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::BgmCatalog
+  _entries:
+  - id: cozy-song-1
+    displayName: cozy-song-1
+    clip: {fileID: 8300000, guid: 31f3abd338944b24284cf7a676dc4cb4, type: 3}
+  - id: cozy-song-2
+    displayName: "cozy-song-2(\uD604\uC11C \uCD5C\uC560)"
+    clip: {fileID: 8300000, guid: c5a61300f8436c0459847db9d564afd1, type: 3}
+  - id: cozy-song-3
+    displayName: cozy-song-3
+    clip: {fileID: 8300000, guid: 44c1f5fd207386e478da49c71ad82dae, type: 3}

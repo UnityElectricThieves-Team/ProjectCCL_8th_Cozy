@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 뷰포트가 확정 적용될 때마다(ViewportScreenSettings.ViewportApplied) 살아있는 캐릭터의
+/// 뷰포트가 확정 적용될 때마다(ViewportScreenSettings.ViewportConfirmed) 살아있는 캐릭터의
 /// "뷰포트 거주"를 보장한다. 뷰포트 밖 캐릭터는:
 ///   1) IViewportExitListener 구현 컴포넌트가 있으면 신호를 보낸다 (자체 연출 기회).
 ///   2) 아무도 자체 처리(true 반환)하지 않으면 뷰포트 안쪽으로 클램프 텔레포트 (기본 회수).
@@ -19,9 +19,9 @@ public class ViewportResidencyEnforcer : MonoBehaviour
 
     [Header("판정/회수")]
     [SerializeField, Tooltip("이탈 판정 여유(월드 유닛). 경계에 걸친 캐릭터를 이탈로 치지 않게.")]
-    private float _exitTolerance = 0.1f;
+    private float _exitTolerance = 0.0108f;
     [SerializeField, Tooltip("기본 회수 시 경계에서 안쪽으로 들여놓는 거리(월드 유닛).")]
-    private float _recallPadding = 0.5f;
+    private float _recallPadding = 0.054f;
     [SerializeField] private bool _debugLogs;
 
     private readonly List<IViewportExitListener> _listenerBuffer = new List<IViewportExitListener>();
@@ -37,16 +37,16 @@ public class ViewportResidencyEnforcer : MonoBehaviour
             enabled = false;
             return;
         }
-        _viewportSettings.ViewportApplied += OnViewportApplied;
+        _viewportSettings.ViewportConfirmed += OnViewportConfirmed;
     }
 
     private void OnDestroy()
     {
         if (_viewportSettings != null)
-            _viewportSettings.ViewportApplied -= OnViewportApplied;
+            _viewportSettings.ViewportConfirmed -= OnViewportConfirmed;
     }
 
-    private void OnViewportApplied(RectInt viewportPx)
+    private void OnViewportConfirmed(RectInt viewportPx)
     {
         if (CharacterManager.Instance == null) return;
 

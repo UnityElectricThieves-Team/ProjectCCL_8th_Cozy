@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,8 +9,14 @@ using UnityEngine;
 /// - 무엇을 스폰할지(prefab)는 호출자가 인자로 넘긴다. 총량 캡(<see cref="_maxCount"/>)은
 ///   prefab 종류와 무관하게 공통 적용된다.
 /// - 캐릭터가 Destroy되면 슬롯이 비어 재스폰 가능.
-/// - 씬 단일 인스턴스(Singleton). 스폰 호출자(StarClickCharacterSpawner / 데모 버튼 등)는
-///   <see cref="Instance"/>.Spawn(...) 만 호출하면 되며 별도 참조 wiring이 필요 없다.
+/// - **추적 목록에 들어오는 문은 <see cref="Register"/> 하나다.** 스폰이든 씬 배치든 여기를 지나므로,
+///   "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 새는 경로가 없다.
+/// - 씬 배치 캐릭터도 시작 시 찾아 <see cref="Register"/>를 지나므로 규칙에서 빠지지 않는다.
+/// - "어떤 캐릭터를 가졌고 누가 나와 있어야 하는가"(보유·배치 기록과 저장, 시작 시 등장)는 <see cref="CharacterOwnership"/>이 맡는다.
+///   이 클래스는 지금 살아 움직이는 캐릭터만 다룬다.
+/// - 씬 단일 인스턴스(Singleton). 스폰 호출자는 <see cref="Instance"/>.Spawn(...)을 부르면 되며 별도 참조 wiring이 필요 없다.
+///   단 <see cref="Spawn"/>은 저수준 입구라 보유 기록을 남기지 않는다. 게임 진행으로 캐릭터가 나오는 경우(해금 등)는
+///   <see cref="CharacterOwnership"/>을 거쳐야 재시작해도 남는다.
 /// </summary>
 [DefaultExecutionOrder(-100)]
 [DisallowMultipleComponent]
@@ -21,9 +28,20 @@ public class CharacterManager : MonoBehaviour
     [SerializeField, Min(1)] private int _maxCount = 10;
 
     private readonly List<GameObject> _alive = new List<GameObject>();
+    private SettingsManager _settings;
 
     /// <summary>현재 살아있는 캐릭터 수.</summary>
     public int AliveCount { get { Prune(); return _alive.Count; } }
+
+    /// <summary>살아있는 캐릭터 목록(읽기 전용). 파괴된 항목을 걸러낸 뒤 돌려준다.
+    /// 내부 리스트를 그대로 노출하므로 순회에 할당이 생기지 않는다 — 받는 쪽은 읽기만 할 것.
+    /// "살아있는 모두에게 같은 규칙을 건다"는 작업(뷰포트 거주 영역 등)의 진입점이다.</summary>
+    public IReadOnlyList<GameObject> Alive { get { Prune(); return _alive; } }
+
+    /// <summary>캐릭터가 추적 목록에 등록된 직후 발행(스폰·씬 배치 both). 살아있는 캐릭터 전체에 거는
+    /// 규칙을 새 캐릭터에도 즉시 걸기 위한 지점이다 — 뷰포트 같은 전역 상태는 등록 시점에 다시
+    /// 알려주지 않으므로, 이 신호가 없으면 나중에 등록된 캐릭터만 규칙 없이 돌아다니게 된다.</summary>
+    public event Action<GameObject> Registered;
 
     /// <summary>최대 동시 수. 인스펙터 노출 + 런타임 변경 가능.</summary>
     public int MaxCount
@@ -45,9 +63,53 @@ public class CharacterManager : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+        // 유저 설정 중 캐릭터에 거는 것(소녀 변신 금지)을 따라간다. 등록 시점에는 Register가 직접 건다.
+        _settings = SettingsManager.Instance;
+        if (_settings != null) _settings.Changed += ApplyUserSettingsToAll;
+
+        // 씬에 미리 배치된 캐릭터는 Spawn을 거치지 않아 추적 목록에 없다. 먼저 찾아서 등록한다.
+        // 빠뜨리면 "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 그 캐릭터만 비껴가고,
+        // 증상은 "그 캐릭터만 제한이 안 걸린다"로 나타난다. 동시 존재 캡도 그만큼 헐거워진다.
+        var placed = FindObjectsByType<BaseCharacterController>(FindObjectsSortMode.None);
+        for (int i = 0; i < placed.Length; i++) Register(placed[i].gameObject);
+    }
+
     private void OnDestroy()
     {
+        if (_settings != null) _settings.Changed -= ApplyUserSettingsToAll;
         if (Instance == this) Instance = null;
+    }
+
+    /// <summary>추적 목록에 등록하고 <see cref="Registered"/>를 발행한다. 이미 있으면 아무 일도 하지 않는다.
+    /// 스폰 경로와 씬 배치 캐릭터가 같은 문을 쓰게 해서, 등록 신호를 놓치는 경로가 생기지 않게 한다.</summary>
+    public void Register(GameObject character)
+    {
+        if (character == null) return;
+        Prune();
+        if (_alive.Contains(character)) return;
+
+        _alive.Add(character);
+        ApplyUserSettings(character);
+        Registered?.Invoke(character);
+    }
+
+    /// <summary>설정이 바뀔 때 살아있는 캐릭터 전부에 다시 건다. 어느 항목이 바뀌었는지는 모르지만,
+    /// 캐릭터 쪽 setter가 같은 값이면 아무 일도 하지 않아서 전부 다시 걸어도 괜찮다.</summary>
+    private void ApplyUserSettingsToAll()
+    {
+        var alive = Alive;
+        for (int i = 0; i < alive.Count; i++) ApplyUserSettings(alive[i]);
+    }
+
+    /// <summary>캐릭터 하나에 유저 설정을 건다. 캐릭터는 설정을 모르므로 여기서 값을 읽어 밀어넣는다.</summary>
+    private static void ApplyUserSettings(GameObject character)
+    {
+        var settings = SettingsManager.Instance;
+        if (settings == null) return;
+        var controller = character.GetComponent<BaseCharacterController>();
+        if (controller != null) controller.SetGirlTransformBanned(settings.GirlTransformBanned);
     }
 
     /// <summary>
@@ -61,7 +123,7 @@ public class CharacterManager : MonoBehaviour
         if (_alive.Count >= _maxCount) return null;
 
         var instance = Instantiate(prefab, position, Quaternion.identity, parent);
-        _alive.Add(instance);
+        Register(instance);
         return instance;
     }
 

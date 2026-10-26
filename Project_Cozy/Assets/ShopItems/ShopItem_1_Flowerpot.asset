@@ -14,5 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopItemDefinition
   id: shop_item_1_flowerpot
   displayName: "\uD654\uBD84"
-  icon: {fileID: 21300000, guid: 29a4282544a5c57439352c4fdc9d7217, type: 3}
+  icon: {fileID: 21300000, guid: 3d15a32327dbbfe47b9bcb0fe0e3d5f4, type: 3}
   price: 100
+  backgroundSprite: {fileID: 0}
+  decorationPrefab: {fileID: 1042970899274785333, guid: ba68fa7a40683cb4e80214da19060c0c, type: 3}
+  placementKind: 0

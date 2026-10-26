@@ -4,31 +4,28 @@ using UnityEngine;
 /// 캐릭터 단일 개체의 메인 컴포넌트. 라이프사이클을 받아 4개 module(<see cref="StateModule"/>/<see cref="VisualModule"/>/<see cref="AffinityModule"/>/<see cref="ScaleModule"/>)에 위임한다.
 /// non-sealed — 종별 자식 클래스(Cat/Dog 등)가 상속한다. 이번 마일스톤(Phase 1~7)은 base만, 자식 클래스 도입은 Phase 10.
 ///
-/// IStateOwner 구현 — State 클래스가 호출하는 정책 수치·거동 API를 노출. 정책 수치는 StateModule에 위임, Ground 시스템·중력·물리는 본체가 담당.
+/// IStateOwner 구현 — State 클래스가 호출하는 정책 수치·거동 API를 노출. 정책 수치는 StateModule에 위임,
+/// 지면 높이·거주 영역·중력·좌표 갱신은 본체가 담당. 접지를 언제 강제할지는 StateModule이 정한다(EnforceFloor).
 /// </summary>
 public class BaseCharacterController : MonoBehaviour, IStateOwner
 {
     [Header("Unity refs")]
     [SerializeField] private Animator _animator;
     [SerializeField] private SpriteRenderer _spriteRenderer;
-    [Tooltip("기존 PolygonCollider2D 참조 — 발 위치 계산용. 비어 있으면 Awake에서 _spriteRenderer의 GameObject에서 자동 탐색.")]
+    [Tooltip("[미사용] 읽는 코드가 없다. 발 위치 계산에 쓰였으나 이제 루트가 곧 발이라 필요 없다. 제거 대기.")]
     [SerializeField] private Collider2D _visualCollider;
 
-    [Header("Ground & Gravity")]
+    [Tooltip("좌클릭 입력 어댑터(자식 Visual에 부착). 비우면 Awake에서 자식에서 찾는다.\n" +
+             "잡기 오프셋을 '누른 순간'의 커서로 재기 위해 참조한다.")]
+    [SerializeField] private HoldClickEvent _holdInput;
+
+    [Tooltip("알파 호버 판정(자식 Visual에 부착). 비우면 Awake에서 자식에서 찾는다.\n" +
+             "좌클릭이 이 캐릭터를 향한 것인지 가리는 데 쓴다.")]
+    [SerializeField] private OpaqueHoverable _hoverGate;
+
+    [Header("Gravity")]
     [Tooltip("아래 가속도. FallState가 매 프레임 -gravity*dt로 적용.")]
-    [SerializeField] private float _gravity = 12f;
-    [Tooltip("바닥 수평선의 y좌표. 발이 이 높이에 닿으면 착지. (Ground 콜라이더 비의존)")]
-    [SerializeField] private float _floorY = 0f;
-    [Tooltip("[미사용] 현재 y=_floorY 평면 사용. Ground 콜라이더 재도입 시 사용.")]
-    [SerializeField] private LayerMask _groundLayerMask;
-    [Tooltip("[미사용] 현재 y=_floorY 평면 사용. Ground 콜라이더 재도입 시 사용.")]
-    [SerializeField] private float _groundProbeDistance = 100f;
-    [Tooltip("발이 바닥(y=_floorY)에 닿았다고 보는 허용 오차.")]
-    [SerializeField] private float _groundContactThreshold = 0.1f;
-    [Tooltip("발 위치 오프셋(루트 로컬 기준). 발이 바닥에 닿는 지점을 캐릭터 원점 기준으로 지정. " +
-             "스프라이트/콜라이더 bounds에 의존하지 않아 애니메이션 중에도 안정적. " +
-             "센터 피벗 스프라이트는 보통 y를 음수(발이 원점 아래)로 둔다.")]
-    [SerializeField] private Vector2 _footOffset = Vector2.zero;
+    [SerializeField] private float _gravity = 1.296f;
 
     [Header("Modules")]
     [SerializeField] private StateModule _state = new StateModule();
@@ -36,15 +33,31 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     [SerializeField] private AffinityModule _affinity = new AffinityModule();
     [SerializeField] private ScaleModule _scale = new ScaleModule();
 
-    // 스폰 시 CharacterNames에서 할당받는 고유 이름(정체성). 표현(머리 위 라벨)과 분리.
-    private string _name;
+    // 이 캐릭터가 머무를 수 있는 월드 영역. 밖에서 SetLivingArea로 주입한다(기본은 제한 없음).
+    // 캐릭터는 이 사각형이 무엇에서 왔는지 모른다 — 뷰포트를 아는 것은 Gameplay/Viewport 쪽이다.
+    private Rect _livingArea;
+    private bool _hasLivingArea;
+
+    // 소녀 변신 금지 여부. 밖에서 SetGirlTransformBanned로 주입한다(기본은 허용).
+    // 거주 영역과 같은 방식이다 — 캐릭터는 이 값이 유저 설정에서 왔다는 것을 모른다.
+    private bool _girlTransformBanned;
+
+    /// <summary>거주 영역이 아직 안 들어온 씬에서 쓰는 지면 높이. 인스펙터로 열지 않는다 —
+    /// 조절 가능한 바닥이 있으면 그게 다른 오차(발 위치 어긋남 등)의 보정값 노릇을 하다가,
+    /// 지면 정의가 바뀌는 순간 보정이 통째로 사라진다. 실제로 그렇게 어긋난 전례가 있다.</summary>
+    private const float FallbackFloorY = 0f;
+
+    /// <summary>실제로 서고 걷는 바닥 높이(월드 y).
+    /// 거주 영역이 주어졌으면 **그 아래 변이 곧 지면**이다 — 뷰포트를 올리든 내리든 지면이 따라간다
+    /// (기획 §2.1.1: "땅바닥은 항상 뷰포트 하단 변에 포함되며 뷰포트와 함께 이동한다").
+    ///
+    /// private으로 둔다. 높이를 밖에 내주면 "발이 바닥에 있는가"를 호출자마다 다시 쓰게 되고,
+    /// 비교 방식이 갈라진다. 판정이 필요하면 <see cref="IsFootOnGround"/>를 쓴다.</summary>
+    private float FloorY => _hasLivingArea ? _livingArea.yMin : FallbackFloorY;
 
     public Animator Animator => _animator;
     public SpriteRenderer SpriteRenderer => _spriteRenderer;
     public Collider2D VisualCollider => _visualCollider;
-
-    /// <summary>스폰 시 할당된 이름. 머리 위 라벨(<see cref="CharacterNameLabel"/>)이 표시한다.</summary>
-    public string Name => _name;
 
     public StateModule State => _state;
     public VisualModule Visual => _visual;
@@ -54,19 +67,22 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     // ===== IStateOwner: 정책 수치 (StateModule에 위임) =====
     public float WalkSpeed => _state.WalkSpeed;
     public float RunSpeed => _state.RunSpeed;
+    public float WalkMinDistance => _state.WalkMinDistance;
     public float Gravity => _gravity;
     public float WakeUpDuration => _state.WakeUpDuration;
     public float LandDuration => _state.LandDuration;
     public float TransformDuration => _state.TransformDuration;
+    public float IdleActionDuration => _state.IdleActionDuration;
+    public float PetDuration => _state.PetDuration;
     public float NextIdleDuration() => _state.NextIdleDuration();
-    public float NextWalkDuration() => _state.NextWalkDuration();
+    public bool RollIdleAction() => _state.RollIdleAction();
 
-    // ===== IStateOwner: Transform / 발 위치 =====
-    public Transform Transform => transform;
-    // 발 위치는 루트 transform + 고정 오프셋(_footOffset)으로 계산한다.
-    // 애니메이션 프레임마다 변하는 스프라이트/콜라이더 bounds에 의존하지 않아
-    // 매 프레임 안정적(상하 떨림 없음). 오프셋은 인스펙터에서 발 위치에 맞춰 조정.
-    public Vector2 FootWorldPosition => transform.TransformPoint(_footOffset);
+    // ===== IStateOwner: 위치 =====
+    // **루트가 곧 발이다.** 프리팹에서 Visual 자식을 올려 스프라이트 아래 끝을 루트 원점에 맞춰 둔다.
+    // 그래서 transform.position을 그냥 읽는 코드도 자동으로 발을 가리킨다 — 발 위치를 코드 필드로
+    // 들고 있으면 그 필드를 부르는 코드만 옳아지고 나머지는 조용히 틀린다.
+    // 왜 이 규약인지는 .claude/rules/unity/character-ground.md.
+    public Vector2 WorldPosition => transform.position;
 
     // ===== IStateOwner: 상태 전환 =====
     public void ChangeState(CharacterState nextId) => _state.ChangeState(nextId);
@@ -77,8 +93,8 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         if (_spriteRenderer == null) _spriteRenderer = GetComponent<SpriteRenderer>();
         if (_visualCollider == null && _spriteRenderer != null)
             _visualCollider = _spriteRenderer.GetComponent<Collider2D>();
-
-        _name = CharacterNames.Acquire();
+        if (_holdInput == null) _holdInput = GetComponentInChildren<HoldClickEvent>();
+        if (_hoverGate == null) _hoverGate = GetComponentInChildren<OpaqueHoverable>();
 
         _state.Bind(this);
         _visual.Bind(this);
@@ -88,8 +104,6 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         RegisterExtraStates(_state);
 
         _state.StateChanged += OnStateChanged;
-        _affinity.SpecialActivated += OnAffinityActivated;
-        _affinity.SpecialReleased += OnAffinityReleased;
     }
 
     protected virtual void Start()
@@ -119,59 +133,29 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     protected virtual void OnDestroy()
     {
-        CharacterNames.Release(_name);
         _state.StateChanged -= OnStateChanged;
-        if (_affinity != null)
-        {
-            _affinity.SpecialActivated -= OnAffinityActivated;
-            _affinity.SpecialReleased -= OnAffinityReleased;
-        }
     }
 
     // ===== Hook (자식 클래스 확장점) =====
 
     protected virtual void RegisterExtraStates(StateModule state) { }
-    protected virtual void OnSpecialActivated() { }
-    protected virtual void OnSpecialReleased() { }
 
     private void OnStateChanged(CharacterState state)
     {
         _visual.Play(state);
     }
 
-    // ===== Affinity 이벤트 핸들러 — SpecialMode 토글 + 현재 state Special 분기로 즉시 전환 =====
+    // ===== UnityEvent에서 호출 가능한 공개 메서드 =====
 
-    private void OnAffinityActivated()
+    /// <summary>캐릭터를 좌클릭한 순간: 친밀도 누적 + 쓰담 진입.
+    /// <c>HoldClickEvent</c>의 On Press Start에서 호출한다.
+    ///
+    /// 호버가 아니라 클릭인 것이 핵심이다 — 마우스를 올려두기만 해서는 아무 일도 일어나지 않는다.
+    /// 쓰담은 모션이 끝나면 스스로 Idle로 돌아가므로 짝이 되는 "종료" 메서드가 없다.</summary>
+    public void OnPetInput()
     {
-        _state.SpecialMode = true;
-        var cur = _state.CurrentStateId;
-        if (cur == CharacterState.Idle) _state.ChangeState(CharacterState.Idle);
-        else if (cur == CharacterState.Walk) _state.ChangeState(CharacterState.Walk);
-        OnSpecialActivated();
-    }
-
-    private void OnAffinityReleased()
-    {
-        _state.SpecialMode = false;
-        var cur = _state.CurrentStateId;
-        if (cur == CharacterState.SpecialIdle) _state.ChangeState(CharacterState.Idle);
-        else if (cur == CharacterState.SpecialWalk) _state.ChangeState(CharacterState.Walk);
-        OnSpecialReleased();
-    }
-
-    // ===== UnityEvent에서 호출 가능한 공개 메서드 (호버/언호버) =====
-
-    /// <summary>호버 진입 시: 친밀도 누적 + Pet 상태 진입. OpaqueHoverable.UnityEvent에서 m_Target으로 호출.</summary>
-    public void OnHover()
-    {
-        _affinity.AddOnHoverEnter();
+        _affinity.AddOnPet();
         RequestPet();
-    }
-
-    /// <summary>호버 종료 시: Pet 종료. OpaqueHoverable.UnityEvent에서 호출.</summary>
-    public void OnHoverEnd()
-    {
-        RequestUnpet();
     }
 
     // ===== External triggers — StateModule에 위임 =====
@@ -179,12 +163,13 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public void RequestWakeUp() => _state.RequestWakeUp();
     public void RequestFall() => _state.RequestFall();
     public void RequestPet() => _state.RequestPet();
-    public void RequestUnpet() => _state.RequestUnpet();
     public void RequestGrab() => _state.RequestGrab();
 
     /// <summary>우클릭 변신 토글. 동물→소녀는 친밀도 만점 필요, 소녀→동물은 언제든. CharacterInteractionRelay.OnRightClick에서 호출.</summary>
     public void RequestTransform()
     {
+        // 금지 중에는 변신 시스템 자체를 끈다(UserSettings.md). 소녀는 금지를 거는 순간 동물로 돌아가 있다.
+        if (_girlTransformBanned) return;
         // 동물 → 소녀: 친밀도가 변신 임계 이상일 때만 (AILogic.md §Transform). 소녀 → 동물: 무조건 허용.
         if (_visual.CurrentForm == CharacterForm.Animal && !_affinity.CanHumanTransform) return;
         _state.RequestTransform();
@@ -192,11 +177,23 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     // ===== IStateOwner: 물리/표현 헬퍼 =====
 
-    public void MoveHorizontal(float deltaX)
+    /// <summary>수평 이동. 거주 영역에 막혀 요청한 만큼 못 갔으면 false를 돌려준다
+    /// (WalkState가 이걸 보고 제자리걸음 대신 반대로 돌아선다).</summary>
+    public bool MoveHorizontal(float deltaX)
     {
-        var p = transform.position;
-        p.x += deltaX;
+        Vector3 p = transform.position;
+
+        float desiredX = p.x + deltaX;
+        // 경계는 발 한 점 기준이다 — 몸통 폭은 보지 않는다. 몸의 좌우 절반이 영역을 넘는 것은
+        // 알고 있는 한계이지 버그가 아니다(character-ground.md).
+        float allowedX = _hasLivingArea
+            ? Mathf.Clamp(desiredX, _livingArea.xMin, _livingArea.xMax)
+            : desiredX;
+
+        p.x = allowedX;
         transform.position = p;
+
+        return Mathf.Approximately(allowedX, desiredX);
     }
 
     public void ApplyVerticalDelta(float deltaY)
@@ -208,7 +205,76 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     public void SetWorldPosition(Vector2 worldPos)
     {
+        if (_hasLivingArea)
+        {
+            // MoveHorizontal과 같은 경계(발 한 점 기준)를 쓴다.
+            worldPos.x = Mathf.Clamp(worldPos.x, _livingArea.xMin, _livingArea.xMax);
+            worldPos.y = Mathf.Clamp(worldPos.y, _livingArea.yMin, _livingArea.yMax);
+        }
         transform.position = new Vector3(worldPos.x, worldPos.y, transform.position.z);
+    }
+
+    /// <summary>
+    /// 이 캐릭터가 머무를 수 있는 월드 영역을 지정한다. 걷기도 드래그도 이 밖으로 나가지 못하고,
+    /// **이 영역의 아래 변이 곧 지면**이다.
+    ///
+    /// 캐릭터는 이 사각형이 무엇에서 왔는지 모른다 — 월드 좌표로 환산된 결과만 받는다.
+    /// 뷰포트에서 환산해 걸어주는 것은 <c>Gameplay/Viewport/ViewportLivingAreaBinder</c>다.
+    ///
+    /// 지금 밖에 있으면 즉시 안으로 끌어들인다(뷰포트를 캐릭터 밑에서 줄인 경우).
+    /// </summary>
+    public void SetLivingArea(Rect worldArea)
+    {
+        _livingArea = worldArea;
+        _hasLivingArea = true;
+
+        // 가로만 여기서 넣는다.
+        Vector3 p = transform.position;
+        p.x = Mathf.Clamp(p.x, _livingArea.xMin, _livingArea.xMax);
+        transform.position = p;
+
+        // 세로는 접지 규칙이 정한다 — 공중에 있는 캐릭터를 바닥으로 끌어내리면 안 되고, 그 판정은 상태가 안다.
+        // 다음 Update까지 미루지 않고 여기서 부른다. 미루면 뷰포트가 바뀐 그 프레임 동안
+        // 발이 지면에서 떨어진 채로 렌더된다.
+        _state.EnforceFloor();
+    }
+
+    /// <summary>걸어갈 목적지를 뽑을 가로 범위. 거주 영역이 아직 안 들어왔으면 false.
+    ///
+    /// 거주 영역 <see cref="Rect"/>를 통째로 내주지 않는다 — 그 아래 변이 곧 지면 높이인데,
+    /// 높이를 밖에 내주면 "발이 바닥에 있는가"를 호출자마다 다시 쓰게 되고 비교 방식이 갈라진다
+    /// (<see cref="IsFootOnGround"/> 참고). 가로만 내주면 그 규약을 건드리지 않는다.</summary>
+    public bool TryGetWalkRange(out float minX, out float maxX)
+    {
+        if (!_hasLivingArea)
+        {
+            minX = 0f;
+            maxX = 0f;
+            return false;
+        }
+
+        minX = _livingArea.xMin;
+        maxX = _livingArea.xMax;
+        return true;
+    }
+
+    /// <summary>지금 커서가 이 캐릭터의 불투명 픽셀 위에 있는가.
+    /// 좌클릭이 캐릭터를 향한 것인지 가릴 때 쓴다 — 자는 캐릭터를 눌렀을 때 기상 대신 쓰담이
+    /// 뜨게 하려면 이 구분이 있어야 한다.
+    ///
+    /// **알려진 한계** — 커서가 캐릭터에 막 닿은 그 프레임에 누르면 호버 판정이 아직 서지 않아
+    /// false가 나오고, 그 클릭은 캐릭터 밖 입력으로 취급되어 캐릭터를 깨운다. 커서가 도착하는
+    /// 프레임과 클릭이 정확히 겹쳐야 하는 조건이라 손으로 재현하기 어렵다.</summary>
+    public bool IsPointerOnSelf => _hoverGate != null && _hoverGate.IsOpaqueHovered;
+
+    /// <summary>지금 누르고 있는 좌클릭이 시작된 순간의 커서 월드 좌표. 누르는 중이 아니면 false.
+    /// 잡기 오프셋의 기준점이다 — 자세한 이유는 <c>HoldClickEvent.TryGetPressWorld</c>.</summary>
+    public bool TryGetPressAnchor(out Vector2 world)
+    {
+        if (_holdInput != null) return _holdInput.TryGetPressWorld(out world);
+
+        world = Vector2.zero;
+        return false;
     }
 
     public void SetFacing(float direction)
@@ -217,50 +283,58 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     }
 
     public CharacterForm CurrentForm => _visual.CurrentForm;
-    public void SetForm(CharacterForm form) => _visual.SetForm(form);
+    public void SetForm(CharacterForm form)
+    {
+        // 동물→소녀 변신 도중에 금지가 걸리면, 이펙트 중간의 폼 스왑이 소녀를 되살린다. 여기서 막는다.
+        if (form == CharacterForm.Girl && _girlTransformBanned) return;
+        _visual.SetForm(form);
+    }
+
+    /// <summary>
+    /// 소녀 변신을 금지하거나 푼다. 금지하는 순간 소녀인 캐릭터는 이펙트 없이 즉시 동물로 돌아간다 —
+    /// 정상 변신 요청으로 되돌리면 수면·낙하·들림 중에는 요청이 거부되어 소녀가 남는다.
+    /// 유저 설정에서 값을 읽어 걸어주는 것은 <see cref="CharacterManager"/>다.
+    /// </summary>
+    public void SetGirlTransformBanned(bool banned)
+    {
+        _girlTransformBanned = banned;
+        if (banned && _visual.CurrentForm == CharacterForm.Girl) _visual.SetForm(CharacterForm.Animal);
+    }
 
     // ===== IStateOwner: Ground =====
 
-    public bool TryGetGroundBelow(out Vector2 hitPoint)
-    {
-        // 무한 수평 바닥(y=_floorY): 발 바로 아래 바닥점은 항상 존재.
-        var foot = FootWorldPosition;
-        hitPoint = new Vector2(foot.x, _floorY);
-        return true;
-    }
+    /// <summary>발이 지면에 닿았거나 그 아래로 파묻혔으면 true.
+    /// 허용 오차가 없다 — 접지를 "추적하는 상태"가 아니라 매 프레임 강제되는 결과로 다루므로,
+    /// 낙하가 지면을 지나친 프레임에 정확히 걸리는 것으로 충분하다.</summary>
+    public bool IsFootOnGround() => transform.position.y <= FloorY;
 
-    public bool IsFootOnGround(out Vector2 hitPoint)
-    {
-        var foot = FootWorldPosition;
-        hitPoint = new Vector2(foot.x, _floorY);
-        // 발이 바닥선(허용오차 내)에 닿았거나 그 아래로 파묻혔으면 접지.
-        return foot.y <= _floorY + _groundContactThreshold;
-    }
-
-    public bool IsFootBelowGround(out Vector2 groundTop)
-    {
-        var foot = FootWorldPosition;
-        groundTop = new Vector2(foot.x, _floorY);
-        return foot.y < _floorY;
-    }
-
-    public void SnapToGround(Vector2 hitPoint)
+    public void SnapToFloor()
     {
         var p = transform.position;
-        p.y += hitPoint.y - FootWorldPosition.y;
+        float floor = FloorY;
+        // 이미 붙어 있으면 transform을 건드리지 않는다. 정확성 장치가 아니라 매 프레임 쓰기를 아끼는
+        // 최적화다 — 아래 대입이 정확한 값을 쓰므로 다음 프레임에는 반드시 걸린다.
+        if (Mathf.Approximately(p.y, floor)) return;
+        p.y = floor;
         transform.position = p;
     }
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        var foot = FootWorldPosition;
+        var foot = WorldPosition;
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(foot, 0.03f);
-        // 바닥선(y=_floorY)과 발→바닥 거리 표시.
+        // 바닥선(y=FloorY)과 발→바닥 거리 표시.
+        float floor = FloorY;
         Gizmos.color = Color.green;
-        Gizmos.DrawLine(new Vector3(foot.x - 1f, _floorY, 0f), new Vector3(foot.x + 1f, _floorY, 0f));
-        Gizmos.DrawLine(new Vector3(foot.x, foot.y, 0f), new Vector3(foot.x, _floorY, 0f));
+        Gizmos.DrawLine(new Vector3(foot.x - 1f, floor, 0f), new Vector3(foot.x + 1f, floor, 0f));
+        Gizmos.DrawLine(new Vector3(foot.x, foot.y, 0f), new Vector3(foot.x, floor, 0f));
+
+        // 거주 영역(있으면) — 캐릭터가 나갈 수 없는 경계.
+        if (!_hasLivingArea) return;
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireCube(_livingArea.center, new Vector3(_livingArea.width, _livingArea.height, 0f));
     }
 #endif
 }

@@ -4,8 +4,10 @@ using UnityEngine.Serialization;
 
 /// <summary>
 /// 친밀도 수치 + 이벤트만. <see cref="UnityEngine.Animator"/>/<see cref="UnityEngine.SpriteRenderer"/> 직접 참조 금지 —
-/// 시각 전환은 <c>SpecialActivated</c>/<c>SpecialReleased</c> 이벤트로 위임한다.
+/// 값이 바뀌었다는 사실만 <c>AffinityChanged</c>로 알리고, 그걸로 무엇을 할지는 구독자가 정한다.
 /// 순수 C# <see cref="SerializableAttribute"/> 클래스 — <see cref="BaseCharacterController"/>가 <c>[SerializeField]</c>로 nested 보유.
+///
+/// 친밀도는 누적값 하나뿐이고 줄어들지 않는다. 기획에 친밀도가 감소·소모되는 경우가 없다.
 /// </summary>
 [Serializable]
 public sealed class AffinityModule
@@ -14,59 +16,50 @@ public sealed class AffinityModule
     [Tooltip("이 친밀도에 도달하면 소녀로 변신할 수 있다.")]
     [FormerlySerializedAs("_maxAffinity")]
     [SerializeField] private int _humanTransformThreshold = 100;
-    [Tooltip("쓰다듬기(호버 진입) 1회당 오르는 친밀도.")]
-    [SerializeField] private int _affinityPerHoverEnter = 10;
+    [Tooltip("쓰담 1회당 오르는 친밀도.\n" +
+             "쓰담은 캐릭터를 좌클릭할 때 시작한다 — 마우스를 올려두기만 해서는 오르지 않는다.")]
+    [FormerlySerializedAs("_affinityPerHoverEnter")]
+    [SerializeField] private int _affinityPerPet = 10;
     [Tooltip("친밀도 최대치. 이 값을 넘으면 더 오르지 않는다(오버플로우 방지).")]
     [SerializeField] private int _affinityHardCap = 100_000_000;
 
     private BaseCharacterController _owner;
-    private int _affinity;
     private int _cumulativeAffinity;
 
-    /// <summary>현재 친밀도. <see cref="Reset"/>로 0으로 돌아간다.</summary>
-    public int Current => _affinity;
-    /// <summary>줄어들지 않는 누적 친밀도. <see cref="Reset"/>에도 유지된다(디버그 표시·향후 활용용).</summary>
+    /// <summary>누적 친밀도. 쓰담으로만 오르고 줄어들지 않는다.</summary>
     public int CumulativeAffinity => _cumulativeAffinity;
     /// <summary>친밀도 최대치(하드 상한).</summary>
     public int Max => _affinityHardCap;
-    /// <summary>소녀 변신 가능 여부 — 친밀도가 변신 임계 이상인가.</summary>
-    public bool CanHumanTransform => _affinity >= Mathf.Max(1, _humanTransformThreshold);
+    /// <summary>소녀 변신 가능 여부 — 누적 친밀도가 변신 임계 이상인가.</summary>
+    public bool CanHumanTransform => _cumulativeAffinity >= Mathf.Max(1, _humanTransformThreshold);
 
     /// <summary>친밀도 값이 변할 때마다 새 값으로 호출.</summary>
     public event Action<int> AffinityChanged;
-    /// <summary>친밀도가 변신 임계에 진입한 순간 1회 발사. <see cref="StateModule.SpecialMode"/> ON 신호.</summary>
-    public event Action SpecialActivated;
-    /// <summary>친밀도가 변신 임계에서 해제된 순간 1회 발사.</summary>
-    public event Action SpecialReleased;
 
     public void Bind(BaseCharacterController owner)
     {
         _owner = owner;
     }
 
-    /// <summary>호버 진입 시 누적. 변신 임계 진입 시 SpecialActivated 발사, 하드 상한에서 멈춘다.</summary>
-    public void AddOnHoverEnter()
+    /// <summary>쓰담 1회당 누적. 하드 상한에서 멈춘다.</summary>
+    public void AddOnPet()
     {
         var cap = Mathf.Max(1, _affinityHardCap);
-        if (_affinity >= cap) return;
+        if (_cumulativeAffinity >= cap) return;
 
-        var before = _affinity;
-        var gain = Mathf.Max(0, _affinityPerHoverEnter);
-        _affinity = Mathf.Min(cap, _affinity + gain);
-        _cumulativeAffinity = Mathf.Min(cap, _cumulativeAffinity + (_affinity - before));
+        var gain = Mathf.Max(0, _affinityPerPet);
+        _cumulativeAffinity = Mathf.Min(cap, _cumulativeAffinity + gain);
 
-        AffinityChanged?.Invoke(_affinity);
-
-        if (before < _humanTransformThreshold && _affinity >= _humanTransformThreshold)
-            SpecialActivated?.Invoke();
+        AffinityChanged?.Invoke(_cumulativeAffinity);
     }
 
-    /// <summary>현재 친밀도 0 리셋. 누적 친밀도는 유지. 변신 임계에서 해제 시 SpecialReleased 발사.</summary>
-    public void Reset()
+    /// <summary>
+    /// 저장된 친밀도를 되돌린다. 스폰 직후 한 번만 부른다.
+    /// <see cref="AffinityChanged"/>를 울리지 않는다 — 울리면 하트 지급(<see cref="BridgeAffinityHeart"/>)이
+    /// 복원된 값만큼의 하트를 그 자리에서 다시 지급한다. 구독자는 자기 Start에서 현재 값을 읽는다.
+    /// </summary>
+    public void Restore(int cumulativeAffinity)
     {
-        var wasTransformable = CanHumanTransform;
-        _affinity = 0;
-        AffinityChanged?.Invoke(_affinity);
-        if (wasTransformable) SpecialReleased?.Invoke();
+        _cumulativeAffinity = Mathf.Clamp(cumulativeAffinity, 0, Mathf.Max(1, _affinityHardCap));
     }
 }

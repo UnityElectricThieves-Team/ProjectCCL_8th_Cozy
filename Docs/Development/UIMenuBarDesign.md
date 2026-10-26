@@ -1,7 +1,7 @@
 # 우하단 메뉴 바 + 메인 UI 화면 설계 (초안)
 
 > 작성: develop-kk / 상태: **초안(토의용)** / 최종 검토 전 3회 적대 검수 완료.
-> 이 문서는 **현서와 크로스체크**할 항목(특히 §7 CanvasScaler)을 포함합니다. 확정 아니고, 같이 다듬는 출발점입니다.
+> 이 문서는 아직 **결정이 필요한 항목**(특히 §7 CanvasScaler)을 포함합니다. 확정 아니고, 다듬어 나가는 출발점입니다.
 
 > ⚠️ **창 스택 서술은 낡았습니다 (PR #13 이후).** 이 문서가 전제하는 `OverlayWindow` / `OverlayWindowController` / `WindowResizeHandler` / `RegionEditChrome` / `OverlayModeDemoButtons`는 모두 삭제되고 `WindowManager` 하나로 통합됐습니다. 특히 **창 이동·리사이즈 핫존 수치를 이 문서 기준으로 구현하면 안 됩니다** — 현행 캡션 존은 상단 중앙 220×28이고, 가장자리 6px·모서리 12px는 `WindowManager` 인스펙터에서 확인하세요. UI 레이아웃·CanvasScaler 논의는 여전히 유효합니다. 현행 창 구조는 [WindowServiceHandover.md](WindowServiceHandover.md) 참조.
 
@@ -42,7 +42,7 @@ Figma: `CCL_8th_Cozy_Companion` (Inventory / Shop / Collection / Picture / Optio
 | UI 입력 모듈 | `InputSystemUIInputModule` 존재 (New Input System용, 올바름) |
 | 아직 씬에 없는 것 | `UIPanel` / `SettingsPanel` / `Phase0InputProbe` (전부 새 파일, 미배치) |
 
-**현서에게 두 가지 확인 요청:**
+**확인이 필요한 두 가지:**
 1. `CharacterScaleSetters` 캔버스(SortingOrder 100, 테스트용)는 디버그 잔재로 보이는데, **지워도 될까?** 안 지우면 SortingOrder 100이라 새 메뉴 UI 위에 그려진다. 또 이 캔버스의 `CharacterScaleClicker`가 `ScaleMultiplierSettings.Character`에 값을 쓰는데, 설정 패널의 캐릭터 크기 슬라이더도 같은 값을 써서 나중에 충돌 소지가 있다.
 2. 그 캔버스의 **1920×1020 / Match=Width**는 의도적으로 고른 값 같은데, 이유가 궁금하다(§7에서 이어짐).
 
@@ -204,13 +204,13 @@ per-pixel 투과는 순수 검정 (0,0,0) 픽셀을 투명 + 통과로 처리한
 
 ---
 
-## 7. 현서 크로스체크 항목 — CanvasScaler 정책 (열린 질문)
+## 7. 결정 필요 항목 — CanvasScaler 정책 (열린 질문)
 
-**이게 이 문서에서 제일 같이 정해야 하는 부분이다.**
+**이게 이 문서에서 제일 먼저 정해야 하는 부분이다.**
 
 ### 상황
 - `UIRoot`(우리 메뉴가 들어갈 캔버스)는 **Constant Pixel Size / 800×600** 인데, 이건 Unity가 캔버스 만들면 나오는 **기본값 그대로**라 아무도 의도적으로 고른 게 아닐 가능성이 크다.
-- 반면 테스트 캔버스는 **Scale With Screen Size / 1920×1020 / Match=Width** 로, **누군가 의도적으로** 설정했다. (현서?)
+- 반면 테스트 캔버스는 **Scale With Screen Size / 1920×1020 / Match=Width** 로, **누군가 의도적으로** 설정했다.
 
 ### 두 모드의 차이
 | 모드 | 창을 키우면/줄이면 | 문제 |
@@ -220,10 +220,10 @@ per-pixel 투과는 순수 검정 (0,0,0) 픽셀을 투명 + 통과로 처리한
 
 ### 잠정 권장
 - **`UIRoot`를 Scale With Screen Size로.** 이 씬은 32:3 띠 강제가 없고(WindowAspectFitter 미배치) 창이 전체화면~축소까지 넓게 변하므로, 자동 축소가 되는 쪽이 안전하다. 참고로 `CameraFitter`는 캐릭터의 **화면 픽셀 크기를 창 크기와 무관하게 고정**한다 — UI도 극단적으로 안 변하는 게 캐릭터와 톤이 맞는다.
-- **기준 해상도·Match 축은 현서 의견이 필요.** 테스트 캔버스가 이미 `Match=Width / 1920×1020`을 쓰는데, 이게 의도라면 메뉴 UI도 거기 맞추는 게 일관적이다. 다만 **왜 1080이 아니라 1020인지, 왜 Height가 아니라 Width인지** 최초 의도를 알아야 우리가 맞추든 바꾸든 결정할 수 있다.
+- **기준 해상도·Match 축은 아직 미확정.** 테스트 캔버스가 이미 `Match=Width / 1920×1020`을 쓰는데, 이게 의도라면 메뉴 UI도 거기 맞추는 게 일관적이다. 다만 **왜 1080이 아니라 1020인지, 왜 Height가 아니라 Width인지** 최초 의도를 알아야 우리가 맞추든 바꾸든 결정할 수 있다.
 
 ### 참고: 처음에 내가 틀렸던 점 (투명하게 공유)
-초안에서 나는 "Match=Height / 1080"을 권했는데, 적대 검수에서 **이 프로젝트엔 그게 오히려 나쁠 수 있다**는 지적을 받았다. (만약 가로로 긴 창이 지배적이라면 Height 기준은 UI를 과하게 줄인다.) 그래서 지금은 **현서가 이미 고른 Width 기준이 더 맞을 수 있다**고 보고, 단정 대신 크로스체크로 남긴다.
+초안에서 나는 "Match=Height / 1080"을 권했는데, 적대 검수에서 **이 프로젝트엔 그게 오히려 나쁠 수 있다**는 지적을 받았다. (만약 가로로 긴 창이 지배적이라면 Height 기준은 UI를 과하게 줄인다.) 그래서 지금은 **테스트 캔버스가 이미 쓰는 Width 기준이 더 맞을 수 있다**고 보고, 단정 대신 열린 질문으로 남긴다.
 
 ### 딸린 변경
 - `SettingsPanel`의 "UI 크기" 슬라이더(`_uiScaleSlider → canvasScaler.scaleFactor`)는 **Constant 모드에서만** 동작한다. Scale With Screen Size로 가면 이 배선은 죽는다. 그래서 이번 슬라이스에서는 이 배선을 **일단 제거**하고, CanvasScaler 정책이 확정된 뒤 그 모드에 맞는 방식으로 다시 붙인다.
@@ -260,7 +260,7 @@ per-pixel 투과는 순수 검정 (0,0,0) 픽셀을 투명 + 통과로 처리한
 |---|---|
 | A | 잠금(PassThrough)은 이번 제외. `SettingsPanel._lockButton` 배선 제거. 전역 핫키 잠금해제 구현 후 재도입 |
 | B | `Scripts/CLAUDE.md`의 UI 레이어 참조 제한 제거 완료 — UI는 하위 레이어(Platform 포함)를 자유 참조 |
-| C | **미확정.** CanvasScaler 정책은 §7대로 현서와 크로스체크 후 확정 |
+| C | **미확정.** CanvasScaler 정책은 §7대로 확인 후 확정 |
 
 ---
 
@@ -269,5 +269,5 @@ per-pixel 투과는 순수 검정 (0,0,0) 픽셀을 투명 + 통과로 처리한
 이 설계는 독립 리뷰어(별도 에이전트)에게 **총 5회** 적대적 검수를 받으며 다듬었다. 주요 교정:
 - **UIModeGate(모드별 UI 자동 숨김 컴포넌트)를 폐기** — 상태 꼬임 + 레이어 위반 유발. 정적 규칙(inset, 잠금 제외)으로 대체.
 - **씬 모델 정정** — 초안이 "Canvas 1개 / 32:3 띠"로 잘못 봤으나, 실제로는 Canvas 2개 + CameraFitter 있음 + WindowAspectFitter 없음. §2가 실측 반영본.
-- **CanvasScaler 권장을 Height→미확정으로 하향** — 이 프로젝트 창 형태엔 Width 기준이 더 맞을 수 있어 현서 크로스체크로 전환(§7).
+- **CanvasScaler 권장을 Height→미확정으로 하향** — 이 프로젝트 창 형태엔 Width 기준이 더 맞을 수 있어 열린 질문으로 전환(§7).
 - **과설계 제거** — `_closeButton`용 상속형 OnValidate 등 검수 대응으로 붙였던 복잡성을 다시 걷어냄(선택 필드엔 경고 대상이 없음).
