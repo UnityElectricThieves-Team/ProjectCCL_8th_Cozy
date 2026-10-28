@@ -49,7 +49,7 @@
 
 **월드의 px 값(뷰포트·배경 높이·최소 크기 등)은 마스터 캔버스 기준 px이고, 화면에서는 작업 영역 폭 비율로 줄어듭니다** — UI의 CanvasScaler와 같은 배율입니다. 새로 px 크기 필드를 갖는 소비자를 만들 때는 [.claude/rules/unity/viewport-coordinates.md](.claude/rules/unity/viewport-coordinates.md)를 봅니다. 새 파일에는 발화할 규칙이 없어 여기 한 줄 둡니다. 프리팹의 월드 위치값은 ×100 하면 마스터 캔버스 px입니다.
 
-**새 그림은 임포트 PPU를 Unity 기본값(100)으로 두고, 시트의 긴 변이 Max Size를 넘지 않게 합니다** — 월드 PPU가 코드 상수 100이라 그대로 두면 그림 1px = 마스터 캔버스 1px가 됩니다. 크기가 안 맞으면 PPU가 아니라 그림을 고칩니다. 새 그림을 임포트하는 순간에도 발화할 규칙이 없어 여기 한 줄 둡니다. 이유는 같은 viewport-coordinates.md에 있습니다.
+**새 그림은 임포트 PPU를 Unity 기본값(100)으로 두고, 시트의 긴 변이 Max Size를 넘지 않게 합니다** — 월드 PPU가 코드 상수 100이라 그대로 두면 그림 1px = 마스터 캔버스 1px가 됩니다. 크기가 안 맞으면 PPU가 아니라 그림을 고칩니다. 지금은 캐릭터만 예외로, 베이스 프리팹 배율로 임시로 줄여 씁니다([character-ground.md](.claude/rules/unity/character-ground.md)). 새 그림을 임포트하는 순간에도 발화할 규칙이 없어 여기 한 줄 둡니다. 이유는 같은 viewport-coordinates.md에 있습니다.
 
 **새 배경음악은 `Assets/Audio/BGM/`에 넣습니다** — 이 폴더에만 Streaming 임포트 프리셋이 자동으로 걸리고, 다른 곳에 넣으면 곡 전체가 메모리에 풀려 상주합니다. 이유와 곡 목록 규약은 [.claude/rules/unity/audio.md](.claude/rules/unity/audio.md)에 있고, 새 음원을 넣는 순간에는 발화하지 않아 여기 한 줄 둡니다.
 

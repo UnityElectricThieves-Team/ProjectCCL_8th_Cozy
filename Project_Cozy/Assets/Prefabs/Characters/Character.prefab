@@ -86,16 +86,16 @@ MonoBehaviour:
   _hoverGate: {fileID: 0}
   _gravity: 2.16
   _state:
-    _idleDurationRange: {x: 10, y: 12}
+    _idleDurationRange: {x: 5, y: 6}
     _idleActionProbability: 0.1
-    _idleActionDuration: 1.5
+    _idleActionDuration: 1.2
     _petDuration: 1.2
     _wakeUpDuration: 0.6
     _landDuration: 0.4
     _transformDuration: 0.8
-    _walkSpeed: 0.162
-    _runSpeed: 0.378
-    _walkMinDistance: 0.054
+    _walkSpeed: 0.4
+    _runSpeed: 0.6
+    _walkMinDistance: 0.2
     _idleThresholdSeconds: 1800
     _logStateChanges: 1
   _visual:
@@ -110,7 +110,7 @@ MonoBehaviour:
     _affinityHardCap: 100000000
   _scale:
     _settings: {fileID: 11400000, guid: f969c08165cf55b468e1f3a4f2c83e7b, type: 2}
-    _baseScale: {x: 1, y: 1, z: 1}
+    _baseScale: {x: 0.5, y: 0.5, z: 1}
 --- !u!1 &5691119776310040808
 GameObject:
   m_ObjectHideFlags: 0
@@ -292,7 +292,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d6f084bff55dbf4588dfb3ef9b66c78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HoldClickEvent
-  _holdSeconds: 1
+  _holdSeconds: 0.25
   _opaqueGate: {fileID: 0}
   _cursorSource: {fileID: 0}
   _camera: {fileID: 0}

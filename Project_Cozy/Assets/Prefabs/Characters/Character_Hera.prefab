@@ -65,17 +65,9 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5990119214145366604, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
-      propertyPath: _state._petDuration
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 5990119214145366604, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
       propertyPath: _visual._girlOverride
       value: 
       objectReference: {fileID: 22100000, guid: e8fde42ac53b21e42b8d71fdd326afcd, type: 2}
-    - target: {fileID: 5990119214145366604, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
-      propertyPath: _state._idleActionDuration
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 8019377413400777602, guid: 849fe04031dc1614db2d8615373d2b58, type: 3}
       propertyPath: m_SpriteTilingProperty.pivot.y
       value: 0.3528
