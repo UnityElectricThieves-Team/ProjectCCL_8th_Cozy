@@ -21,7 +21,8 @@ using UnityEngine.EventSystems;
 ///     ※ Unity 카메라 clear color가 검정(0,0,0)이어야 작동.
 ///
 /// 토글 변경은 부팅 시 1회만 반영 (런타임 변경 미지원).
-/// 예외 — 런타임 영역 API: ApplyRegion / TryGetWorkAreaRect / AcquireClickThroughSuspend 등.
+/// 예외 — 런타임 영역 API: ApplyRegion / TryGetWorkAreaRect / AcquireClickThroughSuspend 등,
+/// 그리고 SetTopmost(유저 설정 "항상 위"를 게임 쪽 적용자가 건다. 인스펙터 alwaysOnTop은 그 전까지의 기본값).
 ///
 /// **창 배치의 주인은 정책 레이어(ViewportScreenSettings)다.** 이 클래스는 시키는 대로 놓기만 한다.
 /// 창은 작업 영역에 고정이고 평상시 크기가 바뀌지 않으며, 사용자가 "윈도우 크기 재조정"을 누를 때만
@@ -34,7 +35,8 @@ public class WindowManager : MonoBehaviour
 {
     // ===== 인스펙터 =====
     [Header("Toggles")]
-    [SerializeField] private bool _alwaysOnTop            = true;
+    [SerializeField, Tooltip("부팅 시의 Topmost. 유저 설정이 있는 씬에서는 적용자가 곧바로 SetTopmost로 덮는다.")]
+    private bool _alwaysOnTop            = true;
     [SerializeField] private bool _hoverAwareClickThrough = true;
     [SerializeField] private bool _borderless             = true;
     [SerializeField, Tooltip("부팅 시 1회 작업 영역을 채운다. 창 배치의 주인은 정책 레이어" +
@@ -104,8 +106,9 @@ public class WindowManager : MonoBehaviour
     const uint SWP_SHOWWINDOW     = 0x0040;
     const uint SWP_FRAMECHANGED   = 0x0020;
 
-    static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
-    static readonly IntPtr HWND_TOP     = IntPtr.Zero;
+    static readonly IntPtr HWND_TOPMOST   = new IntPtr(-1);
+    static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+    static readonly IntPtr HWND_TOP       = IntPtr.Zero;
 
     const uint MONITOR_DEFAULT_TO_NEAREST = 2;
 
@@ -283,6 +286,20 @@ public class WindowManager : MonoBehaviour
     {
         SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0,
             SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+    }
+
+    /// <summary>창을 다른 창들 위에 고정할지 바꾼다. 유저 설정 "항상 위"의 입구.
+    /// 창을 활성화하지 않는다(SWP_NOACTIVATE) — 설정을 바꾸는 순간 포커스를 빼앗지 않게.
+    /// HWND는 Awake에서 잡히므로 그 전이나 Editor에서는 값만 기억한다.</summary>
+    public void SetTopmost(bool topmost)
+    {
+        _alwaysOnTop = topmost;
+        _sAlwaysOnTopForExitSizeMove = topmost;
+#if !UNITY_EDITOR
+        if (_hwnd == IntPtr.Zero) return;
+        SetWindowPos(_hwnd, topmost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+#endif
     }
 
     // ===== Maximize To Work Area =====

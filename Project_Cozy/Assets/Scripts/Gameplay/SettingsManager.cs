@@ -12,8 +12,11 @@ using UnityEngine;
 /// <see cref="Changed"/> 대신 전용 <see cref="VolumeChanged"/>를 울린다 — Changed 구독자들은 이산 이벤트를 전제로 만들어졌다.
 ///
 /// 설정 패널과 이 매니저 사이의 일치, 그리고 저장·복원까지만 책임진다.
-/// 실제 적용은 각 소비자가 여기 값을 읽어 처리한다. 지금 연결된 소비자는 소녀 변신 금지
-/// (<see cref="CharacterManager"/>가 캐릭터에 건다)와 소리 탭(<see cref="BgmPlayer"/>)이다. 나머지 항목은 아직 저장만 된다.
+/// 실제 적용은 각 소비자가 여기 값을 읽어 처리한다. 지금 연결된 소비자:
+/// 언어(<see cref="LocalizationManager"/>), 소녀 변신 금지(<see cref="CharacterManager"/>가 캐릭터에 건다),
+/// 소리 탭(<see cref="BgmPlayer"/>), 항상 위·자동 실행(<see cref="DesktopIntegrationApplier"/>),
+/// 관리자 모드(<see cref="SpawnPointManager"/>가 다른 앱 입력을 셀지 정한다).
+/// 구름 수치·친밀도 표기는 아직 저장만 된다 — 값을 적용할 표시 UI가 없다.
 ///
 /// 씬 단일 인스턴스(Singleton). <see cref="HeartSystem"/>과 같은 패턴.
 /// </summary>
@@ -37,8 +40,8 @@ public sealed class SettingsManager : MonoBehaviour
 
     public bool AlwaysOnTop
     {
-        get => _data.alwaysOnTop;
-        set { if (_data.alwaysOnTop == value) return; _data.alwaysOnTop = value; Commit(); }
+        get => _data.topmost;
+        set { if (_data.topmost == value) return; _data.topmost = value; Commit(); }
     }
 
     /// <summary>표시 언어의 BCP 47 태그(<see cref="LanguageCodes"/>).</summary>

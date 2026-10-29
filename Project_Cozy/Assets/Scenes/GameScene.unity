@@ -2145,6 +2145,7 @@ GameObject:
   - component: {fileID: 800260095}
   - component: {fileID: 800260096}
   - component: {fileID: 800260097}
+  - component: {fileID: 800260098}
   m_Layer: 0
   m_Name: SettingsManager
   m_TagString: Untagged
@@ -2197,6 +2198,19 @@ MonoBehaviour:
   _japaneseFont: {fileID: 11400000, guid: d8b3a0f3d2003d943a114a5b31ef58a7, type: 2}
   _chineseSimplifiedFont: {fileID: 11400000, guid: c82fa2b024e7c224698e36b692e13698, type: 2}
   _chineseTraditionalFont: {fileID: 11400000, guid: 195a4aa41db7fc04bb896e13ff6ac0df, type: 2}
+--- !u!114 &800260098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800260094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf569195405114943aefaf6c482e7972, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DesktopIntegrationApplier
+  _windowManager: {fileID: 0}
 --- !u!1001 &829411603
 PrefabInstance:
   m_ObjectHideFlags: 0

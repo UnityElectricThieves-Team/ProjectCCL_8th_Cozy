@@ -38,7 +38,10 @@ public enum CountVisibility
 [Serializable]
 public class SettingsFileFormat
 {
-    public bool alwaysOnTop = false;
+    /// <summary>항상 위. 옛 키 <c>alwaysOnTop</c>(기본값 false)를 버리고 새 키로 바꿨다 — 그 토글은 실제로 아무 일도
+    /// 하지 않았는데도, 저장이 모든 필드를 쓰는 탓에 사용자가 고른 적 없는 false가 옛 파일에 남아 있다.
+    /// 같은 키로 기본값만 바꾸면 그 false가 이겨 업데이트 직후 창이 맨 위에서 내려온다. 규약은 .claude/rules/unity/settings.md.</summary>
+    public bool topmost = true;
     /// <summary>표시 언어의 BCP 47 태그(<see cref="LanguageCodes"/>).</summary>
     public string language = LanguageCodes.English;
     /// <summary>스폰 지점의 스폰 기운 카운트 표기. 패널의 '구름 수치'.</summary>

@@ -14,12 +14,17 @@ Always-on-Top, borderless + resize, 클릭 투과, 비포커스 키/마우스 �
 ### Window/
 Windows 창의 외형, 입력 통과, 이동·리사이즈를 관리한다.
 
-- `Core/WindowManager.cs` — HWND와 WndProc의 단일 소유자. DWM 투명화, Topmost, 클릭 통과, 영역 적용을 담당
+- `Core/WindowManager.cs` — HWND와 WndProc의 단일 소유자. DWM 투명화, Topmost, 클릭 통과, 영역 적용을 담당. Topmost는 유저 설정이 정한다 — 게임 쪽 적용자(`Gameplay/DesktopIntegrationApplier`)가 `SetTopmost`로 걸고, 인스펙터 값은 그 전까지의 부팅 기본값이다
 - `Input/WindowsCursorToUnityScreen.cs` — 클릭 통과 중에도 OS 커서를 Unity 화면 좌표로 제공
 - `HitTesting/HitTestCalculator.cs` — 마우스 좌표 → `ResizeHitZone` 판정 (순수 C#, EditMode 테스트 가능)
 - `HitTesting/ResizeHitZone.cs` — Caption 이동 + 8방향 리사이즈 판정값과 Win32 NCHITTEST 매핑
 - `Registry/`와 `Editor/` — 선택적 서비스 등록 데이터와 편집 도구. 현행 핵심 부팅 경로에서는 미사용
 - `Core/BorderlessWindow.cs`, `Input/ClickThroughProbe.cs` — 구 프로토타입, 제거 대기
+
+### Startup/
+Windows 로그인 시 자동 실행.
+
+- `StartupRegistration.cs` — 현재 사용자의 시작 프로그램 레지스트리(HKCU\…\Run)에 실행 파일 경로를 등록·해제하는 static 클래스. 언제 부를지는 모른다(설정 판단은 게임 쪽 적용자). `Window/Registry/`(서비스 등록 데이터)와 이름이 비슷하지만 Windows 레지스트리와는 무관한 다른 것이다
 
 ### Input/
 포커스 상태와 무관한 입력 수집.

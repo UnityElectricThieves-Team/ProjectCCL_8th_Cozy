@@ -17,6 +17,8 @@ using UnityEngine.InputSystem.Utilities; // .Call() extension method
 /// </list>
 ///
 /// 중복 카운트 안전: InputSystem은 창 비활성 시 자체적으로 fire 안 하고, OutFocus 훅은 <c>Application.isFocused</c>로 게이트 → 두 경로가 자연 배타적.
+///
+/// OutFocus 두 채널은 유저 설정 '관리자 모드'가 켜져 있을 때만 센다(<see cref="SettingsManager.AdministratorMode"/>).
 /// </summary>
 public class SpawnPointManager : MonoBehaviour
 {
@@ -63,6 +65,10 @@ public class SpawnPointManager : MonoBehaviour
         if (mouse.middleButton.wasPressedThisFrame) Increment();
     }
 
-    private void OnOutFocusKey(Key _)              => Increment();
-    private void OnOutFocusMouseButton(MouseButton _) => Increment();
+    private void OnOutFocusKey(Key _)              { if (CountsOutFocusInput) Increment(); }
+    private void OnOutFocusMouseButton(MouseButton _) { if (CountsOutFocusInput) Increment(); }
+
+    // 유저 설정 '관리자 모드' = 다른 앱을 쓰는 중에 들어온 입력도 스폰 기운으로 셀지. Windows 관리자 권한과는 무관하다.
+    // 매니저가 없는 씬(테스트 등)에서는 예전처럼 센다. 캐릭터 수면 판정은 이 설정과 상관없이 포커스 밖 입력을 센다.
+    private static bool CountsOutFocusInput => SettingsManager.Instance == null || SettingsManager.Instance.AdministratorMode;
 }
