@@ -136,8 +136,18 @@ public sealed class SettingsManager : MonoBehaviour
 
         // 복원은 이벤트를 쏘지 않는다. 이 시점엔 구독자가 아직 없고(실행 순서 -100),
         // 설정 패널은 자기 Start에서 현재 값을 직접 읽어 그린다(HeartSystem과 같은 방식).
+        // 파일이 없는지는 읽기 전에 따로 본다 — Load는 파일이 없을 때와 깨졌을 때 모두 기본값을 돌려줘 둘을 구분할 수 없다.
+        bool firstRun = !File.Exists(GameDataPaths.Settings);
         _data = UserDataSaveIO.Load<SettingsFileFormat>(GameDataPaths.Settings);
         Sanitize();
+
+        // 첫 실행만 OS 언어를 따른다. 바로 저장해 두어야 다음 실행부터는 사용자가 고른 언어(또는 이 값)를 그대로 쓴다.
+        // 파일이 깨져 기본값으로 돌아온 경우는 첫 실행이 아니므로 건드리지 않는다.
+        if (firstRun)
+        {
+            _data.language = LanguageCodes.FromSystemLanguage(Application.systemLanguage);
+            Save();
+        }
     }
 
     private void OnDestroy()
