@@ -17,6 +17,7 @@ using UnityEngine;
 ///
 /// 캐릭터는 씬에 놓지 않는다. 화면에 나와 있는 캐릭터는 저장 기록이 정한다.
 /// 첫 실행(저장 파일 없음)에는 아무 캐릭터도 보유하지 않은 상태라 화면이 비어 있는 것이 정상이다.
+/// 예외로 Development Build는 시작할 때 모두 해금한다(결과물 공유용).
 /// 규약과 이유는 .claude/rules/unity/character-ownership.md.
 ///
 /// 기록이 바뀔 때마다 즉시 저장한다. 해금·배치는 가끔 일어나는 이산 이벤트라
@@ -78,6 +79,13 @@ public class CharacterOwnership : MonoBehaviour
         _data.records ??= new List<CharacterRecord>();
         var seen = new HashSet<string>();
         _data.records.RemoveAll(r => r == null || string.IsNullOrEmpty(r.id) || !seen.Add(r.id));
+
+#if DEVELOPMENT_BUILD
+        // 별의 해금이 아직 없어 빌드에서는 캐릭터를 띄울 길이 없다. 결과물을 보여주는 Development Build에서는
+        // 시작할 때 모두 해금한다. 뷰포트 확정 전이라 기록만 남고, 등장은 Start의 흐름이 맡는다.
+        // 에디터 Play에는 정의되지 않으므로 첫 실행(빈 화면) 확인은 그대로 된다.
+        UnlockAll();
+#endif
     }
 
     private void Start()
@@ -242,17 +250,23 @@ public class CharacterOwnership : MonoBehaviour
         }
     }
 
+    // 대응표의 모든 캐릭터를 해금한다. 이미 보유·배치된 캐릭터는 Unlock이 건너뛰므로 여러 번 불러도 늘지 않는다.
+    private void UnlockAll()
+    {
+        if (_characterPrefabs == null) return;
+        for (int i = 0; i < _characterPrefabs.Length; i++)
+            if (_characterPrefabs[i] != null) Unlock(_characterPrefabs[i].id);
+    }
+
 #if UNITY_EDITOR
-    // 별의 캐릭터 소환이 막혀 있는 동안 캐릭터를 띄울 길이 이것뿐이다. 운영과 같은 해금 경로를 부르므로
+    // 별의 캐릭터 소환이 막혀 있는 동안 에디터에서 캐릭터를 띄우는 길이다. 운영과 같은 해금 경로를 부르므로
     // 저장·재시작 동작이 그대로 검증된다. 처음 상태로 되돌리려면 저장 파일을 지운다.
     [ContextMenu("테스트: 모든 캐릭터 해금")]
     private void EditorUnlockAll()
     {
         // 편집 모드에서 누르면 Awake가 돌지 않은 상태로 실제 저장 파일을 덮어쓸 수 있다.
         if (!Application.isPlaying) return;
-        if (_characterPrefabs == null) return;
-        for (int i = 0; i < _characterPrefabs.Length; i++)
-            if (_characterPrefabs[i] != null) Unlock(_characterPrefabs[i].id);
+        UnlockAll();
     }
 #endif
 }
