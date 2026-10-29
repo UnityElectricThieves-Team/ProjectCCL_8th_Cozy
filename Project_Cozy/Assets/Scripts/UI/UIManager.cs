@@ -13,6 +13,12 @@ using UnityEngine.InputSystem;
 /// 메뉴 버튼의 열기·토글도 무시한다 — 그 ESC와 클릭은 설치 모드의 것이다.
 /// 모드가 이 매니저를 부르는 것이 아니라 이 매니저가 모드의 시작·종료 신호를 듣는다. 그래야 모드가 어떻게 끝나든
 /// (강제 종료 포함) 패널이 되살아난다.
+///
+/// 닫기는 X 버튼(<see cref="UIPanel.RequestClose"/>)·ESC·메뉴 버튼(<see cref="Toggle"/>) 모두 <see cref="Close"/> 하나를 지난다.
+/// 그래서 닫기를 막을 수 있는 질문(<see cref="UIPanel.CanClose"/>)도 여기서 한 번만 묻는다.
+///
+/// 모달 패널(확인 팝업)이 열려 있는 동안에는 다른 패널을 열거나 토글할 수 없고, 열린 패널은 보이되 조작되지 않는다.
+/// ESC는 맨 위인 모달을 닫는다.
 /// </summary>
 public class UIManager : MonoBehaviour
 {
@@ -50,26 +56,52 @@ public class UIManager : MonoBehaviour
     /// <summary>패널을 연다. 다른 패널은 닫지 않는다. 이미 열려 있으면 맨 앞으로 가져온다. 설치 모드 중에는 무시한다.</summary>
     public void Open(UIPanel panel)
     {
-        if (panel == null || _isSuspended) return;
+        if (panel == null || _isSuspended || IsBlockedByModal(panel)) return;
         bool wasOpen = _open.Remove(panel); // 열려 있었으면 순서만 뺐다가
         _open.Add(panel);                   // 리스트 끝(최상단)으로 다시 넣는다
         if (!wasOpen) panel.Open();
         panel.transform.SetAsLastSibling(); // 형제 순서 = 그리기 순서. 맨 뒤 형제 = 맨 앞에 그려짐.
+        RefreshModalBlock();
     }
 
-    /// <summary>패널을 닫는다.</summary>
+    /// <summary>패널을 닫는다. 패널이 <see cref="UIPanel.CanClose"/>로 거절하면 닫지 않는다.</summary>
     public void Close(UIPanel panel)
     {
-        if (panel == null) return;
-        if (_open.Remove(panel)) panel.Close();
+        if (panel == null || !_open.Contains(panel)) return;
+        if (panel.CanClose != null && !panel.CanClose()) return;
+        _open.Remove(panel);
+        RefreshModalBlock(); // 닫힘 알림을 받은 쪽이 다른 패널을 다룰 수 있게, 막힘부터 먼저 푼다
+        panel.Close();
     }
 
-    /// <summary>열려 있으면 닫고, 닫혀 있으면 연다. (메뉴 버튼용) 설치 모드 중에는 무시한다.</summary>
+    /// <summary>열려 있으면 닫고, 닫혀 있으면 연다. (메뉴 버튼용) 설치 모드 중과 모달이 떠 있는 동안에는 무시한다.</summary>
     public void Toggle(UIPanel panel)
     {
-        if (panel == null || _isSuspended) return;
+        if (panel == null || _isSuspended || IsBlockedByModal(panel)) return;
         if (_open.Contains(panel)) Close(panel);
         else Open(panel);
+    }
+
+    // 다른 모달이 떠 있으면 그 패널은 열거나 토글할 수 없다. 모달 자신은 막지 않는다.
+    private bool IsBlockedByModal(UIPanel panel)
+    {
+        UIPanel modal = TopModal();
+        return modal != null && modal != panel;
+    }
+
+    private UIPanel TopModal()
+    {
+        for (int i = _open.Count - 1; i >= 0; i--)
+            if (_open[i] != null && _open[i].IsModal) return _open[i];
+        return null;
+    }
+
+    // 모달이 있으면 그 밖의 열린 패널을 조작 못 하게, 없으면 모두 푼다.
+    private void RefreshModalBlock()
+    {
+        UIPanel modal = TopModal();
+        for (int i = 0; i < _open.Count; i++)
+            if (_open[i] != null) _open[i].SetBlocked(modal != null && _open[i] != modal);
     }
 
     private void OnPlacementActiveChanged(bool active)

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -9,16 +10,34 @@ using UnityEngine;
 /// 보이는지는 두 상태로 정한다 — 열려 있는가(<see cref="IsOpen"/>)와 잠시 숨겨졌는가(<see cref="SetSuspended"/>).
 /// 장식 설치 모드처럼 패널을 닫지 않고 잠시 비켜 두는 경우가 있어서다. 숨김을 열림과 같은 값(알파)으로 표현하면,
 /// 숨긴 동안 열린 패널이 "닫힌 패널"로 읽혀 열림 상태의 뜻이 깨진다.
+///
+/// 모달 패널(<see cref="IsModal"/>, 확인 팝업)이 떠 있는 동안 다른 패널은 보이되 조작되지 않는다(<see cref="SetBlocked"/>).
 /// </summary>
 [RequireComponent(typeof(CanvasGroup))]
 public class UIPanel : MonoBehaviour
 {
+    [SerializeField, Tooltip("켜면 이 패널이 열려 있는 동안 다른 패널을 열 수 없고, 열린 패널도 조작되지 않는다. 확인 팝업용.")]
+    private bool _isModal;
+
     private CanvasGroup _group;
     private bool _isOpen;
     private bool _isSuspended;
+    private bool _isBlocked;
 
     /// <summary>열려 있는가. 잠시 숨겨져 있어도 열려 있으면 true다.</summary>
     public bool IsOpen => _isOpen;
+
+    public bool IsModal => _isModal;
+
+    /// <summary>
+    /// 닫아도 되는지 묻는다. false를 돌려주면 <see cref="UIManager.Close"/>가 닫지 않는다.
+    /// 저장하지 않은 변경이 있을 때 확인 팝업을 띄우려는 쪽이 건다. 그쪽이 팝업 확인 뒤 변경을 정리하고 다시 닫기를 부른다.
+    /// X 버튼·ESC·메뉴 버튼이 모두 UIManager.Close를 지나므로 이 질문 하나로 세 경로가 다 막힌다.
+    /// </summary>
+    public Func<bool> CanClose;
+
+    /// <summary>닫힌 직후 울린다. 확인 팝업이 "대답 없이 닫힘(ESC·X)"을 취소로 처리하는 데 쓴다.</summary>
+    public event Action Closed;
 
     protected virtual void Awake()
     {
@@ -44,6 +63,7 @@ public class UIPanel : MonoBehaviour
     {
         _isOpen = false;
         ApplyVisible();
+        Closed?.Invoke();
     }
 
     /// <summary>열림 상태는 그대로 두고 잠시 숨기거나(true) 되살린다(false). <see cref="UIManager"/>가 부른다.</summary>
@@ -53,12 +73,20 @@ public class UIPanel : MonoBehaviour
         ApplyVisible();
     }
 
+    /// <summary>보이는 채로 조작만 막거나(true) 푼다(false). 모달 팝업이 떠 있는 동안 <see cref="UIManager"/>가 부른다.</summary>
+    public void SetBlocked(bool blocked)
+    {
+        _isBlocked = blocked;
+        ApplyVisible();
+    }
+
     private void ApplyVisible()
     {
         if (_group == null) _group = GetComponent<CanvasGroup>();
         bool visible = _isOpen && !_isSuspended;
         _group.alpha = visible ? 1f : 0f;
-        _group.interactable = visible;
+        _group.interactable = visible && !_isBlocked;
+        // 막힌 패널도 클릭은 받아 둔다 — 놓으면 그 클릭이 뒤의 캐릭터나 바탕화면으로 새어 나간다.
         _group.blocksRaycasts = visible;
     }
 }
