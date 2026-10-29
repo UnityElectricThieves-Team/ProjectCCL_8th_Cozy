@@ -37,23 +37,29 @@ public sealed class BackgroundItemSlot : MonoBehaviour
     private ShopItemDefinition _item;
     private LocalizationManager _localization;
 
-    // 버튼 글자("사용"/"사용 취소")가 언어를 따르므로, 언어가 바뀌면 다시 그린다.
+    // 상품 이름과 버튼 글자("사용"/"사용 취소")가 언어를 따르므로, 언어가 바뀌면 다시 그린다.
     private void Awake()
     {
         _localization = LocalizationManager.Instance;
-        if (_localization != null) _localization.LanguageChanged += RefreshState;
+        if (_localization != null) _localization.LanguageChanged += OnLanguageChanged;
     }
 
     private void OnDestroy()
     {
-        if (_localization != null) _localization.LanguageChanged -= RefreshState;
+        if (_localization != null) _localization.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        RefreshName();
+        RefreshState();
     }
 
     /// <summary>슬롯을 배경 상품 하나로 채운다.</summary>
     public void Bind(ShopItemDefinition item)
     {
         _item = item;
-        if (_nameText != null) _nameText.text = item.displayName;
+        RefreshName();
         if (_preview != null && item.icon != null) _preview.sprite = item.icon;
 
         if (_button != null)
@@ -89,6 +95,11 @@ public sealed class BackgroundItemSlot : MonoBehaviour
             if (_buttonImage != null && _buyableSprite != null)
                 _buttonImage.sprite = _buyableSprite; // 사용/사용취소는 활성 스프라이트 재사용
         }
+    }
+
+    private void RefreshName()
+    {
+        if (_nameText != null && _item != null) LocalizationManager.SetText(_nameText, _item.NameKey);
     }
 
     private void SetLabel(string text, Color color)

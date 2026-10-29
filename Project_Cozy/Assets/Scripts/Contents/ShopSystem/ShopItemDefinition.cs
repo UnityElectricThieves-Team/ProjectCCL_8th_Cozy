@@ -2,8 +2,11 @@ using UnityEngine;
 
 /// <summary>
 /// 상점에 진열되는 상품 하나의 "정의". 게임 내내 바뀌지 않는 카탈로그 데이터만 담는다 —
-/// 저장·조회에 쓰는 안정적 <see cref="id"/>, 표시 이름, 아이콘, 가격(하트),
+/// 저장·조회에 쓰는 안정적 <see cref="id"/>, 아이콘, 가격(하트),
 /// 그리고 배경 상품이면 실제로 화면에 깔릴 스프라이트(<see cref="backgroundSprite"/>).
+///
+/// 표시 이름은 여기 담지 않고 번역 표에서 <see cref="NameKey"/>로 찾는다. 키를 id에서 만드는 것은
+/// id가 저장 키라 한번 정하면 바뀌지 않기 때문이다 — 키 칸을 따로 두면 둘이 어긋날 수 있다.
 ///
 /// 구매 여부 같은 플레이어별 런타임 상태는 여기 담지 않는다. ScriptableObject는 전역 공유 에셋이라
 /// 플레이어마다 다른 값을 담을 수 없고, 에디터에서는 그 변경이 .asset 파일에 눌러앉기 때문이다.
@@ -20,8 +23,8 @@ public class ShopItemDefinition : ScriptableObject
     [Tooltip("저장·조회에 쓰는 안정적 식별자. 예: shop_item_1_flowerpot. 한번 정하면 바꾸지 않는다.")]
     public string id;
 
-    [Tooltip("슬롯에 표시할 상품 이름 (예: 화분, 우체통).")]
-    public string displayName;
+    /// <summary>번역 표에서 상품 이름을 찾는 stringID. 예: UIShop.item.shop_item_1_flowerpot</summary>
+    public string NameKey => "UIShop.item." + id;
 
     [Tooltip("상품 아이콘(png import된 Sprite).")]
     public Sprite icon;

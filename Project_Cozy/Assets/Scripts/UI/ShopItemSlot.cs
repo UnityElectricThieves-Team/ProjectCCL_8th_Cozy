@@ -35,6 +35,19 @@ public sealed class ShopItemSlot : MonoBehaviour
 
     private ShopItemDefinition _item;
     private Action<ShopItemDefinition> _onBuy;
+    private LocalizationManager _localization;
+
+    // 상품 이름이 언어를 따르므로, 언어가 바뀌면 이름(과 개수)을 다시 그린다.
+    private void Awake()
+    {
+        _localization = LocalizationManager.Instance;
+        if (_localization != null) _localization.LanguageChanged += RefreshOwned;
+    }
+
+    private void OnDestroy()
+    {
+        if (_localization != null) _localization.LanguageChanged -= RefreshOwned;
+    }
 
     /// <summary>슬롯을 상품 하나로 채운다. 구매 버튼을 누르면 onBuy(item)을 부른다.</summary>
     public void Bind(ShopItemDefinition item, Action<ShopItemDefinition> onBuy)
@@ -42,7 +55,7 @@ public sealed class ShopItemSlot : MonoBehaviour
         _item = item;
         _onBuy = onBuy;
 
-        if (_nameText != null) _nameText.text = item.displayName;
+        RefreshOwned();
         if (_buttonLabel != null) _buttonLabel.text = item.price.ToString();
         if (_preview != null && item.icon != null) _preview.sprite = item.icon;
 
@@ -68,13 +81,18 @@ public sealed class ShopItemSlot : MonoBehaviour
     ///
     /// 개수를 위한 별도 라벨을 두지 않고 이름 텍스트를 재구성하는 이유는, 슬롯 프리팹에
     /// 새 오브젝트를 추가하지 않고 표시를 붙이기 위해서다. Figma에 개수 자리가 정해지면 그때 옮긴다.
-    /// 항상 <see cref="_item"/>의 원본 이름에서 다시 만든다 — 현재 텍스트에 덧붙이면 갱신할 때마다 "x2 x3"로 쌓인다.
+    /// 이름 뒤에 개수를 이어 붙이지 않고 틀 문장(<c>UIShop.item_count</c>) 하나로 채운다 — 언어마다 어순이 다를 수 있다.
+    /// 항상 번역 표의 이름에서 다시 만든다 — 현재 텍스트에 덧붙이면 갱신할 때마다 "x2 x3"로 쌓인다.
     /// </summary>
     public void RefreshOwned()
     {
         if (_nameText == null || _item == null) return;
         int count = ShopSystem.Instance != null ? ShopSystem.Instance.GetCount(_item.id) : 0;
-        _nameText.text = count > 0 ? $"{_item.displayName} x{count}" : _item.displayName;
+        if (count > 0)
+            LocalizationManager.SetText(_nameText, "UIShop.item_count",
+                ("NAME", LocalizationManager.Localize(_item.NameKey)), ("ITEM_COUNT", count));
+        else
+            LocalizationManager.SetText(_nameText, _item.NameKey);
     }
 
     /// <summary>이 슬롯이 표시 중인 상품 가격(컨트롤러가 구매 가능 여부 계산에 쓴다).</summary>
