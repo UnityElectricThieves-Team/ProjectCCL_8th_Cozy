@@ -38,10 +38,12 @@ public sealed class CollectionPanelContentController : MonoBehaviour
     [SerializeField] private TMP_Text _affinityText;
 
     [Header("잠금")]
-    [Tooltip("해금 전에 상세 대신 보여줄 안내(필요한 기운). 해금 후에는 꺼진다.")]
+    [Tooltip("해금된 항목의 상세 화면(Right_Character_Info). 잠긴 항목을 고르면 통째로 꺼진다.")]
+    [SerializeField] private GameObject _unlockedView;
+    [Tooltip("잠긴 항목의 화면(Right_Character_Locked). 해금된 항목을 고르면 통째로 꺼진다.")]
+    [SerializeField] private GameObject _lockedView;
+    [Tooltip("잠긴 화면 안의 안내 문구. 항목마다 필요한 기운이 달라 코드가 채운다.")]
     [SerializeField] private TMP_Text _lockedMessage;
-    [Tooltip("해금 후에만 보일 오브젝트들(일러스트·이름·정보·친밀도·버튼 등). 해금 전에는 꺼진다.")]
-    [SerializeField] private GameObject[] _unlockedOnly;
 
     // 사진별 그림 캐시. 값이 null이면 "깨진 사진"이라는 뜻이라 다시 디코드하지 않는다.
     private readonly Dictionary<PhotoData, Sprite> _pictures = new();
@@ -151,17 +153,17 @@ public sealed class CollectionPanelContentController : MonoBehaviour
     {
         if (entry == null) return;
 
+        // 잠김 여부에 따라 두 화면 중 하나만 켠다.
         var unlocked = IsUnlocked(entry);
-        if (_unlockedOnly != null)
-            for (int i = 0; i < _unlockedOnly.Length; i++)
-                if (_unlockedOnly[i] != null) _unlockedOnly[i].SetActive(unlocked);
+        if (_unlockedView != null) _unlockedView.SetActive(unlocked);
+        if (_lockedView != null) _lockedView.SetActive(!unlocked);
 
-        if (_lockedMessage != null)
+        if (!unlocked)
         {
-            _lockedMessage.gameObject.SetActive(!unlocked);
-            if (!unlocked) LocalizationManager.SetText(_lockedMessage, "UICollection.locked_hint", ("ENERGY", entry.RequiredSpawnEnergy));
+            if (_lockedMessage != null)
+                LocalizationManager.SetText(_lockedMessage, "UICollection.locked_hint", ("ENERGY", entry.RequiredSpawnEnergy));
+            return;
         }
-        if (!unlocked) return;
 
         if (_illustration != null)
         {
