@@ -10,12 +10,13 @@ using UnityEngine.UI;
 /// 좌측에 캐릭터 목록을 깔고, 고른 항목의 일러스트와 정보를 우측에 보여준다.
 ///
 /// collection.dat은 <see cref="GameDataPaths.CollectionData"/> — StreamingAssets에 놓인 <b>배포 데이터</b>다.
-/// 즉 여기 담긴 값은 콘텐츠 정의이지 이 유저의 진행 상황이 아니다. 유저가 무엇을 모았는지는
-/// persistentDataPath 쪽 유저 데이터에 있어야 하는데 도감용 파일이 아직 없어서,
-/// 지금은 수집 여부로 잠그지 않고 항목을 그대로 보여준다(<c>*_Hidden</c> 사진도 아직 쓰지 않는다).
+/// 즉 여기 담긴 값은 콘텐츠 정의이지 이 유저의 진행 상황이 아니다(그래서 정의의 <c>IsCollected</c>는 쓰지 않는다).
+/// 해금 여부와 친밀도는 유저 기록의 주인인 <see cref="CharacterOwnership"/>에서 항목의 <c>CharacterId</c>로 찾는다.
+/// 해금 전에는 숨김 사진을 썸네일로 쓰고, 상세 대신 해금에 필요한 기운을 안내한다.
+/// <c>CharacterId</c>가 빈 항목은 잠글 근거가 없어 해금된 것처럼 보여준다.
 ///
 /// 항목 그림은 에셋이 아니라 Base64 문자열이라 런타임에 디코드해야 한다(<see cref="PhotoSprite"/>).
-/// 좌측 썸네일과 중앙 일러스트가 같은 그림을 쓰므로 항목당 한 장만 만들어 돌려쓰고,
+/// 좌측 썸네일과 중앙 일러스트가 같은 그림을 쓰므로 사진당 한 장만 만들어 돌려쓰고,
 /// 만든 스프라이트는 <see cref="OnDestroy"/>에서 텍스처까지 함께 정리한다.
 ///
 /// 패널 루트에 붙는다. 패널은 CanvasGroup으로 숨기므로(SetActive 아님) 이 컴포넌트는 계속 살아 있다 —
@@ -33,16 +34,29 @@ public sealed class CollectionPanelContentController : MonoBehaviour
     [SerializeField] private TMP_Text _nameText;
     [Tooltip("나이·키·생일·취미를 여러 줄로 보여줄 텍스트.")]
     [SerializeField] private TMP_Text _infoText;
-    [Tooltip("친밀도. 도감 항목과 씬 캐릭터를 잇는 ID가 아직 없어 지금은 값 없이 표시만 한다.")]
+    [Tooltip("누적 친밀도. 캐릭터 기록에서 읽는다.")]
     [SerializeField] private TMP_Text _affinityText;
 
-    // 항목별 그림 캐시. 값이 null이면 "사진이 없거나 깨진 항목"이라는 뜻이라 다시 디코드하지 않는다.
-    private readonly Dictionary<CollectionData, Sprite> _pictures = new();
+    [Header("잠금")]
+    [Tooltip("해금 전에 상세 대신 보여줄 안내(필요한 기운). 해금 후에는 꺼진다.")]
+    [SerializeField] private TMP_Text _lockedMessage;
+    [Tooltip("해금 후에만 보일 오브젝트들(일러스트·이름·정보·친밀도·버튼 등). 해금 전에는 꺼진다.")]
+    [SerializeField] private GameObject[] _unlockedOnly;
+
+    // 사진별 그림 캐시. 값이 null이면 "깨진 사진"이라는 뜻이라 다시 디코드하지 않는다.
+    private readonly Dictionary<PhotoData, Sprite> _pictures = new();
+    private readonly List<CollectionEntrySlot> _slots = new();
     private CollectionEntrySlot _selected;
     private LocalizationManager _localization;
+    private CharacterOwnership _ownership;
 
     private void Awake()
     {
+        // CharacterOwnership은 실행 순서가 앞서(-99) 이 시점에 Instance와 기록이 준비돼 있다.
+        _ownership = CharacterOwnership.Instance;
+        if (_ownership != null) _ownership.RecordChanged += OnRecordChanged;
+        else Debug.LogWarning($"[{nameof(CollectionPanelContentController)}] CharacterOwnership이 씬에 없어 모든 항목을 해금된 것처럼 보여줍니다.", this);
+
         BuildSlots(CollectionDataRuntime.Load());
 
         // 상세의 항목 이름(나이·키 등)이 언어를 따르므로, 언어가 바뀌면 고른 항목을 다시 그린다.
@@ -52,6 +66,7 @@ public sealed class CollectionPanelContentController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_ownership != null) _ownership.RecordChanged -= OnRecordChanged;
         if (_localization != null) _localization.LanguageChanged -= OnLanguageChanged;
         foreach (var sprite in _pictures.Values) PhotoSprite.Destroy(sprite);
         _pictures.Clear();
@@ -60,6 +75,16 @@ public sealed class CollectionPanelContentController : MonoBehaviour
     private void OnLanguageChanged()
     {
         if (_selected != null) ShowDetail(_selected.Entry);
+    }
+
+    // 해금되면 썸네일이 숨김 사진에서 공개 사진으로 바뀌고, 쓰담으로 친밀도가 오르면 숫자가 바뀐다.
+    // 패널은 CanvasGroup으로 숨겨 계속 살아 있으므로, 닫혀 있는 동안 바뀐 것도 여기서 따라간다.
+    private void OnRecordChanged(string characterId)
+    {
+        for (int i = 0; i < _slots.Count; i++)
+            if (_slots[i].Entry.CharacterId == characterId) _slots[i].SetThumbnail(GetThumbnail(_slots[i].Entry));
+
+        if (_selected != null && _selected.Entry.CharacterId == characterId) ShowDetail(_selected.Entry);
     }
 
     private void BuildSlots(CollectionBoolData data)
@@ -82,21 +107,32 @@ public sealed class CollectionPanelContentController : MonoBehaviour
         foreach (var entry in data.collectionDataList)
         {
             if (entry == null) continue;
+            if (string.IsNullOrEmpty(entry.CharacterId))
+                Debug.LogWarning($"[{nameof(CollectionPanelContentController)}] 도감 항목 '{entry.Name}'에 CharacterId가 없어 잠그지 않고 친밀도도 보여주지 않습니다.", this);
+
             var slot = Instantiate(_slotPrefab, _listContent);
-            slot.Bind(entry, GetPicture(entry), Select);
+            slot.Bind(entry, GetThumbnail(entry), Select);
+            _slots.Add(slot);
             if (firstSlot == null) firstSlot = slot;
         }
 
         Select(firstSlot); // 열자마자 빈 화면이 보이지 않게 첫 항목을 고른다 (항목이 없으면 무시된다)
     }
 
-    /// <summary>항목 그림을 처음 필요할 때 디코드해 캐시한다. 사진이 없으면 null.</summary>
-    private Sprite GetPicture(CollectionData entry)
-    {
-        if (_pictures.TryGetValue(entry, out var cached)) return cached;
+    private bool IsUnlocked(CollectionData entry) =>
+        _ownership == null || string.IsNullOrEmpty(entry.CharacterId) || _ownership.IsOwned(entry.CharacterId);
 
-        var sprite = PhotoSprite.Create(entry.ProfilePictureBase64_Main);
-        _pictures[entry] = sprite;
+    private Sprite GetThumbnail(CollectionData entry) =>
+        GetPicture(IsUnlocked(entry) ? entry.ProfilePictureBase64_Main : entry.ProfilePictureBase64_Main_Hidden);
+
+    /// <summary>사진을 처음 필요할 때 디코드해 캐시한다. 사진이 없으면 null.</summary>
+    private Sprite GetPicture(PhotoData photo)
+    {
+        if (photo == null) return null;
+        if (_pictures.TryGetValue(photo, out var cached)) return cached;
+
+        var sprite = PhotoSprite.Create(photo);
+        _pictures[photo] = sprite;
         return sprite;
     }
 
@@ -115,9 +151,21 @@ public sealed class CollectionPanelContentController : MonoBehaviour
     {
         if (entry == null) return;
 
+        var unlocked = IsUnlocked(entry);
+        if (_unlockedOnly != null)
+            for (int i = 0; i < _unlockedOnly.Length; i++)
+                if (_unlockedOnly[i] != null) _unlockedOnly[i].SetActive(unlocked);
+
+        if (_lockedMessage != null)
+        {
+            _lockedMessage.gameObject.SetActive(!unlocked);
+            if (!unlocked) LocalizationManager.SetText(_lockedMessage, "UICollection.locked_hint", ("ENERGY", entry.RequiredSpawnEnergy));
+        }
+        if (!unlocked) return;
+
         if (_illustration != null)
         {
-            var picture = GetPicture(entry);
+            var picture = GetPicture(entry.ProfilePictureBase64_Main);
             _illustration.sprite = picture;
             _illustration.enabled = picture != null;
         }
@@ -128,7 +176,13 @@ public sealed class CollectionPanelContentController : MonoBehaviour
             LocalizationManager.ApplyFont(_infoText);
             _infoText.text = BuildInfo(entry);
         }
-        if (_affinityText != null) LocalizationManager.SetText(_affinityText, "UICollection.affinity_empty");
+        if (_affinityText != null)
+        {
+            if (_ownership != null && !string.IsNullOrEmpty(entry.CharacterId))
+                LocalizationManager.SetText(_affinityText, "UICollection.affinity_value", ("AFFINITY", _ownership.GetCumulativeAffinity(entry.CharacterId)));
+            else
+                LocalizationManager.SetText(_affinityText, "UICollection.affinity_empty");
+        }
     }
 
     // 단위와 날짜 표기도 언어마다 달라서 조각마다 번역 표의 문장을 쓴다. 값이 없으면 "-".

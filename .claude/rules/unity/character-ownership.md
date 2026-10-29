@@ -7,6 +7,8 @@ paths:
   - "Project_Cozy/Assets/Scenes/GameScene.unity"
   - "Project_Cozy/Assets/Prefabs/Characters/*.prefab"
   - "Project_Cozy/Assets/Prefabs/Star.prefab"
+  - "Project_Cozy/Assets/Scripts/UI/CollectionPanelContentController.cs"
+  - "Project_Cozy/Assets/Scripts/Contents/CollectionSystem/Model/CollectionData.cs"
 ---
 
 # 캐릭터 보유·배치 기록 규약
@@ -35,6 +37,14 @@ paths:
 저장 파일에는 캐릭터별로 id 하나와 상태만 남습니다. id와 프리팹은 `CharacterOwnership` 인스펙터의 대응표로 잇습니다. 프리팹 이름이나 경로를 키로 쓰지 않는 이유는, 프리팹을 옮기거나 이름을 바꾸는 순간 저장된 기록이 조용히 끊기기 때문입니다. 상점 상품 id와 같은 규율입니다.
 
 그래서 id는 한번 정하면 바꾸지 않습니다. 바꾸면 이미 저장된 플레이어의 기록이 그 캐릭터를 잃습니다. 대응표에 없는 id가 기록에 있으면 경고만 남기고 등장시키지 않으며, 기록은 지우지 않습니다. 대응표에 다시 등록되면 저절로 돌아옵니다.
+
+## 도감은 이 기록을 읽기만 합니다
+
+도감 항목(WPF 툴이 만드는 `collection.dat`)은 `CharacterId`에 대응표의 id를 그대로 적어 캐릭터와 이어집니다. 해금 여부와 친밀도는 도감 데이터가 아니라 이 기록에서 읽습니다. 도감 데이터는 배포되는 정의라서 유저의 진행을 담을 수 없기 때문입니다. 같은 이유로 정의에 있는 `IsCollected`는 쓰지 않습니다.
+
+도감 같은 표시 쪽은 `Instance`로 조회하고, `RecordChanged`를 구독해 바뀐 캐릭터만 다시 그립니다. 기록을 고치는 일(해금·배치)은 여전히 이 클래스 안에서만 일어납니다. 표시 쪽이 기록을 직접 고치면 저장과 등장이 따로 놀기 때문입니다.
+
+`CharacterId`가 빈 도감 항목은 잠그지 않고 친밀도도 보여주지 않습니다. 연결이 없으면 해금될 길도 없어서, 잠가 두면 영원히 "?"로 남기 때문입니다. 빈 항목은 경고 로그로 드러납니다.
 
 ## 보유와 배치는 레코드 하나에 담습니다
 

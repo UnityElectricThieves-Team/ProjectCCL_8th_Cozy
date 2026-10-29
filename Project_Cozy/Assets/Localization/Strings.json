@@ -43,6 +43,8 @@
   "UICollection.button.memory": { "ko-KR": "회상", "en-US": "Memories", "ja-JP": "回想", "zh-Hans": "回忆", "zh-Hant": "回憶" },
   "UICollection.button.wardrobe": { "ko-KR": "옷장", "en-US": "Wardrobe", "ja-JP": "クローゼット", "zh-Hans": "衣柜", "zh-Hant": "衣櫃" },
   "UICollection.affinity_empty": { "ko-KR": "친밀도: -", "en-US": "Affinity: -", "ja-JP": "親密度：-", "zh-Hans": "亲密度：-", "zh-Hant": "親密度：-" },
+  "UICollection.affinity_value": { "ko-KR": "친밀도: {AFFINITY}", "en-US": "Affinity: {AFFINITY}", "ja-JP": "親密度：{AFFINITY}", "zh-Hans": "亲密度：{AFFINITY}", "zh-Hant": "親密度：{AFFINITY}" },
+  "UICollection.locked_hint": { "ko-KR": "냥발바닥 구름에 기운을 더 모아주세요!\n필요한 기운: {ENERGY}", "en-US": "Gather more energy in the paw-print cloud!\nEnergy needed: {ENERGY}", "ja-JP": "肉球雲にもっと気を集めてください！\n必要な気：{ENERGY}", "zh-Hans": "请在猫爪云里收集更多能量！\n所需能量：{ENERGY}", "zh-Hant": "請在貓爪雲裡收集更多能量！\n所需能量：{ENERGY}" },
   "UICollection.profile": { "ko-KR": "나이: {AGE}\n키: {HEIGHT}\n생일: {BIRTHDAY}\n취미: {HOBBY}", "en-US": "Age: {AGE}\nHeight: {HEIGHT}\nBirthday: {BIRTHDAY}\nHobby: {HOBBY}", "ja-JP": "年齢：{AGE}\n身長：{HEIGHT}\n誕生日：{BIRTHDAY}\n趣味：{HOBBY}", "zh-Hans": "年龄：{AGE}\n身高：{HEIGHT}\n生日：{BIRTHDAY}\n爱好：{HOBBY}", "zh-Hant": "年齡：{AGE}\n身高：{HEIGHT}\n生日：{BIRTHDAY}\n興趣：{HOBBY}" },
   "UICollection.age_value": { "ko-KR": "{AGE}세", "en-US": "{AGE}", "ja-JP": "{AGE}歳", "zh-Hans": "{AGE}岁", "zh-Hant": "{AGE}歲" },
   "UICollection.height_value": { "ko-KR": "{HEIGHT}cm", "en-US": "{HEIGHT} cm", "ja-JP": "{HEIGHT}cm", "zh-Hans": "{HEIGHT}cm", "zh-Hant": "{HEIGHT}cm" },

@@ -72,6 +72,10 @@ namespace Assets.Scripts.Contents.CollectionSystem.Model
     {
         public Guid CollectionId { get; set; } = Guid.NewGuid();
         public bool IsCollected { get; set; } = false;
+        // 게임의 캐릭터 대응표(CharacterOwnership) id와 같은 값. 이 값으로 해금 여부와 친밀도를 찾는다.
+        public string CharacterId { get; set; } = string.Empty;
+        // 해금에 필요한 누적 스폰 기운. 미해금 화면에 안내로 보여준다.
+        public int RequiredSpawnEnergy { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
         public int Age { get; set; } = 0;
         public int Height { get; set; } = 0;

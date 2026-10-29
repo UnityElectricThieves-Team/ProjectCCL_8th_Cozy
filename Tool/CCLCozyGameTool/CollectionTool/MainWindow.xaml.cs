@@ -127,6 +127,8 @@ namespace CollectionTool
             AgeTextBox.Text = _selected.Age == 0 ? string.Empty : _selected.Age.ToString();
             HeightTextBox.Text = _selected.Height == 0 ? string.Empty : _selected.Height.ToString();
             BirthdayDatePicker.SelectedDate = _selected.Birthday == DateTime.MinValue ? null : _selected.Birthday;
+            CharacterIdTextBox.Text = _selected.CharacterId;
+            RequiredSpawnEnergyTextBox.Text = _selected.RequiredSpawnEnergy.ToString();
 
             SetPreview(MainHiddenImage, _selected.ProfilePictureBase64_Main_Hidden);
             SetPreview(SubHiddenImage, _selected.ProfilePictureBase64_Sub_Hidden);
@@ -196,6 +198,8 @@ namespace CollectionTool
             _selected.Age = int.TryParse(AgeTextBox.Text, out var age) ? age : 0;
             _selected.Height = int.TryParse(HeightTextBox.Text, out var height) ? height : 0;
             _selected.Birthday = BirthdayDatePicker.SelectedDate ?? DateTime.MinValue;
+            _selected.CharacterId = CharacterIdTextBox.Text.Trim();
+            _selected.RequiredSpawnEnergy = int.TryParse(RequiredSpawnEnergyTextBox.Text, out var energy) ? energy : 0;
 
             EntryListBox.Items.Refresh();
 

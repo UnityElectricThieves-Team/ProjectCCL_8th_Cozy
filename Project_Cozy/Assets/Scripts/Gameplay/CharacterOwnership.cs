@@ -32,6 +32,14 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class CharacterOwnership : MonoBehaviour
 {
+    public static CharacterOwnership Instance { get; private set; }
+
+    /// <summary>
+    /// 어떤 캐릭터의 기록(보유·배치·누적 친밀도)이 바뀌었는지 알린다. 인자는 캐릭터 id.
+    /// 도감처럼 기록을 보여주는 쪽이 구독해 그 캐릭터만 다시 그린다.
+    /// </summary>
+    public event Action<string> RecordChanged;
+
     /// <summary>캐릭터 id와 프리팹의 짝. id는 저장 키라 한번 정하면 바꾸지 않는다.</summary>
     [Serializable]
     public class CharacterPrefabEntry
@@ -61,6 +69,8 @@ public class CharacterOwnership : MonoBehaviour
 
     private void Awake()
     {
+        Instance = this;
+
         _data = UserDataSaveIO.Load<CharacterOwnershipFileFormat>(GameDataPaths.CharacterOwnership);
 
         // 에디터 세이브는 사람이 열어 고칠 수 있는 평문 JSON이라, null 필드나 같은 id 레코드가 들어올 수 있다.
@@ -93,6 +103,8 @@ public class CharacterOwnership : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (Instance == this) Instance = null;
+
         if (_waitingForViewport && _viewportSettings != null)
             _viewportSettings.ViewportConfirmed -= OnFirstViewportConfirmed;
 
@@ -143,6 +155,7 @@ public class CharacterOwnership : MonoBehaviour
 
         record.placed = true;
         Save();
+        RecordChanged?.Invoke(id);
 
         // 뷰포트가 아직이면 기록만 해 둔다. 첫 확정 때 배치된 캐릭터 전부와 함께 등장한다.
         if (IsViewportReady) SpawnCharacter(id);
@@ -182,10 +195,17 @@ public class CharacterOwnership : MonoBehaviour
         {
             record.cumulativeAffinity = value;
             Save();
+            RecordChanged?.Invoke(id);
         };
         affinity.AffinityChanged += onChanged;
         _affinitySubscriptions.Add((affinity, onChanged));
     }
+
+    /// <summary>이 캐릭터를 보유했는가(해금됐는가). 화면에 나와 있는지와는 별개다.</summary>
+    public bool IsOwned(string id) => FindRecord(id) != null;
+
+    /// <summary>저장된 누적 친밀도. 보유하지 않은 캐릭터면 0.</summary>
+    public int GetCumulativeAffinity(string id) => FindRecord(id)?.cumulativeAffinity ?? 0;
 
     private CharacterRecord FindRecord(string id)
     {

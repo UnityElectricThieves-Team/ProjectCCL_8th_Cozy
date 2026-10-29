@@ -32,13 +32,7 @@ public sealed class CollectionEntrySlot : MonoBehaviour
         Entry = entry;
         _onClicked = onClicked;
 
-        if (_thumbnail != null)
-        {
-            // 사진이 없어도 칸은 남긴다 — 이미지를 꺼버리면 "사진만 없는 슬롯"과
-            // "슬롯이 아예 안 만들어진 것"이 화면에서 구분되지 않는다.
-            _thumbnail.sprite = thumbnail;
-            _thumbnail.color = thumbnail != null ? Color.white : MissingPhotoColor;
-        }
+        SetThumbnail(thumbnail);
 
         if (_button != null)
         {
@@ -47,6 +41,17 @@ public sealed class CollectionEntrySlot : MonoBehaviour
         }
 
         SetSelected(false);
+    }
+
+    /// <summary>썸네일만 바꾼다. 해금되어 숨김 사진에서 공개 사진으로 바뀔 때 선택 상태를 건드리지 않으려고 따로 둔다.</summary>
+    public void SetThumbnail(Sprite thumbnail)
+    {
+        if (_thumbnail == null) return;
+
+        // 사진이 없어도 칸은 남긴다 — 이미지를 꺼버리면 "사진만 없는 슬롯"과
+        // "슬롯이 아예 안 만들어진 것"이 화면에서 구분되지 않는다.
+        _thumbnail.sprite = thumbnail;
+        _thumbnail.color = thumbnail != null ? Color.white : MissingPhotoColor;
     }
 
     /// <summary>선택 강조를 켜고 끈다.</summary>
