@@ -30,7 +30,7 @@ public class ViewportEditHandles : MonoBehaviour
 {
     private enum DragZone { None, Move, Left, Right, Top, Bottom, TopLeft, TopRight, BottomLeft, BottomRight }
 
-    [SerializeField, Tooltip("미할당 시 씬에서 자동 탐색. 하니스가 Bind()로 주입 가능.")]
+    [SerializeField, Tooltip("미할당 시 씬에서 자동 탐색.")]
     private ViewportScreenSettings _viewportSettings;
 
     [Header("핸들 (베이스 공간 px)")]
@@ -65,14 +65,6 @@ public class ViewportEditHandles : MonoBehaviour
     private Color _savedClearColor;
     private bool _backdropApplied;
 
-    /// <summary>협력자 직접 주입 — Find 순서 의존 제거 (하니스의 EnsureCompanion 경로).</summary>
-    public void Bind(ViewportScreenSettings settings)
-    {
-        UnsubscribeEditMode();
-        _viewportSettings = settings;
-        SubscribeEditMode();
-    }
-
     private void Awake()
     {
         useGUILayout = false; // GUILayout 미사용 — Layout 페이즈 제거로 OnGUI 비용 절반 절감
@@ -83,7 +75,7 @@ public class ViewportEditHandles : MonoBehaviour
         if (_viewportSettings == null) _viewportSettings = FindFirstObjectByType<ViewportScreenSettings>();
         if (_viewportSettings == null)
         {
-            Debug.LogWarning("[ViewportEditHandles] ViewportScreenSettings 없음 — 비활성. Bind()로 주입 가능.");
+            Debug.LogWarning("[ViewportEditHandles] ViewportScreenSettings 없음 — 비활성.");
             enabled = false;
             return;
         }
@@ -99,8 +91,6 @@ public class ViewportEditHandles : MonoBehaviour
     private void SubscribeEditMode()
     {
         if (_viewportSettings == null) return;
-        // Bind() 후 Start()가 또 부를 수 있으므로 멱등으로 — 해제 후 구독.
-        _viewportSettings.EditModeChanged -= OnEditModeChanged;
         _viewportSettings.EditModeChanged += OnEditModeChanged;
     }
 

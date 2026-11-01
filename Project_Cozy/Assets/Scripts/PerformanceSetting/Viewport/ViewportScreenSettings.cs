@@ -15,9 +15,8 @@ using UnityEngine;
 ///              (RefreshBaseSpace). px→월드 환산(앵커·PPU)은 BaseSpaceCameraFitter가 든다.
 /// 뷰포트:      베이스 공간 안의 논리적 사각형. **렌더링 파라미터가 아니다** — 창을 줄이지도 화면을
 ///              잘라내지도 않는다. 캐릭터가 살 수 있는 영역이자 지면·회수 판정의 기준이다.
-/// 편집:        조정값은 프리뷰일 뿐이며(PreviewChanged로 UI가 경계·딤·회수 예정 시각화),
-///              SaveEdit()로만 확정, CancelEdit()는 폐기(§2.1.1 "저장하지 않고 나가면 폐기").
-/// 미저장:      설정 그래픽 탭에서 들어온 편집은 [완료]로 나와도 확정하지 않는다(EndEditKeepPreview).
+/// 편집:        조정값은 프리뷰일 뿐이다(PreviewChanged로 UI가 경계·딤·회수 예정 시각화).
+/// 미저장:      편집은 [완료]로 나와도 확정하지 않는다(EndEditKeepPreview).
 ///              조정한 사각형을 미저장 뷰포트로 들고 있다가, 그래픽 탭의 [저장]이 확정하고(CommitPendingViewport)
 ///              미저장 확인 팝업이 버린다(DiscardPendingViewport). 그동안 월드는 확정 뷰포트 그대로다.
 ///
@@ -83,14 +82,14 @@ public class ViewportScreenSettings : MonoBehaviour
     public event Action<RectInt> PreviewChanged;
 
     /// <summary>저장 확정 — ViewportSaveBinder가 구독해 영속화하는 지점.
-    /// 사용자가 편집 모드에서 명시적으로 저장했을 때만 발행한다. 클램프로 값이 줄어든 것은
+    /// 사용자가 설정 그래픽 탭에서 명시적으로 저장했을 때만 발행한다. 클램프로 값이 줄어든 것은
     /// 사용자의 뜻이 아니므로 발행하지 않는다 — 작은 화면에 한 번 열었다고 설정이 깎이면 안 된다.</summary>
     public event Action<RectInt> ViewportSaved;
 
     /// <summary>편집 모드 진입(true)/이탈(false) — 편집 UI 표시 토글 지점.</summary>
     public event Action<bool> EditModeChanged;
 
-    /// <summary>뷰포트가 확정된 직후 — 시작 시 초기 적용, SetViewport, 편집 저장/취소 복귀, 창 재조정 때마다 울린다.
+    /// <summary>뷰포트가 확정된 직후 — 시작 시 초기 적용, SetViewport, 편집 이탈, 미저장 뷰포트 확정, 창 재조정 때마다 울린다.
     /// 한 번만 울리는 "준비 완료" 신호가 아니다. 첫 확정이 이미 지났는지는 <see cref="IsReady"/>로 본다.
     /// 거주 영역(ViewportLivingAreaBinder)·배경 띠·장식 레이어가 구독한다.</summary>
     public event Action<RectInt> ViewportConfirmed;
@@ -163,7 +162,7 @@ public class ViewportScreenSettings : MonoBehaviour
 
         _viewport = ClampToBaseSpace(viewport);
 
-        // 편집 중에는 진행 중인 프리뷰를 건드리지 않는다. 저장/취소로 빠져나올 때
+        // 편집 중에는 진행 중인 프리뷰를 건드리지 않는다. 편집을 빠져나올 때
         // ExitEdit이 이 확정 값을 반영한다.
         if (_isEditing) return;
 
@@ -245,22 +244,6 @@ public class ViewportScreenSettings : MonoBehaviour
         PreviewChanged?.Invoke(_previewViewport);
     }
 
-    /// <summary>"화면 설정 저장" — 프리뷰를 확정하고 평시 상태로 복귀. §2.1.1의 유일한 확정 경로.</summary>
-    public void SaveEdit()
-    {
-        if (!_isEditing) return;
-        _viewport = _previewViewport;
-        ViewportSaved?.Invoke(_viewport);
-        ExitEdit();
-    }
-
-    /// <summary>저장 없이 이탈 — 프리뷰 폐기, 기존 뷰포트로 복귀.</summary>
-    public void CancelEdit()
-    {
-        if (!_isEditing) return;
-        ExitEdit();
-    }
-
     /// <summary>
     /// 편집 화면의 [완료]·ESC. 편집에서 나가 정지·잠금을 풀되, 조정한 사각형은 확정하지 않고 미저장 뷰포트로 남긴다.
     /// 확정은 설정 그래픽 탭의 [저장]이 한다(Figma "그래픽은 [저장]으로 최종 확정").
@@ -274,7 +257,7 @@ public class ViewportScreenSettings : MonoBehaviour
         ExitEdit();
     }
 
-    /// <summary>미저장 뷰포트를 확정한다(설정 그래픽 탭의 [저장]). 없으면 아무 일도 하지 않는다.</summary>
+    /// <summary>미저장 뷰포트를 확정한다(설정 그래픽 탭의 [저장]). 뷰포트를 확정하는 유일한 경로다. 없으면 아무 일도 하지 않는다.</summary>
     public void CommitPendingViewport()
     {
         if (!_hasPendingViewport) return;
