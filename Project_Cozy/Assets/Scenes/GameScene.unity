@@ -1833,7 +1833,7 @@ PrefabInstance:
       objectReference: {fileID: 1492600941}
     - target: {fileID: 8430567564375317691, guid: f7d3c7a93cc1d6b44ab5aaaaa12af980, type: 3}
       propertyPath: m_Name
-      value: Star
+      value: Cloud
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

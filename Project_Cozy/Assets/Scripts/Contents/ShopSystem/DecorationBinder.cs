@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +12,10 @@ using UnityEngine;
 ///
 /// 부팅 복원은 <see cref="ShopSystem"/>이 이벤트를 쏘지 않으므로, Start에서 현재 목록을 한 번 직접 읽는다.
 /// 장식 레이어 프리팹 루트에 <see cref="DecorationLayer"/>와 함께 붙는다.
+///
+/// 뷰포트를 줄여 저장하면(<see cref="ViewportScreenSettings.ViewportSaved"/>) 새 뷰포트에 온전히 들어가지 않는 장식을
+/// 인벤토리로 회수한다. 판정에 장식 그림의 크기가 필요한데, 상품 id를 프리팹으로 바꾸는 곳이 여기라 여기서 한다.
+/// 판정 상자는 설치 모드와 같은 그림 전체(투명 여백 포함)다. 확인 팝업은 띄우지 않는다.
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(DecorationLayer))]
@@ -20,8 +25,17 @@ public sealed class DecorationBinder : MonoBehaviour
 
     private DecorationLayer _layer;
     private ShopSystem _system;
+    private ViewportScreenSettings _viewportSettings;
+    private BaseSpaceCameraFitter _cameraFitter;
 
-    private void Awake() => _layer = GetComponent<DecorationLayer>();
+    private RectInt _savedViewport;   // 회수 판정 중인 새 뷰포트(베이스 공간 px)
+    private Predicate<PlacedDecorationData> _isOutsideSavedViewport;
+
+    private void Awake()
+    {
+        _layer = GetComponent<DecorationLayer>();
+        _isOutsideSavedViewport = IsOutsideSavedViewport;
+    }
 
     private void Start()
     {
@@ -36,11 +50,47 @@ public sealed class DecorationBinder : MonoBehaviour
 
         _system.OwnedChanged += Apply;
         Apply();
+
+        // 프리팹이라 씬 오브젝트를 인스펙터로 잇지 못한다 — DecorationLayer와 같이 Start에서 한 번 찾는다.
+        _viewportSettings = FindFirstObjectByType<ViewportScreenSettings>();
+        _cameraFitter = FindFirstObjectByType<BaseSpaceCameraFitter>();
+        if (_viewportSettings != null && _cameraFitter != null)
+            _viewportSettings.ViewportSaved += OnViewportSaved;
+        else
+            Debug.LogWarning($"[{nameof(DecorationBinder)}] ViewportScreenSettings/BaseSpaceCameraFitter 없음 — 뷰포트를 줄여도 장식을 회수하지 않습니다.", this);
     }
 
     private void OnDestroy()
     {
         if (_system != null) _system.OwnedChanged -= Apply;
+        if (_viewportSettings != null) _viewportSettings.ViewportSaved -= OnViewportSaved;
+    }
+
+    private void OnViewportSaved(RectInt viewport)
+    {
+        _savedViewport = viewport;
+        _system.RecallPlaced(_isOutsideSavedViewport);
+    }
+
+    // 그림의 가로 중앙이 저장된 x이고, 아래 끝은 지면(뷰포트 아래 변)에 붙는다. 그래서 가로는 양 끝을, 세로는 높이만 본다.
+    private bool IsOutsideSavedViewport(PlacedDecorationData placed)
+    {
+        // 지금 그리지 않는 장식(상점에 없는 id, 빈 프리팹)은 크기를 알 수 없어 그대로 둔다 — 그리는 쪽과 같은 판단.
+        ShopItemDefinition item = FindItem(placed.itemId);
+        if (item == null || item.decorationPrefab == null) return false;
+
+        SpriteRenderer renderer = item.decorationPrefab.GetComponentInChildren<SpriteRenderer>();
+        if (renderer == null || renderer.sprite == null) return false;
+
+        Vector3 size = renderer.sprite.bounds.size;
+        Vector3 scale = renderer.transform.lossyScale;
+        float ppu = _cameraFitter.PixelsPerUnit;
+        float halfWidthPx = size.x * Mathf.Abs(scale.x) * ppu * 0.5f;
+        float heightPx = size.y * Mathf.Abs(scale.y) * ppu;
+
+        return placed.x - halfWidthPx < _savedViewport.xMin
+            || placed.x + halfWidthPx > _savedViewport.xMax
+            || heightPx > _savedViewport.height;
     }
 
     private void Apply()

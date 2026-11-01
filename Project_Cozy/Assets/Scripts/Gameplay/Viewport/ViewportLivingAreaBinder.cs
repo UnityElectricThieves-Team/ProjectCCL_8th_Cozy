@@ -9,13 +9,12 @@ using UnityEngine;
 /// (Character/CLAUDE.md의 "캐릭터는 화면 정책을 모른다" 원칙).
 ///
 /// 거는 시점이 둘이다.
-///   - <c>ViewportConfirmed</c> — 뷰포트가 확정될 때. 이때 이미 밖에 있던 캐릭터는 안으로 끌려온다.
+///   - <c>ViewportConfirmed</c> — 뷰포트가 확정될 때. 이때 이미 밖에 있던 캐릭터는 안쪽 랜덤 위치로 옮겨진다.
 ///   - <c>CharacterManager.Registered</c> — 그 뒤에 등록된 캐릭터. ViewportConfirmed는 등록 시점에
 ///     다시 오지 않으므로, 이게 없으면 나중에 들어온 캐릭터만 제한 없이 돌아다닌다.
 ///
-/// **편집 중 프리뷰에는 반응하지 않는다.** 저장·취소로 확정된 순간에만 적용한다 —
-/// 핸들을 끄는 동안 캐릭터가 따라 끌려다니면 조작이 어렵고, 기획서도 조정 중에는 밖으로 나간
-/// 대상을 그대로 두라고 정하고 있다(UserSettings.md §2.1.1).
+/// **편집 중 프리뷰에는 반응하지 않는다.** 뷰포트가 확정된 순간에만 적용한다 —
+/// 핸들을 끄는 동안 캐릭터가 따라 끌려다니면 조작이 어렵다. 조정한 뷰포트는 그래픽 탭의 [저장]으로 확정된다.
 /// </summary>
 [DisallowMultipleComponent]
 public class ViewportLivingAreaBinder : MonoBehaviour

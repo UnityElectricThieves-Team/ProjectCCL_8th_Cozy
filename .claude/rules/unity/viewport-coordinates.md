@@ -3,6 +3,7 @@ paths:
   - "Project_Cozy/Assets/Scripts/PerformanceSetting/Viewport/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Viewport/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/CharacterOwnership.cs"
+  - "Project_Cozy/Assets/Scripts/Gameplay/CloudController.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Background/**/*.cs"
   - "Project_Cozy/Assets/Scripts/Contents/ShopSystem/Background*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/Decoration/**/*.cs"
@@ -46,6 +47,16 @@ paths:
 - 베이스 공간 폭은 늘 마스터 캔버스 폭이므로, 해상도가 낮아져도 뷰포트는 화면 대비 같은 비율로 따라갑니다. "모니터가 작아지면 뷰포트를 줄인다" 같은 처리는 따로 하지 않습니다.
 - 종횡비가 바뀌어 베이스 공간 높이가 줄면 뷰포트를 그 안으로 잘라 맞추지만 **저장하지는 않습니다.** 원래 모니터로 돌아가면 저장된 뷰포트가 그대로 돌아옵니다.
 - 이 버튼은 그래픽 탭의 [저장] 흐름을 타지 않고 누르는 즉시 적용됩니다. 사용자의 선택을 바꾸는 것이 아니라, 바뀐 화면에 지금 상태를 맞추는 것뿐이라서입니다.
+
+## 뷰포트 밖에 남은 것은 확정될 때 정리합니다
+
+뷰포트를 줄여 확정하면 그 밖에 남은 것을 각자의 주인이 정리합니다. 편집 중 프리뷰에는 아무도 따라가지 않습니다.
+
+- **장식**은 [저장]으로 확정될 때 인벤토리로 회수합니다. 규칙은 [decoration-placement.md](decoration-placement.md).
+- **캐릭터**는 뷰포트 안의 랜덤한 가로 위치 지면으로 옮깁니다. 규칙은 [character-ownership.md](character-ownership.md).
+- **구름**은 그림이 뷰포트 안에 온전히 들어가는 범위의 랜덤 위치로 옮깁니다. 마우스로 끌 때도 그 범위의 경계에 걸려 밖으로 나가지 않습니다. 구름은 캐릭터와 달리 지면에 붙지 않아서 세로도 랜덤입니다.
+
+캐릭터와 구름은 [저장]뿐 아니라 뷰포트가 확정될 때마다(창 다시 맞추기 포함) 확인합니다. 장식만 [저장] 때로 한정하는 것은, 회수는 저장되는 일이라 사용자가 고른 뷰포트에서만 일어나야 하기 때문입니다.
 
 ## 월드 PPU는 코드 상수 100입니다
 

@@ -36,7 +36,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 6
-    m_ConditionEvent: StarState
+    m_ConditionEvent: CloudState
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -8041795956750649039}
@@ -61,7 +61,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 6
-    m_ConditionEvent: StarState
+    m_ConditionEvent: CloudState
     m_EventTreshold: 1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 2318845978069168808}
@@ -83,10 +83,10 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: BaseStarAnimatorController
+  m_Name: BaseCloudAnimatorController
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: StarState
+  - m_Name: CloudState
     m_Type: 3
     m_DefaultFloat: 0
     m_DefaultInt: 0

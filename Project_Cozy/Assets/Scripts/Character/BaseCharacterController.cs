@@ -220,17 +220,21 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     /// 캐릭터는 이 사각형이 무엇에서 왔는지 모른다 — 월드 좌표로 환산된 결과만 받는다.
     /// 뷰포트에서 환산해 걸어주는 것은 <c>Gameplay/Viewport/ViewportLivingAreaBinder</c>다.
     ///
-    /// 지금 밖에 있으면 즉시 안으로 끌어들인다(뷰포트를 캐릭터 밑에서 줄인 경우).
+    /// 발이 지금 밖에 있으면 영역 안의 랜덤한 가로 위치 지면으로 옮긴다(뷰포트를 캐릭터 밑에서 줄인 경우).
+    /// 기획이 "새 화면 안에 랜덤 재배치"로 정했다. 파괴·재생성이 아니라 위치만 옮기므로 친밀도 등 상태는 그대로다.
     /// </summary>
     public void SetLivingArea(Rect worldArea)
     {
         _livingArea = worldArea;
         _hasLivingArea = true;
 
-        // 가로만 여기서 넣는다.
         Vector3 p = transform.position;
-        p.x = Mathf.Clamp(p.x, _livingArea.xMin, _livingArea.xMax);
-        transform.position = p;
+        if (p.x < _livingArea.xMin || p.x > _livingArea.xMax)
+        {
+            p.x = Random.Range(_livingArea.xMin, _livingArea.xMax);
+            p.y = _livingArea.yMin;
+            transform.position = p;
+        }
 
         // 세로는 접지 규칙이 정한다 — 공중에 있는 캐릭터를 바닥으로 끌어내리면 안 되고, 그 판정은 상태가 안다.
         // 다음 Update까지 미루지 않고 여기서 부른다. 미루면 뷰포트가 바뀐 그 프레임 동안

@@ -2,18 +2,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 인벤토리 패널 내용물(Content)의 두뇌. 플레이어가 가진 장식을 격자에 늘어놓고,
-/// 소유가 바뀌면(장식을 새로 사면) 다시 그린다.
+/// 인벤토리 패널 내용물(Content)의 두뇌. 플레이어가 가진 장식 중 화면에 놓지 않은 것을 격자에 늘어놓고,
+/// 소유나 놓인 목록이 바뀌면(장식을 사서 놓거나 회수하면) 다시 그린다.
 ///
 /// 칸을 어디에 놓을지는 이 스크립트가 계산하지 않는다 — <see cref="_content"/>에 붙은
 /// GridLayoutGroup이 한다. 그래서 상점처럼 행 프리팹(<see cref="ShopItemRow"/>)을 두지 않는다.
 /// 상점은 장식과 배경의 칸 크기·한 행에 담기는 수가 달라 '행'이라는 단위가 필요했지만,
 /// 인벤토리는 모든 칸이 같은 크기라 격자 하나로 끝난다.
 ///
-/// 지금 보여주는 것은 '산 장식 전부'다. 기획(Figma)의 인벤토리는 산 것 중에서도
-/// **아직 화면에 설치하지 않은** 장식만 보여주고 '이동/회수/제거' 모드 버튼을 갖지만,
-/// 회수 모드가 아직 없어 잔여 개수를 다루지 않는다. 회수가 생기면 <see cref="BuildOwnedList"/>가
-/// 목록을 어디서 가져오는지만 바꾸면 된다.
+/// 보여주는 것은 산 장식 중 **아직 화면에 놓지 않은** 것(잔여 장식)과 그 개수다(<see cref="ShopSystem.GetUnplacedCount"/>).
+/// 기획(Figma 인벤토리)이 "이미 배치되어 있는 시설물은 인벤토리에 없음"이라고 정했다. 그래서 설치하면 칸이 줄고,
+/// 회수하면 다시 는다. '이동/회수/제거' 모드 버튼은 아직 없다.
 ///
 /// 패널은 CanvasGroup으로 숨기므로(SetActive 아님) 다시 열려도 <see cref="OnEnable"/>이 불리지 않는다.
 /// 그래서 화면을 여는 시점이 아니라 <see cref="ShopSystem.OwnedChanged"/>가 울릴 때 다시 그린다.
@@ -69,16 +68,16 @@ public sealed class InventoryPanelContentController : MonoBehaviour
 
             var slot = _slots[i];
             slot.gameObject.SetActive(true);
-            slot.Bind(_owned[i], shop.GetCount(_owned[i].id));
+            slot.Bind(_owned[i], shop.GetUnplacedCount(_owned[i].id));
         }
 
         for (int i = _owned.Count; i < _slots.Count; i++) _slots[i].gameObject.SetActive(false);
     }
 
     /// <summary>
-    /// 가지고 있는 장식만 골라 <see cref="_owned"/>에 담고 진열 순서로 정렬한다.
+    /// 화면에 놓지 않고 남은 장식만 골라 <see cref="_owned"/>에 담고 진열 순서로 정렬한다.
     ///
-    /// 기획의 정렬 규칙은 "가장 최근에 회수한 것부터 앞"인데, 회수라는 개념 자체가 아직 코드에 없어
+    /// 기획의 정렬 규칙은 "가장 최근에 회수한 것부터 앞"인데, 회수한 순서를 아직 저장하지 않아
     /// 이번에는 쓸 수 없다. 대신 상점과 같은 순서(싼 것부터, 가격이 같으면 id 순)로 둔다 —
     /// 상점에서 본 차례대로 인벤토리에도 놓이는 편이 찾기 쉽다.
     ///
@@ -97,7 +96,7 @@ public sealed class InventoryPanelContentController : MonoBehaviour
         {
             // 인스펙터에서 칸을 비워둔 채로 두면 null이 섞여 들어오므로 여기서 걸러낸다.
             var item = catalog[i];
-            if (item != null && shop.IsOwned(item.id)) _owned.Add(item);
+            if (item != null && shop.GetUnplacedCount(item.id) > 0) _owned.Add(item);
         }
 
         _owned.Sort(CompareForDisplay);
