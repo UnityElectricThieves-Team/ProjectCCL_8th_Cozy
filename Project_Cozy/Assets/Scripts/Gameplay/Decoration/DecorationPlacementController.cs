@@ -91,7 +91,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
     private void Start()
     {
         // 프리팹은 씬 오브젝트를 인스펙터로 참조할 수 없고, 인스턴스에서 걸면 씬 override가 남는다.
-        // 그래서 Start에서 한 번만 찾는다(BackgroundStrip·ViewportScreenSettings와 같은 방식).
+        // 그래서 Start에서 한 번만 찾는다(BackgroundStage·ViewportScreenSettings와 같은 방식).
         _viewportSettings = FindFirstObjectByType<ViewportScreenSettings>();
         _cameraFitter = FindFirstObjectByType<BaseSpaceCameraFitter>();
         _windowManager = FindFirstObjectByType<WindowManager>();

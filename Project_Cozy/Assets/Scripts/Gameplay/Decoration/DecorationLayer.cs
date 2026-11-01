@@ -22,7 +22,7 @@ public readonly struct PlacedDecoration
 /// 그림의 아래 끝을 지면(확정 뷰포트의 아래 변)에 맞춘다.
 ///
 /// 이 컴포넌트는 <b>상점을 모른다</b> — 무엇을 어디에 놓을지는 밖에서 <see cref="SetDecorations"/>로 넣어 준다
-/// (배경의 <see cref="BackgroundStrip"/>과 같은 자리). 그래야 이동·회수 모드가 같은 레이어를 그대로 쓸 수 있다.
+/// (배경의 <see cref="BackgroundStage"/>와 같은 자리). 그래야 이동·회수 모드가 같은 레이어를 그대로 쓸 수 있다.
 ///
 /// 목록이 바뀌면 인스턴스를 전부 지우고 다시 만든다. 바뀌는 순간이 설치를 확정할 때뿐이라 드물고 개수도 적다.
 /// 놓인 장식에는 고유 id가 없어서, 차이만 골라 만드는 방식은 지금 상점에 없는 상품이 섞이면 어긋난다.
@@ -54,7 +54,7 @@ public sealed class DecorationLayer : MonoBehaviour
     private void Start()
     {
         // 프리팹은 씬 오브젝트를 인스펙터로 참조할 수 없고, 인스턴스에서 걸면 씬 override가 남는다.
-        // 그래서 Start에서 한 번만 찾는다(BackgroundStrip과 같은 방식).
+        // 그래서 Start에서 한 번만 찾는다(BackgroundStage와 같은 방식).
         _viewportSettings = FindFirstObjectByType<ViewportScreenSettings>();
         _cameraFitter = FindFirstObjectByType<BaseSpaceCameraFitter>();
 

@@ -1,24 +1,23 @@
 using UnityEngine;
 
 /// <summary>
-/// <see cref="BackgroundSystem"/>의 활성 배경과 띠 높이를 <see cref="BackgroundStrip"/>에 이어 주는 얇은 바인더.
-/// 활성 배경이 바뀌면 그 정의의 <see cref="ShopItemDefinition.backgroundSprite"/>를 띠에 넣고, 없으면 null을 넣어 숨긴다.
-/// 높이는 시작할 때 한 번 넘긴다 — 런타임에 바뀌는 값이 아니다.
+/// <see cref="BackgroundSystem"/>의 활성 배경을 <see cref="BackgroundStage"/>에 이어 주는 얇은 바인더.
+/// 활성 배경이 바뀌면 그 정의의 <see cref="ShopItemDefinition.backgroundPrefab"/>을 무대에 넣고, 없으면 null을 넣어 지운다.
 ///
-/// 띠(<see cref="BackgroundStrip"/>)는 상점을 모르고 기하만 책임진다. 상점 쪽 상태를 아는 것은 이 컴포넌트뿐이라,
+/// 무대(<see cref="BackgroundStage"/>)는 상점을 모르고 배치만 책임진다. 상점 쪽 상태를 아는 것은 이 컴포넌트뿐이라,
 /// 뷰포트 → 캐릭터 거주 영역을 잇는 <see cref="ViewportLivingAreaBinder"/>와 같은 자리다.
 ///
 /// 부팅 복원은 <see cref="BackgroundSystem"/>이 이벤트를 쏘지 않으므로, Start에서 현재 값을 한 번 직접 읽는다.
-/// 배경 프리팹 루트에 <see cref="BackgroundStrip"/>과 함께 붙는다.
+/// 배경 프리팹 루트에 <see cref="BackgroundStage"/>와 함께 붙는다.
 /// </summary>
 [DisallowMultipleComponent]
-[RequireComponent(typeof(BackgroundStrip))]
+[RequireComponent(typeof(BackgroundStage))]
 public sealed class BackgroundBinder : MonoBehaviour
 {
-    private BackgroundStrip _strip;
+    private BackgroundStage _stage;
     private BackgroundSystem _system;
 
-    private void Awake() => _strip = GetComponent<BackgroundStrip>();
+    private void Awake() => _stage = GetComponent<BackgroundStage>();
 
     private void Start()
     {
@@ -32,7 +31,6 @@ public sealed class BackgroundBinder : MonoBehaviour
         }
 
         _system.ActiveBackgroundChanged += OnActiveBackgroundChanged;
-        _strip.SetHeight(_system.HeightBasePx); // 높이의 소유자는 BackgroundSystem — 띠는 받기만 한다
         Apply();
     }
 
@@ -47,6 +45,6 @@ public sealed class BackgroundBinder : MonoBehaviour
     private void Apply()
     {
         var item = _system.ActiveBackground;
-        _strip.SetSprite(item != null ? item.backgroundSprite : null);
+        _stage.SetPrefab(item != null ? item.backgroundPrefab : null);
     }
 }
