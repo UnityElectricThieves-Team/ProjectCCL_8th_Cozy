@@ -23,15 +23,16 @@ public sealed class BackgroundSystem : MonoBehaviour
 {
     public static BackgroundSystem Instance { get; private set; }
 
-    [Tooltip("게임에 존재하는 모든 배경. 여기 늘어놓은 순서는 상점 진열 순서와 무관하다 — 진열 순서는 상점이 따로 정한다.")]
-    [SerializeField] private ShopItemDefinition[] _availableBackgrounds;
+    [Tooltip("게임에 존재하는 모든 상품 목록. 배경은 이 목록의 backgrounds를 쓴다.")]
+    [SerializeField] private ShopCatalog _catalog;
 
     /// <summary>
     /// 게임에 존재하는 모든 배경 목록. 상점이 이걸 받아 자기 규칙대로 정렬해 진열한다.
     /// 카탈로그를 상점 패널이 아니라 이 시스템이 드는 이유는, 배경 상태를 들고 있는 쪽이
     /// "어떤 배경들이 있는가"도 알아야 하기 때문이다. 상점을 한 번도 열지 않아도 목록이 존재해야 한다.
     /// </summary>
-    public IReadOnlyList<ShopItemDefinition> AvailableBackgrounds => _availableBackgrounds;
+    public IReadOnlyList<ShopItemDefinition> AvailableBackgrounds =>
+        _catalog != null && _catalog.backgrounds != null ? _catalog.backgrounds : Array.Empty<ShopItemDefinition>();
 
     private BackgroundFileFormat _data = new();
 
@@ -68,21 +69,6 @@ public sealed class BackgroundSystem : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
-#if UNITY_EDITOR
-    // 배경 상품인데 실제로 깔릴 프리팹이 비어 있으면, 사용을 눌러도 화면에 아무것도 안 그려지고
-    // 어디서도 에러가 나지 않는다. 에셋을 새로 만들 때 빠뜨린 것을 여기서 시끄럽게 알린다.
-    private void OnValidate()
-    {
-        if (_availableBackgrounds == null) return;
-        for (int i = 0; i < _availableBackgrounds.Length; i++)
-        {
-            var item = _availableBackgrounds[i];
-            if (item != null && item.backgroundPrefab == null)
-                Debug.LogWarning($"[{nameof(BackgroundSystem)}] 배경 '{item.id}'의 backgroundPrefab이 비어 있음 — 사용해도 화면에 아무것도 안 그려진다.", item);
-        }
-    }
-#endif
-
     /// <summary>이 배경을 이미 샀는가.</summary>
     public bool IsOwned(string id) => _data.ownedIds.Contains(id);
 
@@ -97,10 +83,11 @@ public sealed class BackgroundSystem : MonoBehaviour
     {
         get
         {
-            if (string.IsNullOrEmpty(_data.activeId) || _availableBackgrounds == null) return null;
-            for (int i = 0; i < _availableBackgrounds.Length; i++)
+            if (string.IsNullOrEmpty(_data.activeId)) return null;
+            var backgrounds = AvailableBackgrounds;
+            for (int i = 0; i < backgrounds.Count; i++)
             {
-                var item = _availableBackgrounds[i];
+                var item = backgrounds[i];
                 if (item != null && item.id == _data.activeId) return item;
             }
             return null;

@@ -21,15 +21,16 @@ public sealed class ShopSystem : MonoBehaviour
 {
     public static ShopSystem Instance { get; private set; }
 
-    [Tooltip("게임에 존재하는 모든 장식. 여기 늘어놓은 순서는 상점 진열 순서와 무관하다 — 진열 순서는 상점이 따로 정한다.")]
-    [SerializeField] private ShopItemDefinition[] _availableDecorations;
+    [Tooltip("게임에 존재하는 모든 상품 목록. 장식은 이 목록의 decorations를 쓴다.")]
+    [SerializeField] private ShopCatalog _catalog;
 
     /// <summary>
     /// 게임에 존재하는 모든 장식 목록. 상점이 이걸 받아 자기 규칙대로 정렬해 진열한다.
     /// 카탈로그를 상점 패널이 아니라 이 시스템이 드는 이유는, 소유 상태를 들고 있는 쪽이
     /// "어떤 장식들이 있는가"도 알아야 하기 때문이다(<see cref="BackgroundSystem"/>와 같은 구조).
     /// </summary>
-    public IReadOnlyList<ShopItemDefinition> AvailableDecorations => _availableDecorations;
+    public IReadOnlyList<ShopItemDefinition> AvailableDecorations =>
+        _catalog != null && _catalog.decorations != null ? _catalog.decorations : Array.Empty<ShopItemDefinition>();
 
     private ShopInventoryFileFormat _inventory = new();
 
