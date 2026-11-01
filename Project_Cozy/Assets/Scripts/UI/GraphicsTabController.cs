@@ -8,6 +8,7 @@ using UnityEngine;
 ///
 /// 값은 들고 있지 않다. −/+ 줄이 바뀌면 <see cref="SettingsManager"/>에 지금 값(미리보기)을 쓰고,
 /// [저장]이 확정, [초기화]는 기본값 미리보기다. 화면에 반영하는 쪽은 매니저의 <see cref="SettingsManager.GraphicsChanged"/>를 듣는다.
+/// 화면 크기 [조정]의 미저장 사각형은 <see cref="ViewportScreenSettings"/>가 들고, [저장]·미저장 확인은 둘을 함께 다룬다.
 ///
 /// 버튼 OnClick과 −/+ 줄의 ValueChanged는 인스펙터로 여기 public 메서드에 건다.
 /// 패널 오브젝트는 CanvasGroup으로 숨기지만, 탭 루트는 SetActive로 껐다 켜므로 이 컴포넌트의 Start는 그래픽 탭을 처음 열 때 돈다.
@@ -52,16 +53,32 @@ public sealed class GraphicsTabController : MonoBehaviour
     public void OnCharacterScaleChanged(int step) { if (_settings != null) _settings.SetCharacterScaleStep(step); }
     public void OnUIScaleChanged(int step) { if (_settings != null) _settings.SetUIScaleStep(step); }
 
-    // [저장] 버튼.
-    public void Save() { if (_settings != null) _settings.CommitGraphics(); }
+    // [저장] 버튼. 크기 단계와 화면 크기 조정을 함께 확정한다.
+    public void Save()
+    {
+        if (_settings != null) _settings.CommitGraphics();
+        if (FindViewport() != null) _viewport.CommitPendingViewport();
+    }
+
+    // 화면 크기 [조정] 버튼. 편집에 들어가면 UIManager가 패널을 모두 숨기고, 편집 화면의 [완료]·ESC로 돌아온다.
+    // 조정한 크기는 [저장]을 눌러야 확정된다.
+    public void AdjustViewport()
+    {
+        if (FindViewport() != null && _viewport.IsReady) _viewport.EnterEdit();
+    }
 
     // "화면 다시 맞추기" 버튼. 해상도·작업표시줄·모니터가 바뀐 뒤 창과 카메라를 지금 작업 영역에 다시 맞춘다.
     // 사용자의 선택을 바꾸는 일이 아니라 [저장] 흐름을 타지 않고 바로 적용한다.
-    // 패널 프리팹은 씬 오브젝트를 참조할 수 없어 처음 누를 때 한 번 찾아 둔다.
     public void ReadjustWindow()
     {
+        if (FindViewport() != null) _viewport.ReadjustWindow();
+    }
+
+    // 패널 프리팹은 씬 오브젝트를 참조할 수 없어 처음 쓸 때 한 번 찾아 둔다.
+    private ViewportScreenSettings FindViewport()
+    {
         if (_viewport == null) _viewport = FindFirstObjectByType<ViewportScreenSettings>();
-        if (_viewport != null) _viewport.ReadjustWindow();
+        return _viewport;
     }
 
     // [초기화] 버튼. 확인하면 기본값을 미리보기로 보여 주고, 확정은 [저장]이 한다.
@@ -78,19 +95,27 @@ public sealed class GraphicsTabController : MonoBehaviour
     /// </summary>
     public bool TryLeave(Action leave)
     {
-        if (_settings == null || !_settings.HasUnsavedGraphics) return true;
+        bool unsavedSteps = _settings != null && _settings.HasUnsavedGraphics;
+        bool unsavedViewport = FindViewport() != null && _viewport.HasPendingViewport;
+        if (!unsavedSteps && !unsavedViewport) return true;
         if (ConfirmPopup.Instance == null)
         {
             // 물을 팝업이 없는 씬이면 막지 않는다(닫기가 영영 막히지 않게). 저장 안 한 미리보기는 버린다.
-            _settings.RevertGraphics();
+            DiscardUnsaved();
             return true;
         }
 
         ConfirmPopup.Instance.Show(UnsavedMessageId, () =>
         {
-            _settings.RevertGraphics();
+            DiscardUnsaved();
             leave?.Invoke();
         });
         return false;
+    }
+
+    private void DiscardUnsaved()
+    {
+        if (_settings != null) _settings.RevertGraphics();
+        if (_viewport != null) _viewport.DiscardPendingViewport();
     }
 }

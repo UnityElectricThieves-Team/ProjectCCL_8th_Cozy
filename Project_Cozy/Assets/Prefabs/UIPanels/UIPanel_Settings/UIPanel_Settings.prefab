@@ -4776,6 +4776,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4933372482555496290, guid: 5ad0853b362e0e54a8de4ac8bdf8ca59, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4933372482555496290, guid: 5ad0853b362e0e54a8de4ac8bdf8ca59, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4933372482555496290, guid: 5ad0853b362e0e54a8de4ac8bdf8ca59, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6904332796153174398}
+    - target: {fileID: 4933372482555496290, guid: 5ad0853b362e0e54a8de4ac8bdf8ca59, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4933372482555496290, guid: 5ad0853b362e0e54a8de4ac8bdf8ca59, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: AdjustViewport
+      objectReference: {fileID: 0}
+    - target: {fileID: 4933372482555496290, guid: 5ad0853b362e0e54a8de4ac8bdf8ca59, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: GraphicsTabController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 4933372482555496290, guid: 5ad0853b362e0e54a8de4ac8bdf8ca59, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 5889514718494954610, guid: 5ad0853b362e0e54a8de4ac8bdf8ca59, type: 3}
       propertyPath: m_text
       value: "\uD654\uBA74 \uD06C\uAE30"

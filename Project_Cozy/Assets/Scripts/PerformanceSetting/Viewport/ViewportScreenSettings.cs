@@ -17,6 +17,9 @@ using UnityEngine;
 ///              잘라내지도 않는다. 캐릭터가 살 수 있는 영역이자 지면·회수 판정의 기준이다.
 /// 편집:        조정값은 프리뷰일 뿐이며(PreviewChanged로 UI가 경계·딤·회수 예정 시각화),
 ///              SaveEdit()로만 확정, CancelEdit()는 폐기(§2.1.1 "저장하지 않고 나가면 폐기").
+/// 미저장:      설정 그래픽 탭에서 들어온 편집은 [완료]로 나와도 확정하지 않는다(EndEditKeepPreview).
+///              조정한 사각형을 미저장 뷰포트로 들고 있다가, 그래픽 탭의 [저장]이 확정하고(CommitPendingViewport)
+///              미저장 확인 팝업이 버린다(DiscardPendingViewport). 그동안 월드는 확정 뷰포트 그대로다.
 ///
 /// 이 모델을 고른 이유는 Docs/Development/WindowViewportUIArchitecture.md.
 ///
@@ -46,7 +49,9 @@ public class ViewportScreenSettings : MonoBehaviour
     private RectInt _viewport = new RectInt(0, 0, 0, 0);
 
     private RectInt _previewViewport;
-    private RectInt _baseSpaceScreenRect;      // 작업 영역을 스크린 좌표(화면 px, Y 아래)로 표현한 것 — 창 배치용
+    private RectInt _pendingViewport;          // [완료]로 나왔지만 아직 [저장]하지 않은 뷰포트
+    private bool _hasPendingViewport;
+    private RectInt _baseSpaceScreenRect;     // 작업 영역을 스크린 좌표(화면 px, Y 아래)로 표현한 것 — 창 배치용
     private Vector2Int _baseSpaceSize;         // 베이스 공간 크기(마스터 캔버스 기준 px) — 폭은 항상 MasterCanvasWidthPx
     private bool _isEditing;
     private bool _ready;                       // 초기 적용 완료 전 API 호출 가드
@@ -63,6 +68,9 @@ public class ViewportScreenSettings : MonoBehaviour
     public RectInt PreviewViewport => _isEditing ? _previewViewport : _viewport;
 
     public bool IsEditing => _isEditing;
+
+    /// <summary>조정했지만 아직 저장하지 않은 뷰포트가 있는가. 설정 그래픽 탭의 미저장 판정에 들어간다.</summary>
+    public bool HasPendingViewport => _hasPendingViewport;
 
     /// <summary>초기 적용 완료 여부. false 동안 EnterEdit/ReadjustWindow는 거부된다 — UI는 이걸로 버튼을 잠글 것.</summary>
     public bool IsReady => _ready;
@@ -198,6 +206,7 @@ public class ViewportScreenSettings : MonoBehaviour
         // 작업 영역이 줄었으면 뷰포트가 베이스 공간을 넘칠 수 있다. 줄여서 맞추되 저장하지는 않는다
         // (큰 모니터로 돌아가면 저장된 원래 크기가 복원되어야 한다).
         _viewport = ClampToBaseSpace(_viewport);
+        if (_hasPendingViewport) _pendingViewport = ClampToBaseSpace(_pendingViewport);
         PublishViewportConfirmed();
     }
 
@@ -213,7 +222,8 @@ public class ViewportScreenSettings : MonoBehaviour
             return;
         }
         _isEditing = true;
-        _previewViewport = _viewport;
+        // 저장하지 않은 조정이 있으면 거기서 이어 간다 — [완료] 뒤 다시 [조정]을 눌러도 손댄 것이 남아 있게.
+        _previewViewport = _hasPendingViewport ? _pendingViewport : _viewport;
 
         if (_windowManager != null)
         {
@@ -250,6 +260,32 @@ public class ViewportScreenSettings : MonoBehaviour
         if (!_isEditing) return;
         ExitEdit();
     }
+
+    /// <summary>
+    /// 편집 화면의 [완료]·ESC. 편집에서 나가 정지·잠금을 풀되, 조정한 사각형은 확정하지 않고 미저장 뷰포트로 남긴다.
+    /// 확정은 설정 그래픽 탭의 [저장]이 한다(Figma "그래픽은 [저장]으로 최종 확정").
+    /// 편집을 열어 둔 채 패널로 돌아가면 그동안 바탕화면 전체가 클릭을 받지 않으므로, 편집 자체는 여기서 끝낸다.
+    /// </summary>
+    public void EndEditKeepPreview()
+    {
+        if (!_isEditing) return;
+        _pendingViewport = _previewViewport;
+        _hasPendingViewport = !_previewViewport.Equals(_viewport); // 손댔다가 원래대로 돌려 놓았으면 미저장이 아니다
+        ExitEdit();
+    }
+
+    /// <summary>미저장 뷰포트를 확정한다(설정 그래픽 탭의 [저장]). 없으면 아무 일도 하지 않는다.</summary>
+    public void CommitPendingViewport()
+    {
+        if (!_hasPendingViewport) return;
+        _viewport = _pendingViewport;
+        _hasPendingViewport = false;
+        ViewportSaved?.Invoke(_viewport);
+        PublishViewportConfirmed();
+    }
+
+    /// <summary>미저장 뷰포트를 버린다(그래픽 탭 미저장 확인). 월드는 처음부터 확정 뷰포트였으므로 알릴 것이 없다.</summary>
+    public void DiscardPendingViewport() => _hasPendingViewport = false;
 
     // ===== 내부 =====
 

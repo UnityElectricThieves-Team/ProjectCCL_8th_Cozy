@@ -21,7 +21,8 @@ using UnityEngine.InputSystem;
 /// 클리어 알파를 올리면 창 전체의 목적지 알파가 보장되고, "편집 중" 전역 신호도 겸한다.
 /// 알파 1(완전 불투명)은 금지 — 데스크톱을 보면서 뷰포트를 배치하는 편집 UX가 죽는다.
 ///
-/// 확정/폐기는 이 컴포넌트 소관이 아님 — SaveEdit()/CancelEdit()는 호출 측(UI 버튼) 담당.
+/// 확정/폐기는 이 컴포넌트 소관이 아님 — 편집을 끝내는 [완료] 버튼과 안내 문구는 UGUI 오버레이(ViewportEditOverlay)가 든다.
+/// 안내 문구를 여기 IMGUI로 그리지 않는 것은 화면 글자를 번역 키로 찾아 써야 해서다.
 /// Win32를 모른다 — 순수 Unity UI. ViewportScreenSettings와 같은 정책 레이어.
 /// </summary>
 [DisallowMultipleComponent]
@@ -53,7 +54,6 @@ public class ViewportEditHandles : MonoBehaviour
     private Vector2Int _dragStartMouse;   // 베이스 공간 px
     private RectInt _dragStartRect;
     private static Texture2D _circleTex;  // 모서리 핸들용 원형 (레퍼런스 이미지의 점 형태)
-    private GUIStyle _centerLabel;
 
     // UI 위 클릭 판정 — 무인자 IsPointerOverGameObject는 클릭 통과 이력이 있는 이 앱에서
     // stale할 수 있어(리뷰 합의) WindowManager와 같은 좌표 직접 주입 레이캐스트를 쓴다.
@@ -316,9 +316,6 @@ public class ViewportEditHandles : MonoBehaviour
         DrawEdgeBar(ClampAnchor((pv.xMin + pv.xMax) / 2, pv.yMax), horizontal: true);
         DrawEdgeBar(ClampAnchor(pv.xMin, (pv.yMin + pv.yMax) / 2), horizontal: false);
         DrawEdgeBar(ClampAnchor(pv.xMax, (pv.yMin + pv.yMax) / 2), horizontal: false);
-
-        GUI.Label(new Rect(v.xMin, v.center.y - 12f, v.width, 24f),
-            "드래그: 내부 = 이동 · 모서리 원/변 바 = 크기 조절", _centerLabel);
     }
 
     private void DrawCorner(Vector2Int baseAnchor)
@@ -367,16 +364,6 @@ public class ViewportEditHandles : MonoBehaviour
                     _circleTex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
                 }
             _circleTex.Apply();
-        }
-        if (_centerLabel == null)
-        {
-            _centerLabel = new GUIStyle(GUI.skin.label)
-            {
-                alignment = TextAnchor.MiddleCenter,
-                fontSize = 14,
-                fontStyle = FontStyle.Bold,
-            };
-            _centerLabel.normal.textColor = new Color(1f, 1f, 1f, 0.9f);
         }
     }
 }
