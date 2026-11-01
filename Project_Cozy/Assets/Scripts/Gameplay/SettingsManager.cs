@@ -11,6 +11,11 @@ using UnityEngine;
 /// 파일 기록은 손을 뗄 때 부르는 <see cref="CommitVolume"/>과 종료 시로 미룬다. 같은 이유로 볼륨은
 /// <see cref="Changed"/> 대신 전용 <see cref="VolumeChanged"/>를 울린다 — Changed 구독자들은 이산 이벤트를 전제로 만들어졌다.
 ///
+/// 그래픽 탭(캐릭터·UI 크기)도 예외다. Figma가 "변경 즉시 화면에 보이다가 [저장]을 눌러야 최종 확정"으로 정해서,
+/// <see cref="SetCharacterScaleStep"/> 등은 지금 값만 바꿔 <see cref="GraphicsChanged"/>를 울리고, 파일에는 <see cref="CommitGraphics"/>
+/// 때만 쓴다. 저장한 값은 <see cref="_data"/>에, 지금 화면의 값은 따로 든다 — 그래서 다른 설정이 저장될 때 미리보기 값이 섞여 들어가지 않는다.
+/// 적용하는 쪽은 지금 값을 읽는다(미리보기도 화면에 보여야 하므로).
+///
 /// 설정 패널과 이 매니저 사이의 일치, 그리고 저장·복원까지만 책임진다.
 /// 실제 적용은 각 소비자가 여기 값을 읽어 처리한다. 지금 연결된 소비자:
 /// 언어(<see cref="LocalizationManager"/>), 소녀 변신 금지(<see cref="CharacterManager"/>가 캐릭터에 건다),
@@ -37,6 +42,65 @@ public sealed class SettingsManager : MonoBehaviour
 
     // 볼륨이 바뀌었지만 아직 파일에 쓰지 않았다.
     private bool _volumeDirty;
+
+    /// <summary>그래픽 탭의 지금 값(미리보기 포함)이 바뀌면 울린다. 저장·되돌리기·초기화 때도 울린다.</summary>
+    public event Action GraphicsChanged;
+
+    // 그래픽 탭의 지금 값. 저장한 값은 _data에 있다.
+    private int _characterScaleStep;
+    private int _uiScaleStep;
+
+    /// <summary>캐릭터 크기의 지금 단계(<see cref="GraphicsScaleSteps.Character"/>). 저장 전 미리보기일 수 있다.</summary>
+    public int CharacterScaleStep => _characterScaleStep;
+
+    /// <summary>UI 크기의 지금 단계(<see cref="GraphicsScaleSteps.UI"/>). 저장 전 미리보기일 수 있다.</summary>
+    public int UIScaleStep => _uiScaleStep;
+
+    /// <summary>그래픽 탭에 저장하지 않은 변경이 있는가. 바꿨다가 원래 값으로 돌려 놓으면 false다.</summary>
+    public bool HasUnsavedGraphics =>
+        _characterScaleStep != _data.characterScaleStep || _uiScaleStep != _data.uiScaleStep;
+
+    public void SetCharacterScaleStep(int step)
+    {
+        step = GraphicsScaleSteps.Character.Clamp(step);
+        if (_characterScaleStep == step) return;
+        _characterScaleStep = step;
+        GraphicsChanged?.Invoke();
+    }
+
+    public void SetUIScaleStep(int step)
+    {
+        step = GraphicsScaleSteps.UI.Clamp(step);
+        if (_uiScaleStep == step) return;
+        _uiScaleStep = step;
+        GraphicsChanged?.Invoke();
+    }
+
+    /// <summary>그래픽 탭의 지금 값을 확정해 파일에 쓴다. 그래픽 [저장] 버튼.</summary>
+    public void CommitGraphics()
+    {
+        if (!HasUnsavedGraphics) return;
+        _data.characterScaleStep = _characterScaleStep;
+        _data.uiScaleStep = _uiScaleStep;
+        Save();
+        GraphicsChanged?.Invoke();
+    }
+
+    /// <summary>저장하지 않은 그래픽 변경을 버리고 마지막으로 저장한 값으로 돌아간다.</summary>
+    public void RevertGraphics()
+    {
+        if (!HasUnsavedGraphics) return;
+        _characterScaleStep = _data.characterScaleStep;
+        _uiScaleStep = _data.uiScaleStep;
+        GraphicsChanged?.Invoke();
+    }
+
+    /// <summary>그래픽 탭을 기본값으로 바꾼다. 미리보기일 뿐이라 [저장]을 눌러야 파일에 남는다.</summary>
+    public void ResetGraphicsToDefaults()
+    {
+        SetCharacterScaleStep(GraphicsScaleSteps.Character.DefaultIndex);
+        SetUIScaleStep(GraphicsScaleSteps.UI.DefaultIndex);
+    }
 
     public bool AlwaysOnTop
     {
@@ -140,6 +204,8 @@ public sealed class SettingsManager : MonoBehaviour
         bool firstRun = !File.Exists(GameDataPaths.Settings);
         _data = UserDataSaveIO.Load<SettingsFileFormat>(GameDataPaths.Settings);
         Sanitize();
+        _characterScaleStep = _data.characterScaleStep;
+        _uiScaleStep = _data.uiScaleStep;
 
         // 첫 실행만 OS 언어를 따른다. 바로 저장해 두어야 다음 실행부터는 사용자가 고른 언어(또는 이 값)를 그대로 쓴다.
         // 파일이 깨져 기본값으로 돌아온 경우는 첫 실행이 아니므로 건드리지 않는다.
@@ -174,6 +240,9 @@ public sealed class SettingsManager : MonoBehaviour
         _data.musicVolume = float.IsNaN(_data.musicVolume) ? defaults.musicVolume : Mathf.Clamp01(_data.musicVolume);
         _data.sfxVolume = float.IsNaN(_data.sfxVolume) ? defaults.sfxVolume : Mathf.Clamp01(_data.sfxVolume);
         _data.bgmTrackId ??= defaults.bgmTrackId;
+        // 단계 수를 줄이면 옛 파일의 단계 번호가 범위를 넘을 수 있다. 끝 단계로 자른다.
+        _data.characterScaleStep = GraphicsScaleSteps.Character.Clamp(_data.characterScaleStep);
+        _data.uiScaleStep = GraphicsScaleSteps.UI.Clamp(_data.uiScaleStep);
     }
 
     /// <summary>값이 바뀐 직후. 저장하고 방송한다.</summary>

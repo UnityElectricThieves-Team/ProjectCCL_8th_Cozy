@@ -2,7 +2,9 @@
 paths:
   - "Project_Cozy/Assets/Scripts/Gameplay/Settings*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/DesktopIntegrationApplier.cs"
+  - "Project_Cozy/Assets/Scripts/Gameplay/GraphicsScaleSteps.cs"
   - "Project_Cozy/Assets/Scripts/UI/Settings*.cs"
+  - "Project_Cozy/Assets/Scripts/UI/GraphicsTabController.cs"
   - "Project_Cozy/Assets/Scripts/Platform/Startup/**"
   - "Project_Cozy/Assets/Prefabs/UIPanels/UIPanel_Settings/**"
 ---
@@ -19,6 +21,16 @@ paths:
 
 - **`Changed`는 어느 설정이 바뀌어도 울립니다.** 그래서 OS를 부르거나 비싼 일을 하는 쪽은 마지막으로 건 값과 다를 때만 다시 겁니다. 언어 하나 바꿀 때마다 창 순서를 다시 잡거나 레지스트리를 쓰면 안 됩니다.
 - **OS와 맞닿는 설정은 Gameplay의 적용자가 Platform을 부릅니다.** 항상 위와 자동 실행은 `DesktopIntegrationApplier`가 `WindowManager.SetTopmost`와 `StartupRegistration`을 부릅니다. Platform은 게임 설정을 모르게 둡니다([platform.md](platform.md)의 책임 경계).
+
+## 저장 방식은 세 가지입니다
+
+- **대부분은 바뀌는 즉시 저장합니다.** 설정은 가끔 바뀌는 값이라 저장 빈도를 묶을 이유가 없습니다.
+- **볼륨은 슬라이더에서 손을 뗄 때 저장합니다.** 끄는 동안 매 프레임 값이 오기 때문입니다. 자세한 것은 [audio.md](audio.md).
+- **그래픽 탭은 바꾸면 바로 화면에 보이고, [저장]을 눌러야 파일에 남습니다.** Figma가 "변경 즉시 실시간 동기화되어 보이다가 '저장' 버튼 누르면 최종 확정"으로 정했습니다. 저장하지 않고 패널을 닫거나 다른 탭으로 가면 미저장 팝업이 뜨고, 확인하면 마지막으로 저장한 값으로 돌아갑니다. [초기화]도 기본값을 미리보기로 보여 줄 뿐, 확정은 [저장]이 합니다. 그래픽 탭의 값을 적용하는 쪽은 저장값이 아니라 지금 값을 읽습니다 — 미리보기도 화면에 보여야 해서입니다.
+
+`SettingsManager`는 그래픽의 저장한 값과 지금 값을 따로 듭니다. 한 칸에 섞으면 다른 설정(언어 등)이 즉시 저장될 때 아직 확정하지 않은 미리보기까지 파일에 들어갑니다.
+
+**그래픽 값은 배율이 아니라 단계 번호로 저장합니다.** 실수를 저장하고 비교하면 오차 때문에, 바꾼 것이 없는데도 "저장 안 됨"으로 판정될 수 있습니다. 단계와 배율의 대응은 `GraphicsScaleSteps` 한 곳에만 둡니다. 지금 범위와 단계는 임시이고, 기획·아트와 빌드를 보며 다시 맞춥니다.
 
 ## 기본값을 바꿀 때는 저장 키 이름도 바꿉니다
 

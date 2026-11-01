@@ -43,6 +43,10 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     [SerializeField] private Toggle _administratorModeToggle;
     [SerializeField] private Toggle _girlTransformBannedToggle;
 
+    [Header("그래픽 탭")]
+    [Tooltip("그래픽 탭 내용 루트에 붙은 컨트롤러. 저장하지 않은 그래픽 변경이 있으면 패널 닫기·탭 이동 전에 물어본다.")]
+    [SerializeField] private GraphicsTabController _graphicsTab;
+
     [Header("소리 탭 컨트롤")]
     [Tooltip("볼륨 슬라이더는 OnValueChanged에 On*VolumeChanged를, Slider 오브젝트의 SliderReleaseEvent에 OnVolumeReleased를 건다.")]
     [SerializeField] private Slider _masterVolumeSlider;
@@ -68,6 +72,7 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     private SettingsTab _tab = SettingsTab.General;
     private SettingsManager _settings;
     private LocalizationManager _localization;
+    private UIPanel _panel;
 
     private void OnEnable() => SetTab(_tab); // 다시 열릴 때 현재 탭으로 복원
 
@@ -82,6 +87,10 @@ public sealed class SettingsPanelContentController : MonoBehaviour
         // 첫 RefreshControls보다 먼저 만들어야 저장된 곡 위치가 옵션 수에 잘리지 않는다.
         BuildBgmTrackOptions();
 
+        // 저장하지 않은 그래픽 변경이 있으면 X·ESC·메뉴 버튼 어느 쪽으로 닫든 먼저 묻는다(UIManager.Close가 이 질문을 거친다).
+        _panel = GetComponentInParent<UIPanel>();
+        if (_panel != null) _panel.CanClose = CanClosePanel;
+
         _settings = SettingsManager.Instance;
         if (_settings == null)
         {
@@ -95,6 +104,7 @@ public sealed class SettingsPanelContentController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_panel != null && _panel.CanClose == CanClosePanel) _panel.CanClose = null;
         if (_settings != null) _settings.Changed -= RefreshControls;
         if (_localization != null) _localization.LanguageChanged -= RefreshCountVisibilityLabels;
     }
@@ -205,9 +215,23 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     }
 
     // 탭 버튼의 OnClick()에 인스펙터로 거는 진입점. 인스펙터는 enum 인자를 넘길 수 없어 버튼별로 나눈다.
-    public void ShowGeneralTab() => SetTab(SettingsTab.General);
+    // 그래픽 탭에서 다른 탭으로 갈 때는 저장하지 않은 변경이 있는지 먼저 묻는다(Figma 그래픽 미저장 팝업).
+    public void ShowGeneralTab() => LeaveGraphicsThen(SettingsTab.General);
     public void ShowGraphicsTab() => SetTab(SettingsTab.Graphics);
-    public void ShowSoundTab() => SetTab(SettingsTab.Sound);
+    public void ShowSoundTab() => LeaveGraphicsThen(SettingsTab.Sound);
+
+    private void LeaveGraphicsThen(SettingsTab tab)
+    {
+        if (_tab == SettingsTab.Graphics && _graphicsTab != null && !_graphicsTab.TryLeave(() => SetTab(tab))) return;
+        SetTab(tab);
+    }
+
+    // 패널 닫기 질문. 그래픽 탭에 있을 때만 그래픽 컨트롤러에 묻는다. 팝업에서 확인하면 변경을 버린 뒤 다시 닫는다.
+    private bool CanClosePanel()
+    {
+        if (_tab != SettingsTab.Graphics || _graphicsTab == null) return true;
+        return _graphicsTab.TryLeave(() => UIManager.Instance?.Close(_panel));
+    }
 
     private void SetTab(SettingsTab tab)
     {
