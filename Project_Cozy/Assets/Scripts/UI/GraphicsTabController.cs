@@ -23,6 +23,7 @@ public sealed class GraphicsTabController : MonoBehaviour
     [SerializeField] private SettingsStepper _uiScaleStepper;
 
     private SettingsManager _settings;
+    private ViewportScreenSettings _viewport;
 
     private void OnEnable()
     {
@@ -53,6 +54,15 @@ public sealed class GraphicsTabController : MonoBehaviour
 
     // [저장] 버튼.
     public void Save() { if (_settings != null) _settings.CommitGraphics(); }
+
+    // "화면 다시 맞추기" 버튼. 해상도·작업표시줄·모니터가 바뀐 뒤 창과 카메라를 지금 작업 영역에 다시 맞춘다.
+    // 사용자의 선택을 바꾸는 일이 아니라 [저장] 흐름을 타지 않고 바로 적용한다.
+    // 패널 프리팹은 씬 오브젝트를 참조할 수 없어 처음 누를 때 한 번 찾아 둔다.
+    public void ReadjustWindow()
+    {
+        if (_viewport == null) _viewport = FindFirstObjectByType<ViewportScreenSettings>();
+        if (_viewport != null) _viewport.ReadjustWindow();
+    }
 
     // [초기화] 버튼. 확인하면 기본값을 미리보기로 보여 주고, 확정은 [저장]이 한다.
     public void ResetToDefaults()

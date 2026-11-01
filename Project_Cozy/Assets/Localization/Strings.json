@@ -5,6 +5,8 @@
   "UISettings.tab.sound": { "ko-KR": "소리", "en-US": "Sound", "ja-JP": "サウンド", "zh-Hans": "声音", "zh-Hant": "聲音" },
   "UISettings.save_notice": { "ko-KR": "설정을 바꾼 뒤 꼭 저장해주세요!", "en-US": "Don't forget to save after changing settings!", "ja-JP": "設定を変更したら、必ず保存してください！", "zh-Hans": "更改设置后请务必保存！", "zh-Hant": "變更設定後請務必儲存！" },
   "UISettings.button.adjust": { "ko-KR": "조정", "en-US": "Adjust", "ja-JP": "調整", "zh-Hans": "调整", "zh-Hant": "調整" },
+  "UISettings.row.readjust_window": { "ko-KR": "화면 다시 맞추기", "en-US": "Refit to Screen", "ja-JP": "画面に合わせ直す", "zh-Hans": "重新适配屏幕", "zh-Hant": "重新適配螢幕" },
+  "UISettings.button.apply": { "ko-KR": "적용", "en-US": "Apply", "ja-JP": "適用", "zh-Hans": "应用", "zh-Hant": "套用" },
   "UISettings.button.save": { "ko-KR": "저장", "en-US": "Save", "ja-JP": "保存", "zh-Hans": "保存", "zh-Hant": "儲存" },
   "UISettings.button.reset": { "ko-KR": "초기화", "en-US": "Reset", "ja-JP": "リセット", "zh-Hans": "重置", "zh-Hant": "重設" },
   "UISettings.popup.graphics_unsaved": { "ko-KR": "그래픽 설정에서 나갈까요?\n변경된 내용이 저장되지 않아요.", "en-US": "Leave graphics settings?\nYour changes won't be saved.", "ja-JP": "グラフィック設定を終了しますか？\n変更内容は保存されません。", "zh-Hans": "要离开图形设置吗？\n更改的内容不会被保存。", "zh-Hant": "要離開圖形設定嗎？\n變更的內容不會被儲存。" },

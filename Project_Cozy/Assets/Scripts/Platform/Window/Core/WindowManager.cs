@@ -25,7 +25,7 @@ using UnityEngine.EventSystems;
 /// 그리고 SetTopmost(유저 설정 "항상 위"를 게임 쪽 적용자가 건다. 인스펙터 alwaysOnTop은 그 전까지의 기본값).
 ///
 /// **창 배치의 주인은 정책 레이어(ViewportScreenSettings)다.** 이 클래스는 시키는 대로 놓기만 한다.
-/// 창은 작업 영역에 고정이고 평상시 크기가 바뀌지 않으며, 사용자가 "윈도우 크기 재조정"을 누를 때만
+/// 창은 작업 영역에 고정이고 평상시 크기가 바뀌지 않으며, 사용자가 설정의 "화면 다시 맞추기"를 누를 때만
 /// 다시 잡는다. 근거는 Docs/Development/WindowViewportUIArchitecture.md.
 ///
 /// 빌드 전용 — Editor에서는 모든 Win32 호출 스킵 (Editor 창 보호).
