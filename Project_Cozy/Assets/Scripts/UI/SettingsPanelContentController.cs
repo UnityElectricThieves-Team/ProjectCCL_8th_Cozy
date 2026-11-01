@@ -22,6 +22,8 @@ public sealed class SettingsPanelContentController : MonoBehaviour
 {
     private enum SettingsTab { General, Graphics, Sound }
 
+    private const string GirlTransformBanMessageId = "UISettings.popup.girl_transform_ban";
+
     [Header("탭 배경 이미지")]
     [Tooltip("활성/비활성 색을 칠할 탭 배경 이미지.")]
     [SerializeField] private Image _generalTabImage;
@@ -172,7 +174,23 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     public void OnAffinityVisibilityChanged(int index) { if (_settings != null) _settings.AffinityVisibility = (CountVisibility)index; }
     public void OnAutoStartChanged(bool on) { if (_settings != null) _settings.AutoStart = on; }
     public void OnAdministratorModeChanged(bool on) { if (_settings != null) _settings.AdministratorMode = on; }
-    public void OnGirlTransformBannedChanged(bool on) { if (_settings != null) _settings.GirlTransformBanned = on; }
+    // 켜는 순간에만 먼저 묻는다(Figma "'On'을 클릭하면 바뀌기 전 '소녀 변신 금지 팝업'이 먼저 뜸").
+    // 판단은 매니저 값과의 차이로 한다 — RefreshControls가 저장값을 밀어넣거나, 취소로 토글을 되돌릴 때 다시 불려도
+    // 매니저 값과 같으므로 팝업이 뜨지 않는다.
+    public void OnGirlTransformBannedChanged(bool on)
+    {
+        if (_settings == null || on == _settings.GirlTransformBanned) return;
+        if (!on || ConfirmPopup.Instance == null)
+        {
+            _settings.GirlTransformBanned = on;
+            return;
+        }
+
+        ConfirmPopup.Instance.Show(GirlTransformBanMessageId,
+            () => _settings.GirlTransformBanned = true,
+            // SetIsOnWithoutNotify로 되돌리면 알약 그림이 켜진 채로 남는다. 알림이 와도 매니저 값과 같아 무시된다.
+            () => { if (_girlTransformBannedToggle != null) _girlTransformBannedToggle.isOn = false; });
+    }
 
     // 볼륨은 끄는 동안 소리에만 반영하고, 파일 저장은 손 뗄 때(OnVolumeReleased) 한다.
     public void OnMasterVolumeChanged(float value) { if (_settings != null) _settings.SetVolume(VolumeChannel.Master, value); }
