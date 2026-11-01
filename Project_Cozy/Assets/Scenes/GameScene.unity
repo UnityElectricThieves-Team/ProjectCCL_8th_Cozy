@@ -1861,6 +1861,7 @@ GameObject:
   - component: {fileID: 679324989}
   - component: {fileID: 679324988}
   - component: {fileID: 679324992}
+  - component: {fileID: 679324993}
   m_Layer: 5
   m_Name: UIRoot
   m_TagString: Untagged
@@ -1966,6 +1967,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ef925e1e0b8f88439d0d76e307d4c52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
+--- !u!114 &679324993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 679324987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5b6a6824c18207459d23708457e5510, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIScaleApplier
+  _targets:
+  - {fileID: 1637915477}
+  - {fileID: 1626436296}
 --- !u!1 &788830924
 GameObject:
   m_ObjectHideFlags: 0

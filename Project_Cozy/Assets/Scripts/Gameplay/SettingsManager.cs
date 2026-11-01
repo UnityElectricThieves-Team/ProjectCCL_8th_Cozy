@@ -20,7 +20,7 @@ using UnityEngine;
 /// 실제 적용은 각 소비자가 여기 값을 읽어 처리한다. 지금 연결된 소비자:
 /// 언어(<see cref="LocalizationManager"/>), 소녀 변신 금지·캐릭터 크기(<see cref="CharacterManager"/>가 캐릭터에 건다),
 /// 소리 탭(<see cref="BgmPlayer"/>), 항상 위·자동 실행(<see cref="DesktopIntegrationApplier"/>),
-/// 관리자 모드(<see cref="SpawnPointManager"/>가 다른 앱 입력을 셀지 정한다), 전체 크기(<see cref="WorldZoomApplier"/>).
+/// 관리자 모드(<see cref="SpawnPointManager"/>가 다른 앱 입력을 셀지 정한다), 전체 크기(<see cref="WorldZoomApplier"/>), UI 크기(<see cref="UIScaleApplier"/>).
 /// 구름 수치·친밀도 표기는 아직 저장만 된다 — 값을 적용할 표시 UI가 없다.
 ///
 /// 씬 단일 인스턴스(Singleton). <see cref="HeartSystem"/>과 같은 패턴.

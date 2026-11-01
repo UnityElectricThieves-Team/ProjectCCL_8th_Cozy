@@ -4,6 +4,7 @@ paths:
   - "Project_Cozy/Assets/Scripts/Gameplay/DesktopIntegrationApplier.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/GraphicsScaleSteps.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/WorldZoomApplier.cs"
+  - "Project_Cozy/Assets/Scripts/UI/UIScaleApplier.cs"
   - "Project_Cozy/Assets/Scripts/UI/Settings*.cs"
   - "Project_Cozy/Assets/Scripts/UI/GraphicsTabController.cs"
   - "Project_Cozy/Assets/Scripts/Platform/Startup/**"
