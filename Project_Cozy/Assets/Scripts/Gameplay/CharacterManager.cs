@@ -65,9 +65,14 @@ public class CharacterManager : MonoBehaviour
 
     private void Start()
     {
-        // 유저 설정 중 캐릭터에 거는 것(소녀 변신 금지)을 따라간다. 등록 시점에는 Register가 직접 건다.
+        // 유저 설정 중 캐릭터에 거는 것(소녀 변신 금지, 캐릭터 크기)을 따라간다. 등록 시점에는 Register가 직접 건다.
+        // 캐릭터 크기는 그래픽 탭 값이라 저장 전 미리보기도 따라가야 해서 GraphicsChanged를 따로 듣는다.
         _settings = SettingsManager.Instance;
-        if (_settings != null) _settings.Changed += ApplyUserSettingsToAll;
+        if (_settings != null)
+        {
+            _settings.Changed += ApplyUserSettingsToAll;
+            _settings.GraphicsChanged += ApplyUserSettingsToAll;
+        }
 
         // 씬에 미리 배치된 캐릭터는 Spawn을 거치지 않아 추적 목록에 없다. 먼저 찾아서 등록한다.
         // 빠뜨리면 "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 그 캐릭터만 비껴가고,
@@ -78,7 +83,11 @@ public class CharacterManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_settings != null) _settings.Changed -= ApplyUserSettingsToAll;
+        if (_settings != null)
+        {
+            _settings.Changed -= ApplyUserSettingsToAll;
+            _settings.GraphicsChanged -= ApplyUserSettingsToAll;
+        }
         if (Instance == this) Instance = null;
     }
 
@@ -109,7 +118,9 @@ public class CharacterManager : MonoBehaviour
         var settings = SettingsManager.Instance;
         if (settings == null) return;
         var controller = character.GetComponent<BaseCharacterController>();
-        if (controller != null) controller.SetGirlTransformBanned(settings.GirlTransformBanned);
+        if (controller == null) return;
+        controller.SetGirlTransformBanned(settings.GirlTransformBanned);
+        controller.SetUserScale(GraphicsScaleSteps.Character.ToScale(settings.CharacterScaleStep));
     }
 
     /// <summary>

@@ -128,7 +128,6 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     protected virtual void OnDisable()
     {
         _state.Unsubscribe();
-        _scale.Unsubscribe();
     }
 
     protected virtual void OnDestroy()
@@ -300,6 +299,12 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         _girlTransformBanned = banned;
         if (banned && _visual.CurrentForm == CharacterForm.Girl) _visual.SetForm(CharacterForm.Animal);
     }
+
+    /// <summary>
+    /// 유저 설정의 캐릭터 크기 배율을 건다. 루트 스케일이라 발(루트)은 제자리에 남는다.
+    /// 유저 설정에서 값을 읽어 걸어주는 것은 <see cref="CharacterManager"/>다.
+    /// </summary>
+    public void SetUserScale(float multiplier) => _scale.UserMultiplier = multiplier;
 
     // ===== IStateOwner: Ground =====
 
