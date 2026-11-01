@@ -2129,6 +2129,7 @@ GameObject:
   - component: {fileID: 800260096}
   - component: {fileID: 800260097}
   - component: {fileID: 800260098}
+  - component: {fileID: 800260099}
   m_Layer: 0
   m_Name: SettingsManager
   m_TagString: Untagged
@@ -2194,6 +2195,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DesktopIntegrationApplier
   _windowManager: {fileID: 0}
+--- !u!114 &800260099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800260094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bdae348d16f9b746a9c41829c98a4ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldZoomApplier
+  _viewportSettings: {fileID: 0}
 --- !u!1001 &829411603
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2489,6 +2503,10 @@ PrefabInstance:
     - target: {fileID: 6655322309280933630, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7300567027924687433, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8121642386099088425, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
       propertyPath: m_AnchorMax.y

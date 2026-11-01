@@ -78,6 +78,7 @@ public class SettingsFileFormat
     // ===== 그래픽 탭. 배율이 아니라 단계 번호를 저장한다 — 대응은 GraphicsScaleSteps. =====
     public int characterScaleStep = GraphicsScaleSteps.Character.DefaultIndex;
     public int uiScaleStep = GraphicsScaleSteps.UI.DefaultIndex;
+    public int worldZoomStep = GraphicsScaleSteps.WorldZoom.DefaultIndex;
 }
 
 /// <summary>설정 패널 소리 탭의 볼륨 슬라이더 하나에 대응하는 믹서 채널.</summary>

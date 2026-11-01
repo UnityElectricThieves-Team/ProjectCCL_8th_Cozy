@@ -16,6 +16,10 @@ public sealed class GraphicsScaleSteps
     /// <summary>UI 크기. 0.5~1.5배, 0.1 단계. 기본 1.0배.</summary>
     public static readonly GraphicsScaleSteps UI = new GraphicsScaleSteps(0.5f, 0.1f, 11, 5);
 
+    /// <summary>전체 크기(줌). 1.0~1.5배, 0.1 단계. 기본 1.0배.
+    /// 1.0 미만은 두지 않는다 — 마스터 캔버스(아트 기준) 밖이 보이게 되기 때문이다. 상한·단계는 임시다.</summary>
+    public static readonly GraphicsScaleSteps WorldZoom = new GraphicsScaleSteps(1.0f, 0.1f, 6, 0);
+
     private readonly float _min;
     private readonly float _step;
 

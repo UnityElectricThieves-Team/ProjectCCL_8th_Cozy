@@ -33,7 +33,7 @@ RectTransform:
   m_Father: {fileID: 6629125874968317976}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -745,6 +745,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GraphicsTabController
   _characterScaleStepper: {fileID: 1674299051012502984}
   _uiScaleStepper: {fileID: 8689276034578978455}
+  _worldZoomStepper: {fileID: 7042951172720812634}
 --- !u!1 &2597968353334771189
 GameObject:
   m_ObjectHideFlags: 0
@@ -786,8 +787,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 471.5, y: -308}
-  m_SizeDelta: {x: 943, y: 0}
+  m_AnchoredPosition: {x: 480, y: -308}
+  m_SizeDelta: {x: 960, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6927826589890648227
 MonoBehaviour:
@@ -1886,7 +1887,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4618392197633590607
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5510,13 +5511,37 @@ PrefabInstance:
       propertyPath: m_text
       value: "(00) \uD06C\uAE30"
       objectReference: {fileID: 0}
+    - target: {fileID: 2122572098501434385, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+      propertyPath: _valueChanged.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2122572098501434385, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+      propertyPath: _valueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6904332796153174398}
+    - target: {fileID: 2122572098501434385, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+      propertyPath: _valueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2122572098501434385, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+      propertyPath: _valueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnWorldZoomChanged
+      objectReference: {fileID: 0}
+    - target: {fileID: 2122572098501434385, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+      propertyPath: _valueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: GraphicsTabController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2122572098501434385, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+      propertyPath: _valueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 3936362321794701357, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_Name
-      value: Row_SomethingSize
+      value: Row_WorldSize
       objectReference: {fileID: 0}
     - target: {fileID: 3936362321794701357, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5083535010709951574, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: m_Pivot.x
@@ -5600,7 +5625,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5196219493032795003, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
       propertyPath: _stringId
-      value: UISettings.row.something_size
+      value: UISettings.row.world_size
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5612,3 +5637,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5083535010709951574, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
   m_PrefabInstance: {fileID: 8991844390731562571}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7042951172720812634 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2122572098501434385, guid: b178fdd3aac88184f8313693d3f64359, type: 3}
+  m_PrefabInstance: {fileID: 8991844390731562571}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c8254be14df77a46a2bc9245b37b9d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SettingsStepper

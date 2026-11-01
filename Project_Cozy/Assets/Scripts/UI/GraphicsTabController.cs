@@ -22,6 +22,7 @@ public sealed class GraphicsTabController : MonoBehaviour
 
     [SerializeField] private SettingsStepper _characterScaleStepper;
     [SerializeField] private SettingsStepper _uiScaleStepper;
+    [SerializeField] private SettingsStepper _worldZoomStepper;
 
     private SettingsManager _settings;
     private ViewportScreenSettings _viewport;
@@ -45,6 +46,8 @@ public sealed class GraphicsTabController : MonoBehaviour
             _characterScaleStepper.Setup(GraphicsScaleSteps.Character.Count, _settings.CharacterScaleStep);
         if (_uiScaleStepper != null)
             _uiScaleStepper.Setup(GraphicsScaleSteps.UI.Count, _settings.UIScaleStep);
+        if (_worldZoomStepper != null)
+            _worldZoomStepper.Setup(GraphicsScaleSteps.WorldZoom.Count, _settings.WorldZoomStep);
     }
 
     // ===== 인스펙터로 거는 진입점 =====
@@ -52,12 +55,14 @@ public sealed class GraphicsTabController : MonoBehaviour
     // −/+ 줄의 ValueChanged(int)에 건다(동적 int).
     public void OnCharacterScaleChanged(int step) { if (_settings != null) _settings.SetCharacterScaleStep(step); }
     public void OnUIScaleChanged(int step) { if (_settings != null) _settings.SetUIScaleStep(step); }
+    public void OnWorldZoomChanged(int step) { if (_settings != null) _settings.SetWorldZoomStep(step); }
 
-    // [저장] 버튼. 크기 단계와 화면 크기 조정을 함께 확정한다.
+    // [저장] 버튼. 크기 단계(전체 크기 포함)와 화면 크기 조정을 함께 확정한다.
+    // 뷰포트 쪽 확정이 뒤에 와야 한다 — 확정 신호로 장식을 회수할 때 줌이 이미 저장된 값이어야 해서다.
     public void Save()
     {
         if (_settings != null) _settings.CommitGraphics();
-        if (FindViewport() != null) _viewport.CommitPendingViewport();
+        if (FindViewport() != null) _viewport.Commit();
     }
 
     // 화면 크기 [조정] 버튼. 편집에 들어가면 UIManager가 패널을 모두 숨기고, 편집 화면의 [완료]·ESC로 돌아온다.

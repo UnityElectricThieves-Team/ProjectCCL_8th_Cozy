@@ -3,6 +3,7 @@ paths:
   - "Project_Cozy/Assets/Scripts/Gameplay/Settings*.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/DesktopIntegrationApplier.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/GraphicsScaleSteps.cs"
+  - "Project_Cozy/Assets/Scripts/Gameplay/WorldZoomApplier.cs"
   - "Project_Cozy/Assets/Scripts/UI/Settings*.cs"
   - "Project_Cozy/Assets/Scripts/UI/GraphicsTabController.cs"
   - "Project_Cozy/Assets/Scripts/Platform/Startup/**"
@@ -29,6 +30,8 @@ paths:
 - **그래픽 탭은 바꾸면 바로 화면에 보이고, [저장]을 눌러야 파일에 남습니다.** Figma가 "변경 즉시 실시간 동기화되어 보이다가 '저장' 버튼 누르면 최종 확정"으로 정했습니다. 저장하지 않고 패널을 닫거나 다른 탭으로 가면 미저장 팝업이 뜨고, 확인하면 마지막으로 저장한 값으로 돌아갑니다. [초기화]도 기본값을 미리보기로 보여 줄 뿐, 확정은 [저장]이 합니다. 그래픽 탭의 값을 적용하는 쪽은 저장값이 아니라 지금 값을 읽습니다 — 미리보기도 화면에 보여야 해서입니다.
 
 화면 크기 [조정]도 같은 흐름입니다. 편집 화면에서 [완료]로 나와도 확정되지 않고, [저장]을 눌러야 확정됩니다. 조정한 사각형은 `SettingsManager`가 아니라 뷰포트의 주인인 `ViewportScreenSettings`가 미저장 상태로 들고, 그래픽 탭의 [저장]과 미저장 확인이 크기 단계와 함께 다룹니다. 미저장 동안 월드는 저장한 뷰포트 그대로입니다.
+
+전체 크기(줌)는 다른 크기 단계처럼 `SettingsManager`가 단계 번호로 들고, `WorldZoomApplier`가 지금 값을 뷰포트 정책에 넣습니다. [저장]은 크기 단계를 먼저 확정한 뒤 뷰포트를 확정합니다 — 뷰포트 확정 신호로 화면 밖 장식을 회수할 때 줌이 이미 확정된 값이어야 해서입니다. 줌이 무엇을 하는지는 [viewport-coordinates.md](viewport-coordinates.md).
 
 `SettingsManager`는 그래픽의 저장한 값과 지금 값을 따로 듭니다. 한 칸에 섞으면 다른 설정(언어 등)이 즉시 저장될 때 아직 확정하지 않은 미리보기까지 파일에 들어갑니다.
 

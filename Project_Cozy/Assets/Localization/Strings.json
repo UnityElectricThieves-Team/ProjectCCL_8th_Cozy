@@ -21,6 +21,7 @@
   "UISettings.row.admin_mode": { "ko-KR": "관리자 모드", "en-US": "Administrator Mode", "ja-JP": "管理者モード", "zh-Hans": "管理员模式", "zh-Hant": "管理員模式" },
   "UISettings.row.girl_transform_ban": { "ko-KR": "소녀 변신 금지", "en-US": "Disable Girl Transformation", "ja-JP": "少女への変身を禁止", "zh-Hans": "禁止变身为少女", "zh-Hant": "禁止變身為少女" },
   "UISettings.row.screen_size": { "ko-KR": "화면 크기", "en-US": "Screen Size", "ja-JP": "画面サイズ", "zh-Hans": "画面大小", "zh-Hant": "畫面大小" },
+  "UISettings.row.world_size": { "ko-KR": "전체 크기", "en-US": "World Size", "ja-JP": "全体サイズ", "zh-Hans": "整体大小", "zh-Hant": "整體大小" },
   "UISettings.row.ui_size": { "ko-KR": "UI 크기", "en-US": "UI Size", "ja-JP": "UIサイズ", "zh-Hans": "UI 大小", "zh-Hant": "UI 大小" },
   "UISettings.row.character_size": { "ko-KR": "캐릭터 크기", "en-US": "Character Size", "ja-JP": "キャラクターサイズ", "zh-Hans": "角色大小", "zh-Hant": "角色大小" },
   "UISettings.row.monitor": { "ko-KR": "모니터", "en-US": "Monitor", "ja-JP": "モニター", "zh-Hans": "显示器", "zh-Hant": "顯示器" },
