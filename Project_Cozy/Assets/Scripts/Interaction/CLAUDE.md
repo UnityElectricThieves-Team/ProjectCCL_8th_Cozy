@@ -5,15 +5,15 @@
 ## 책임
 
 - 카메라 좌표·콜라이더·sortingOrder를 봐서 *지금 마우스 아래에 어떤 인터랙터블이 있나*를 결정하고, 해당 객체에 메소드를 호출한다.
-- 인터랙터블이 응답할 *계약*(어떤 메소드를 받는지)을 인터페이스로 노출한다 — 캐릭터/달/별 등 게임 객체가 이를 구현.
-- 일부 *단순 상호작용 로직*(별 클릭 → 별 상태 전환처럼 한 컴포넌트로 끝나는 것)은 여기에 둘 수 있다. 큰 게임 시스템(친밀도·변신 등)은 자기 폴더([Character/](../Character/CLAUDE.md) 등)로 분리.
+- 인터랙터블이 응답할 *계약*(어떤 메소드를 받는지)을 인터페이스로 노출한다 — 캐릭터/달/구름 등 게임 객체가 이를 구현.
+- 일부 *단순 상호작용 로직*(구름 클릭 → 구름 상태 전환처럼 한 컴포넌트로 끝나는 것)은 여기에 둘 수 있다. 큰 게임 시스템(친밀도·변신 등)은 자기 폴더([Character/](../Character/CLAUDE.md) 등)로 분리.
 
 ## 현재 들어 있는 것
 
 - `InteractionInterfaces.cs` — `IHoverable` / `IClickable` / `IRightClickable` / `IShiftRightClickable` 4개 계약. 모든 인터랙터블은 이 중 필요한 것만 구현하면 매니저가 자동 라우팅.
 - `WorldInputLock.cs` — "지금은 월드 오브젝트가 마우스에 반응하면 안 된다"를 거는 공용 잠금(static). 뷰포트 편집 모드와 장식 설치 모드가 건다. `Acquire(owner)` / `Release(owner)` / `IsLocked`.
 - `InputInteractionManager.cs` — 마우스 위치 → 월드좌표 → `Physics2D.OverlapPointNonAlloc` → sortingLayer/sortingOrder가 가장 높은 콜라이더에 라우팅. 마우스 픽셀 변화 없으면 재스캔 스킵하는 최적화 내장(`_skipRescanWhenPointerUnchanged`).
-- `MoonClickIdle2D.cs` — 별(가제) 컴포넌트. `K`키로 Active 진입 → 클릭 시 prefab 리스트의 다음 1개 스폰 → 다시 Idle. 한 번 다 쓰면 더 이상 스폰 안 함. 같은 GameObject에 `DraggableObject2D`가 있으면 스폰은 mouse up 시점·드래그 아니었을 때에만 발생 — 매니저가 mouse down에서 `OnClick`을 호출하는 구조에서 클릭과 드래그를 분리하기 위한 협력.
+- `MoonClickIdle2D.cs` — 구름(가제) 컴포넌트. `K`키로 Active 진입 → 클릭 시 prefab 리스트의 다음 1개 스폰 → 다시 Idle. 한 번 다 쓰면 더 이상 스폰 안 함. 같은 GameObject에 `DraggableObject2D`가 있으면 스폰은 mouse up 시점·드래그 아니었을 때에만 발생 — 매니저가 mouse down에서 `OnClick`을 호출하는 구조에서 클릭과 드래그를 분리하기 위한 협력.
 - `DraggableObject2D.cs` — 마우스 좌클릭 드래그로 transform 위치를 갱신. 매니저 라우팅 대신 자체로 `Mouse.current`를 폴링하고 자기 `Collider2D.OverlapPoint`로 press 시작을 판정. `PressEnded(bool wasDrag)` 이벤트로 드래그/클릭 분리 신호를 같은 GameObject의 `IClickable` 측에 공급.
 - `InputInteractionTestProbe.cs` — `IRightClickable`을 뺀 3개 인터페이스를 구현하고 `Debug.Log`만 하는 시연/테스트용. 인터랙터블 셋업이 맞는지 확인할 때 GameObject에 부착.
 - `OpaqueHoverable.cs` — `IHoverable`을 받아 sprite 픽셀 알파를 검사한 뒤, *불투명 영역에서만* UnityEvent(`_onOpaqueHoverEnter` / `_onOpaqueHoverExit`)로 다시 발사. 사용 조건은 같은 GameObject에 `Collider2D` + sprite 텍스처의 `Read/Write Enabled = true`. 이벤트를 구독하지 않고 *지금 호버 중인가*만 필요한 쪽을 위해 `IsOpaqueHovered`도 노출한다.

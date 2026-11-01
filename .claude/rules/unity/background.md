@@ -44,4 +44,4 @@ paths:
 
 ## 정렬은 Default 레이어의 음수 Order in Layer로 합니다
 
-새 Sorting Layer를 만들지 않습니다. ProjectSettings를 건드리지 않기 위해서이고, 아트 샘플 씬의 배경도 같은 방식을 씁니다. 캐릭터·별·달·장식은 모두 배경보다 큰 Order in Layer를 가져야 합니다. 값은 프리팹에서 확인합니다.
+새 Sorting Layer를 만들지 않습니다. ProjectSettings를 건드리지 않기 위해서이고, 아트 샘플 씬의 배경도 같은 방식을 씁니다. 캐릭터·구름·달·장식은 모두 배경보다 큰 Order in Layer를 가져야 합니다. 값은 프리팹에서 확인합니다.

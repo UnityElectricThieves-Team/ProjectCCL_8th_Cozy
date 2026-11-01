@@ -10,7 +10,7 @@ using UnityEngine;
 /// 둘은 기준이 다르므로(외곽선 근사 vs 알파 임계값) 서로 맞추려고 튜닝하지 않는다.
 /// 외곽선의 정밀도는 그림 임포트 설정(Sprite Editor의 Custom Physics Shape / Outline Tolerance)에서 정한다.
 ///
-/// 콜라이더는 인터랙터블(IClickable 등)과 같은 GameObject에 있어야 하므로, 그림이 자식에 있는 구조(별)도 있다.
+/// 콜라이더는 인터랙터블(IClickable 등)과 같은 GameObject에 있어야 하므로, 그림이 자식에 있는 구조(구름)도 있다.
 /// 그 경우 <see cref="_spriteRenderer"/>를 인스펙터에서 연결한다.
 /// 전제: 실행 중 그림과 콜라이더 사이의 상대 위치·배율은 변하지 않는다 — 외곽선은 프레임·반전이 바뀔 때만 다시 담는다.
 /// </summary>

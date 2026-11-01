@@ -1,26 +1,26 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Serialization;
 
 /// <summary>
-/// 별(스폰 포인트)의 중앙 컨트롤러 — <see cref="BaseCharacterController"/>에 대응하는 별 버전.
+/// 구름(스폰 포인트)의 중앙 컨트롤러 — <see cref="BaseCharacterController"/>에 대응하는 구름 버전.
 ///
 /// - 누적 스폰 기운(<see cref="SpawnPointManager.CumulativeEnergy"/>)이 <see cref="_threshold"/> 이상이면 Activated,
 ///   아니면 Idle인 2상태 머신. 상태가 바뀔 때만 Animator의 Int 파라미터(<see cref="StateParameter"/>)를 갱신한다
 ///   (Character의 VisualModule과 같은 방식이되 상태 클래스 없이 단순화).
 /// - 클릭(드래그가 아니었을 때) 시 캐릭터 1개 스폰을 요청한다. 생성·동시존재 캡 판정은 <see cref="CharacterManager"/>에 위임한다.
 ///   스폰해도 기운은 차감하지 않는다.
-/// - 지금 Star.prefab은 <see cref="_characterPrefab"/>을 비워 두어 캐릭터를 소환하지 않는다. 이유는
-///   .claude/rules/unity/character-ownership.md의 별 항목.
+/// - 지금 Cloud.prefab은 <see cref="_characterPrefab"/>을 비워 두어 캐릭터를 소환하지 않는다. 이유는
+///   .claude/rules/unity/character-ownership.md의 구름 항목.
 ///
 /// 같은 GameObject에 <see cref="Collider2D"/>가 있어야 <see cref="InputInteractionManager"/>가 클릭을 라우팅한다.
 /// 같은 GameObject에 <see cref="DraggableObject2D"/>가 있으면 드래그가 아니었을 때(mouse up 시점)에만 스폰한다.
 /// </summary>
-public sealed class StarController : MonoBehaviour, IClickable
+public sealed class CloudController : MonoBehaviour, IClickable
 {
-    private enum StarState { Idle = 0, Activated = 1 }
+    private enum CloudState { Idle = 0, Activated = 1 }
 
     [Header("Refs")]
-    [Tooltip("Visual 자식의 Animator. Idle/Activated 상태를 가진 StarAnimation 컨트롤러를 연결.")]
+    [Tooltip("Visual 자식의 Animator. Idle/Activated 상태를 가진 BaseCloudAnimatorController를 연결.")]
     [SerializeField] private Animator _animator;
     [Tooltip("스폰 기운 소스(SpawnPointManager). 비우면 Awake에서 같은 GameObject에서 탐색.")]
     [SerializeField, FormerlySerializedAs("_counter")] private SpawnPointManager _spawnPoint;
@@ -32,15 +32,15 @@ public sealed class StarController : MonoBehaviour, IClickable
     [SerializeField] private GameObject _characterPrefab;
     [Tooltip("스폰 시 부모 Transform (선택). 비우면 Hierarchy 루트에 스폰.")]
     [SerializeField] private Transform _spawnParent;
-    [Tooltip("스폰 위치 = 별 위치 + Random(Min..Max). Y는 위쪽(+)이 자연 낙하에 적합.")]
+    [Tooltip("스폰 위치 = 구름 위치 + Random(Min..Max). Y는 위쪽(+)이 자연 낙하에 적합.")]
     [SerializeField] private Vector2 _spawnOffsetMin = new Vector2(-0.24f, 0.48f);
     [SerializeField] private Vector2 _spawnOffsetMax = new Vector2(0.24f, 0.96f);
 
-    // Animator 파라미터 이름 — StarAnimation 컨트롤러의 Int 파라미터 이름과 글자까지 일치해야 한다.
-    private const string StateParameter = "StarState";
+    // Animator 파라미터 이름 — BaseCloudAnimatorController의 Int 파라미터 이름과 글자까지 일치해야 한다.
+    private const string StateParameter = "CloudState";
 
     private int _stateHash;
-    private StarState _current;
+    private CloudState _current;
     private DraggableObject2D _draggable;
     private bool _spawnPending;
 
@@ -54,7 +54,7 @@ public sealed class StarController : MonoBehaviour, IClickable
     private void Start()
     {
         // 시작 상태를 명시적으로 적용 — 기운 0이면 Idle.
-        ApplyState(IsReady() ? StarState.Activated : StarState.Idle);
+        ApplyState(IsReady() ? CloudState.Activated : CloudState.Idle);
     }
 
     private void OnEnable()
@@ -70,7 +70,7 @@ public sealed class StarController : MonoBehaviour, IClickable
     private void Update()
     {
         if (_spawnPoint == null) return;
-        var desired = IsReady() ? StarState.Activated : StarState.Idle;
+        var desired = IsReady() ? CloudState.Activated : CloudState.Idle;
         if (desired != _current) ApplyState(desired);
     }
 
@@ -116,7 +116,7 @@ public sealed class StarController : MonoBehaviour, IClickable
         CharacterManager.Instance.Spawn(_characterPrefab, transform.position + offset, _spawnParent);
     }
 
-    private void ApplyState(StarState next)
+    private void ApplyState(CloudState next)
     {
         _current = next;
         if (_animator != null) _animator.SetInteger(_stateHash, (int)next);
@@ -126,9 +126,9 @@ public sealed class StarController : MonoBehaviour, IClickable
     private void OnValidate()
     {
         if (GetComponent<Collider2D>() == null)
-            Debug.LogWarning($"[{nameof(StarController)}] '{name}' needs a Collider2D for clicks to register.", this);
+            Debug.LogWarning($"[{nameof(CloudController)}] '{name}' needs a Collider2D for clicks to register.", this);
         if (_animator == null)
-            Debug.LogWarning($"[{nameof(StarController)}] '{name}' has no Animator — Idle/Activated won't switch.", this);
+            Debug.LogWarning($"[{nameof(CloudController)}] '{name}' has no Animator — Idle/Activated won't switch.", this);
     }
 #endif
 }

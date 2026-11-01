@@ -1,16 +1,16 @@
 ---
 paths:
   - "Project_Cozy/Assets/Scripts/Interaction/**/*.cs"
-  - "Project_Cozy/Assets/Scripts/Gameplay/StarController.cs"
+  - "Project_Cozy/Assets/Scripts/Gameplay/CloudController.cs"
   - "Project_Cozy/Assets/Prefabs/Characters/*.prefab"
-  - "Project_Cozy/Assets/Prefabs/Star.prefab"
+  - "Project_Cozy/Assets/Prefabs/Cloud.prefab"
   - "Project_Cozy/Assets/Assets/ProtoTypeCharacter/**"
   - "Project_Cozy/Assets/Art/**"
 ---
 
 # 월드 오브젝트의 마우스 판정 규약
 
-캐릭터·별처럼 마우스로 만지는 월드 오브젝트의 판정 영역을 어떻게 정하는지에 대한 규칙입니다. 구체 설정은 프리팹과 그림 임포트 설정에서 확인하세요.
+캐릭터·구름처럼 마우스로 만지는 월드 오브젝트의 판정 영역을 어떻게 정하는지에 대한 규칙입니다. 구체 설정은 프리팹과 그림 임포트 설정에서 확인하세요.
 
 ## 판정 모양은 그림에서 가져옵니다
 
@@ -29,6 +29,6 @@ paths:
 
 ## 콜라이더는 받는 쪽과 같은 GameObject에 둡니다
 
-라우팅 매니저는 콜라이더가 붙은 GameObject에서 `IClickable` 등을 찾습니다(정본은 [Interaction/CLAUDE.md](../../../Project_Cozy/Assets/Scripts/Interaction/CLAUDE.md)의 "콜라이더 필수"). 그래서 그림이 자식에 있는 오브젝트(별)는 콜라이더를 루트에 두고, `SpritePhysicsShapeSync`의 그림 칸에 자식의 SpriteRenderer를 연결합니다. 그림과 받는 쪽이 같은 GameObject(캐릭터의 Visual)면 칸을 비워 둬도 같은 GameObject에서 찾습니다.
+라우팅 매니저는 콜라이더가 붙은 GameObject에서 `IClickable` 등을 찾습니다(정본은 [Interaction/CLAUDE.md](../../../Project_Cozy/Assets/Scripts/Interaction/CLAUDE.md)의 "콜라이더 필수"). 그래서 그림이 자식에 있는 오브젝트(구름)는 콜라이더를 루트에 두고, `SpritePhysicsShapeSync`의 그림 칸에 자식의 SpriteRenderer를 연결합니다. 그림과 받는 쪽이 같은 GameObject(캐릭터의 Visual)면 칸을 비워 둬도 같은 GameObject에서 찾습니다.
 
 새 콜라이더를 붙일 때는 **새 것을 먼저 붙이고 옛 콜라이더를 지웁니다.** `DraggableObject2D`·`HoldClickEvent`가 `Collider2D`를 요구해서, 마지막 콜라이더는 지워지지 않습니다.

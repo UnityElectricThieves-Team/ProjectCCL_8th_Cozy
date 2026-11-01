@@ -6,7 +6,7 @@ Always-on-Top, borderless + resize, 클릭 투과, 비포커스 키/마우스 �
 
 ## 책임
 
-- Win32 / WinAPI / DwmApi 등 OS 호출은 **모두 이 폴더 안에서만**. 게임 로직(별 클릭, 친밀도, 변신 등)은 P/Invoke 직접 호출 금지.
+- Win32 / WinAPI / DwmApi 등 OS 호출은 **모두 이 폴더 안에서만**. 게임 로직(구름 클릭, 친밀도, 변신 등)은 P/Invoke 직접 호출 금지.
 - Steam SDK 같은 외부 서비스는 여기 두지 않는다 — OS가 아닌 서비스이므로 별도 모듈로 분리. (구체 폴더 위치는 결정 시점에.)
 
 ## 하위 폴더

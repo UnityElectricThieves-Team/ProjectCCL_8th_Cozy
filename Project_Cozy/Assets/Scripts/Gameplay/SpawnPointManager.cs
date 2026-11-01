@@ -7,7 +7,7 @@ using UnityEngine.InputSystem.Utilities; // .Call() extension method
 
 /// <summary>
 /// 스폰 포인트의 '스폰 기운'을 관리한다. 포커스 무관 입력 4채널을 모아 스폰 기운을 누적한다. 스폰해도 차감하지 않는다.
-/// 스폰 포인트(Star 오브젝트)의 <see cref="StarController"/>는 이 관리자를 참조해 활성 여부·소환을 판단한다.
+/// 스폰 포인트(Cloud 오브젝트)의 <see cref="CloudController"/>는 이 관리자를 참조해 활성 여부·소환을 판단한다.
 ///
 /// <list type="bullet">
 ///   <item>InFocus 키 : <c>InputSystem.onAnyButtonPress</c>의 <see cref="KeyControl"/></item>

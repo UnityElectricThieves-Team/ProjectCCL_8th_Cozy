@@ -28,7 +28,7 @@ OS 의존 코드(Win32, WinAPI, DwmApi, LL Hook 등) 격리 레이어.
 
 ### 책임 경계
 
-- 게임 로직(별 클릭, 친밀도, 변신 등)이 **P/Invoke를 직접 호출하면 안 된다.** Platform/ 안에서 wrapper API를 노출하고, 게임 로직은 wrapper만 호출.
+- 게임 로직(구름 클릭, 친밀도, 변신 등)이 **P/Invoke를 직접 호출하면 안 된다.** Platform/ 안에서 wrapper API를 노출하고, 게임 로직은 wrapper만 호출.
 - Steam SDK 같은 외부 서비스는 Platform/에 두지 않는다 — OS가 아닌 서비스이므로 별도 모듈.
 
 ## 테스트 가능성

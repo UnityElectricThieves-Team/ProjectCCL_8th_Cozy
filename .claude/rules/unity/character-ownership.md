@@ -3,10 +3,10 @@ paths:
   - "Project_Cozy/Assets/Scripts/Gameplay/CharacterOwnership.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/CharacterOwnershipFileFormat.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/CharacterManager.cs"
-  - "Project_Cozy/Assets/Scripts/Gameplay/StarController.cs"
+  - "Project_Cozy/Assets/Scripts/Gameplay/CloudController.cs"
   - "Project_Cozy/Assets/Scenes/GameScene.unity"
   - "Project_Cozy/Assets/Prefabs/Characters/*.prefab"
-  - "Project_Cozy/Assets/Prefabs/Star.prefab"
+  - "Project_Cozy/Assets/Prefabs/Cloud.prefab"
   - "Project_Cozy/Assets/Scripts/UI/CollectionPanelContentController.cs"
   - "Project_Cozy/Assets/Scripts/Contents/CollectionSystem/Model/CollectionData.cs"
 ---
@@ -54,7 +54,7 @@ paths:
 
 저장 파일이 없으면 아무 캐릭터도 보유하지 않은 상태로 시작합니다. 파일 형식의 기본값이 곧 첫 실행 상태라 별도 초기값을 두지 않습니다. 처음부터 다시 하려면 저장 파일을 지웁니다.
 
-개발 중에는 캐릭터를 해금할 게임 경로가 없습니다(아래 별 항목). 그래서 에디터에서 Play 중에 `CharacterOwnership` 컴포넌트를 우클릭해 "테스트: 모든 캐릭터 해금"을 씁니다. 이 메뉴는 실제 해금과 같은 함수를 부르므로, 저장과 재시작 동작이 출시 버전과 같은 경로로 검증됩니다. 에디터 밖에는 들어가지 않습니다.
+개발 중에는 캐릭터를 해금할 게임 경로가 없습니다(아래 구름 항목). 그래서 에디터에서 Play 중에 `CharacterOwnership` 컴포넌트를 우클릭해 "테스트: 모든 캐릭터 해금"을 씁니다. 이 메뉴는 실제 해금과 같은 함수를 부르므로, 저장과 재시작 동작이 출시 버전과 같은 경로로 검증됩니다. 에디터 밖에는 들어가지 않습니다.
 
 빌드에서는 이 메뉴를 쓸 수 없어서, **Development Build로 빌드하면 시작할 때 모든 캐릭터를 해금합니다.** 아트·기획에게 결과물을 빠르게 보여주기 위해서입니다. 같은 해금 함수를 부르므로 재시작해도 캐릭터가 늘지 않습니다. Development Build를 끈 빌드와 에디터 Play는 그대로 빈 화면으로 시작합니다. 한 번 실행한 PC에는 해금 기록이 남으므로, 그 PC에서 첫 실행을 다시 보려면 저장 파일을 지웁니다.
 
@@ -64,6 +64,6 @@ paths:
 
 뷰포트는 시작하고 몇 프레임 뒤에야 확정되므로 그 전에는 위치를 정하지 않습니다. 규약은 [viewport-coordinates.md](viewport-coordinates.md)의 "뷰포트가 처음 확정되기 전에는" 절에 있습니다.
 
-## 별은 지금 캐릭터를 소환하지 않습니다
+## 구름은 지금 캐릭터를 소환하지 않습니다
 
-별의 기능이 "클릭마다 같은 캐릭터를 소환"에서 "조건마다 대응하는 캐릭터를 해금"으로 바뀌어 새로 만들어야 하는 상태입니다. 그 전까지 옛 방식으로 소환하면 기록에 없는 캐릭터가 계속 복제되고, 1종류당 1개라는 기획 제약도 깨집니다. 그래서 `Star.prefab`의 캐릭터 프리팹 칸을 비워 두었습니다. **이 칸을 다시 채우지 않습니다.** 새 별은 `CharacterOwnership`의 해금을 거치게 만듭니다.
+구름의 기능이 "클릭마다 같은 캐릭터를 소환"에서 "조건마다 대응하는 캐릭터를 해금"으로 바뀌어 새로 만들어야 하는 상태입니다. 그 전까지 옛 방식으로 소환하면 기록에 없는 캐릭터가 계속 복제되고, 1종류당 1개라는 기획 제약도 깨집니다. 그래서 `Cloud.prefab`의 캐릭터 프리팹 칸을 비워 두었습니다. **이 칸을 다시 채우지 않습니다.** 새 구름은 `CharacterOwnership`의 해금을 거치게 만듭니다.

@@ -81,7 +81,7 @@ public class CharacterOwnership : MonoBehaviour
         _data.records.RemoveAll(r => r == null || string.IsNullOrEmpty(r.id) || !seen.Add(r.id));
 
 #if DEVELOPMENT_BUILD
-        // 별의 해금이 아직 없어 빌드에서는 캐릭터를 띄울 길이 없다. 결과물을 보여주는 Development Build에서는
+        // 구름의 해금이 아직 없어 빌드에서는 캐릭터를 띄울 길이 없다. 결과물을 보여주는 Development Build에서는
         // 시작할 때 모두 해금한다. 뷰포트 확정 전이라 기록만 남고, 등장은 Start의 흐름이 맡는다.
         // 에디터 Play에는 정의되지 않으므로 첫 실행(빈 화면) 확인은 그대로 된다.
         UnlockAll();
@@ -259,7 +259,7 @@ public class CharacterOwnership : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    // 별의 캐릭터 소환이 막혀 있는 동안 에디터에서 캐릭터를 띄우는 길이다. 운영과 같은 해금 경로를 부르므로
+    // 구름의 캐릭터 소환이 막혀 있는 동안 에디터에서 캐릭터를 띄우는 길이다. 운영과 같은 해금 경로를 부르므로
     // 저장·재시작 동작이 그대로 검증된다. 처음 상태로 되돌리려면 저장 파일을 지운다.
     [ContextMenu("테스트: 모든 캐릭터 해금")]
     private void EditorUnlockAll()

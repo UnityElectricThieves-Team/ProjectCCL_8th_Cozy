@@ -141,7 +141,7 @@ public class ViewportScreenSettings : MonoBehaviour
         // 정지는 소유자별이라 다른 컴포넌트가 건 정지는 풀지 않는다. 걸지 않았을 때 풀어도 안전하다.
         //
         // _isEditing은 건드리지 않는다 — 이벤트 없이 조용히 내리면 편집 UI가 상태를 잘못 알게 된다.
-        // 월드 입력 잠금도 같은 이유로 푼다 — 남으면 캐릭터·별이 영영 반응하지 않는다.
+        // 월드 입력 잠금도 같은 이유로 푼다 — 남으면 캐릭터·구름이 영영 반응하지 않는다.
         WorldInputLock.Release(this);
         if (_windowManager == null) return;
         _windowManager.ReleaseClickThroughSuspend(this);

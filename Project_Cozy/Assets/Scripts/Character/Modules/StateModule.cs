@@ -201,7 +201,7 @@ public sealed class StateModule
     public void EnforceFloor()
     {
         // StartUp 전 — 시작 상태를 Idle로 볼지 Fall로 볼지는 StartUp이 정한다. 여기서 먼저 바닥에
-        // 붙여버리면 스폰 직후 낙하가 사라진다(별에서 스폰된 캐릭터는 Start보다 먼저 거주 영역을 받는다).
+        // 붙여버리면 스폰 직후 낙하가 사라진다(구름에서 스폰된 캐릭터는 Start보다 먼저 거주 영역을 받는다).
         if (_current == null) return;
         if (OwnsVerticalPosition) return;
         _stateOwner.SnapToFloor();
