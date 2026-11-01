@@ -157,7 +157,7 @@ public class ViewportEditHandles : MonoBehaviour
         int dx = mouse.x - _dragStartMouse.x;
         int dy = mouse.y - _dragStartMouse.y;
         _viewportSettings.SetPreviewViewport(
-            ApplyDrag(_dragStartRect, _dragZone, dx, dy, _viewportSettings.VisibleRect));
+            ApplyDrag(_dragStartRect, _dragZone, dx, dy, _viewportSettings.VisibleRect, _viewportSettings.MinViewportSize));
     }
 
     private bool IsPointerOverUI(Vector2 screenPos)
@@ -177,9 +177,9 @@ public class ViewportEditHandles : MonoBehaviour
     // 이동하는 변을 보이는 영역 안으로 직접 클램프해 반대편 앵커를 보존한다.
     // (사후 ClampToVisible의 위치 클램프에만 맡기면 오버슈트 시 앵커가 밀린다 — 리뷰 합의)
 
-    private static RectInt ApplyDrag(RectInt r, DragZone zone, int dx, int dy, RectInt visible)
+    private static RectInt ApplyDrag(RectInt r, DragZone zone, int dx, int dy, RectInt visible, Vector2Int min)
     {
-        Vector2Int min = ViewportScreenSettings.MinViewportSize;
+        min = Vector2Int.Min(min, visible.size); // 줌으로 보이는 영역이 최소 크기보다 작아져도 끌 수 있게
 
         if (zone == DragZone.Move)
         {

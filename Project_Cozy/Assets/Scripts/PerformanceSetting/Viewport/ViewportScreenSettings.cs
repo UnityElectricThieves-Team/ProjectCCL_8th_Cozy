@@ -34,9 +34,10 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class ViewportScreenSettings : MonoBehaviour
 {
-    /// <summary>§2.1.1 제약 — 뷰포트 최소 크기(베이스 공간 px = 마스터 캔버스 기준 px).
-    /// 기획서의 "절대 픽셀"을 마스터 캔버스 좌표계의 픽셀로 해석한 것이라, 4K에서만 화면 px와 같다.</summary>
-    public static readonly Vector2Int MinViewportSize = new Vector2Int(720, 480);
+    /// <summary>뷰포트 최소 크기(베이스 공간 px) — 베이스 공간의 가로·세로 각각 1/4.
+    /// Figma '화면 창 조정 이모저모'의 "해상도의 1/4"을 각 변의 1/4로 해석했다(넓이의 1/4이 아님).
+    /// 베이스 공간은 작업 영역의 종횡비를 따르므로, 세로 최소값도 모니터에 따라 달라진다.</summary>
+    public Vector2Int MinViewportSize => new Vector2Int(_baseSpaceSize.x / 4, _baseSpaceSize.y / 4);
 
     // 마스터 캔버스 폭(px). 베이스 공간의 폭이자 화면 배율의 분모다. GameScene의 UIRoot CanvasScaler
     // 기준 해상도 폭과 같아야 월드와 UI가 같은 배율로 줄어든다 — 씬 값은 인스펙터에서 바뀌므로 코드로
