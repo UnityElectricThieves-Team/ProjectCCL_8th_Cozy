@@ -147,6 +147,18 @@ public sealed class BackgroundSystem : MonoBehaviour
     }
 
     /// <summary>
+    /// 게임 초기화(<see cref="GameProgressReset"/>). 산 기록을 지우고 기본(활성 없음)으로 되돌린 뒤 저장한다.
+    /// </summary>
+    public void ResetProgress()
+    {
+        _data.ownedIds.Clear();
+        _data.activeId = string.Empty;
+        Save();
+        OwnedChanged?.Invoke();
+        ActiveBackgroundChanged?.Invoke(_data.activeId);
+    }
+
+    /// <summary>
     /// 현재 소유와 활성 배경을 파일에 기록한다. 쓰기 실패는 로그만 남기고 삼킨다 —
     /// 저장이 안 됐다고 구매나 사용 자체를 취소하면 이미 차감된 하트를 되돌릴 방법이 없어 더 이상해진다.
     /// </summary>

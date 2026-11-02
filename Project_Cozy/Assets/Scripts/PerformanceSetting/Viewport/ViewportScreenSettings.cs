@@ -5,8 +5,9 @@ using UnityEngine;
 /// <summary>
 /// "화면 설정"(UserSettings.md §2.1.1)의 정책 레이어 — 정적 창 모델.
 ///
-/// 창:          항상 현재 모니터의 **작업 영역**(작업표시줄을 뺀 영역)에 놓인다. 평상시에는 크기도
-///              위치도 변하지 않고, ReadjustWindow()를 부를 때만 다시 잡는다.
+/// 창:          항상 한 모니터의 **작업 영역**(작업표시줄을 뺀 영역)에 놓인다. 설정에서 고른 모니터가 있으면
+///              그 모니터(SetTargetWorkArea), 없으면 창이 지금 있는 모니터다. 평상시에는 크기도 위치도 변하지 않고,
+///              ReadjustWindow()나 모니터 선택이 바뀔 때만 다시 잡는다.
 /// 베이스 공간: 작업 영역을 **마스터 캔버스 기준 px**로 표현한 것. 폭은 항상 마스터 캔버스 폭이고,
 ///              높이는 작업 영역의 종횡비를 따른다. 화면에서는 베이스 px 하나가 (작업 영역 폭 / 마스터 캔버스 폭)
 ///              화면 px로 보인다 — UI의 CanvasScaler(기준 폭 일치, Match=Width)와 같은 배율이라, 어느 해상도에서든
@@ -62,6 +63,12 @@ public class ViewportScreenSettings : MonoBehaviour
     private Vector2Int _baseSpaceSize;         // 베이스 공간 크기(마스터 캔버스 기준 px) — 폭은 항상 MasterCanvasWidthPx
     private bool _isEditing;
     private bool _ready;                       // 초기 적용 완료 전 API 호출 가드
+
+    // 창을 놓을 작업 영역(스크린 좌표). 모니터를 골랐으면 그 모니터의 것이다. 없으면 창이 지금 있는 모니터를 읽는다.
+    private RectInt _targetWorkArea;
+    private bool _hasTargetWorkArea;
+    private bool _relayoutAfterEdit;           // 편집 중에 모니터가 바뀌어 편집이 끝나면 다시 배치해야 한다
+    private Coroutine _verifyWindow;
 
     // ready 전에 작업 영역 px 단위로 들어온 뷰포트. 환산에 필요한 배율은 Start에서 작업 영역을 읽은 뒤에야
     // 알 수 있어 그때까지 따로 들고 있는다. _viewport에 섞어 두면 어느 단위인지 알 수 없어진다.
@@ -218,10 +225,33 @@ public class ViewportScreenSettings : MonoBehaviour
             return;
         }
 
-        ApplyScreenLayout();
+        Relayout();
+    }
 
-        // 작업 영역이 줄었으면 뷰포트가 보이는 영역을 넘칠 수 있다. 적용하는 값만 줄이고 고른 값은 그대로 둔다
-        // (큰 모니터로 돌아가면 저장된 원래 크기가 복원되어야 한다).
+    /// <summary>
+    /// 창을 놓을 작업 영역(스크린 좌표, 가상 바탕화면 기준)을 정한다 — 설정에서 고른 모니터의 작업 영역이다.
+    /// 값을 넣는 쪽은 Gameplay의 MonitorApplier다(이 클래스는 설정을 모른다). 같은 값이면 아무 일도 하지 않는다.
+    /// ready 전이면 들고 있다가 Start의 첫 배치에 쓴다. 편집 중이면 편집이 끝날 때 옮긴다 — 프리뷰가 옛 베이스 공간 기준으로 남지 않게.
+    /// </summary>
+    public void SetTargetWorkArea(RectInt workArea)
+    {
+        if (_hasTargetWorkArea && _targetWorkArea.Equals(workArea)) return;
+        _targetWorkArea = workArea;
+        _hasTargetWorkArea = true;
+        if (!_ready) return;
+        if (_isEditing)
+        {
+            _relayoutAfterEdit = true;
+            return;
+        }
+        Relayout();
+    }
+
+    // 창·카메라를 다시 놓고 뷰포트를 맞춘다. 작업 영역이 줄었으면 뷰포트가 보이는 영역을 넘칠 수 있다.
+    // 적용하는 값만 줄이고 고른 값은 그대로 둔다(큰 모니터로 돌아가면 저장된 원래 크기가 복원되어야 한다).
+    private void Relayout()
+    {
+        ApplyScreenLayout();
         RefreshEffectiveViewport();
         if (_hasPendingViewport) _pendingViewport = ClampToVisible(_pendingViewport);
         PublishViewportConfirmed();
@@ -333,7 +363,15 @@ public class ViewportScreenSettings : MonoBehaviour
             _windowManager.ReleaseResizeSuspend(this);
         }
         WorldInputLock.Release(this);
-        PublishViewportConfirmed();
+        if (_relayoutAfterEdit)
+        {
+            _relayoutAfterEdit = false;
+            Relayout();
+        }
+        else
+        {
+            PublishViewportConfirmed();
+        }
         EditModeChanged?.Invoke(false);
     }
 
@@ -349,8 +387,27 @@ public class ViewportScreenSettings : MonoBehaviour
             _windowManager.ApplyRegion(
                 _baseSpaceScreenRect.x, _baseSpaceScreenRect.y,
                 _baseSpaceScreenRect.width, _baseSpaceScreenRect.height);
+            if (_verifyWindow != null) StopCoroutine(_verifyWindow);
+            _verifyWindow = StartCoroutine(VerifyWindowRect());
         }
         FrameCamera();
+    }
+
+    // 배율(DPI)이 다른 모니터로 옮기면 Unity가 창 크기를 다시 잡을 수 있다(MultiMonitorPreparation.md §4.1, 미확인).
+    // 확인을 기다리지 않고, 옮긴 뒤 몇 프레임 동안 창이 목표와 다르면 한 번 더 맞춘다. 옮길 때만 도는 비용이다.
+    private IEnumerator VerifyWindowRect()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            yield return null;
+            if (_windowManager.TryGetWindowRect(out RectInt actual) && !actual.Equals(_baseSpaceScreenRect))
+            {
+                _windowManager.ApplyRegion(
+                    _baseSpaceScreenRect.x, _baseSpaceScreenRect.y,
+                    _baseSpaceScreenRect.width, _baseSpaceScreenRect.height);
+            }
+        }
+        _verifyWindow = null;
     }
 
     private void FrameCamera()
@@ -374,7 +431,11 @@ public class ViewportScreenSettings : MonoBehaviour
 
     private void RefreshBaseSpace()
     {
-        if (_windowManager != null && _windowManager.TryGetWorkAreaRect(out RectInt workArea))
+        if (_hasTargetWorkArea)
+        {
+            _baseSpaceScreenRect = _targetWorkArea;
+        }
+        else if (_windowManager != null && _windowManager.TryGetWorkAreaRect(out RectInt workArea))
         {
             _baseSpaceScreenRect = workArea;
         }

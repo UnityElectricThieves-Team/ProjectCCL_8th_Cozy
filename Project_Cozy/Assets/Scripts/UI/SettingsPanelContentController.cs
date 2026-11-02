@@ -23,6 +23,8 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     private enum SettingsTab { General, Graphics, Sound }
 
     private const string GirlTransformBanMessageId = "UISettings.popup.girl_transform_ban";
+    private const string QuitMessageId = "UISettings.popup.quit";
+    private const string ResetGameMessageId = "UISettings.popup.reset_game";
 
     [Header("탭 배경 이미지")]
     [Tooltip("활성/비활성 색을 칠할 탭 배경 이미지.")]
@@ -34,6 +36,8 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     [SerializeField] private GameObject _generalRoot;
     [SerializeField] private GameObject _graphicsRoot;
     [SerializeField] private GameObject _soundRoot;
+    [Tooltip("하단 영역 안의 그래픽 탭 전용 묶음([저장]·[초기화]·안내 문구). 하단 영역은 세 탭이 함께 써서 그래픽 탭에서만 켠다.")]
+    [SerializeField] private GameObject _graphicsFooter;
 
     [Header("일반 탭 컨트롤")]
     [Tooltip("저장된 값을 밀어넣을 대상. 컨트롤 → 매니저 방향은 각 컨트롤의 OnValueChanged에 인스펙터로 건다.")]
@@ -192,6 +196,30 @@ public sealed class SettingsPanelContentController : MonoBehaviour
             () => { if (_girlTransformBannedToggle != null) _girlTransformBannedToggle.isOn = false; });
     }
 
+    // ===== 일반 탭 아래 버튼. OnClick()에 인스펙터로 건다. [버그&피드백]·[크레딧]은 아직 연결할 화면이 없어 버튼만 있다. =====
+
+    public void OnQuitClicked()
+    {
+        if (ConfirmPopup.Instance == null) Quit();
+        else ConfirmPopup.Instance.Show(QuitMessageId, Quit);
+    }
+
+    // 되돌릴 수 없는 일이라 팝업이 없으면 하지 않는다.
+    public void OnResetGameClicked()
+    {
+        if (ConfirmPopup.Instance != null) ConfirmPopup.Instance.Show(ResetGameMessageId, GameProgressReset.ResetAll);
+    }
+
+    private static void Quit()
+    {
+#if UNITY_EDITOR
+        // 에디터에서는 Application.Quit이 무시된다. 버튼이 동작하는지 볼 수 있게 Play를 멈춘다.
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
     // 볼륨은 끄는 동안 소리에만 반영하고, 파일 저장은 손 뗄 때(OnVolumeReleased) 한다.
     public void OnMasterVolumeChanged(float value) { if (_settings != null) _settings.SetVolume(VolumeChannel.Master, value); }
     public void OnMusicVolumeChanged(float value) { if (_settings != null) _settings.SetVolume(VolumeChannel.Music, value); }
@@ -257,6 +285,7 @@ public sealed class SettingsPanelContentController : MonoBehaviour
         if (_generalRoot != null) _generalRoot.SetActive(tab == SettingsTab.General);
         if (_graphicsRoot != null) _graphicsRoot.SetActive(tab == SettingsTab.Graphics);
         if (_soundRoot != null) _soundRoot.SetActive(tab == SettingsTab.Sound);
+        if (_graphicsFooter != null) _graphicsFooter.SetActive(tab == SettingsTab.Graphics);
         UpdateTabVisuals();
     }
 

@@ -79,6 +79,36 @@ public class SettingsFileFormat
     public int characterScaleStep = GraphicsScaleSteps.Character.DefaultIndex;
     public int uiScaleStep = GraphicsScaleSteps.UI.DefaultIndex;
     public int worldZoomStep = GraphicsScaleSteps.WorldZoom.DefaultIndex;
+
+    // 그래픽 탭의 모니터. 장치 이름과 모니터 rect를 함께 들어, 한쪽이 바뀌어도 다시 찾을 수 있게 한다
+    // (Docs/Development/MultiMonitorPreparation.md D3). 장치 이름이 비어 있으면 주 모니터 — 옛 파일도 저절로 주 모니터가 된다.
+    // RectInt를 그대로 담지 않고 정수로 푼다(ViewportFileFormat과 같은 이유).
+    public string monitorDevice = "";
+    public int monitorX;
+    public int monitorY;
+    public int monitorWidth;
+    public int monitorHeight;
+}
+
+/// <summary>설정에 저장하는 모니터 선택. 장치 이름이 비어 있으면 주 모니터다.</summary>
+public readonly struct MonitorSelection : IEquatable<MonitorSelection>
+{
+    public static readonly MonitorSelection Primary = new MonitorSelection("", default);
+
+    public readonly string DeviceName;
+    public readonly RectInt Bounds;
+
+    public MonitorSelection(string deviceName, RectInt bounds)
+    {
+        DeviceName = deviceName ?? "";
+        Bounds = bounds;
+    }
+
+    public bool IsPrimary => string.IsNullOrEmpty(DeviceName);
+
+    public bool Equals(MonitorSelection other) => DeviceName == other.DeviceName && Bounds.Equals(other.Bounds);
+    public override bool Equals(object obj) => obj is MonitorSelection other && Equals(other);
+    public override int GetHashCode() => HashCode.Combine(DeviceName, Bounds);
 }
 
 /// <summary>설정 패널 소리 탭의 볼륨 슬라이더 하나에 대응하는 믹서 채널.</summary>

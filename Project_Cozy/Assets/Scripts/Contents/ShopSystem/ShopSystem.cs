@@ -125,6 +125,18 @@ public sealed class ShopSystem : MonoBehaviour
     }
 
     /// <summary>
+    /// 게임 초기화(<see cref="GameProgressReset"/>). 산 기록과 화면에 놓인 장식을 모두 지우고 저장한다.
+    /// 놓인 장식은 <see cref="OwnedChanged"/>를 듣는 바인더가 화면에서 걷어 낸다.
+    /// </summary>
+    public void ResetProgress()
+    {
+        _inventory.ownedCounts.Clear();
+        _inventory.placed.Clear();
+        Save();
+        OwnedChanged?.Invoke();
+    }
+
+    /// <summary>
     /// 현재 소유를 파일에 기록한다. 쓰기 실패는 로그만 남기고 삼킨다 —
     /// 저장이 안 됐다고 구매 자체를 취소하면 이미 차감된 하트를 되돌릴 방법이 없어 더 이상해진다.
     /// </summary>

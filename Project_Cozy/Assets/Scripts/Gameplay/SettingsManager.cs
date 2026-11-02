@@ -11,7 +11,7 @@ using UnityEngine;
 /// 파일 기록은 손을 뗄 때 부르는 <see cref="CommitVolume"/>과 종료 시로 미룬다. 같은 이유로 볼륨은
 /// <see cref="Changed"/> 대신 전용 <see cref="VolumeChanged"/>를 울린다 — Changed 구독자들은 이산 이벤트를 전제로 만들어졌다.
 ///
-/// 그래픽 탭(캐릭터·UI·전체 크기)도 예외다. Figma가 "변경 즉시 화면에 보이다가 [저장]을 눌러야 최종 확정"으로 정해서,
+/// 그래픽 탭(캐릭터·UI·전체 크기, 모니터)도 예외다. Figma가 "변경 즉시 화면에 보이다가 [저장]을 눌러야 최종 확정"으로 정해서,
 /// <see cref="SetCharacterScaleStep"/> 등은 지금 값만 바꿔 <see cref="GraphicsChanged"/>를 울리고, 파일에는 <see cref="CommitGraphics"/>
 /// 때만 쓴다. 저장한 값은 <see cref="_data"/>에, 지금 화면의 값은 따로 든다 — 그래서 다른 설정이 저장될 때 미리보기 값이 섞여 들어가지 않는다.
 /// 적용하는 쪽은 지금 값을 읽는다(미리보기도 화면에 보여야 하므로).
@@ -20,8 +20,8 @@ using UnityEngine;
 /// 실제 적용은 각 소비자가 여기 값을 읽어 처리한다. 지금 연결된 소비자:
 /// 언어(<see cref="LocalizationManager"/>), 소녀 변신 금지·캐릭터 크기(<see cref="CharacterManager"/>가 캐릭터에 건다),
 /// 소리 탭(<see cref="BgmPlayer"/>), 항상 위·자동 실행(<see cref="DesktopIntegrationApplier"/>),
-/// 관리자 모드(<see cref="SpawnPointManager"/>가 다른 앱 입력을 셀지 정한다), 전체 크기(<see cref="WorldZoomApplier"/>), UI 크기(<see cref="UIScaleApplier"/>).
-/// 구름 수치·친밀도 표기는 아직 저장만 된다 — 값을 적용할 표시 UI가 없다.
+/// 관리자 모드(<see cref="SpawnPointManager"/>가 다른 앱 입력을 셀지 정한다), 전체 크기(<see cref="WorldZoomApplier"/>), UI 크기(<see cref="UIScaleApplier"/>),
+/// 모니터(<see cref="MonitorApplier"/>), 구름·캐릭터 수치(<see cref="CountLabel"/>).
 ///
 /// 씬 단일 인스턴스(Singleton). <see cref="HeartSystem"/>과 같은 패턴.
 /// </summary>
@@ -50,6 +50,7 @@ public sealed class SettingsManager : MonoBehaviour
     private int _characterScaleStep;
     private int _uiScaleStep;
     private int _worldZoomStep;
+    private MonitorSelection _monitor;
 
     /// <summary>캐릭터 크기의 지금 단계(<see cref="GraphicsScaleSteps.Character"/>). 저장 전 미리보기일 수 있다.</summary>
     public int CharacterScaleStep => _characterScaleStep;
@@ -60,10 +61,23 @@ public sealed class SettingsManager : MonoBehaviour
     /// <summary>전체 크기(줌)의 지금 단계(<see cref="GraphicsScaleSteps.WorldZoom"/>). 저장 전 미리보기일 수 있다.</summary>
     public int WorldZoomStep => _worldZoomStep;
 
+    /// <summary>창을 띄울 모니터의 지금 선택. 저장 전 미리보기일 수 있다. 실제로 그 모니터를 찾아 창을 옮기는 쪽은 <see cref="MonitorApplier"/>.</summary>
+    public MonitorSelection Monitor => _monitor;
+
     /// <summary>그래픽 탭에 저장하지 않은 변경이 있는가. 바꿨다가 원래 값으로 돌려 놓으면 false다.</summary>
     public bool HasUnsavedGraphics =>
         _characterScaleStep != _data.characterScaleStep || _uiScaleStep != _data.uiScaleStep
-        || _worldZoomStep != _data.worldZoomStep;
+        || _worldZoomStep != _data.worldZoomStep || !_monitor.Equals(SavedMonitor);
+
+    private MonitorSelection SavedMonitor => new MonitorSelection(_data.monitorDevice,
+        new RectInt(_data.monitorX, _data.monitorY, _data.monitorWidth, _data.monitorHeight));
+
+    public void SetMonitor(MonitorSelection monitor)
+    {
+        if (_monitor.Equals(monitor)) return;
+        _monitor = monitor;
+        GraphicsChanged?.Invoke();
+    }
 
     public void SetCharacterScaleStep(int step)
     {
@@ -96,6 +110,11 @@ public sealed class SettingsManager : MonoBehaviour
         _data.characterScaleStep = _characterScaleStep;
         _data.uiScaleStep = _uiScaleStep;
         _data.worldZoomStep = _worldZoomStep;
+        _data.monitorDevice = _monitor.DeviceName;
+        _data.monitorX = _monitor.Bounds.x;
+        _data.monitorY = _monitor.Bounds.y;
+        _data.monitorWidth = _monitor.Bounds.width;
+        _data.monitorHeight = _monitor.Bounds.height;
         Save();
         GraphicsChanged?.Invoke();
     }
@@ -107,6 +126,7 @@ public sealed class SettingsManager : MonoBehaviour
         _characterScaleStep = _data.characterScaleStep;
         _uiScaleStep = _data.uiScaleStep;
         _worldZoomStep = _data.worldZoomStep;
+        _monitor = SavedMonitor;
         GraphicsChanged?.Invoke();
     }
 
@@ -223,6 +243,7 @@ public sealed class SettingsManager : MonoBehaviour
         _characterScaleStep = _data.characterScaleStep;
         _uiScaleStep = _data.uiScaleStep;
         _worldZoomStep = _data.worldZoomStep;
+        _monitor = SavedMonitor;
 
         // 첫 실행만 OS 언어를 따른다. 바로 저장해 두어야 다음 실행부터는 사용자가 고른 언어(또는 이 값)를 그대로 쓴다.
         // 파일이 깨져 기본값으로 돌아온 경우는 첫 실행이 아니므로 건드리지 않는다.
@@ -257,6 +278,7 @@ public sealed class SettingsManager : MonoBehaviour
         _data.musicVolume = float.IsNaN(_data.musicVolume) ? defaults.musicVolume : Mathf.Clamp01(_data.musicVolume);
         _data.sfxVolume = float.IsNaN(_data.sfxVolume) ? defaults.sfxVolume : Mathf.Clamp01(_data.sfxVolume);
         _data.bgmTrackId ??= defaults.bgmTrackId;
+        _data.monitorDevice ??= defaults.monitorDevice;
         // 단계 수를 줄이면 옛 파일의 단계 번호가 범위를 넘을 수 있다. 끝 단계로 자른다.
         _data.characterScaleStep = GraphicsScaleSteps.Character.Clamp(_data.characterScaleStep);
         _data.uiScaleStep = GraphicsScaleSteps.UI.Clamp(_data.uiScaleStep);

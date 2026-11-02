@@ -109,7 +109,6 @@ MonoBehaviour:
     _affinityPerPet: 10
     _affinityHardCap: 100000000
   _scale:
-    _settings: {fileID: 11400000, guid: f969c08165cf55b468e1f3a4f2c83e7b, type: 2}
     _baseScale: {x: 0.5, y: 0.5, z: 1}
 --- !u!1 &5691119776310040808
 GameObject:
@@ -406,7 +405,7 @@ GameObject:
   - component: {fileID: 8169669275498638499}
   - component: {fileID: 5038290652792216014}
   - component: {fileID: 7511013896788931336}
-  - component: {fileID: 866922764878238286}
+  - component: {fileID: 3828849505732628269}
   m_Layer: 0
   m_Name: StateTextBox
   m_TagString: Untagged
@@ -430,7 +429,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -2.07, y: 1.57}
   m_SizeDelta: {x: 2.16, y: 1.62}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &5038290652792216014
@@ -536,7 +535,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -577,7 +576,7 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 5038290652792216014}
   m_maskType: 0
---- !u!114 &866922764878238286
+--- !u!114 &3828849505732628269
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -586,10 +585,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 7592741081836303986}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29b68e4fe0130214ba36acc26dfe54a6, type: 3}
+  m_Script: {fileID: 11500000, guid: ff021c489c565dc44a308676086a73e9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterStateLabel
-  _character: {fileID: 5990119214145366604}
+  m_EditorClassIdentifier: Assembly-CSharp::CountLabel
+  _source: 1
   _label: {fileID: 7511013896788931336}
 --- !u!1 &7770905970032606799
 GameObject:

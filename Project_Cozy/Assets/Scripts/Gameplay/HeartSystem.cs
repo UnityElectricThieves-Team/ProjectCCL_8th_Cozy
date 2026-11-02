@@ -63,6 +63,14 @@ public class HeartSystem : MonoBehaviour
         return true;
     }
 
+    /// <summary>게임 초기화(<see cref="GameProgressReset"/>). 보유량을 0으로 되돌리고 저장한다.</summary>
+    public void ResetProgress()
+    {
+        CurrentHearts = 0;
+        HeartsChanged?.Invoke(CurrentHearts);
+        Save();
+    }
+
     /// <summary>
     /// 현재 보유량을 파일에 기록한다. 쓰기 실패(디스크 잠금 등)는 로그만 남기고 삼킨다 —
     /// 저장이 안 됐다고 하트 적립·소비 자체가 취소되면 게임이 더 이상하게 동작한다.

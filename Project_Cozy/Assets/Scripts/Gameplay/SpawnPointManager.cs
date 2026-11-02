@@ -33,6 +33,10 @@ public class SpawnPointManager : MonoBehaviour
         CumulativeEnergy++;
     }
 
+    /// <summary>게임 초기화(<see cref="GameProgressReset"/>). 누적 스폰 기운을 0으로 되돌린다.
+    /// 구름(<see cref="CloudController"/>)은 다음 프레임에 이 값을 보고 스스로 Idle로 돌아간다.</summary>
+    public void ResetProgress() => CumulativeEnergy = 0;
+
     private void OnEnable()
     {
         // OutFocus 훅은 static 이벤트를 방송하므로 인스턴스 참조 없이 바로 구독한다.
