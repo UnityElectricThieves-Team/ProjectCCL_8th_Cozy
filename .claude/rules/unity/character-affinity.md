@@ -5,7 +5,7 @@ paths:
   - "Project_Cozy/Assets/Scripts/Gameplay/BridgeAffinityHeart.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/CharacterOwnership.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/CharacterOwnershipFileFormat.cs"
-  - "Project_Cozy/Assets/Scripts/UI/CharacterStateLabel.cs"
+  - "Project_Cozy/Assets/Scripts/UI/CountLabel.cs"
 ---
 
 # 캐릭터 친밀도 규약

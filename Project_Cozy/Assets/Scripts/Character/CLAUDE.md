@@ -32,8 +32,8 @@
 자식 Shadow GameObject
 └─ ShadowProjector           (바닥을 향해 판정해 그림자를 놓고, 멀어지면 폭을 줄인다)
 
-자식 StateLabelAnchor GameObject (상태 디버그 글자 자리 — 좌우 반전을 따라가지 않음)
-└─ StateTextBox              (CharacterStateLabel, 위치는 앵커 기준 0)
+자식 StateLabelAnchor GameObject (머리 위 친밀도 수치 자리 — 좌우 반전을 따라가지 않음)
+└─ StateTextBox              (UI/CountLabel, 위치는 앵커 기준 0)
 ```
 
 **루트가 곧 발이다.** 발 위치를 나타내는 필드는 없다 — 프리팹에서 Visual 자식을 올려 스프라이트 아래 끝을
