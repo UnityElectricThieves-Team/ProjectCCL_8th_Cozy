@@ -32,6 +32,7 @@ public sealed class BackgroundStage : MonoBehaviour
     private ViewportScreenSettings _viewportSettings;
     private BaseSpaceCameraFitter _cameraFitter;
     private SpriteMask _mask;
+    private Transform _inactiveHolder; // 프리팹을 꺼진 채로 만들기 위한 꺼진 부모
     private GameObject _instance;
 
     private Rect _area;      // 확정 뷰포트의 월드 사각형
@@ -44,7 +45,14 @@ public sealed class BackgroundStage : MonoBehaviour
         _mask = maskObject.AddComponent<SpriteMask>();
         _mask.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, MASK_SPRITE_SIZE, MASK_SPRITE_SIZE),
             new Vector2(0.5f, 0.5f), MASK_SPRITE_SIZE);
+        // 범위를 두지 않으면 씬의 모든 VisibleInsideMask 렌더러가 이 마스크를 탄다. 배경의 정렬 범위만 자르게 한다(SetPrefab에서 채움).
+        _mask.isCustomRangeActive = true;
         _mask.enabled = false;
+
+        var holderObject = new GameObject("InactiveHolder");
+        holderObject.transform.SetParent(transform, false);
+        holderObject.SetActive(false);
+        _inactiveHolder = holderObject.transform;
     }
 
     private void Start()
@@ -82,14 +90,20 @@ public sealed class BackgroundStage : MonoBehaviour
 
         if (prefab != null)
         {
-            _instance = Instantiate(prefab, transform);
-
             // 첫 배치가 끝나기 전에는 그리지 않는다. 카메라가 프레이밍되기 전 몇 프레임 동안 엉뚱한 자리에 보이는 깜빡임을 막는다.
+            // 꺼진 부모 아래에서 만들어 끈 뒤 옮긴다 — 켜진 채로 만들면 파티클의 Awake·자동 재생이 한 번 돌고 나서 꺼진다.
+            _instance = Instantiate(prefab, _inactiveHolder);
             _instance.SetActive(false);
+            _instance.transform.SetParent(transform, false);
 
+            // 마스크가 배경의 정렬 범위만 자르도록 렌더러들의 Order in Layer 범위를 모은다. 배경은 Default 레이어만 쓴다(background.md).
+            int minOrder = int.MaxValue, maxOrder = int.MinValue;
             var renderers = _instance.GetComponentsInChildren<Renderer>(true);
             for (int i = 0; i < renderers.Length; i++)
             {
+                minOrder = Mathf.Min(minOrder, renderers[i].sortingOrder);
+                maxOrder = Mathf.Max(maxOrder, renderers[i].sortingOrder);
+
                 if (renderers[i] is SpriteRenderer sprite)
                 {
                     sprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
@@ -99,6 +113,16 @@ public sealed class BackgroundStage : MonoBehaviour
                 {
                     particle.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                 }
+            }
+
+            if (renderers.Length > 0)
+            {
+                // 마스크는 back보다 크고 front 이하인 Order를 자른다. back은 범위에 들지 않으므로 하나 아래로 둔다.
+                int defaultLayer = SortingLayer.NameToID("Default");
+                _mask.frontSortingLayerID = defaultLayer;
+                _mask.backSortingLayerID = defaultLayer;
+                _mask.frontSortingOrder = maxOrder;
+                _mask.backSortingOrder = minOrder - 1;
             }
 
             if (_spriteRenderers.Count == 0)
@@ -126,7 +150,9 @@ public sealed class BackgroundStage : MonoBehaviour
         }
 
         _mask.transform.position = new Vector3(_area.center.x, _area.center.y, _mask.transform.position.z);
-        _mask.transform.localScale = new Vector3(_area.width, _area.height, 1f);
+        // 마스크는 이 오브젝트의 자식이라, 부모 배율로 나눠야 월드 크기가 뷰포트와 같아진다.
+        Vector3 parentScale = transform.lossyScale;
+        _mask.transform.localScale = new Vector3(_area.width / parentScale.x, _area.height / parentScale.y, 1f);
 
         // 그림 전체(스프라이트들의 합)의 가로 범위와 아래 끝이 지금 월드 어디에 있는지 구해, 그만큼 인스턴스 루트를 옮긴다.
         // 파티클은 범위에 넣지 않는다 — 떠다니는 것이라 바닥의 기준이 될 수 없다.
@@ -139,12 +165,16 @@ public sealed class BackgroundStage : MonoBehaviour
                 SpriteRenderer renderer = _spriteRenderers[i];
                 if (renderer.sprite == null) continue;
 
+                // 층이 돌아가 있으면 min·max 두 점만으로는 범위가 틀리므로 네 모서리를 모두 옮긴다.
                 Bounds local = renderer.sprite.bounds;
-                Vector3 a = renderer.transform.TransformPoint(local.min);
-                Vector3 b = renderer.transform.TransformPoint(local.max);
-                minX = Mathf.Min(minX, Mathf.Min(a.x, b.x));
-                maxX = Mathf.Max(maxX, Mathf.Max(a.x, b.x));
-                minY = Mathf.Min(minY, Mathf.Min(a.y, b.y));
+                for (int c = 0; c < 4; c++)
+                {
+                    var corner = new Vector3((c & 1) == 0 ? local.min.x : local.max.x, (c & 2) == 0 ? local.min.y : local.max.y, 0f);
+                    Vector3 p = renderer.transform.TransformPoint(corner);
+                    minX = Mathf.Min(minX, p.x);
+                    maxX = Mathf.Max(maxX, p.x);
+                    minY = Mathf.Min(minY, p.y);
+                }
             }
 
             if (minY != float.MaxValue)
