@@ -24,6 +24,7 @@ public static class ShopItemGenerator
     private const string BACKGROUND_ROOT = "Assets/Resources/Backgrounds";
     private const string ITEM_FOLDER = "Assets/ShopItems";
     private const string CATALOG_PATH = ITEM_FOLDER + "/ShopCatalog.asset";
+    private const string STRINGS_PATH = "Assets/Localization/Strings.json";
 
     // 기획이 가격을 정하기 전까지 쓰는 임시 가격(하트).
     private const int TEMP_PRICE = 10;
@@ -46,14 +47,25 @@ public static class ShopItemGenerator
         }
 
         int created = 0;
-        created += CreateMissing(DECORATION_ROOT, "decoration.prefab", "deco_", "Deco_", false, usedPrefabs, decorations);
-        created += CreateMissing(BACKGROUND_ROOT, "background.prefab", "bg_", "Bg_", true, usedPrefabs, backgrounds);
+        // 에셋을 하나 만들 때마다 임포트하지 않고 끝에서 한 번에 한다.
+        AssetDatabase.StartAssetEditing();
+        try
+        {
+            created += CreateMissing(DECORATION_ROOT, "decoration.prefab", "deco_", "Deco_", false, usedPrefabs, decorations);
+            created += CreateMissing(BACKGROUND_ROOT, "background.prefab", "bg_", "Bg_", true, usedPrefabs, backgrounds);
+        }
+        finally
+        {
+            AssetDatabase.StopAssetEditing();
+        }
 
         // 기존 목록의 순서를 지키고, 새로 찾은 것만 뒤에 붙인다.
         catalog.decorations = Merge(catalog.decorations, decorations);
         catalog.backgrounds = Merge(catalog.backgrounds, backgrounds);
         EditorUtility.SetDirty(catalog);
         AssetDatabase.SaveAssets();
+
+        WarnMissingNameKeys(catalog);
 
         bool sceneChanged = AssignToScene<ShopSystem>(catalog) | AssignToScene<BackgroundSystem>(catalog);
 
@@ -87,6 +99,14 @@ public static class ShopItemGenerator
             }
             if (usedPrefabs.Contains(prefab)) continue;
 
+            // 같은 이름의 상품 파일이 이미 있으면 덮어쓰지 않는다. 덮어쓰면 고쳐 둔 가격·아이콘이 초기화된다.
+            string itemPath = ITEM_FOLDER + "/" + filePrefix + folderName + ".asset";
+            if (File.Exists(itemPath))
+            {
+                Debug.LogWarning($"[{nameof(ShopItemGenerator)}] '{itemPath}'가 이미 있지만 '{folder}'의 프리팹을 가리키지 않아 건너뜁니다. 상품 에셋을 확인하세요.");
+                continue;
+            }
+
             var icon = AssetDatabase.LoadAssetAtPath<Sprite>(folder + "/store_thumbnail.png");
             if (icon == null)
                 Debug.LogWarning($"[{nameof(ShopItemGenerator)}] '{folder}'에 store_thumbnail.png가 없어 아이콘을 비워 둡니다. 아트에 요청하세요.");
@@ -98,12 +118,35 @@ public static class ShopItemGenerator
             if (isBackground) item.backgroundPrefab = prefab;
             else item.decorationPrefab = prefab;
 
-            AssetDatabase.CreateAsset(item, ITEM_FOLDER + "/" + filePrefix + folderName + ".asset");
+            AssetDatabase.CreateAsset(item, itemPath);
             usedPrefabs.Add(prefab);
             results.Add(item);
             created++;
         }
         return created;
+    }
+
+    // 목록의 상품마다 번역 표에 이름 줄이 있는지 본다. 번역 표는 사람이 줄 단위로 관리하므로 여기서 쓰지 않는다.
+    private static void WarnMissingNameKeys(ShopCatalog catalog)
+    {
+        if (!File.Exists(STRINGS_PATH))
+        {
+            Debug.LogWarning($"[{nameof(ShopItemGenerator)}] 번역 표 '{STRINGS_PATH}'가 없어 이름 줄을 확인하지 못했습니다.");
+            return;
+        }
+
+        string strings = File.ReadAllText(STRINGS_PATH);
+        WarnMissingNameKeys(catalog.decorations, strings);
+        WarnMissingNameKeys(catalog.backgrounds, strings);
+    }
+
+    private static void WarnMissingNameKeys(ShopItemDefinition[] items, string strings)
+    {
+        foreach (var item in items)
+        {
+            if (!strings.Contains("\"" + item.NameKey + "\""))
+                Debug.LogWarning($"[{nameof(ShopItemGenerator)}] 번역 표에 '{item.NameKey}' 줄이 없습니다. {STRINGS_PATH}에 넣으세요.", item);
+        }
     }
 
     private static ShopItemDefinition[] Merge(ShopItemDefinition[] existing, List<ShopItemDefinition> found)
