@@ -26,6 +26,11 @@ Windows 로그인 시 자동 실행.
 
 - `StartupRegistration.cs` — 현재 사용자의 시작 프로그램 레지스트리(HKCU\…\Run)에 실행 파일 경로를 등록·해제하는 static 클래스. 언제 부를지는 모른다(설정 판단은 게임 쪽 적용자). `Window/Registry/`(서비스 등록 데이터)와 이름이 비슷하지만 Windows 레지스트리와는 무관한 다른 것이다
 
+### Display/
+모니터 목록.
+
+- `MonitorList.cs` — 연결된 모니터(장치 이름·모니터 rect·작업 영역·주 모니터 여부)를 `EnumDisplayMonitors`로 읽는 static 클래스. 주 모니터가 0번이고 나머지는 위치 순서다. 언제 부를지·어느 모니터를 쓸지는 모른다(게임 쪽 적용자 `Gameplay/MonitorApplier`). 에디터에서는 지금 화면 하나만 돌려준다. 열거는 드롭다운을 만들 때와 다시 맞출 때만 하고 상주 확인은 하지 않는다
+
 ### Input/
 포커스 상태와 무관한 입력 수집.
 
@@ -46,4 +51,4 @@ Windows 로그인 시 자동 실행.
 
 ## 추후 후보 (지금은 만들지 않음)
 
-- `Display/` — 다중 모니터, DPI, 작업표시줄 회피 좌표 계산
+- `Display/`의 모니터 분리·재연결 감지 — WndProc 메시지냐 저빈도 확인이냐가 정해지지 않았다(`Docs/Development/MultiMonitorPreparation.md` D9)

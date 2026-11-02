@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 
 /// <summary>
@@ -19,17 +20,31 @@ public sealed class GraphicsTabController : MonoBehaviour
 {
     private const string UnsavedMessageId = "UISettings.popup.graphics_unsaved";
     private const string ResetMessageId = "UISettings.popup.graphics_reset";
+    private const string MonitorOptionId = "UISettings.option.monitor";
 
     [SerializeField] private SettingsStepper _characterScaleStepper;
     [SerializeField] private SettingsStepper _uiScaleStepper;
+    [SerializeField] private SettingsStepper _worldZoomStepper;
+    [Tooltip("모니터 드롭다운. 옵션은 실행할 때 연결된 모니터로 만든다 — 프리팹의 Options는 덮어써진다. OnValueChanged에 OnMonitorChanged를 건다.")]
+    [SerializeField] private TMP_Dropdown _monitorDropdown;
 
     private SettingsManager _settings;
     private ViewportScreenSettings _viewport;
+    private MonitorApplier _monitorApplier;
+    private LocalizationManager _localization;
 
     private void OnEnable()
     {
         _settings = SettingsManager.Instance;
         if (_settings == null) return;
+
+        // 패널 프리팹은 씬 오브젝트를 참조할 수 없어 찾아 둔다. 탭을 열 때만 도는 일이라 비용이 없다.
+        if (_monitorApplier == null) _monitorApplier = FindFirstObjectByType<MonitorApplier>();
+        if (_monitorApplier != null) _monitorApplier.MonitorsChanged += BuildMonitorOptions;
+        _localization = LocalizationManager.Instance;
+        if (_localization != null) _localization.LanguageChanged += BuildMonitorOptions;
+        BuildMonitorOptions();
+
         _settings.GraphicsChanged += RefreshControls;
         RefreshControls();
     }
@@ -37,6 +52,8 @@ public sealed class GraphicsTabController : MonoBehaviour
     private void OnDisable()
     {
         if (_settings != null) _settings.GraphicsChanged -= RefreshControls;
+        if (_monitorApplier != null) _monitorApplier.MonitorsChanged -= BuildMonitorOptions;
+        if (_localization != null) _localization.LanguageChanged -= BuildMonitorOptions;
     }
 
     private void RefreshControls()
@@ -45,6 +62,29 @@ public sealed class GraphicsTabController : MonoBehaviour
             _characterScaleStepper.Setup(GraphicsScaleSteps.Character.Count, _settings.CharacterScaleStep);
         if (_uiScaleStepper != null)
             _uiScaleStepper.Setup(GraphicsScaleSteps.UI.Count, _settings.UIScaleStep);
+        if (_worldZoomStepper != null)
+            _worldZoomStepper.Setup(GraphicsScaleSteps.WorldZoom.Count, _settings.WorldZoomStep);
+        if (_monitorDropdown != null && _monitorApplier != null)
+            _monitorDropdown.SetValueWithoutNotify(_monitorApplier.IndexOf(_settings.Monitor));
+    }
+
+    // "모니터1 (1920×1080)"처럼 번호와 해상도를 보인다. 주 모니터가 1번이다(MonitorApplier.Monitors 순서).
+    // ClearOptions는 선택을 첫 항목으로 돌리므로 다시 만든 뒤 지금 선택을 알림 없이 맞춘다.
+    private void BuildMonitorOptions()
+    {
+        if (_monitorDropdown == null || _monitorApplier == null) return;
+        var monitors = _monitorApplier.Monitors;
+        _monitorDropdown.ClearOptions();
+        for (int i = 0; i < monitors.Count; i++)
+        {
+            string label = LocalizationManager.Localize(MonitorOptionId,
+                ("NUMBER", i + 1), ("WIDTH", monitors[i].Bounds.width), ("HEIGHT", monitors[i].Bounds.height));
+            _monitorDropdown.options.Add(new TMP_Dropdown.OptionData(label));
+        }
+        LocalizationManager.ApplyFont(_monitorDropdown.captionText);
+        LocalizationManager.ApplyFont(_monitorDropdown.itemText);
+        if (_settings != null) _monitorDropdown.SetValueWithoutNotify(_monitorApplier.IndexOf(_settings.Monitor));
+        _monitorDropdown.RefreshShownValue();
     }
 
     // ===== 인스펙터로 거는 진입점 =====
@@ -52,12 +92,24 @@ public sealed class GraphicsTabController : MonoBehaviour
     // −/+ 줄의 ValueChanged(int)에 건다(동적 int).
     public void OnCharacterScaleChanged(int step) { if (_settings != null) _settings.SetCharacterScaleStep(step); }
     public void OnUIScaleChanged(int step) { if (_settings != null) _settings.SetUIScaleStep(step); }
+    public void OnWorldZoomChanged(int step) { if (_settings != null) _settings.SetWorldZoomStep(step); }
 
-    // [저장] 버튼. 크기 단계와 화면 크기 조정을 함께 확정한다.
+    // 모니터 드롭다운의 OnValueChanged(int)에 건다(동적 int). 주 모니터(1번)를 고르면 "늘 주 모니터"로 둔다 —
+    // 주 모니터를 바꿔도 따라가게 하려는 것이다. 나머지는 장치 이름과 rect로 기억한다.
+    public void OnMonitorChanged(int index)
+    {
+        if (_settings == null || _monitorApplier == null) return;
+        var monitors = _monitorApplier.Monitors;
+        if (index < 0 || index >= monitors.Count) return;
+        _settings.SetMonitor(index == 0 ? MonitorSelection.Primary : new MonitorSelection(monitors[index].DeviceName, monitors[index].Bounds));
+    }
+
+    // [저장] 버튼. 크기 단계(전체 크기 포함)와 화면 크기 조정을 함께 확정한다.
+    // 뷰포트 쪽 확정이 뒤에 와야 한다 — 확정 신호로 장식을 회수할 때 줌이 이미 저장된 값이어야 해서다.
     public void Save()
     {
         if (_settings != null) _settings.CommitGraphics();
-        if (FindViewport() != null) _viewport.CommitPendingViewport();
+        if (FindViewport() != null) _viewport.Commit();
     }
 
     // 화면 크기 [조정] 버튼. 편집에 들어가면 UIManager가 패널을 모두 숨기고, 편집 화면의 [완료]·ESC로 돌아온다.
@@ -71,6 +123,8 @@ public sealed class GraphicsTabController : MonoBehaviour
     // 사용자의 선택을 바꾸는 일이 아니라 [저장] 흐름을 타지 않고 바로 적용한다.
     public void ReadjustWindow()
     {
+        // 모니터 구성도 바뀌었을 수 있다. 목록을 다시 읽어 고른 모니터의 새 작업 영역부터 넣는다.
+        if (_monitorApplier != null) _monitorApplier.Refresh();
         if (FindViewport() != null) _viewport.ReadjustWindow();
     }
 

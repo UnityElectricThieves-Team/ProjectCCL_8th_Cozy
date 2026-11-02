@@ -10,8 +10,8 @@ using UnityEngine.InputSystem;
 ///   - 마우스 드래그(Input System)로 핸들을 끌면 SetPreviewViewport 갱신
 ///     (모서리/변 = 리사이즈, rect 내부 = 이동)
 ///
-/// 좌표 전제: 창=작업 영역, 카메라=베이스 공간 전체 프레이밍이라 "화면 px = 베이스 공간 px × 배율"이고,
-/// 그 배율은 Screen 크기와 BaseSpaceSize의 비율로 그때그때 구한다(ScreenToBase/BaseToGui 계열).
+/// 좌표 전제: 창=작업 영역, 카메라=보이는 영역(VisibleRect) 프레이밍이라 "화면 px = (베이스 px − 보이는 영역 원점) × 배율"이고,
+/// 그 배율은 Screen 크기와 보이는 영역 크기의 비율로 그때그때 구한다(MouseToBasePx/BaseToGui 계열). 줌 1이면 원점은 0이다.
 /// 히트 반경·inset 수치는 베이스 px라 작은 해상도에서는 화면상 작아진다.
 /// 핸들의 시각 위치와 히트 판정은 같은 앵커 클램프(_edgeInsetPx)를 공유한다 —
 /// 프리뷰=화면 전체(기본값)일 때도 "보이는 곳 = 잡히는 곳"이 유지된다.
@@ -157,7 +157,7 @@ public class ViewportEditHandles : MonoBehaviour
         int dx = mouse.x - _dragStartMouse.x;
         int dy = mouse.y - _dragStartMouse.y;
         _viewportSettings.SetPreviewViewport(
-            ApplyDrag(_dragStartRect, _dragZone, dx, dy, _viewportSettings.BaseSpaceSize));
+            ApplyDrag(_dragStartRect, _dragZone, dx, dy, _viewportSettings.VisibleRect, _viewportSettings.MinViewportSize));
     }
 
     private bool IsPointerOverUI(Vector2 screenPos)
@@ -174,17 +174,17 @@ public class ViewportEditHandles : MonoBehaviour
     }
 
     // ===== 드래그 계산 =====
-    // 이동하는 변을 베이스 공간 [0, base]로 직접 클램프해 반대편 앵커를 보존한다.
-    // (사후 ClampToBaseSpace의 위치 클램프에만 맡기면 오버슈트 시 앵커가 밀린다 — 리뷰 합의)
+    // 이동하는 변을 보이는 영역 안으로 직접 클램프해 반대편 앵커를 보존한다.
+    // (사후 ClampToVisible의 위치 클램프에만 맡기면 오버슈트 시 앵커가 밀린다 — 리뷰 합의)
 
-    private static RectInt ApplyDrag(RectInt r, DragZone zone, int dx, int dy, Vector2Int baseSize)
+    private static RectInt ApplyDrag(RectInt r, DragZone zone, int dx, int dy, RectInt visible, Vector2Int min)
     {
-        Vector2Int min = ViewportScreenSettings.MinViewportSize;
+        min = Vector2Int.Min(min, visible.size); // 줌으로 보이는 영역이 최소 크기보다 작아져도 끌 수 있게
 
         if (zone == DragZone.Move)
         {
-            int mx = Mathf.Clamp(r.x + dx, 0, Mathf.Max(0, baseSize.x - r.width));
-            int my = Mathf.Clamp(r.y + dy, 0, Mathf.Max(0, baseSize.y - r.height));
+            int mx = Mathf.Clamp(r.x + dx, visible.xMin, Mathf.Max(visible.xMin, visible.xMax - r.width));
+            int my = Mathf.Clamp(r.y + dy, visible.yMin, Mathf.Max(visible.yMin, visible.yMax - r.height));
             return new RectInt(mx, my, r.width, r.height);
         }
 
@@ -194,10 +194,10 @@ public class ViewportEditHandles : MonoBehaviour
         bool top    = zone == DragZone.Top   || zone == DragZone.TopLeft    || zone == DragZone.TopRight;
 
         int xMin = r.xMin, xMax = r.xMax, yMin = r.yMin, yMax = r.yMax;
-        if (left)   xMin = Mathf.Clamp(xMin + dx, 0, xMax - min.x);
-        if (right)  xMax = Mathf.Clamp(xMax + dx, xMin + min.x, baseSize.x);
-        if (bottom) yMin = Mathf.Clamp(yMin + dy, 0, yMax - min.y);
-        if (top)    yMax = Mathf.Clamp(yMax + dy, yMin + min.y, baseSize.y);
+        if (left)   xMin = Mathf.Clamp(xMin + dx, visible.xMin, xMax - min.x);
+        if (right)  xMax = Mathf.Clamp(xMax + dx, xMin + min.x, visible.xMax);
+        if (bottom) yMin = Mathf.Clamp(yMin + dy, visible.yMin, yMax - min.y);
+        if (top)    yMax = Mathf.Clamp(yMax + dy, yMin + min.y, visible.yMax);
 
         return new RectInt(xMin, yMin, xMax - xMin, yMax - yMin);
     }
@@ -232,13 +232,14 @@ public class ViewportEditHandles : MonoBehaviour
         return DragZone.None;
     }
 
-    /// <summary>핸들 앵커를 베이스 공간 안쪽으로 클램프 — 시각과 히트가 같은 위치를 쓴다.</summary>
+    /// <summary>핸들 앵커를 보이는 영역 안쪽으로 클램프 — 시각과 히트가 같은 위치를 쓴다.</summary>
     private Vector2Int ClampAnchor(int x, int y)
     {
-        Vector2Int b = _viewportSettings.BaseSpaceSize;
+        RectInt v = _viewportSettings.VisibleRect;
+        int xLo = v.xMin + _edgeInsetPx, yLo = v.yMin + _edgeInsetPx;
         return new Vector2Int(
-            Mathf.Clamp(x, _edgeInsetPx, Mathf.Max(_edgeInsetPx, b.x - _edgeInsetPx)),
-            Mathf.Clamp(y, _edgeInsetPx, Mathf.Max(_edgeInsetPx, b.y - _edgeInsetPx)));
+            Mathf.Clamp(x, xLo, Mathf.Max(xLo, v.xMax - _edgeInsetPx)),
+            Mathf.Clamp(y, yLo, Mathf.Max(yLo, v.yMax - _edgeInsetPx)));
     }
 
     private static bool Near(Vector2Int m, Vector2Int p, int radius)
@@ -246,29 +247,31 @@ public class ViewportEditHandles : MonoBehaviour
 
     // ===== 좌표 변환 =====
 
+    // 화면 전체가 보이는 영역(VisibleRect)에 대응한다. 줌이 1이 아니면 보이는 영역의 원점이 베이스 공간 원점과 달라
+    // 오프셋이 붙는다.
     private Vector2Int MouseToBasePx()
     {
         Vector2 pos = Mouse.current.position.ReadValue(); // 화면 좌하단 원점, Y 위
-        Vector2Int b = _viewportSettings.BaseSpaceSize;
+        RectInt v = _viewportSettings.VisibleRect;
         return new Vector2Int(
-            Mathf.RoundToInt(pos.x * b.x / Mathf.Max(1, Screen.width)),
-            Mathf.RoundToInt(pos.y * b.y / Mathf.Max(1, Screen.height)));
+            v.x + Mathf.RoundToInt(pos.x * v.width  / Mathf.Max(1, Screen.width)),
+            v.y + Mathf.RoundToInt(pos.y * v.height / Mathf.Max(1, Screen.height)));
     }
 
     private Vector2 BaseToGuiPoint(Vector2Int p)
     {
-        Vector2Int b = _viewportSettings.BaseSpaceSize;
-        float sx = (float)Screen.width  / Mathf.Max(1, b.x);
-        float sy = (float)Screen.height / Mathf.Max(1, b.y);
-        return new Vector2(p.x * sx, Screen.height - p.y * sy); // 베이스(Y 위) → GUI(Y 아래)
+        RectInt v = _viewportSettings.VisibleRect;
+        float sx = (float)Screen.width  / Mathf.Max(1, v.width);
+        float sy = (float)Screen.height / Mathf.Max(1, v.height);
+        return new Vector2((p.x - v.x) * sx, Screen.height - (p.y - v.y) * sy); // 베이스(Y 위) → GUI(Y 아래)
     }
 
     private Rect BaseToGui(RectInt r)
     {
-        Vector2Int b = _viewportSettings.BaseSpaceSize;
-        float sx = (float)Screen.width  / Mathf.Max(1, b.x);
-        float sy = (float)Screen.height / Mathf.Max(1, b.y);
-        return new Rect(r.x * sx, Screen.height - (r.y + r.height) * sy, r.width * sx, r.height * sy);
+        RectInt v = _viewportSettings.VisibleRect;
+        float sx = (float)Screen.width  / Mathf.Max(1, v.width);
+        float sy = (float)Screen.height / Mathf.Max(1, v.height);
+        return new Rect((r.x - v.x) * sx, Screen.height - (r.y - v.y + r.height) * sy, r.width * sx, r.height * sy);
     }
 
     // ===== 그리기 =====

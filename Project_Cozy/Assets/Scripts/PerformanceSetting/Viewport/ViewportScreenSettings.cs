@@ -5,19 +5,24 @@ using UnityEngine;
 /// <summary>
 /// "화면 설정"(UserSettings.md §2.1.1)의 정책 레이어 — 정적 창 모델.
 ///
-/// 창:          항상 현재 모니터의 **작업 영역**(작업표시줄을 뺀 영역)에 놓인다. 평상시에는 크기도
-///              위치도 변하지 않고, ReadjustWindow()를 부를 때만 다시 잡는다.
+/// 창:          항상 한 모니터의 **작업 영역**(작업표시줄을 뺀 영역)에 놓인다. 설정에서 고른 모니터가 있으면
+///              그 모니터(SetTargetWorkArea), 없으면 창이 지금 있는 모니터다. 평상시에는 크기도 위치도 변하지 않고,
+///              ReadjustWindow()나 모니터 선택이 바뀔 때만 다시 잡는다.
 /// 베이스 공간: 작업 영역을 **마스터 캔버스 기준 px**로 표현한 것. 폭은 항상 마스터 캔버스 폭이고,
-///              높이는 작업 영역의 종횡비를 따른다. 카메라는 이 전체를 비추며, 재조정 때 말고는
-///              건드리지 않는다. 화면에서는 베이스 px 하나가 (작업 영역 폭 / 마스터 캔버스 폭) 화면 px로
-///              보인다 — UI의 CanvasScaler(기준 폭 일치, Match=Width)와 같은 배율이라, 어느 해상도에서든
+///              높이는 작업 영역의 종횡비를 따른다. 화면에서는 베이스 px 하나가 (작업 영역 폭 / 마스터 캔버스 폭)
+///              화면 px로 보인다 — UI의 CanvasScaler(기준 폭 일치, Match=Width)와 같은 배율이라, 어느 해상도에서든
 ///              월드와 UI가 같은 비율로 줄어든다. 이 클래스가 그 단위 정의의 유일한 원천이다
 ///              (RefreshBaseSpace). px→월드 환산(앵커·PPU)은 BaseSpaceCameraFitter가 든다.
+/// 보이는 영역: 카메라가 실제로 비추는 베이스 공간의 오른쪽 아래 부분. 전체 크기(줌) z면 폭·높이가 베이스 공간의 1/z이다.
+///              줌 1이면 베이스 공간 전체다. 좌표계는 그대로 두고 비추는 범위만 줄이므로, 저장된 위치(뷰포트·장식)는
+///              줌과 무관하게 같은 값이다. 메뉴 바와 지면이 있는 오른쪽 아래 모서리가 기준점이다.
 /// 뷰포트:      베이스 공간 안의 논리적 사각형. **렌더링 파라미터가 아니다** — 창을 줄이지도 화면을
 ///              잘라내지도 않는다. 캐릭터가 살 수 있는 영역이자 지면·회수 판정의 기준이다.
+///              사용자가 고른 값(_viewport)과 지금 적용된 값(Viewport — 보이는 영역 안으로 맞춘 것)을 따로 든다.
+///              줌이나 작업 영역이 바뀌어 잘려도 고른 값은 그대로라, 되돌리면 원래 뷰포트가 돌아온다.
 /// 편집:        조정값은 프리뷰일 뿐이다(PreviewChanged로 UI가 경계·딤·회수 예정 시각화).
 /// 미저장:      편집은 [완료]로 나와도 확정하지 않는다(EndEditKeepPreview).
-///              조정한 사각형을 미저장 뷰포트로 들고 있다가, 그래픽 탭의 [저장]이 확정하고(CommitPendingViewport)
+///              조정한 사각형을 미저장 뷰포트로 들고 있다가, 그래픽 탭의 [저장]이 확정하고(Commit)
 ///              미저장 확인 팝업이 버린다(DiscardPendingViewport). 그동안 월드는 확정 뷰포트 그대로다.
 ///
 /// 이 모델을 고른 이유는 Docs/Development/WindowViewportUIArchitecture.md.
@@ -30,9 +35,10 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class ViewportScreenSettings : MonoBehaviour
 {
-    /// <summary>§2.1.1 제약 — 뷰포트 최소 크기(베이스 공간 px = 마스터 캔버스 기준 px).
-    /// 기획서의 "절대 픽셀"을 마스터 캔버스 좌표계의 픽셀로 해석한 것이라, 4K에서만 화면 px와 같다.</summary>
-    public static readonly Vector2Int MinViewportSize = new Vector2Int(720, 480);
+    /// <summary>뷰포트 최소 크기(베이스 공간 px) — 베이스 공간의 가로·세로 각각 1/4.
+    /// Figma '화면 창 조정 이모저모'의 "해상도의 1/4"을 각 변의 1/4로 해석했다(넓이의 1/4이 아님).
+    /// 베이스 공간은 작업 영역의 종횡비를 따르므로, 세로 최소값도 모니터에 따라 달라진다.</summary>
+    public Vector2Int MinViewportSize => new Vector2Int(_baseSpaceSize.x / 4, _baseSpaceSize.y / 4);
 
     // 마스터 캔버스 폭(px). 베이스 공간의 폭이자 화면 배율의 분모다. GameScene의 UIRoot CanvasScaler
     // 기준 해상도 폭과 같아야 월드와 UI가 같은 배율로 줄어든다 — 씬 값은 인스펙터에서 바뀌므로 코드로
@@ -45,8 +51,11 @@ public class ViewportScreenSettings : MonoBehaviour
 
     [Header("뷰포트 (베이스 공간 px, 원점=좌하단)")]
     [SerializeField, Tooltip("시작 뷰포트. 크기가 0이면 베이스 공간 전체(기본값)로 시작")]
-    private RectInt _viewport = new RectInt(0, 0, 0, 0);
+    private RectInt _viewport = new RectInt(0, 0, 0, 0);   // 사용자가 고른 뷰포트. 보이는 영역보다 클 수 있다
 
+    private RectInt _effectiveViewport;        // 지금 적용된 뷰포트 = _viewport를 보이는 영역 안으로 맞춘 것
+    private float _zoom = 1f;                  // 전체 크기. 1 이상
+    private RectInt _visibleRect;              // 카메라가 비추는 베이스 공간의 오른쪽 아래 부분
     private RectInt _previewViewport;
     private RectInt _pendingViewport;          // [완료]로 나왔지만 아직 [저장]하지 않은 뷰포트
     private bool _hasPendingViewport;
@@ -55,16 +64,26 @@ public class ViewportScreenSettings : MonoBehaviour
     private bool _isEditing;
     private bool _ready;                       // 초기 적용 완료 전 API 호출 가드
 
+    // 창을 놓을 작업 영역(스크린 좌표). 모니터를 골랐으면 그 모니터의 것이다. 없으면 창이 지금 있는 모니터를 읽는다.
+    private RectInt _targetWorkArea;
+    private bool _hasTargetWorkArea;
+    private bool _relayoutAfterEdit;           // 편집 중에 모니터가 바뀌어 편집이 끝나면 다시 배치해야 한다
+    private Coroutine _verifyWindow;
+
     // ready 전에 작업 영역 px 단위로 들어온 뷰포트. 환산에 필요한 배율은 Start에서 작업 영역을 읽은 뒤에야
     // 알 수 있어 그때까지 따로 들고 있는다. _viewport에 섞어 두면 어느 단위인지 알 수 없어진다.
     private RectInt _pendingWorkAreaPx;
     private bool _hasPendingWorkAreaPx;
 
-    /// <summary>확정된 뷰포트(베이스 공간 px, 원점=좌하단).</summary>
-    public RectInt Viewport => _viewport;
+    /// <summary>지금 적용된 뷰포트(베이스 공간 px, 원점=좌하단). 확정한 뷰포트를 보이는 영역 안으로 맞춘 값이다.</summary>
+    public RectInt Viewport => _effectiveViewport;
 
     /// <summary>편집 중 프리뷰 뷰포트. 편집 중이 아니면 Viewport와 동일.</summary>
-    public RectInt PreviewViewport => _isEditing ? _previewViewport : _viewport;
+    public RectInt PreviewViewport => _isEditing ? _previewViewport : _effectiveViewport;
+
+    /// <summary>카메라가 비추는 베이스 공간의 오른쪽 아래 부분(베이스 공간 px). 줌 1이면 베이스 공간 전체.
+    /// 화면 전체가 이 사각형에 대응한다 — 화면 px와 베이스 px를 오갈 때 이걸 쓴다.</summary>
+    public RectInt VisibleRect => _visibleRect;
 
     public bool IsEditing => _isEditing;
 
@@ -89,7 +108,11 @@ public class ViewportScreenSettings : MonoBehaviour
     /// <summary>편집 모드 진입(true)/이탈(false) — 편집 UI 표시 토글 지점.</summary>
     public event Action<bool> EditModeChanged;
 
-    /// <summary>뷰포트가 확정된 직후 — 시작 시 초기 적용, SetViewport, 편집 이탈, 미저장 뷰포트 확정, 창 재조정 때마다 울린다.
+    /// <summary>그래픽 탭의 [저장]이 끝난 직후, 지금 적용된 뷰포트로 울린다(<see cref="Commit"/>).
+    /// 뷰포트를 줄였든 줌을 키웠든, 사용자가 확정한 화면 밖에 남은 장식을 회수하는 지점이다(DecorationBinder).</summary>
+    public event Action<RectInt> Committed;
+
+    /// <summary>뷰포트가 확정된 직후 — 시작 시 초기 적용, SetViewport, 편집 이탈, 미저장 뷰포트 확정, 창 재조정, 줌 변경 때마다 울린다.
     /// 한 번만 울리는 "준비 완료" 신호가 아니다. 첫 확정이 이미 지났는지는 <see cref="IsReady"/>로 본다.
     /// 거주 영역(ViewportLivingAreaBinder)·배경 띠·장식 레이어가 구독한다.</summary>
     public event Action<RectInt> ViewportConfirmed;
@@ -128,7 +151,7 @@ public class ViewportScreenSettings : MonoBehaviour
         if (_viewport.width <= 0 || _viewport.height <= 0)
             _viewport = new RectInt(0, 0, _baseSpaceSize.x, _baseSpaceSize.y);
 
-        _viewport = ClampToBaseSpace(_viewport);
+        RefreshEffectiveViewport();
         _ready = true;
         PublishViewportConfirmed();
     }
@@ -150,17 +173,19 @@ public class ViewportScreenSettings : MonoBehaviour
 
     // ===== 외부 API =====
 
-    /// <summary>확정 뷰포트를 직접 설정(로드 경로). 베이스 공간 밖 값은 클램프.
+    /// <summary>확정 뷰포트를 직접 설정(로드 경로). 보이는 영역 밖으로 나가는 부분은 적용할 때 맞춘다.
     /// 편집 중이면 확정 값만 갱신하고 반영은 편집을 벗어날 때까지 미룬다.</summary>
     public void SetViewport(RectInt viewport)
     {
         // 뒤에 온 베이스 px 값이 이긴다 — 앞서 보류된 작업 영역 px 값을 Start가 또 환산해 덮지 않게.
         _hasPendingWorkAreaPx = false;
 
-        // ready 전엔 베이스 공간 크기를 아직 모르므로 클램프할 수 없다 — Start가 클램프·적용을 맡는다.
-        if (!_ready) { _viewport = viewport; return; }
+        _viewport = viewport;
 
-        _viewport = ClampToBaseSpace(viewport);
+        // ready 전엔 보이는 영역을 아직 모른다 — Start가 맞추고 적용한다.
+        if (!_ready) return;
+
+        RefreshEffectiveViewport();
 
         // 편집 중에는 진행 중인 프리뷰를 건드리지 않는다. 편집을 빠져나올 때
         // ExitEdit이 이 확정 값을 반영한다.
@@ -200,12 +225,62 @@ public class ViewportScreenSettings : MonoBehaviour
             return;
         }
 
-        ApplyScreenLayout();
+        Relayout();
+    }
 
-        // 작업 영역이 줄었으면 뷰포트가 베이스 공간을 넘칠 수 있다. 줄여서 맞추되 저장하지는 않는다
-        // (큰 모니터로 돌아가면 저장된 원래 크기가 복원되어야 한다).
-        _viewport = ClampToBaseSpace(_viewport);
-        if (_hasPendingViewport) _pendingViewport = ClampToBaseSpace(_pendingViewport);
+    /// <summary>
+    /// 창을 놓을 작업 영역(스크린 좌표, 가상 바탕화면 기준)을 정한다 — 설정에서 고른 모니터의 작업 영역이다.
+    /// 값을 넣는 쪽은 Gameplay의 MonitorApplier다(이 클래스는 설정을 모른다). 같은 값이면 아무 일도 하지 않는다.
+    /// ready 전이면 들고 있다가 Start의 첫 배치에 쓴다. 편집 중이면 편집이 끝날 때 옮긴다 — 프리뷰가 옛 베이스 공간 기준으로 남지 않게.
+    /// </summary>
+    public void SetTargetWorkArea(RectInt workArea)
+    {
+        if (_hasTargetWorkArea && _targetWorkArea.Equals(workArea)) return;
+        _targetWorkArea = workArea;
+        _hasTargetWorkArea = true;
+        if (!_ready) return;
+        if (_isEditing)
+        {
+            _relayoutAfterEdit = true;
+            return;
+        }
+        Relayout();
+    }
+
+    // 창·카메라를 다시 놓고 뷰포트를 맞춘다. 작업 영역이 줄었으면 뷰포트가 보이는 영역을 넘칠 수 있다.
+    // 적용하는 값만 줄이고 고른 값은 그대로 둔다(큰 모니터로 돌아가면 저장된 원래 크기가 복원되어야 한다).
+    private void Relayout()
+    {
+        ApplyScreenLayout();
+        RefreshEffectiveViewport();
+        if (_hasPendingViewport) _pendingViewport = ClampToVisible(_pendingViewport);
+        PublishViewportConfirmed();
+    }
+
+    /// <summary>
+    /// 전체 크기(줌)를 바꾼다. 1 미만은 1로 올린다 — 마스터 캔버스(아트 기준) 밖이 보이면 안 되기 때문이다.
+    /// 카메라가 비추는 범위를 오른쪽 아래 기준으로 1/zoom로 줄이고, 뷰포트를 그 안으로 맞춰 <see cref="ViewportConfirmed"/>를 울린다.
+    /// 줄어든 뷰포트는 저장하지 않는다 — 줌을 되돌리면 고른 뷰포트가 그대로 돌아온다(작업 영역이 바뀔 때와 같은 규칙).
+    /// 값을 넣는 쪽은 Gameplay의 WorldZoomApplier다 — 이 클래스는 설정을 모른다.
+    /// ready 전에 불리면 값만 들고 있다가 Start의 첫 적용에 쓴다.
+    /// </summary>
+    public void SetZoom(float zoom)
+    {
+        zoom = Mathf.Max(1f, zoom);
+        if (Mathf.Approximately(_zoom, zoom)) return;
+        _zoom = zoom;
+        if (!_ready) return;
+
+        RefreshVisibleRect();
+        FrameCamera();
+        RefreshEffectiveViewport();
+        if (_hasPendingViewport) _pendingViewport = ClampToVisible(_pendingViewport);
+        if (_isEditing)
+        {
+            _previewViewport = ClampToVisible(_previewViewport);
+            PreviewChanged?.Invoke(_previewViewport);
+            return;
+        }
         PublishViewportConfirmed();
     }
 
@@ -222,7 +297,7 @@ public class ViewportScreenSettings : MonoBehaviour
         }
         _isEditing = true;
         // 저장하지 않은 조정이 있으면 거기서 이어 간다 — [완료] 뒤 다시 [조정]을 눌러도 손댄 것이 남아 있게.
-        _previewViewport = _hasPendingViewport ? _pendingViewport : _viewport;
+        _previewViewport = _hasPendingViewport ? ClampToVisible(_pendingViewport) : _effectiveViewport;
 
         if (_windowManager != null)
         {
@@ -240,7 +315,7 @@ public class ViewportScreenSettings : MonoBehaviour
     public void SetPreviewViewport(RectInt viewport)
     {
         if (!_isEditing) return;
-        _previewViewport = ClampToBaseSpace(viewport);
+        _previewViewport = ClampToVisible(viewport);
         PreviewChanged?.Invoke(_previewViewport);
     }
 
@@ -253,18 +328,25 @@ public class ViewportScreenSettings : MonoBehaviour
     {
         if (!_isEditing) return;
         _pendingViewport = _previewViewport;
-        _hasPendingViewport = !_previewViewport.Equals(_viewport); // 손댔다가 원래대로 돌려 놓았으면 미저장이 아니다
+        _hasPendingViewport = !_previewViewport.Equals(_effectiveViewport); // 손댔다가 원래대로 돌려 놓았으면 미저장이 아니다
         ExitEdit();
     }
 
-    /// <summary>미저장 뷰포트를 확정한다(설정 그래픽 탭의 [저장]). 뷰포트를 확정하는 유일한 경로다. 없으면 아무 일도 하지 않는다.</summary>
-    public void CommitPendingViewport()
+    /// <summary>
+    /// 설정 그래픽 탭의 [저장]. 미저장 뷰포트가 있으면 확정해 저장한다 — 뷰포트를 확정하는 유일한 경로다.
+    /// 그다음 지금 적용된 뷰포트로 <see cref="Committed"/>를 울린다. 줌만 바꿔 저장해도 울린다.
+    /// </summary>
+    public void Commit()
     {
-        if (!_hasPendingViewport) return;
-        _viewport = _pendingViewport;
-        _hasPendingViewport = false;
-        ViewportSaved?.Invoke(_viewport);
-        PublishViewportConfirmed();
+        if (_hasPendingViewport)
+        {
+            _viewport = _pendingViewport;
+            _hasPendingViewport = false;
+            ViewportSaved?.Invoke(_viewport);
+            RefreshEffectiveViewport();
+            PublishViewportConfirmed();
+        }
+        Committed?.Invoke(_effectiveViewport);
     }
 
     /// <summary>미저장 뷰포트를 버린다(그래픽 탭 미저장 확인). 월드는 처음부터 확정 뷰포트였으므로 알릴 것이 없다.</summary>
@@ -281,33 +363,79 @@ public class ViewportScreenSettings : MonoBehaviour
             _windowManager.ReleaseResizeSuspend(this);
         }
         WorldInputLock.Release(this);
-        PublishViewportConfirmed();
+        if (_relayoutAfterEdit)
+        {
+            _relayoutAfterEdit = false;
+            Relayout();
+        }
+        else
+        {
+            PublishViewportConfirmed();
+        }
         EditModeChanged?.Invoke(false);
     }
 
-    /// <summary>창을 작업 영역에 놓고 카메라를 베이스 공간 전체에 프레이밍한다.
-    /// 부팅 시 1회와 ReadjustWindow에서만 부른다 — 뷰포트가 바뀌어도 창·카메라는 그대로다.</summary>
+    /// <summary>창을 작업 영역에 놓고 카메라를 보이는 영역에 프레이밍한다.
+    /// 부팅 시 1회와 ReadjustWindow에서만 부른다 — 뷰포트가 바뀌어도 창·카메라는 그대로다(줌은 카메라만 다시 맞춘다).</summary>
     private void ApplyScreenLayout()
     {
         RefreshBaseSpace();
+        RefreshVisibleRect();
 
         if (_windowManager != null)
         {
             _windowManager.ApplyRegion(
                 _baseSpaceScreenRect.x, _baseSpaceScreenRect.y,
                 _baseSpaceScreenRect.width, _baseSpaceScreenRect.height);
+            if (_verifyWindow != null) StopCoroutine(_verifyWindow);
+            _verifyWindow = StartCoroutine(VerifyWindowRect());
         }
-        if (_cameraFitter != null)
-            _cameraFitter.Frame(new RectInt(0, 0, _baseSpaceSize.x, _baseSpaceSize.y), _baseSpaceSize);
+        FrameCamera();
     }
+
+    // 배율(DPI)이 다른 모니터로 옮기면 Unity가 창 크기를 다시 잡을 수 있다(MultiMonitorPreparation.md §4.1, 미확인).
+    // 확인을 기다리지 않고, 옮긴 뒤 몇 프레임 동안 창이 목표와 다르면 한 번 더 맞춘다. 옮길 때만 도는 비용이다.
+    private IEnumerator VerifyWindowRect()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            yield return null;
+            if (_windowManager.TryGetWindowRect(out RectInt actual) && !actual.Equals(_baseSpaceScreenRect))
+            {
+                _windowManager.ApplyRegion(
+                    _baseSpaceScreenRect.x, _baseSpaceScreenRect.y,
+                    _baseSpaceScreenRect.width, _baseSpaceScreenRect.height);
+            }
+        }
+        _verifyWindow = null;
+    }
+
+    private void FrameCamera()
+    {
+        if (_cameraFitter != null) _cameraFitter.Frame(_visibleRect, _baseSpaceSize);
+    }
+
+    // 보이는 영역 = 베이스 공간의 오른쪽 아래를 1/zoom 크기로 잘라낸 것. 오른쪽 아래 모서리(메뉴 바·지면)가 기준점이다.
+    private void RefreshVisibleRect()
+    {
+        int w = Mathf.RoundToInt(_baseSpaceSize.x / _zoom);
+        int h = Mathf.RoundToInt(_baseSpaceSize.y / _zoom);
+        _visibleRect = new RectInt(_baseSpaceSize.x - w, 0, w, h);
+    }
+
+    private void RefreshEffectiveViewport() => _effectiveViewport = ClampToVisible(_viewport);
 
     /// <summary>확정 뷰포트가 적용됐음을 알린다. 창·카메라는 건드리지 않는다 —
     /// 뷰포트는 렌더링이 아니라 게임플레이 규칙의 기준이기 때문이다.</summary>
-    private void PublishViewportConfirmed() => ViewportConfirmed?.Invoke(_viewport);
+    private void PublishViewportConfirmed() => ViewportConfirmed?.Invoke(_effectiveViewport);
 
     private void RefreshBaseSpace()
     {
-        if (_windowManager != null && _windowManager.TryGetWorkAreaRect(out RectInt workArea))
+        if (_hasTargetWorkArea)
+        {
+            _baseSpaceScreenRect = _targetWorkArea;
+        }
+        else if (_windowManager != null && _windowManager.TryGetWorkAreaRect(out RectInt workArea))
         {
             _baseSpaceScreenRect = workArea;
         }
@@ -335,12 +463,14 @@ public class ViewportScreenSettings : MonoBehaviour
             Mathf.RoundToInt(r.width / s), Mathf.RoundToInt(r.height / s));
     }
 
-    private RectInt ClampToBaseSpace(RectInt r)
+    // 보이는 영역 안으로 맞춘다. 크기를 먼저 줄이고 위치를 민다 — 줌을 키우면 왼쪽·위쪽이 잘려 오른쪽 아래로 모인다.
+    private RectInt ClampToVisible(RectInt r)
     {
-        r.width  = Mathf.Clamp(r.width,  MinViewportSize.x, _baseSpaceSize.x);
-        r.height = Mathf.Clamp(r.height, MinViewportSize.y, _baseSpaceSize.y);
-        r.x = Mathf.Clamp(r.x, 0, _baseSpaceSize.x - r.width);
-        r.y = Mathf.Clamp(r.y, 0, _baseSpaceSize.y - r.height);
+        RectInt v = _visibleRect;
+        r.width  = Mathf.Clamp(r.width,  Mathf.Min(MinViewportSize.x, v.width),  v.width);
+        r.height = Mathf.Clamp(r.height, Mathf.Min(MinViewportSize.y, v.height), v.height);
+        r.x = Mathf.Clamp(r.x, v.xMin, v.xMax - r.width);
+        r.y = Mathf.Clamp(r.y, v.yMin, v.yMax - r.height);
         return r;
     }
 }

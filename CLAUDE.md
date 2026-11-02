@@ -47,7 +47,7 @@
 
 **새 배경은 아트가 만든 배경 프리팹을 그대로 상품에 연결합니다** — 개발 쪽에서 크기나 타일 개수를 다시 맞추지 않습니다. 그림의 아래 끝을 뷰포트 아래 변에 맞추고, 뷰포트 밖은 마스크로 자릅니다. 높이 표준은 500px이지만 배경마다 조금 달라도 됩니다. 나머지 배경 규약은 [.claude/rules/unity/background.md](.claude/rules/unity/background.md)에 있고, 같은 이유로 여기 한 줄 둡니다.
 
-**월드의 px 값(뷰포트·배경 높이·최소 크기 등)은 마스터 캔버스 기준 px이고, 화면에서는 작업 영역 폭 비율로 줄어듭니다** — UI의 CanvasScaler와 같은 배율입니다. 새로 px 크기 필드를 갖는 소비자를 만들 때는 [.claude/rules/unity/viewport-coordinates.md](.claude/rules/unity/viewport-coordinates.md)를 봅니다. 새 파일에는 발화할 규칙이 없어 여기 한 줄 둡니다. 프리팹의 월드 위치값은 ×100 하면 마스터 캔버스 px입니다.
+**월드의 px 값(뷰포트·배경 높이·최소 크기 등)은 마스터 캔버스 기준 px이고, 화면에서는 작업 영역 폭 비율로 줄어듭니다** — UI의 CanvasScaler와 같은 배율입니다. 그래픽 탭의 전체 크기(줌)를 키우면 월드에만 그 배율이 더 곱해지고, UI는 따라가지 않습니다. 새로 px 크기 필드를 갖는 소비자를 만들 때는 [.claude/rules/unity/viewport-coordinates.md](.claude/rules/unity/viewport-coordinates.md)를 봅니다. 새 파일에는 발화할 규칙이 없어 여기 한 줄 둡니다. 프리팹의 월드 위치값은 ×100 하면 마스터 캔버스 px입니다.
 
 **새 그림은 임포트 PPU를 Unity 기본값(100)으로 두고, 시트의 긴 변이 Max Size를 넘지 않게 합니다** — 월드 PPU가 코드 상수 100이라 그대로 두면 그림 1px = 마스터 캔버스 1px가 됩니다. 크기가 안 맞으면 PPU가 아니라 그림을 고칩니다. 지금은 캐릭터만 예외로, 베이스 프리팹 배율로 임시로 줄여 씁니다([character-ground.md](.claude/rules/unity/character-ground.md)). 새 그림을 임포트하는 순간에도 발화할 규칙이 없어 여기 한 줄 둡니다. 이유는 같은 viewport-coordinates.md에 있습니다.
 
@@ -92,7 +92,7 @@
 
 ### .claude/rules/ 인덱스
 - `git.md` — `paths` 없음, 항상 로드
-- `figma.md` — `paths` 없음, 항상 로드. 기획 원본인 Figma 파일을 어떤 도구로 읽는지. **기본은 브라우저이고, MCP는 명시 요청이나 정확한 수치가 필요할 때만**
+- `figma.md` — `paths` 없음, 항상 로드. 기획 원본인 Figma 파일을 어떤 도구로 읽는지. **Figma MCP는 쓰지 않고, 사용자 브라우저(`mcp__claude-in-chrome__*`)로만 읽는다**
 - `docs-conventions.md` — 문서·CLAUDE.md·rules를 쓸 때
 - `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/ui-panels.md`, `unity/platform.md`, `unity/project-settings.md` — 해당 파일을 열 때
 - `unity/character-ground.md` — 캐릭터 지면·발 규약. Character 스크립트·캐릭터 프리팹·캐릭터 스프라이트 임포트 설정을 열 때

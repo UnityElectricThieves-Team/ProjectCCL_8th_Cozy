@@ -235,6 +235,32 @@ public class CharacterOwnership : MonoBehaviour
     }
 
     /// <summary>
+    /// 게임 초기화(<see cref="GameProgressReset"/>). 모든 기록(해금·배치·친밀도)을 지우고 저장한 뒤,
+    /// 화면에 나와 있는 캐릭터를 모두 내린다. 친밀도를 줄이는 경로를 만들지 않는다는 규약
+    /// (.claude/rules/unity/character-affinity.md)의 예외로, 사용자가 확인 팝업에서 직접 고른 경우에만 불린다.
+    /// Development Build는 다음 실행 때 다시 모두 해금한다.
+    /// </summary>
+    public void ResetProgress()
+    {
+        // 파괴할 캐릭터의 친밀도 모듈을 붙든 구독을 먼저 끊는다.
+        for (int i = 0; i < _affinitySubscriptions.Count; i++)
+            _affinitySubscriptions[i].affinity.AffinityChanged -= _affinitySubscriptions[i].handler;
+        _affinitySubscriptions.Clear();
+
+        if (CharacterManager.Instance != null)
+        {
+            var alive = CharacterManager.Instance.Alive;
+            for (int i = 0; i < alive.Count; i++) Destroy(alive[i]);
+        }
+
+        var ids = new List<string>(_data.records.Count);
+        for (int i = 0; i < _data.records.Count; i++) ids.Add(_data.records[i].id);
+        _data.records.Clear();
+        Save();
+        for (int i = 0; i < ids.Count; i++) RecordChanged?.Invoke(ids[i]);
+    }
+
+    /// <summary>
     /// 현재 기록을 파일에 쓴다. 쓰기 실패는 로그만 남기고 삼킨다 — 저장이 안 됐다고 해금을 되돌리면
     /// 화면에 나온 캐릭터와 기록이 어긋나 더 이상해진다(ShopSystem과 같은 판단).
     /// </summary>
