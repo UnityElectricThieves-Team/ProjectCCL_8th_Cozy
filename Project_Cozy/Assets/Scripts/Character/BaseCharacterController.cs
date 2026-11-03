@@ -164,13 +164,23 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public void RequestPet() => _state.RequestPet();
     public void RequestGrab() => _state.RequestGrab();
 
-    /// <summary>우클릭 변신 토글. 동물→소녀는 친밀도 만점 필요, 소녀→동물은 언제든. CharacterInteractionRelay.OnRightClick에서 호출.</summary>
+    /// <summary>동물 → 소녀 변신 요청. 친밀도가 변신 임계 이상일 때만 받는다(AILogic.md §Transform).
+    /// 이미 소녀면 무시한다 — 기획은 우클릭을 동물 → 소녀, Shift+우클릭을 소녀 → 동물로 나눴다.
+    /// CharacterInteractionRelay.OnRightClick에서 호출.</summary>
     public void RequestTransform()
     {
         // 금지 중에는 변신 시스템 자체를 끈다(UserSettings.md). 소녀는 금지를 거는 순간 동물로 돌아가 있다.
         if (_girlTransformBanned) return;
-        // 동물 → 소녀: 친밀도가 변신 임계 이상일 때만 (AILogic.md §Transform). 소녀 → 동물: 무조건 허용.
-        if (_visual.CurrentForm == CharacterForm.Animal && !_affinity.CanHumanTransform) return;
+        if (_visual.CurrentForm != CharacterForm.Animal) return;
+        if (!_affinity.CanHumanTransform) return;
+        _state.RequestTransform();
+    }
+
+    /// <summary>소녀 → 동물 변신 요청. 조건 없이 받는다(잠금·공중·수면 중이면 StateModule이 거부한다).
+    /// 이미 동물이면 무시한다. CharacterInteractionRelay.OnShiftRightClick에서 호출.</summary>
+    public void RequestRevertToAnimal()
+    {
+        if (_visual.CurrentForm != CharacterForm.Girl) return;
         _state.RequestTransform();
     }
 
