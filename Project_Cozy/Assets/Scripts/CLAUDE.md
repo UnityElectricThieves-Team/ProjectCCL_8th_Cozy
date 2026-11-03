@@ -42,7 +42,7 @@
 - `Animation/SpriteAnimator.cs` — **캐릭터 외 사용처 전용**(구름·달 등). `BaseCharacterController` 시스템은 `VisualModule`을 쓴다.
 - `Platform/Window/Core/BorderlessWindow.cs`, `Platform/Window/Input/ClickThroughProbe.cs` — 구 프로토타입. 현행 스택과 같은 HWND를 만지므로 함께 활성화하면 충돌한다. 제거 대기.
 - `PerformanceSetting/WindowAspectFitter.cs` — 구 구현. 후속은 `Platform/`의 `WindowManager`다. 제거 조건은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) 참조.
-- `Platform/Data/SaveScheduler.cs` — 인프라만 있고 **고객이 0명이다.** `IPeriodicSaveable` 구현체도, 씬 배치도 없다. 여기 등록하면 조용히 저장이 안 된다. 새 저장은 `HeartSystem`/`ShopSystem` 골격(값이 바뀔 때 즉시 저장)을 따른다. 예외는 둘이다. 슬라이더처럼 매 프레임 값이 오는 볼륨은 손 뗄 때 저장하고([audio.md](../../../.claude/rules/unity/audio.md)), 설정 그래픽 탭은 [저장]을 누를 때 저장한다([settings.md](../../../.claude/rules/unity/settings.md)).
+- `Platform/Data/SaveScheduler.cs` — 인프라만 있고 **고객이 0명이다.** `IPeriodicSaveable` 구현체도, 씬 배치도 없다. 여기 등록하면 조용히 저장이 안 된다. 새 저장은 `HeartSystem`/`ShopSystem` 골격(값이 바뀔 때 즉시 저장)을 따른다. 예외는 셋이다. 슬라이더처럼 매 프레임 값이 오는 볼륨은 손 뗄 때 저장하고([audio.md](../../../.claude/rules/unity/audio.md)), 설정 그래픽 탭은 [저장]을 누를 때 저장한다([settings.md](../../../.claude/rules/unity/settings.md)). 입력마다 오르는 스폰 기운은 `SpawnPointManager`가 몇 초마다, 그리고 끝날 때 저장한다.
 
 ## 컨벤션
 
