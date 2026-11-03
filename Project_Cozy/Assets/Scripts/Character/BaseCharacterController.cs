@@ -27,6 +27,11 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     [Tooltip("아래 가속도. FallState가 매 프레임 -gravity*dt로 적용.")]
     [SerializeField] private float _gravity = 1.296f;
 
+    [Header("Form")]
+    [Tooltip("소녀로 변신한 뒤 이 시간(초)이 지나면 스스로 동물로 돌아간다. 기획은 2시간(7200초).\n" +
+             "잠든 동안처럼 변신을 받지 않는 상태면, 받을 수 있게 되는 순간 돌아간다.")]
+    [SerializeField, Min(1f)] private float _girlFormSeconds = 7200f;
+
     [Header("Modules")]
     [SerializeField] private StateModule _state = new StateModule();
     [SerializeField] private VisualModule _visual = new VisualModule();
@@ -41,6 +46,10 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     // 소녀 변신 금지 여부. 밖에서 SetGirlTransformBanned로 주입한다(기본은 허용).
     // 거주 영역과 같은 방식이다 — 캐릭터는 이 값이 유저 설정에서 왔다는 것을 모른다.
     private bool _girlTransformBanned;
+
+    // 소녀가 된 시각(Time.time). 소녀일 때만 의미가 있다.
+    // 폼은 저장하지 않으므로 재시작하면 언제나 동물로 시작한다 — 기획의 "2시간 전에 껐다 켜도 동물로 복귀"가 이것으로 성립한다.
+    private float _girlSince;
 
     /// <summary>거주 영역이 아직 안 들어온 씬에서 쓰는 지면 높이. 인스펙터로 열지 않는다 —
     /// 조절 가능한 바닥이 있으면 그게 다른 오차(발 위치 어긋남 등)의 보정값 노릇을 하다가,
@@ -123,6 +132,11 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         var dt = Time.deltaTime;
         _state.Tick(dt);
         _visual.Tick(dt);
+
+        // 요청이 거부되면(수면·낙하 등) 다음 프레임에 다시 요청한다. 받아들여지면 변신 중 잠금으로 조용해지고,
+        // 폼이 동물로 바뀌는 순간 이 조건이 꺼진다.
+        if (_visual.CurrentForm == CharacterForm.Girl && Time.time - _girlSince >= _girlFormSeconds)
+            RequestRevertToAnimal();
     }
 
     protected virtual void OnDisable()
@@ -301,6 +315,8 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         // 동물→소녀 변신 도중에 금지가 걸리면, 이펙트 중간의 폼 스왑이 소녀를 되살린다. 여기서 막는다.
         if (form == CharacterForm.Girl && _girlTransformBanned) return;
         _visual.SetForm(form);
+        // 폼 스왑이 실제로 일어났을 때만 잰다 — 애니메이터 오버라이드가 비어 있으면 VisualModule이 스왑을 건너뛴다.
+        if (form == CharacterForm.Girl && _visual.CurrentForm == CharacterForm.Girl) _girlSince = Time.time;
     }
 
     /// <summary>
