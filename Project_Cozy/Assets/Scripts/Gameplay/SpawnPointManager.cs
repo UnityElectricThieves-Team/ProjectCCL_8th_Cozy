@@ -24,12 +24,16 @@ public class SpawnPointManager : MonoBehaviour
 {
     private IDisposable _anyButtonSubscription;
 
+    /// <summary>누적 스폰 기운의 최대치. 기획이 "최대 수치 1,000,000,000"으로 정했다.</summary>
+    public const int MaxEnergy = 1_000_000_000;
+
     /// <summary>누적 스폰 기운. 쌓이기만 하고 스폰해도 차감되지 않는다.</summary>
     public int CumulativeEnergy { get; private set; }
 
     /// <summary>입력 1회 — 누적 <see cref="CumulativeEnergy"/>를 올린다. 모든 입력 채널이 이 메서드를 통한다.</summary>
     private void Increment()
     {
+        if (CumulativeEnergy >= MaxEnergy) return;
         CumulativeEnergy++;
     }
 
