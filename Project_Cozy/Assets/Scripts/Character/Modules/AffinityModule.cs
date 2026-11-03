@@ -7,13 +7,15 @@ using UnityEngine.Serialization;
 /// 값이 바뀌었다는 사실만 <c>AffinityChanged</c>로 알리고, 그걸로 무엇을 할지는 구독자가 정한다.
 /// 순수 C# <see cref="SerializableAttribute"/> 클래스 — <see cref="BaseCharacterController"/>가 <c>[SerializeField]</c>로 nested 보유.
 ///
-/// 친밀도는 누적값 하나뿐이고 줄어들지 않는다. 기획에 친밀도가 감소·소모되는 경우가 없다.
+/// 저장되는 친밀도는 누적값 하나뿐이고 줄어들지 않는다. 기획에 친밀도가 감소·소모되는 경우가 없다.
+/// 소녀 변신 조건만은 누적값이 아니라 "게임을 켠 뒤, 또는 동물로 돌아온 뒤 쌓인 양"으로 본다 —
+/// 저장하지 않는 실행 중 카운터라, 이것을 0으로 돌려도 누적 친밀도는 줄지 않는다.
 /// </summary>
 [Serializable]
 public sealed class AffinityModule
 {
     [Header("Affinity")]
-    [Tooltip("이 친밀도에 도달하면 소녀로 변신할 수 있다.")]
+    [Tooltip("게임을 켠 뒤, 또는 동물로 돌아온 뒤 이만큼 친밀도가 쌓이면 소녀로 변신할 수 있다.")]
     [FormerlySerializedAs("_maxAffinity")]
     [SerializeField] private int _humanTransformThreshold = 100;
     [Tooltip("쓰담 1회당 오르는 친밀도.\n" +
@@ -26,12 +28,15 @@ public sealed class AffinityModule
     private BaseCharacterController _owner;
     private int _cumulativeAffinity;
 
-    /// <summary>누적 친밀도. 쓰담으로만 오르고 줄어들지 않는다.</summary>
+    // 게임을 켠 뒤, 또는 마지막으로 동물이 된 뒤 쌓인 친밀도. 저장하지 않는다(재시작하면 0 — 기획의 "게임 딱 켰을 때부터").
+    private int _gainedSinceAnimal;
+
+    /// <summary>누적 친밀도. 줄어들지 않는다.</summary>
     public int CumulativeAffinity => _cumulativeAffinity;
     /// <summary>친밀도 최대치(하드 상한).</summary>
     public int Max => _affinityHardCap;
-    /// <summary>소녀 변신 가능 여부 — 누적 친밀도가 변신 임계 이상인가.</summary>
-    public bool CanHumanTransform => _cumulativeAffinity >= Mathf.Max(1, _humanTransformThreshold);
+    /// <summary>소녀 변신 가능 여부 — 게임을 켠 뒤, 또는 동물로 돌아온 뒤 쌓인 친밀도가 변신 임계 이상인가.</summary>
+    public bool CanHumanTransform => _gainedSinceAnimal >= Mathf.Max(1, _humanTransformThreshold);
 
     /// <summary>친밀도 값이 변할 때마다 새 값으로 호출.</summary>
     public event Action<int> AffinityChanged;
@@ -41,14 +46,26 @@ public sealed class AffinityModule
         _owner = owner;
     }
 
-    /// <summary>쓰담 1회당 누적. 하드 상한에서 멈춘다.</summary>
-    public void AddOnPet()
+    /// <summary>쓰담 1회당 누적.</summary>
+    public void AddOnPet() => Add(_affinityPerPet);
+
+    /// <summary>동물이 된 순간 부른다. 변신 조건을 처음부터 다시 센다 — 기획의 "고양이로 복귀한 뒤부터 카운트 시작".
+    /// 누적 친밀도는 건드리지 않는다.</summary>
+    public void RestartTransformCount() => _gainedSinceAnimal = 0;
+
+    // 친밀도를 올리는 단 하나의 경로. 누적값은 하드 상한에서 멈춘다.
+    private void Add(int amount)
     {
+        var gain = Mathf.Max(0, amount);
+        if (gain == 0) return;
+
+        // 변신 카운터는 상한과 무관하게 센다. 상한에 닿은 캐릭터도 동물로 돌아온 뒤 다시 변신할 수 있어야 한다.
+        // 임계를 넘으면 더 셀 필요가 없으므로 거기서 멈춰 넘침을 막는다.
+        _gainedSinceAnimal = Mathf.Min(_gainedSinceAnimal + gain, Mathf.Max(1, _humanTransformThreshold));
+
         var cap = Mathf.Max(1, _affinityHardCap);
         if (_cumulativeAffinity >= cap) return;
-
-        var gain = Mathf.Max(0, _affinityPerPet);
-        _cumulativeAffinity = Mathf.Min(cap, _cumulativeAffinity + gain);
+        _cumulativeAffinity = (int)Math.Min((long)_cumulativeAffinity + gain, cap);
 
         AffinityChanged?.Invoke(_cumulativeAffinity);
     }

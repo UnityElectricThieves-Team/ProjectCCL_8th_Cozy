@@ -317,6 +317,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         _visual.SetForm(form);
         // 폼 스왑이 실제로 일어났을 때만 잰다 — 애니메이터 오버라이드가 비어 있으면 VisualModule이 스왑을 건너뛴다.
         if (form == CharacterForm.Girl && _visual.CurrentForm == CharacterForm.Girl) _girlSince = Time.time;
+        if (form == CharacterForm.Animal && _visual.CurrentForm == CharacterForm.Animal) _affinity.RestartTransformCount();
     }
 
     /// <summary>
@@ -327,7 +328,11 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public void SetGirlTransformBanned(bool banned)
     {
         _girlTransformBanned = banned;
-        if (banned && _visual.CurrentForm == CharacterForm.Girl) _visual.SetForm(CharacterForm.Animal);
+        if (banned && _visual.CurrentForm == CharacterForm.Girl)
+        {
+            _visual.SetForm(CharacterForm.Animal);
+            _affinity.RestartTransformCount();
+        }
     }
 
     /// <summary>
