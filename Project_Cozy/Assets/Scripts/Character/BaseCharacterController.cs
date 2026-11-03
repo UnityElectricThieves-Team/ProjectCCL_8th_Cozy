@@ -132,6 +132,7 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         var dt = Time.deltaTime;
         _state.Tick(dt);
         _visual.Tick(dt);
+        _affinity.TickAwake(dt, _state.CurrentStateId == CharacterState.Sleep);
 
         // 요청이 거부되면(수면·낙하 등) 다음 프레임에 다시 요청한다. 받아들여지면 변신 중 잠금으로 조용해지고,
         // 폼이 동물로 바뀌는 순간 이 조건이 꺼진다.

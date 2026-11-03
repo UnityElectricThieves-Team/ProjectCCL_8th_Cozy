@@ -22,6 +22,8 @@ public sealed class AffinityModule
              "쓰담은 캐릭터를 좌클릭할 때 시작한다 — 마우스를 올려두기만 해서는 오르지 않는다.")]
     [FormerlySerializedAs("_affinityPerHoverEnter")]
     [SerializeField] private int _affinityPerPet = 10;
+    [Tooltip("깨어 있는 동안 1분마다 오르는 친밀도. 기획은 2. 잠든 동안은 시간을 세지 않는다.")]
+    [SerializeField, Min(0)] private int _affinityPerAwakeMinute = 2;
     [Tooltip("친밀도 최대치. 이 값을 넘으면 더 오르지 않는다(오버플로우 방지).")]
     [SerializeField] private int _affinityHardCap = 100_000_000;
 
@@ -30,6 +32,9 @@ public sealed class AffinityModule
 
     // 게임을 켠 뒤, 또는 마지막으로 동물이 된 뒤 쌓인 친밀도. 저장하지 않는다(재시작하면 0 — 기획의 "게임 딱 켰을 때부터").
     private int _gainedSinceAnimal;
+
+    // 깨어 있던 시간 중 아직 1분이 안 찬 나머지(초). 저장하지 않는다 — 재시작하면 새 1분부터 센다.
+    private float _awakeSeconds;
 
     /// <summary>누적 친밀도. 줄어들지 않는다.</summary>
     public int CumulativeAffinity => _cumulativeAffinity;
@@ -48,6 +53,21 @@ public sealed class AffinityModule
 
     /// <summary>쓰담 1회당 누적.</summary>
     public void AddOnPet() => Add(_affinityPerPet);
+
+    /// <summary>매 프레임 부른다. 깨어 있는 시간을 모아 1분이 찰 때마다 <see cref="_affinityPerAwakeMinute"/>만큼 올린다.
+    /// 잠든 동안은 시간을 세지 않는다 — 기획의 "sleep 중 0". 깨어나면 모아 둔 나머지부터 이어서 센다.</summary>
+    public void TickAwake(float dt, bool asleep)
+    {
+        if (asleep) return;
+
+        _awakeSeconds += dt;
+        if (_awakeSeconds < 60f) return;
+
+        // 한 프레임이 1분을 넘기는 일은 없지만(멈췄다 풀린 경우 등) 그때도 분 수만큼 한 번에 준다.
+        int minutes = (int)(_awakeSeconds / 60f);
+        _awakeSeconds -= minutes * 60f;
+        Add(minutes * _affinityPerAwakeMinute);
+    }
 
     /// <summary>동물이 된 순간 부른다. 변신 조건을 처음부터 다시 센다 — 기획의 "고양이로 복귀한 뒤부터 카운트 시작".
     /// 누적 친밀도는 건드리지 않는다.</summary>
