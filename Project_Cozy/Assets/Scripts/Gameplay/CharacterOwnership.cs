@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using Assets.Scripts.Contents.CollectionSystem.Model;
 
 /// <summary>
 /// "어떤 캐릭터를 가졌고, 그중 누가 화면에 나와 있어야 하는가"의 주인. 캐릭터별 기록(보유·배치·누적 친밀도)을
@@ -22,6 +23,10 @@ using UnityEngine;
 ///
 /// 기록이 바뀔 때마다 즉시 저장한다. 해금·배치는 가끔 일어나는 이산 이벤트라
 /// <see cref="SaveScheduler"/>를 거치지 않는다(하트·상점과 같은 판단).
+///
+/// 해금은 구름(<see cref="CloudController"/>)을 누를 때 일어난다. 어떤 캐릭터가 얼마의 누적 스폰 기운에서 열리는지는
+/// 도감 정의(CollectionTool이 내보낸 collection.dat)의 <c>CharacterId</c>·<c>RequiredSpawnEnergy</c>가 정본이라,
+/// 시작할 때 거기서 해금 순서만 뽑아 둔다. 도감 화면이 보여주는 필요 기운과 실제 해금 기준이 갈라지지 않게 하려는 것이다.
 ///
 /// 등장은 뷰포트가 처음 확정된 뒤로 미룬다. 그 전에는 뷰포트 영역을 몰라서 위치를 정할 수 없다
 /// (.claude/rules/unity/viewport-coordinates.md).
@@ -68,6 +73,9 @@ public class CharacterOwnership : MonoBehaviour
     // 등장시킨 캐릭터의 친밀도 구독. 파괴될 때 풀기 위해 들고 있다.
     private readonly List<(AffinityModule affinity, Action<int> handler)> _affinitySubscriptions = new();
 
+    // 해금 순서 — 도감 정의에서 뽑은 (캐릭터 id, 필요 누적 스폰 기운)을 필요 기운 오름차순으로 든다.
+    private readonly List<(string id, int requiredEnergy)> _unlockSteps = new();
+
     private void Awake()
     {
         Instance = this;
@@ -80,9 +88,11 @@ public class CharacterOwnership : MonoBehaviour
         var seen = new HashSet<string>();
         _data.records.RemoveAll(r => r == null || string.IsNullOrEmpty(r.id) || !seen.Add(r.id));
 
+        LoadUnlockSteps();
+
 #if DEVELOPMENT_BUILD
-        // 구름의 해금이 아직 없어 빌드에서는 캐릭터를 띄울 길이 없다. 결과물을 보여주는 Development Build에서는
-        // 시작할 때 모두 해금한다. 뷰포트 확정 전이라 기록만 남고, 등장은 Start의 흐름이 맡는다.
+        // 결과물을 보여주는 Development Build에서는 스폰 기운을 모으지 않고도 캐릭터를 볼 수 있게 시작할 때 모두 해금한다.
+        // 그래서 이 빌드에서는 구름이 활성화되지 않는다. 뷰포트 확정 전이라 기록만 남고, 등장은 Start의 흐름이 맡는다.
         // 에디터 Play에는 정의되지 않으므로 첫 실행(빈 화면) 확인은 그대로 된다.
         UnlockAll();
 #endif
@@ -209,6 +219,66 @@ public class CharacterOwnership : MonoBehaviour
         _affinitySubscriptions.Add((affinity, onChanged));
     }
 
+    /// <summary>지금 누적 스폰 기운으로 해금할 수 있는데 아직 보유하지 않은 캐릭터가 있는가.
+    /// 구름이 활성 상태를 정하려고 매 프레임 묻는다 — 몇 개뿐인 목록을 할당 없이 훑는다.</summary>
+    public bool HasUnlockable(int spawnEnergy) => FindNextUnlockable(spawnEnergy) != null;
+
+    /// <summary>구름을 눌렀을 때 부른다. 해금할 수 있는 캐릭터 중 필요 기운이 가장 낮은 하나만 해금한다.
+    /// 여러 단계를 한꺼번에 넘겼어도 누를 때마다 하나씩 나온다. 해금했으면 true.</summary>
+    public bool TryUnlockNext(int spawnEnergy)
+    {
+        var id = FindNextUnlockable(spawnEnergy);
+        if (id == null) return false;
+        Unlock(id);
+        return true;
+    }
+
+    // 필요 기운 오름차순이라, 기운이 모자란 단계를 만나면 뒤는 볼 필요가 없다.
+    private string FindNextUnlockable(int spawnEnergy)
+    {
+        for (int i = 0; i < _unlockSteps.Count; i++)
+        {
+            var step = _unlockSteps[i];
+            if (step.requiredEnergy > spawnEnergy) return null;
+            if (FindRecord(step.id) == null) return step.id;
+        }
+        return null;
+    }
+
+    // 도감 정의에서 해금 순서만 뽑는다. 사진까지 든 정의 전체는 들고 있지 않는다 — 시작할 때 한 번 읽고 버린다.
+    // CharacterId가 비었거나 대응표에 없는 항목은 해금할 수 없으므로 뺀다(도감 쪽도 빈 id는 잠그지 않는다).
+    private void LoadUnlockSteps()
+    {
+        CollectionBoolData collection;
+        try
+        {
+            collection = CollectionDataRuntime.Load();
+        }
+        catch (Exception e)
+        {
+            // collection.dat은 배포 데이터라 깨져 있으면 빌드 문제다. 캐릭터 기록과 등장까지 멈추지 않게 로그만 남긴다.
+            Debug.LogError($"[{nameof(CharacterOwnership)}] 도감 정의를 읽지 못해 구름 해금을 쓸 수 없습니다: {e.Message}", this);
+            return;
+        }
+
+        var entries = collection?.collectionDataList;
+        if (entries == null) return;
+
+        for (int i = 0; i < entries.Count; i++)
+        {
+            var entry = entries[i];
+            if (entry == null || string.IsNullOrEmpty(entry.CharacterId)) continue;
+            if (FindPrefab(entry.CharacterId) == null)
+            {
+                Debug.LogWarning($"[{nameof(CharacterOwnership)}] 도감 항목의 캐릭터 id '{entry.CharacterId}'가 대응표에 없어 해금 순서에서 뺐습니다.", this);
+                continue;
+            }
+            _unlockSteps.Add((entry.CharacterId, Mathf.Max(0, entry.RequiredSpawnEnergy)));
+        }
+
+        _unlockSteps.Sort((a, b) => a.requiredEnergy.CompareTo(b.requiredEnergy));
+    }
+
     /// <summary>이 캐릭터를 보유했는가(해금됐는가). 화면에 나와 있는지와는 별개다.</summary>
     public bool IsOwned(string id) => FindRecord(id) != null;
 
@@ -285,7 +355,7 @@ public class CharacterOwnership : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    // 구름의 캐릭터 소환이 막혀 있는 동안 에디터에서 캐릭터를 띄우는 길이다. 운영과 같은 해금 경로를 부르므로
+    // 스폰 기운을 모으지 않고 에디터에서 캐릭터를 띄우는 길이다. 운영과 같은 해금 경로를 부르므로
     // 저장·재시작 동작이 그대로 검증된다. 처음 상태로 되돌리려면 저장 파일을 지운다.
     [ContextMenu("테스트: 모든 캐릭터 해금")]
     private void EditorUnlockAll()

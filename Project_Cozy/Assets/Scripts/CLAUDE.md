@@ -11,7 +11,7 @@
 | `PerformanceSetting/` | 프레임 레이트·뷰포트 등 런타임 *정책*. OS 조작은 `Platform/`에 위임. | `Platform/`, `Interaction/`(월드 입력 잠금) — 자세한 컨벤션은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) |
 | `Animation/` | 스프라이트 애니메이션 등 순수 표현 컴포넌트. 게임 로직·OS를 모른다. | (없음) |
 | `Character/` | 캐릭터 단일 개체의 자율 거동·친밀도·시각. `BaseCharacterController` 단일 컴포넌트 + nested module(`StateModule`/`VisualModule`/`AffinityModule`/`ScaleModule`). | `Interaction/`, `Animation/`, `Platform/Input/` — 자세한 컨벤션은 [Character/CLAUDE.md](Character/CLAUDE.md) |
-| `Gameplay/` | 게임 로직. `Platform/`의 인프라를 *소비*한다 (변신 등은 채워지는 중, 구름은 지금 캐릭터를 소환하지 않는다). 하트·스폰 기운처럼 씬에 하나만 두는 시스템이 여기 산다. 캐릭터 보유·배치 기록은 Contents가 아니라 여기의 `CharacterOwnership`이 저장한다 — 기록대로 캐릭터를 등장시키는 주체라서다. | `Platform/`, `Animation/`, `Interaction/`, `PerformanceSetting/`(뷰포트·좌표 환산 — 배경·장식 배치) |
+| `Gameplay/` | 게임 로직. `Platform/`의 인프라를 *소비*한다 (변신 등은 채워지는 중, 구름은 누르면 다음 캐릭터를 해금한다). 하트·스폰 기운처럼 씬에 하나만 두는 시스템이 여기 산다. 캐릭터 보유·배치 기록은 Contents가 아니라 여기의 `CharacterOwnership`이 저장한다 — 기록대로 캐릭터를 등장시키는 주체라서다. | `Platform/`, `Animation/`, `Interaction/`, `PerformanceSetting/`(뷰포트·좌표 환산 — 배경·장식 배치) |
 | `Contents/` | 상점·도감 같은 *콘텐츠* 시스템. 무엇을 가졌고 무엇을 쓰는 중인지를 들고 파일에 기록한다. 정의(ScriptableObject·JSON)와 상태(저장 파일)를 분리한다. | `Platform/Data/`, `Gameplay/`, `PerformanceSetting/`(뷰포트 저장 시 장식 회수) |
 | `UI/` | HUD·메뉴 표시. TextMeshPro 사용. | 하위 레이어 자유 참조 (`Gameplay/`·`Character/`·`Interaction/`·`PerformanceSetting/`·`Platform/` 등) — UI는 최상위 표현층이라 하위를 향한 참조에 제한을 두지 않는다. 설정 UI가 창·뷰포트 정책(`PerformanceSetting/`의 `ViewportScreenSettings` 등)을 직접 제어하는 교차가 잦기 때문. |
 | `Examples/` | 기능 확인용 하니스. 본편 동작에 필요한 것을 여기 두지 않는다. | 자유 |
