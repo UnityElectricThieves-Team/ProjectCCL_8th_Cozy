@@ -18,8 +18,8 @@ public class HeartSystem : MonoBehaviour
 {
     public static HeartSystem Instance { get; private set; }
 
-    /// <summary>보유 하트의 최대치. 기획이 "최대 10억"으로 정했다. 넘는 적립은 버린다.</summary>
-    public const int MaxHearts = 1_000_000_000;
+    /// <summary>보유 하트의 최대치. 넘는 적립은 버린다. 값은 <see cref="GameBalance.MaxHearts"/>(기획 10억)에 있다.</summary>
+    public const int MaxHearts = GameBalance.MaxHearts;
 
     /// <summary>현재 보유 하트. 0에서 시작.</summary>
     public int CurrentHearts { get; private set; }

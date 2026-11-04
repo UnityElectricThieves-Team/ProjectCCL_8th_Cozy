@@ -18,7 +18,7 @@ using Assets.Scripts.Contents.CollectionSystem.Model;
 ///
 /// 캐릭터는 씬에 놓지 않는다. 화면에 나와 있는 캐릭터는 저장 기록이 정한다.
 /// 첫 실행(저장 파일 없음)에는 아무 캐릭터도 보유하지 않은 상태라 화면이 비어 있는 것이 정상이다.
-/// 예외로 Development Build는 시작할 때 모두 해금한다(결과물 공유용).
+/// Development Build도 같다 — 대신 해금 기운이 테스트 값(<see cref="GameBalance.TestUnlockEnergy"/>)이라 금방 열린다.
 /// 규약과 이유는 .claude/rules/unity/character-ownership.md.
 ///
 /// 기록이 바뀔 때마다 즉시 저장한다. 해금·배치는 가끔 일어나는 이산 이벤트라
@@ -89,13 +89,6 @@ public class CharacterOwnership : MonoBehaviour
         _data.records.RemoveAll(r => r == null || string.IsNullOrEmpty(r.id) || !seen.Add(r.id));
 
         LoadUnlockSteps();
-
-#if DEVELOPMENT_BUILD
-        // 결과물을 보여주는 Development Build에서는 스폰 기운을 모으지 않고도 캐릭터를 볼 수 있게 시작할 때 모두 해금한다.
-        // 그래서 이 빌드에서는 구름이 활성화되지 않는다. 뷰포트 확정 전이라 기록만 남고, 등장은 Start의 흐름이 맡는다.
-        // 에디터 Play에는 정의되지 않으므로 첫 실행(빈 화면) 확인은 그대로 된다.
-        UnlockAll();
-#endif
     }
 
     private void Start()
@@ -233,6 +226,15 @@ public class CharacterOwnership : MonoBehaviour
         return true;
     }
 
+    /// <summary>이 캐릭터가 실제로 해금되는 누적 스폰 기운. 테스트 값(<see cref="GameBalance.TestUnlockEnergy"/>)이 반영된다.
+    /// 도감의 미해금 안내가 이 값을 보여줘야 화면과 실제 해금이 갈라지지 않는다. 해금 순서에 없는 캐릭터면 fallback.</summary>
+    public int GetRequiredSpawnEnergy(string id, int fallback)
+    {
+        for (int i = 0; i < _unlockSteps.Count; i++)
+            if (_unlockSteps[i].id == id) return _unlockSteps[i].requiredEnergy;
+        return fallback;
+    }
+
     // 필요 기운 오름차순이라, 기운이 모자란 단계를 만나면 뒤는 볼 필요가 없다.
     private string FindNextUnlockable(int spawnEnergy)
     {
@@ -277,6 +279,12 @@ public class CharacterOwnership : MonoBehaviour
         }
 
         _unlockSteps.Sort((a, b) => a.requiredEnergy.CompareTo(b.requiredEnergy));
+
+        // 테스트 값이면 순서는 도감 정의대로 두고 기운만 갈아 끼운다. 목록보다 캐릭터가 많으면 남는 캐릭터는 마지막 값.
+        var testEnergy = GameBalance.TestUnlockEnergy;
+        if (testEnergy == null || testEnergy.Length == 0) return;
+        for (int i = 0; i < _unlockSteps.Count; i++)
+            _unlockSteps[i] = (_unlockSteps[i].id, testEnergy[Mathf.Min(i, testEnergy.Length - 1)]);
     }
 
     /// <summary>이 캐릭터를 보유했는가(해금됐는가). 화면에 나와 있는지와는 별개다.</summary>
@@ -308,7 +316,6 @@ public class CharacterOwnership : MonoBehaviour
     /// 게임 초기화(<see cref="GameProgressReset"/>). 모든 기록(해금·배치·친밀도)을 지우고 저장한 뒤,
     /// 화면에 나와 있는 캐릭터를 모두 내린다. 친밀도를 줄이는 경로를 만들지 않는다는 규약
     /// (.claude/rules/unity/character-affinity.md)의 예외로, 사용자가 확인 팝업에서 직접 고른 경우에만 불린다.
-    /// Development Build는 다음 실행 때 다시 모두 해금한다.
     /// </summary>
     public void ResetProgress()
     {
@@ -346,6 +353,7 @@ public class CharacterOwnership : MonoBehaviour
         }
     }
 
+#if UNITY_EDITOR
     // 대응표의 모든 캐릭터를 해금한다. 이미 보유·배치된 캐릭터는 Unlock이 건너뛰므로 여러 번 불러도 늘지 않는다.
     private void UnlockAll()
     {
@@ -354,7 +362,6 @@ public class CharacterOwnership : MonoBehaviour
             if (_characterPrefabs[i] != null) Unlock(_characterPrefabs[i].id);
     }
 
-#if UNITY_EDITOR
     // 스폰 기운을 모으지 않고 에디터에서 캐릭터를 띄우는 길이다. 운영과 같은 해금 경로를 부르므로
     // 저장·재시작 동작이 그대로 검증된다. 처음 상태로 되돌리려면 저장 파일을 지운다.
     [ContextMenu("테스트: 모든 캐릭터 해금")]

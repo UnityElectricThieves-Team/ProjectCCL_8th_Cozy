@@ -27,11 +27,6 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     [Tooltip("아래 가속도. FallState가 매 프레임 -gravity*dt로 적용.")]
     [SerializeField] private float _gravity = 1.296f;
 
-    [Header("Form")]
-    [Tooltip("소녀로 변신한 뒤 이 시간(초)이 지나면 스스로 동물로 돌아간다. 기획은 2시간(7200초).\n" +
-             "잠든 동안처럼 변신을 받지 않는 상태면, 받을 수 있게 되는 순간 돌아간다.")]
-    [SerializeField, Min(1f)] private float _girlFormSeconds = 7200f;
-
     [Header("Modules")]
     [SerializeField] private StateModule _state = new StateModule();
     [SerializeField] private VisualModule _visual = new VisualModule();
@@ -134,9 +129,9 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         _visual.Tick(dt);
         _affinity.TickAwake(dt, _state.CurrentStateId == CharacterState.Sleep);
 
-        // 요청이 거부되면(수면·낙하 등) 다음 프레임에 다시 요청한다. 받아들여지면 변신 중 잠금으로 조용해지고,
-        // 폼이 동물로 바뀌는 순간 이 조건이 꺼진다.
-        if (_visual.CurrentForm == CharacterForm.Girl && Time.time - _girlSince >= _girlFormSeconds)
+        // 소녀 유지 시간이 지나면 동물로 돌아간다(시간은 GameBalance). 요청이 거부되면(수면·낙하 등) 다음 프레임에
+        // 다시 요청한다. 받아들여지면 변신 중 잠금으로 조용해지고, 폼이 동물로 바뀌는 순간 이 조건이 꺼진다.
+        if (_visual.CurrentForm == CharacterForm.Girl && Time.time - _girlSince >= GameBalance.GirlFormSeconds)
             RequestRevertToAnimal();
     }
 
