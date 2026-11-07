@@ -2452,7 +2452,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2497683381313822024, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -468
+      value: -418
       objectReference: {fileID: 0}
     - target: {fileID: 3017649737032538804, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
       propertyPath: m_AnchorMax.y
@@ -2535,6 +2535,26 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4523871459075310849, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718203956127748392, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718203956127748392, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718203956127748392, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718203956127748392, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4718203956127748392, guid: a3ce0478220f563408f7323abb5e6036, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
@@ -3088,13 +3108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 093ffe8cef36f7d4eb4105ef7cd868b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BackgroundSystem
-  _availableBackgrounds:
-  - {fileID: 11400000, guid: e39d5421ed7a46143a882923064f10c9, type: 2}
-  - {fileID: 11400000, guid: 6aeb4c969993ad240b38b396f1724705, type: 2}
-  - {fileID: 11400000, guid: f4bfebf1e7d4c2644a33ca3261d26fe0, type: 2}
-  - {fileID: 11400000, guid: 3f4f0ffe89a45184e9f75aec548d231b, type: 2}
-  - {fileID: 11400000, guid: dc5f48c872f54f14faa4befc578350eb, type: 2}
-  _heightBasePx: 400
+  _catalog: {fileID: 11400000, guid: 6f4ef1b6f72108e4b888c03ab505198a, type: 2}
 --- !u!4 &1016305392
 Transform:
   m_ObjectHideFlags: 0
@@ -3334,14 +3348,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c703e7c4c1e79aa4ca20e92d789b4bf0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopSystem
-  _availableDecorations:
-  - {fileID: 11400000, guid: 4196878441c755b49b33e447c8fd35dd, type: 2}
-  - {fileID: 11400000, guid: c113c621cc54e8b4083cda366133312b, type: 2}
-  - {fileID: 11400000, guid: fc19bc79f2691424f9d1bb87dbc9f700, type: 2}
-  - {fileID: 11400000, guid: 5fd6dbf9344fccc41a5effa68b2730eb, type: 2}
-  - {fileID: 11400000, guid: df86d8beca335ec49aff46078bef5305, type: 2}
-  - {fileID: 11400000, guid: 89edf458b3f76b24f96036d162ead986, type: 2}
-  - {fileID: 11400000, guid: 82e148a98af8b6343abf631c8a77196e, type: 2}
+  _catalog: {fileID: 11400000, guid: 6f4ef1b6f72108e4b888c03ab505198a, type: 2}
 --- !u!1001 &1448072130
 PrefabInstance:
   m_ObjectHideFlags: 0
