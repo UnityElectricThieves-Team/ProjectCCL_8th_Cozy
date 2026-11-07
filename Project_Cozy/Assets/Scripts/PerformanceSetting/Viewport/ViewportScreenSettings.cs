@@ -393,7 +393,7 @@ public class ViewportScreenSettings : MonoBehaviour
         FrameCamera();
     }
 
-    // 배율(DPI)이 다른 모니터로 옮기면 Unity가 창 크기를 다시 잡을 수 있다(MultiMonitorPreparation.md §4.1, 미확인).
+    // 배율(DPI)이 다른 모니터로 옮기면 Unity가 창 크기를 다시 잡을 수 있다(MultiMonitorPreparation.md §4, 미확인).
     // 확인을 기다리지 않고, 옮긴 뒤 몇 프레임 동안 창이 목표와 다르면 한 번 더 맞춘다. 옮길 때만 도는 비용이다.
     private IEnumerator VerifyWindowRect()
     {

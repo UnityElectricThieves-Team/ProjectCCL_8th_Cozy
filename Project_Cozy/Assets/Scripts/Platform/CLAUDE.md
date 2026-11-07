@@ -29,7 +29,7 @@ Windows 로그인 시 자동 실행.
 ### Display/
 모니터 목록.
 
-- `MonitorList.cs` — 연결된 모니터(장치 이름·모니터 rect·작업 영역·주 모니터 여부)를 `EnumDisplayMonitors`로 읽는 static 클래스. 주 모니터가 0번이고 나머지는 위치 순서다. 언제 부를지·어느 모니터를 쓸지는 모른다(게임 쪽 적용자 `Gameplay/MonitorApplier`). 에디터에서는 지금 화면 하나만 돌려준다. 열거는 드롭다운을 만들 때와 다시 맞출 때만 하고 상주 확인은 하지 않는다
+- `MonitorList.cs` — 연결된 모니터(장치 이름·모니터 rect·작업 영역·주 모니터 여부)를 `EnumDisplayMonitors`로 읽는 static 클래스. 주 모니터가 0번이고 나머지는 위치 순서다. 언제 부를지·어느 모니터를 쓸지는 모른다(게임 쪽 적용자 `Gameplay/MonitorApplier`). 에디터에서는 지금 화면 하나만 돌려준다. 열거는 드롭다운을 만들 때와 다시 맞출 때만 하고 상주 확인은 하지 않는다. 실행 중 모니터 분리·재연결 감지(`WM_DISPLAYCHANGE` 등)는 일부러 두지 않았다(`Docs/Development/MultiMonitorPreparation.md` D9)
 
 ### Input/
 포커스 상태와 무관한 입력 수집.
@@ -48,7 +48,3 @@ Windows 로그인 시 자동 실행.
 - **창 동작 정지는 소유자별로 걸고 푼다.** `WindowManager`의 클릭 통과 정지와 가장자리 리사이즈 정지는 `Acquire…Suspend(owner)` / `Release…Suspend(owner)`로 쓴다. owner는 보통 호출하는 컴포넌트 자신(`this`)이다. 여러 곳(뷰포트 편집, 장식 배치, 구름 드래그 등)이 동시에 걸 수 있어서, 한쪽이 풀어도 다른 쪽이 건 정지는 유지되고 모든 소유자가 풀어야 재개된다. 개수 카운터가 아니라 소유자 집합인 이유는 같은 owner의 중복 걸기·중복 풀기를 한 번으로 쳐서 짝이 어긋나도 영구히 꼬이지 않게 하기 위해서다. 정지를 건 컴포넌트는 `OnDisable`에서도 반드시 자기 것을 푼다 — 클릭 통과 정지가 남으면 창이 바탕화면의 모든 클릭을 흡수하고, 사용자에게는 복구 수단이 없다. 리사이즈 쪽 집합은 메인 스레드에서만 고치고, WndProc은 "비었는가"를 미러한 volatile bool만 읽는다.
 - **순수 로직은 `UnityEngine` 의존 없이.** `HitTestCalculator`처럼 좌표 계산만 하는 헬퍼는 `using UnityEngine`을 빼서 EditMode 테스트가 가능하게.
 - **Namespace 미사용.** 팀 컨벤션에 따라 글로벌 namespace 유지.
-
-## 추후 후보 (지금은 만들지 않음)
-
-- `Display/`의 모니터 분리·재연결 감지 — WndProc 메시지냐 저빈도 확인이냐가 정해지지 않았다(`Docs/Development/MultiMonitorPreparation.md` D9)

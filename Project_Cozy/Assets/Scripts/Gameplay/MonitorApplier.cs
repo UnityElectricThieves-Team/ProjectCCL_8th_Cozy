@@ -13,7 +13,7 @@ using UnityEngine;
 /// 매니저가 저장값으로 되돌려 <see cref="SettingsManager.GraphicsChanged"/>가 울리고, 여기서 원래 모니터로 돌려놓는다.
 ///
 /// 에디터에서는 창을 옮길 수 없고 베이스 공간이 Game 뷰 크기를 따라야 해서 정책에 넣지 않는다.
-/// 모니터 분리·재연결을 스스로 알아채지는 않는다(감지 방법 D9 미정). "화면 다시 맞추기"가 <see cref="Refresh"/>를 거쳐 다시 찾는다.
+/// 모니터 분리·재연결을 스스로 알아채지는 않는다(D9 — 드문 일이라 상주 비용을 들이지 않는다). "화면 다시 맞추기"가 <see cref="Refresh"/>를 거쳐 다시 찾는다.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class MonitorApplier : MonoBehaviour

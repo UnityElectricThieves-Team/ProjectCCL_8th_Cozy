@@ -6,7 +6,7 @@
 
 | 폴더 | 책임 | 주로 참조하는 대상 |
 |---|---|---|
-| `Platform/` | OS 의존 인프라 — borderless·Always-on-Top 창, 비포커스 키보드 훅, 시작 프로그램 등록, Win32 / DwmApi 호출. 게임 로직을 모른다. | (없음) — 자세한 컨벤션은 [Platform/CLAUDE.md](Platform/CLAUDE.md) |
+| `Platform/` | OS 의존 인프라 — borderless·Always-on-Top 창, 모니터 목록, 비포커스 키보드 훅, 시작 프로그램 등록, Win32 / DwmApi 호출. 게임 로직을 모른다. | (없음) — 자세한 컨벤션은 [Platform/CLAUDE.md](Platform/CLAUDE.md) |
 | `Interaction/` | 마우스 입력 라우팅 + 인터랙터블 인터페이스 계약. 게임 객체가 `IHoverable` / `IClickable` / `IRightClickable` / `IShiftRightClickable`을 구현하면 매니저가 자동 라우팅. | `Platform/`(드래그 중 창 클릭 통과 정지) — 자세한 컨벤션은 [Interaction/CLAUDE.md](Interaction/CLAUDE.md) |
 | `PerformanceSetting/` | 프레임 레이트·뷰포트 등 런타임 *정책*. OS 조작은 `Platform/`에 위임. | `Platform/`, `Interaction/`(월드 입력 잠금) — 자세한 컨벤션은 [PerformanceSetting/CLAUDE.md](PerformanceSetting/CLAUDE.md) |
 | `Animation/` | 스프라이트 애니메이션 등 순수 표현 컴포넌트. 게임 로직·OS를 모른다. | (없음) |
@@ -16,7 +16,7 @@
 | `UI/` | HUD·메뉴 표시. TextMeshPro 사용. | 하위 레이어 자유 참조 (`Gameplay/`·`Character/`·`Interaction/`·`PerformanceSetting/`·`Platform/` 등) — UI는 최상위 표현층이라 하위를 향한 참조에 제한을 두지 않는다. 설정 UI가 창·뷰포트 정책(`PerformanceSetting/`의 `ViewportScreenSettings` 등)을 직접 제어하는 교차가 잦기 때문. |
 | `Examples/` | 기능 확인용 하니스. 본편 동작에 필요한 것을 여기 두지 않는다. | 자유 |
 
-> 새 시스템(다중 모니터 등)이 구현되면 이 표에 위치를 같이 적는다.
+> 새 시스템이 구현되면 이 표에 위치를 같이 적는다.
 
 ## 폴더별 진입점
 
