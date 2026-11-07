@@ -45,7 +45,7 @@
 
 **새 장식 프리팹에는 콜라이더를 달지 않습니다** — 장식은 배경처럼 평소 클릭을 바탕화면으로 통과시켜야 하는 오브젝트라 위 판정 규약의 대상이 아닙니다. 콜라이더가 있으면 그 자리의 바탕화면이 눌리지 않습니다. 이유와 나머지 장식 규약은 [.claude/rules/unity/decoration-placement.md](.claude/rules/unity/decoration-placement.md)에 있고, 새 장식 프리팹을 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다.
 
-**새 배경 스프라이트는 Mesh Type을 Full Rect, pivot을 Center로 임포트합니다** — 배경은 Tiled 드로우 모드로 가로 반복하므로 Tight 메시로는 타일이 깨집니다. 나머지 배경 규약은 [.claude/rules/unity/background.md](.claude/rules/unity/background.md)에 있고, 같은 이유로 여기 한 줄 둡니다.
+**새 배경은 아트가 만든 배경 프리팹을 그대로 상품에 연결합니다** — 개발 쪽에서 크기나 타일 개수를 다시 맞추지 않습니다. 그림의 아래 끝을 뷰포트 아래 변에 맞추고, 뷰포트 밖은 마스크로 자릅니다. 높이 표준은 500px이지만 배경마다 조금 달라도 됩니다. 나머지 배경 규약은 [.claude/rules/unity/background.md](.claude/rules/unity/background.md)에 있고, 같은 이유로 여기 한 줄 둡니다.
 
 **월드의 px 값(뷰포트·배경 높이·최소 크기 등)은 마스터 캔버스 기준 px이고, 화면에서는 작업 영역 폭 비율로 줄어듭니다** — UI의 CanvasScaler와 같은 배율입니다. 그래픽 탭의 전체 크기(줌)를 키우면 월드에만 그 배율이 더 곱해지고, UI는 따라가지 않습니다. 새로 px 크기 필드를 갖는 소비자를 만들 때는 [.claude/rules/unity/viewport-coordinates.md](.claude/rules/unity/viewport-coordinates.md)를 봅니다. 새 파일에는 발화할 규칙이 없어 여기 한 줄 둡니다. 프리팹의 월드 위치값은 ×100 하면 마스터 캔버스 px입니다.
 
@@ -103,7 +103,7 @@
 - `unity/character-shadow.md` — 캐릭터 그림자 규약. `ShadowProjector`·캐릭터 프리팹을 열 때
 - `unity/character-state-machine.md` — 캐릭터 상태 전이 확정안. **캐릭터 행동 로직의 유일한 본.** Character 스크립트·캐릭터 프리팹·Animator 자산을 열 때
 - `unity/interaction-hit.md` — 월드 오브젝트의 마우스 판정 규약(판정은 그림 외곽선에서, 콜라이더와 픽셀 검사의 역할 분담, 콜라이더 위치). Interaction 스크립트·`CloudController`·캐릭터·구름 프리팹·캐릭터 그림 임포트 설정을 열 때
-- `unity/background.md` — 배경 띠 규약(뷰포트 아래 변 고정, 고정 높이, Tiled 반복, 콜라이더 금지). 배경 스크립트·`Background.prefab`·배경 아트 임포트 설정을 열 때
+- `unity/background.md` — 배경 규약(아트 프리팹을 그대로 씀, 그림 아래 끝을 뷰포트 아래 변에, 뷰포트 밖은 마스크로 자름, 콜라이더 금지). 배경 스크립트·`Background.prefab`·배경 프리팹·배경 아트를 열 때
 - `unity/viewport-coordinates.md` — 월드 좌표 단위 규약(베이스 공간 px = 마스터 캔버스 기준 px, 폭 기준 배율, 월드 PPU 상수 100·앵커 불변, 저장 단위). 뷰포트·배경·장식 스크립트를 열 때
 - `unity/decoration-placement.md` — 장식 배치 모드(설치·이동·회수·제거)의 공통 골격, 설치 가능 판정과 색, 앞뒤 순서, 구매 시점과 저장, 장식에 콜라이더를 달지 않는 이유, 인벤토리 갱신 시점. 상점·인벤토리·장식 스크립트, 장식 프리팹을 열 때
 - `unity/audio.md` — 오디오 규약(음원은 Assets에·StreamingAssets 아님, `Assets/Audio/BGM/`의 Streaming 프리셋, 곡 목록 `BgmCatalog`가 드롭다운 이름·순서의 정본, 믹서 구성, 볼륨만 손 뗄 때 저장하는 이유). 오디오 폴더·오디오 스크립트·설정 스크립트·Preset Manager 설정을 열 때

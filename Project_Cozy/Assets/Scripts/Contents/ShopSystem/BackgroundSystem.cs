@@ -7,7 +7,7 @@ using UnityEngine;
 /// 배경 아이템의 런타임 상태를 들고 있는 씬 단일 시스템. "무엇을 샀는가"(구매 집합)와
 /// "지금 어느 배경을 쓰는가"(활성 배경 하나)를 관리하고, 활성 배경이 바뀔 때 이벤트로 방송한다.
 ///
-/// 이 시스템은 <b>상태와 이벤트만</b> 책임진다 — 실제로 배경을 화면에 그리는 것은 <see cref="BackgroundStrip"/>이고,
+/// 이 시스템은 <b>상태와 이벤트만</b> 책임진다 — 실제로 배경을 화면에 까는 것은 <see cref="BackgroundStage"/>이고,
 /// 그 사이를 <see cref="BackgroundBinder"/>가 잇는다(<see cref="ActiveBackgroundChanged"/> 구독 + 시작 시 <see cref="ActiveBackground"/> 읽기).
 ///
 /// Figma 배경 규칙(기획):
@@ -23,21 +23,16 @@ public sealed class BackgroundSystem : MonoBehaviour
 {
     public static BackgroundSystem Instance { get; private set; }
 
-    [Tooltip("게임에 존재하는 모든 배경. 여기 늘어놓은 순서는 상점 진열 순서와 무관하다 — 진열 순서는 상점이 따로 정한다.")]
-    [SerializeField] private ShopItemDefinition[] _availableBackgrounds;
-
-    [Tooltip("배경 띠 높이(베이스 공간 px). 배경 높이를 정하는 유일한 지점이며, 배경 프리팹은 이 값을 받아 쓴다. 개발자가 임의로 정한 자리표시 값이다.")]
-    [SerializeField] private int _heightBasePx = 400;
-
-    /// <summary>배경 띠 높이(베이스 공간 px). 값의 소유자는 이 인스펙터 필드 하나다.</summary>
-    public int HeightBasePx => _heightBasePx;
+    [Tooltip("게임에 존재하는 모든 상품 목록. 배경은 이 목록의 backgrounds를 쓴다.")]
+    [SerializeField] private ShopCatalog _catalog;
 
     /// <summary>
     /// 게임에 존재하는 모든 배경 목록. 상점이 이걸 받아 자기 규칙대로 정렬해 진열한다.
     /// 카탈로그를 상점 패널이 아니라 이 시스템이 드는 이유는, 배경 상태를 들고 있는 쪽이
     /// "어떤 배경들이 있는가"도 알아야 하기 때문이다. 상점을 한 번도 열지 않아도 목록이 존재해야 한다.
     /// </summary>
-    public IReadOnlyList<ShopItemDefinition> AvailableBackgrounds => _availableBackgrounds;
+    public IReadOnlyList<ShopItemDefinition> AvailableBackgrounds =>
+        _catalog != null && _catalog.backgrounds != null ? _catalog.backgrounds : Array.Empty<ShopItemDefinition>();
 
     private BackgroundFileFormat _data = new();
 
@@ -74,21 +69,6 @@ public sealed class BackgroundSystem : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
-#if UNITY_EDITOR
-    // 배경 상품인데 실제로 깔릴 스프라이트가 비어 있으면, 사용을 눌러도 화면에 아무것도 안 그려지고
-    // 어디서도 에러가 나지 않는다. 에셋을 새로 만들 때 빠뜨린 것을 여기서 시끄럽게 알린다.
-    private void OnValidate()
-    {
-        if (_availableBackgrounds == null) return;
-        for (int i = 0; i < _availableBackgrounds.Length; i++)
-        {
-            var item = _availableBackgrounds[i];
-            if (item != null && item.backgroundSprite == null)
-                Debug.LogWarning($"[{nameof(BackgroundSystem)}] 배경 '{item.id}'의 backgroundSprite가 비어 있음 — 사용해도 화면에 아무것도 안 그려진다.", item);
-        }
-    }
-#endif
-
     /// <summary>이 배경을 이미 샀는가.</summary>
     public bool IsOwned(string id) => _data.ownedIds.Contains(id);
 
@@ -103,10 +83,11 @@ public sealed class BackgroundSystem : MonoBehaviour
     {
         get
         {
-            if (string.IsNullOrEmpty(_data.activeId) || _availableBackgrounds == null) return null;
-            for (int i = 0; i < _availableBackgrounds.Length; i++)
+            if (string.IsNullOrEmpty(_data.activeId)) return null;
+            var backgrounds = AvailableBackgrounds;
+            for (int i = 0; i < backgrounds.Count; i++)
             {
-                var item = _availableBackgrounds[i];
+                var item = backgrounds[i];
                 if (item != null && item.id == _data.activeId) return item;
             }
             return null;
