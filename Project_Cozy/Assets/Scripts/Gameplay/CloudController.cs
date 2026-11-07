@@ -4,13 +4,14 @@ using UnityEngine.Serialization;
 /// <summary>
 /// 구름(스폰 포인트)의 중앙 컨트롤러 — <see cref="BaseCharacterController"/>에 대응하는 구름 버전.
 ///
-/// - 누적 스폰 기운(<see cref="SpawnPointManager.CumulativeEnergy"/>)이 <see cref="_threshold"/> 이상이면 Activated,
+/// - 누적 스폰 기운(<see cref="SpawnPointManager.CumulativeEnergy"/>)으로 해금할 수 있는 캐릭터가 남아 있으면 Activated,
 ///   아니면 Idle인 2상태 머신. 상태가 바뀔 때만 Animator의 Int 파라미터(<see cref="StateParameter"/>)를 갱신한다
 ///   (Character의 VisualModule과 같은 방식이되 상태 클래스 없이 단순화).
-/// - 클릭(드래그가 아니었을 때) 시 캐릭터 1개 스폰을 요청한다. 생성·동시존재 캡 판정은 <see cref="CharacterManager"/>에 위임한다.
-///   스폰해도 기운은 차감하지 않는다.
-/// - 지금 Cloud.prefab은 <see cref="_characterPrefab"/>을 비워 두어 캐릭터를 소환하지 않는다. 이유는
-///   .claude/rules/unity/character-ownership.md의 구름 항목.
+/// - 클릭(드래그가 아니었을 때) 시 다음 캐릭터 하나를 해금한다. 어떤 캐릭터가 얼마에 열리는지, 기록과 등장은
+///   <see cref="CharacterOwnership"/>이 맡는다. 구름은 "지금 눌러도 되는가"와 "눌렸다"만 안다.
+///   해금해도 기운은 차감하지 않는다.
+/// - 프리팹을 직접 스폰하지 않는다. 기록을 거치지 않은 캐릭터는 재시작하면 사라지고, 1종류당 1개라는 제약도 깨진다
+///   (.claude/rules/unity/character-ownership.md의 구름 항목).
 ///
 /// 같은 GameObject에 <see cref="Collider2D"/>가 있어야 <see cref="InputInteractionManager"/>가 클릭을 라우팅한다.
 /// 같은 GameObject에 <see cref="DraggableObject2D"/>가 있으면 드래그가 아니었을 때(mouse up 시점)에만 스폰한다.
@@ -29,24 +30,13 @@ public sealed class CloudController : MonoBehaviour, IClickable
     [Tooltip("스폰 기운 소스(SpawnPointManager). 비우면 Awake에서 같은 GameObject에서 탐색.")]
     [SerializeField, FormerlySerializedAs("_counter")] private SpawnPointManager _spawnPoint;
 
-    [Header("Spawn")]
-    [Tooltip("누적 기운이 이 값 이상이어야 Activated가 되고 클릭 스폰이 가능하다.")]
-    [SerializeField, Min(1)] private int _threshold = 100;
-    [Tooltip("클릭마다 1개 생성할 캐릭터 프리팹.")]
-    [SerializeField] private GameObject _characterPrefab;
-    [Tooltip("스폰 시 부모 Transform (선택). 비우면 Hierarchy 루트에 스폰.")]
-    [SerializeField] private Transform _spawnParent;
-    [Tooltip("스폰 위치 = 구름 위치 + Random(Min..Max). Y는 위쪽(+)이 자연 낙하에 적합.")]
-    [SerializeField] private Vector2 _spawnOffsetMin = new Vector2(-0.24f, 0.48f);
-    [SerializeField] private Vector2 _spawnOffsetMax = new Vector2(0.24f, 0.96f);
-
     // Animator 파라미터 이름 — BaseCloudAnimatorController의 Int 파라미터 이름과 글자까지 일치해야 한다.
     private const string StateParameter = "CloudState";
 
     private int _stateHash;
     private CloudState _current;
     private DraggableObject2D _draggable;
-    private bool _spawnPending;
+    private bool _unlockPending;
 
     private SpriteRenderer _renderer;               // 뷰포트 안에 넣을 그림(Visual 자식)
     private ViewportScreenSettings _viewportSettings;
@@ -135,46 +125,40 @@ public sealed class CloudController : MonoBehaviour, IClickable
         if (desired != _current) ApplyState(desired);
     }
 
-    // 스폰 가능(=Activated) 여부. 누적값은 줄지 않으므로 한 번 넘으면 계속 Activated.
-    private bool IsReady() => _spawnPoint != null && _spawnPoint.CumulativeEnergy >= _threshold;
+    // 해금 가능(=Activated) 여부. 눌러서 해금하면 다음 단계의 기운이 찰 때까지 Idle로 돌아간다.
+    private bool IsReady() => _spawnPoint != null && CharacterOwnership.Instance != null
+        && CharacterOwnership.Instance.HasUnlockable(_spawnPoint.CumulativeEnergy);
 
-    /// <summary>현재 Activated(스폰 가능) 상태인가. 디버그 표시 등 외부 노출용.</summary>
+    /// <summary>현재 Activated(해금 가능) 상태인가. 디버그 표시 등 외부 노출용.</summary>
     public bool IsActivated => IsReady();
 
-    // ===== 클릭 → 스폰 =====
+    // ===== 클릭 → 해금 =====
 
     public void OnClick()
     {
-        // 드래그 컴포넌트가 있으면 드래그/클릭 구분이 끝나는 mouse up(OnPressEnded)에서 스폰.
+        // 드래그 컴포넌트가 있으면 드래그/클릭 구분이 끝나는 mouse up(OnPressEnded)에서 해금.
         if (_draggable != null)
         {
-            _spawnPending = true;
+            _unlockPending = true;
             return;
         }
-        RequestSpawn();
+        RequestUnlock();
     }
 
     private void OnPressEnded(bool wasDrag)
     {
-        if (!_spawnPending) return;
-        _spawnPending = false;
+        if (!_unlockPending) return;
+        _unlockPending = false;
         if (wasDrag) return;
-        RequestSpawn();
+        RequestUnlock();
     }
 
-    /// <summary>누적 기운이 임계값 이상이고 캡에 여유가 있으면 캐릭터 1개를 스폰한다.</summary>
-    private void RequestSpawn()
+    /// <summary>해금할 수 있는 캐릭터가 있으면 하나를 해금한다. 없으면(Idle) 아무 일도 하지 않는다.
+    /// 해금된 캐릭터는 CharacterOwnership이 뷰포트 안 랜덤 위치에서 떨어뜨린다.</summary>
+    private void RequestUnlock()
     {
-        if (_characterPrefab == null || CharacterManager.Instance == null) return;
-        if (!IsReady()) return;
-
-        var offset = new Vector3(
-            Random.Range(_spawnOffsetMin.x, _spawnOffsetMax.x),
-            Random.Range(_spawnOffsetMin.y, _spawnOffsetMax.y),
-            0f);
-
-        // 생성·캡 판정은 CharacterManager에 위임. 캡에 닿으면 생성하지 않는다.
-        CharacterManager.Instance.Spawn(_characterPrefab, transform.position + offset, _spawnParent);
+        if (_spawnPoint == null || CharacterOwnership.Instance == null) return;
+        CharacterOwnership.Instance.TryUnlockNext(_spawnPoint.CumulativeEnergy);
     }
 
     private void ApplyState(CloudState next)

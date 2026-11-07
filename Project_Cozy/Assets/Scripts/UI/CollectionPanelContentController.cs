@@ -161,7 +161,13 @@ public sealed class CollectionPanelContentController : MonoBehaviour
         if (!unlocked)
         {
             if (_lockedMessage != null)
-                LocalizationManager.SetText(_lockedMessage, "UICollection.locked_hint", ("ENERGY", entry.RequiredSpawnEnergy));
+            {
+                // 실제 해금 기준은 CharacterOwnership이 든다(테스트 빌드에서는 정의 값과 다르다).
+                var energy = _ownership != null
+                    ? _ownership.GetRequiredSpawnEnergy(entry.CharacterId, entry.RequiredSpawnEnergy)
+                    : entry.RequiredSpawnEnergy;
+                LocalizationManager.SetText(_lockedMessage, "UICollection.locked_hint", ("ENERGY", energy));
+            }
             return;
         }
 

@@ -18,6 +18,9 @@ public class HeartSystem : MonoBehaviour
 {
     public static HeartSystem Instance { get; private set; }
 
+    /// <summary>보유 하트의 최대치. 넘는 적립은 버린다. 값은 <see cref="GameBalance.MaxHearts"/>(기획 10억)에 있다.</summary>
+    public const int MaxHearts = GameBalance.MaxHearts;
+
     /// <summary>현재 보유 하트. 0에서 시작.</summary>
     public int CurrentHearts { get; private set; }
 
@@ -35,7 +38,7 @@ public class HeartSystem : MonoBehaviour
 
         // 복원은 이벤트를 쏘지 않는다. 이 시점엔 구독자가 아직 없고(HeartSystem은 실행 순서 -100),
         // 표시 컴포넌트는 자기 OnEnable에서 CurrentHearts를 직접 읽어 초기값을 채운다.
-        CurrentHearts = UserDataSaveIO.Load<HeartFileFormat>(GameDataPaths.Hearts).hearts;
+        CurrentHearts = Mathf.Clamp(UserDataSaveIO.Load<HeartFileFormat>(GameDataPaths.Hearts).hearts, 0, MaxHearts);
     }
 
     private void OnDestroy()
@@ -43,11 +46,13 @@ public class HeartSystem : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
-    /// <summary>하트 적립. 0 이하는 무시(적립은 실패 시나리오가 없어 반환값 없음).</summary>
+    /// <summary>하트 적립. 0 이하는 무시하고, <see cref="MaxHearts"/>에서 멈춘다(적립은 실패 시나리오가 없어 반환값 없음).</summary>
     public void Add(int amount)
     {
         if (amount <= 0) return;
-        CurrentHearts += amount;
+        if (CurrentHearts >= MaxHearts) return;
+        // long으로 더한다 — int끼리 더하면 상한 근처에서 넘쳐 음수가 된다.
+        CurrentHearts = (int)Math.Min((long)CurrentHearts + amount, MaxHearts);
         HeartsChanged?.Invoke(CurrentHearts);
         Save();
     }

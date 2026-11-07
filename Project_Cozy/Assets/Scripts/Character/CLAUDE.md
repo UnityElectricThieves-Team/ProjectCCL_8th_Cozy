@@ -27,7 +27,7 @@
 ├─ SpritePhysicsShapeSync    (지금 프레임의 그림 외곽선을 콜라이더에 옮겨 담음)
 ├─ OpaqueHoverable           (IHoverable, 알파 검사 후 UnityEvent 발사 + 지금 호버 중인지 조회)
 ├─ HoldClickEvent            (좌클릭을 "누른 순간"과 "2초 도달"로 갈라 UnityEvent 발사)
-└─ CharacterInteractionRelay (IRightClickable — 우클릭 변신만 위임)
+└─ CharacterInteractionRelay (IRightClickable·IShiftRightClickable — 변신 두 방향만 위임)
 
 자식 Shadow GameObject
 └─ ShadowProjector           (바닥을 향해 판정해 그림자를 놓고, 멀어지면 폭을 줄인다)
@@ -52,13 +52,13 @@ Int 값은 [BaseCharacterAnimatorController.controller](../../Assets/Animations/
 
 ## 현재 들어 있는 것
 
-- **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`) + 공개 메서드(`OnPetInput`/`Request{Sleep,WakeUp,Fall,Pet,Grab,Transform}`). 소녀 변신 금지와 캐릭터 크기는 거주 영역처럼 밖에서 주입받는다(`SetGirlTransformBanned`·`SetUserScale` — `CharacterManager`가 유저 설정을 읽어 건다).
+- **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`) + 공개 메서드(`OnPetInput`/`Request{Sleep,WakeUp,Fall,Pet,Grab,Transform}`). 소녀 변신 금지와 캐릭터 크기는 거주 영역처럼 밖에서 주입받는다(`SetGirlTransformBanned`·`SetUserScale` — `CharacterManager`가 유저 설정을 읽어 건다). 소녀는 정해진 시간(기획 2시간)이 지나면 스스로 동물로 돌아간다. 폼은 저장하지 않아서 재시작하면 언제나 동물이다 — 기획이 "2시간 전에 껐다 켜도 동물로 복귀"로 정해 둔 것이 이것으로 성립하니, 폼을 저장하게 바꾸면 이 규칙을 따로 만들어야 한다.
 - **`CharacterState.cs`** — 통합 13-state enum + `CharacterForm` enum(Animal/Girl).
 - **`IStateOwner.cs`** — State 클래스가 의존할 owner 인터페이스. 정책 수치·물리·지면 판정·ChangeState API 노출. 지면 *높이*는 내주지 않는다 — 판정은 `IsFootOnGround` 하나로 모여 있다. 걷기 목적지용으로 거주 영역의 *가로* 범위(`TryGetWalkRange`)만 내주는 것도 같은 이유다. 사각형을 통째로 주면 아래 변이 곧 지면 높이가 되어 버린다.
-- **`CharacterInteractionRelay.cs`** — 자식 Visual에 부착, `IRightClickable`만 책임 (우클릭 → 변신 토글). `IHoverable`은 `OpaqueHoverable`에 양보하고, 좌클릭은 매니저 라우팅을 쓰지 않는다 — `HoldClickEvent`가 자체 폴링으로 누른 시간을 재야 하기 때문이다.
+- **`CharacterInteractionRelay.cs`** — 자식 Visual에 부착, 변신 두 방향만 책임 (우클릭 → 동물에서 소녀로, Shift+우클릭 → 소녀에서 동물로). 기획이 방향마다 입력을 따로 정했다. 반대 방향 입력은 무시한다. `IHoverable`은 `OpaqueHoverable`에 양보하고, 좌클릭은 매니저 라우팅을 쓰지 않는다 — `HoldClickEvent`가 자체 폴링으로 누른 시간을 재야 하기 때문이다.
 - **`Modules/StateModule.cs`** — State 머신 + Sleep 정책. 11 State 인스턴스 + `Request*` API + 잠금 가드(`IsLockedState`) + 접지 강제(`EnforceFloor`) + 입력 4채널 구독(InFocus·OutFocus). `RegisterState(IState)` 확장점. 수면은 확률이 아니라 무입력 시간만으로 결정되고, **캐릭터를 향한 좌클릭은 무입력 타이머를 초기화하되 캐릭터를 깨우지는 않는다**(자는 캐릭터를 누르면 기상 대신 쓰담이 뜬다).
 - **`Modules/VisualModule.cs`** — Animator 단일 진입점. `Play(state)` / `PlayOneShot(state)` / `SetFacing` / `SetForm`. OneShot은 float timer 기반 (UniTask 미사용).
-- **`Modules/AffinityModule.cs`** — 친밀도 수치 + `AffinityChanged` 이벤트. 값은 누적 친밀도 하나뿐이고 줄어들지 않는다(기획에 감소·소모가 없다). 저장은 `CharacterOwnership`이 하고, 스폰 직후 `Restore`로 이벤트 없이 되돌린다 — 이유는 [character-affinity.md](../../../../.claude/rules/unity/character-affinity.md). 시각 직접 제어 금지 — 값이 바뀌었다는 사실만 알리고 그걸로 무엇을 할지는 구독자가 정한다.
+- **`Modules/AffinityModule.cs`** — 친밀도 수치 + `AffinityChanged` 이벤트. 저장하는 값은 누적 친밀도 하나뿐이고 줄어들지 않는다(기획에 감소·소모가 없다). 소녀 변신 조건만은 "게임을 켠 뒤, 또는 동물이 된 뒤 쌓인 양"을 실행 중에 따로 센다. 쓰담과 깨어 있는 시간(1분마다)으로 오르고, 잠든 동안은 시간을 세지 않는다. 저장은 `CharacterOwnership`이 하고, 스폰 직후 `Restore`로 이벤트 없이 되돌린다 — 이유는 [character-affinity.md](../../../../.claude/rules/unity/character-affinity.md). 시각 직접 제어 금지 — 값이 바뀌었다는 사실만 알리고 그걸로 무엇을 할지는 구독자가 정한다.
 - **`Modules/ScaleModule.cs`** — 루트 `transform.localScale = _baseScale * User * Extra` 갱신. User는 유저 설정의 캐릭터 크기로, 소녀 변신 금지처럼 밖에서 주입받는다(`SetUserScale` — `CharacterManager`가 설정을 읽어 건다). 호버 강조 같은 일시 `ExtraMultiplier` 슬롯도 제공.
 - **`States/BaseCharacterState.cs`** — abstract. `OnEnter(IStateOwner)` / `Tick(IStateOwner, dt)` / `OnExit(IStateOwner)`.
 - **`States/{Idle, IdleAction, Walk, Run, Sleep, WakeUp, Pet, Grabbed, Fall, Land, Transform}State.cs`** — 11개 State 클래스. `RunState`는 `WalkState` 상속(속도만 다름). `WalkState`는 시간이 아니라 *목적지 도착*으로 끝난다 — 거주 영역 안에서 목적지를 뽑고 거기까지 간다. `PetState`는 모션 시간이 지나면 스스로 Idle로 돌아간다 — 밖에서 꺼주는 API는 없다. `Interact`만 State 클래스가 없다 — enum에는 있지만 OneShot이라 `VisualModule.PlayOneShot`을 직접 호출한다.

@@ -63,6 +63,8 @@
 
 프로젝트 전체에 걸리는 제약 하나만 여기 적습니다. **이 게임은 바탕화면에 항상 떠 있으므로, 매 프레임 할당과 메모리 누수가 곧 사용자 경험을 깎습니다.** §1의 최우선 가치가 코드에 드러나는 지점입니다.
 
+**밸런스 수치(친밀도·하트·해금 기운·소녀 유지 시간 등)는 프리팹이나 인스펙터가 아니라 `GameBalance` 한 곳에 출시 값과 테스트 값을 함께 둡니다** — 에디터와 Development Build는 테스트 값을, 나머지 빌드는 출시 값(Figma)을 씁니다. 프리팹 값은 코드 기본값을 덮어써서 기획 값이 어디 있는지 흩어지기 때문입니다. 새 수치를 만드는 순간에는 발화할 규칙이 없어 여기 한 줄 둡니다.
+
 **화면에 보이는 문장은 프리팹·코드에 직접 넣지 않고 키로 찾아 씁니다** — 다섯 개 언어로 번역되기 때문입니다. 나머지 규약은 [.claude/rules/unity/localization.md](.claude/rules/unity/localization.md)에 있습니다. 새 UI 스크립트나 새 로컬라이제이션 코드를 만들 때는 그 파일이 발화하지 않을 수 있어 여기 한 줄 둡니다.
 
 ---
@@ -96,7 +98,7 @@
 - `docs-conventions.md` — 문서·CLAUDE.md·rules를 쓸 때
 - `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/ui-panels.md`, `unity/platform.md`, `unity/project-settings.md` — 해당 파일을 열 때
 - `unity/character-ground.md` — 캐릭터 지면·발 규약. Character 스크립트·캐릭터 프리팹·캐릭터 스프라이트 임포트 설정을 열 때
-- `unity/character-ownership.md` — 캐릭터 보유·배치 기록 규약(캐릭터는 씬에 두지 않음, id는 저장 키라 불변, 첫 실행은 빈 화면이 정상, 등장은 뷰포트 확정 후, 구름은 지금 소환하지 않음, 도감은 `CharacterId`로 기록을 읽기만 함). `CharacterOwnership`·`CharacterManager`·`CloudController`, 도감 컨트롤러·도감 데이터 모델, GameScene, 캐릭터·구름 프리팹을 열 때
+- `unity/character-ownership.md` — 캐릭터 보유·배치 기록 규약(캐릭터는 씬에 두지 않음, id는 저장 키라 불변, 첫 실행은 빈 화면이 정상, 등장은 뷰포트 확정 후, 해금은 구름 클릭·기준은 도감 정의, 도감은 `CharacterId`로 기록을 읽기만 함). `CharacterOwnership`·`CharacterManager`·`CloudController`, 도감 컨트롤러·도감 데이터 모델, GameScene, 캐릭터·구름 프리팹을 열 때
 - `unity/character-affinity.md` — 캐릭터 친밀도 규약(누적값 하나·줄지 않음, 저장은 CharacterOwnership이 쓰담마다, 복원은 이벤트 없이·하트 기준선은 Start에서 — 하트 복제 방지). 친밀도 모듈·하트 지급·캐릭터 기록·상태 글자 스크립트를 열 때
 - `unity/character-shadow.md` — 캐릭터 그림자 규약. `ShadowProjector`·캐릭터 프리팹을 열 때
 - `unity/character-state-machine.md` — 캐릭터 상태 전이 확정안. **캐릭터 행동 로직의 유일한 본.** Character 스크립트·캐릭터 프리팹·Animator 자산을 열 때

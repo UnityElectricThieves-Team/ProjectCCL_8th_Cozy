@@ -42,6 +42,10 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     // 거주 영역과 같은 방식이다 — 캐릭터는 이 값이 유저 설정에서 왔다는 것을 모른다.
     private bool _girlTransformBanned;
 
+    // 소녀가 된 시각(Time.time). 소녀일 때만 의미가 있다.
+    // 폼은 저장하지 않으므로 재시작하면 언제나 동물로 시작한다 — 기획의 "2시간 전에 껐다 켜도 동물로 복귀"가 이것으로 성립한다.
+    private float _girlSince;
+
     /// <summary>거주 영역이 아직 안 들어온 씬에서 쓰는 지면 높이. 인스펙터로 열지 않는다 —
     /// 조절 가능한 바닥이 있으면 그게 다른 오차(발 위치 어긋남 등)의 보정값 노릇을 하다가,
     /// 지면 정의가 바뀌는 순간 보정이 통째로 사라진다. 실제로 그렇게 어긋난 전례가 있다.</summary>
@@ -123,6 +127,12 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         var dt = Time.deltaTime;
         _state.Tick(dt);
         _visual.Tick(dt);
+        _affinity.TickAwake(dt, _state.CurrentStateId == CharacterState.Sleep);
+
+        // 소녀 유지 시간이 지나면 동물로 돌아간다(시간은 GameBalance). 요청이 거부되면(수면·낙하 등) 다음 프레임에
+        // 다시 요청한다. 받아들여지면 변신 중 잠금으로 조용해지고, 폼이 동물로 바뀌는 순간 이 조건이 꺼진다.
+        if (_visual.CurrentForm == CharacterForm.Girl && Time.time - _girlSince >= GameBalance.GirlFormSeconds)
+            RequestRevertToAnimal();
     }
 
     protected virtual void OnDisable()
@@ -164,13 +174,23 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public void RequestPet() => _state.RequestPet();
     public void RequestGrab() => _state.RequestGrab();
 
-    /// <summary>우클릭 변신 토글. 동물→소녀는 친밀도 만점 필요, 소녀→동물은 언제든. CharacterInteractionRelay.OnRightClick에서 호출.</summary>
+    /// <summary>동물 → 소녀 변신 요청. 친밀도가 변신 임계 이상일 때만 받는다(AILogic.md §Transform).
+    /// 이미 소녀면 무시한다 — 기획은 우클릭을 동물 → 소녀, Shift+우클릭을 소녀 → 동물로 나눴다.
+    /// CharacterInteractionRelay.OnRightClick에서 호출.</summary>
     public void RequestTransform()
     {
         // 금지 중에는 변신 시스템 자체를 끈다(UserSettings.md). 소녀는 금지를 거는 순간 동물로 돌아가 있다.
         if (_girlTransformBanned) return;
-        // 동물 → 소녀: 친밀도가 변신 임계 이상일 때만 (AILogic.md §Transform). 소녀 → 동물: 무조건 허용.
-        if (_visual.CurrentForm == CharacterForm.Animal && !_affinity.CanHumanTransform) return;
+        if (_visual.CurrentForm != CharacterForm.Animal) return;
+        if (!_affinity.CanHumanTransform) return;
+        _state.RequestTransform();
+    }
+
+    /// <summary>소녀 → 동물 변신 요청. 조건 없이 받는다(잠금·공중·수면 중이면 StateModule이 거부한다).
+    /// 이미 동물이면 무시한다. CharacterInteractionRelay.OnShiftRightClick에서 호출.</summary>
+    public void RequestRevertToAnimal()
+    {
+        if (_visual.CurrentForm != CharacterForm.Girl) return;
         _state.RequestTransform();
     }
 
@@ -291,6 +311,9 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         // 동물→소녀 변신 도중에 금지가 걸리면, 이펙트 중간의 폼 스왑이 소녀를 되살린다. 여기서 막는다.
         if (form == CharacterForm.Girl && _girlTransformBanned) return;
         _visual.SetForm(form);
+        // 폼 스왑이 실제로 일어났을 때만 잰다 — 애니메이터 오버라이드가 비어 있으면 VisualModule이 스왑을 건너뛴다.
+        if (form == CharacterForm.Girl && _visual.CurrentForm == CharacterForm.Girl) _girlSince = Time.time;
+        if (form == CharacterForm.Animal && _visual.CurrentForm == CharacterForm.Animal) _affinity.RestartTransformCount();
     }
 
     /// <summary>
@@ -301,7 +324,11 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public void SetGirlTransformBanned(bool banned)
     {
         _girlTransformBanned = banned;
-        if (banned && _visual.CurrentForm == CharacterForm.Girl) _visual.SetForm(CharacterForm.Animal);
+        if (banned && _visual.CurrentForm == CharacterForm.Girl)
+        {
+            _visual.SetForm(CharacterForm.Animal);
+            _affinity.RestartTransformCount();
+        }
     }
 
     /// <summary>
