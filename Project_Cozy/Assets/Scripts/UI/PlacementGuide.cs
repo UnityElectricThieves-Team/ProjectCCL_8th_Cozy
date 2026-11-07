@@ -2,34 +2,31 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 장식 설치 모드의 안내. 모드 동안 마우스 커서를 전용 그림으로 바꾸고, 커서 옆에 "설치(왼쪽)·취소(오른쪽)" 글자를 붙여 다닌다.
-/// 기본과 다른 커서가 "지금은 설치 모드"라는 신호다. 모드가 끝나면 기본 커서로 되돌린다.
+/// 장식 설치 모드의 안내. 모드 동안 OS 마우스 커서를 숨기고, 프리팹 안의 커서 그림(UI 이미지)과
+/// "설치(왼쪽)·취소(오른쪽)" 글자를 마우스 위치에 붙여 다닌다.
+/// 기본과 다른 커서가 "지금은 설치 모드"라는 신호다. 모드가 끝나면 OS 커서를 되돌린다.
+///
+/// 커서 그림도 UI라서 글자와 같은 캔버스 배율을 따른다. OS가 그리는 커서는 해상도와 상관없이 같은 픽셀 크기라
+/// 글자와의 간격이 배율마다 달라졌기 때문에, 그림까지 UI로 그린다. 대가는 그림이 입력보다 한 프레임쯤 늦을 수 있다는 점이다.
 ///
 /// <see cref="DecorationPlacementController.ActiveChanged"/>를 듣고 켜고 끈다 — 모드가 이 컴포넌트를 부르지 않는다.
 /// 글자는 프리팹 안의 <see cref="LocalizedText"/>가 채운다(<c>UIPlacement.guide.*</c>).
+/// 루트의 피벗이 곧 커서 끝이다 — 피벗을 라벨 줄의 아래 변(커서 그림 위쪽 가운데 부근)에 두면, 루트 안에서
+/// "설치"는 그림 왼쪽 위, "취소"는 오른쪽 위에 놓인다(Figma 안내 그림). 커서 그림의 클릭 지점(화살표 끝)은
+/// 그 이미지의 피벗이다. 위치는 모두 프리팹의 피벗·앵커·크기가 정한다.
+/// 알파는 프리팹에 0으로 저장해 두어, 에디터에서 Play 전에도 보이지 않는다.
 ///
 /// 이 UI는 클릭을 받지 않는다. 받으면 설치 모드의 "커서가 UI 위면 놓을 수 없음" 판정에 자기 자신이 걸려
-/// 늘 빨강이 된다. 그래서 CanvasGroup의 blocksRaycasts를 끄고, 안의 글자도 Raycast Target을 끈다.
+/// 늘 빨강이 된다. 그래서 CanvasGroup의 blocksRaycasts를 끄고, 안의 글자와 커서 그림도 Raycast Target을 끈다.
 ///
-/// 커서 그림은 텍스처 임포트 설정을 Cursor로 둔다. 다른 타입이면 Unity가 하드웨어 커서로 쓰지 못한다.
 /// 범용 UI 위젯 폴더(Prefabs/UIPanels/UIObjects)의 프리팹 루트에 붙는다.
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(CanvasGroup))]
 public sealed class PlacementGuide : MonoBehaviour
 {
-    [Tooltip("설치 모드 동안 쓸 커서 그림. 임포트 설정 Texture Type = Cursor.")]
-    [SerializeField] private Texture2D _cursorTexture;
-
-    [Tooltip("커서 그림에서 클릭 지점(px, 왼쪽 위 원점). 화살표 끝.")]
-    [SerializeField] private Vector2 _cursorHotspot;
-
-    [Tooltip("커서 위치에서 글자 묶음까지의 거리(마스터 캔버스 기준 px, 오른쪽 +, 위 +).")]
-    [SerializeField] private Vector2 _labelOffset = new Vector2(40f, -40f);
-
     private CanvasGroup _group;
     private RectTransform _rect;
-    private Canvas _canvas;
     private DecorationPlacementController _placement;
     private WindowsCursorToUnityScreen _cursorSource;
     private bool _isShown;
@@ -38,7 +35,6 @@ public sealed class PlacementGuide : MonoBehaviour
     {
         _group = GetComponent<CanvasGroup>();
         _rect = (RectTransform)transform;
-        _canvas = GetComponentInParent<Canvas>();
         _group.blocksRaycasts = false;
         _group.interactable = false;
         Show(false);
@@ -61,16 +57,15 @@ public sealed class PlacementGuide : MonoBehaviour
     private void OnDestroy()
     {
         if (_placement != null) _placement.ActiveChanged -= Show;
-        if (_isShown) Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto); // 모드 중 파괴돼도 커서를 되돌린다
+        if (_isShown) Cursor.visible = true; // 모드 중 파괴돼도 OS 커서를 되돌린다
     }
 
     private void Show(bool show)
     {
+        // OS 커서는 켜진 채로 시작하므로, 모드가 시작되고 끝날 때만 바꾼다(Awake의 Show(false)가 다른 곳이 만진 커서를 덮지 않게).
+        if (_isShown != show) Cursor.visible = !show;
         _isShown = show;
         _group.alpha = show ? 1f : 0f;
-
-        if (show) Cursor.SetCursor(_cursorTexture, _cursorHotspot, CursorMode.Auto);
-        else Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
 
         if (show) FollowCursor();
     }
@@ -87,8 +82,8 @@ public sealed class PlacementGuide : MonoBehaviour
             ? _cursorSource.UnityScreenPosition
             : (Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero);
 
-        // UI 캔버스는 Screen Space Overlay라 position이 곧 화면 px다. 거리는 캔버스 배율을 곱해 마스터 캔버스 기준 px로 맞춘다.
-        float scale = _canvas != null ? _canvas.scaleFactor : 1f;
-        _rect.position = screen + _labelOffset * scale;
+        // UI 캔버스는 Screen Space Overlay라 position이 곧 화면 px다. 루트의 피벗을 커서에 놓기만 한다.
+        // 커서에서 글자까지의 거리는 프리팹의 피벗·크기가 들고 있어 코드에 숫자를 두지 않는다.
+        _rect.position = screen;
     }
 }

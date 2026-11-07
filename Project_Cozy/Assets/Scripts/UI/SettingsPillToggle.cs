@@ -12,7 +12,8 @@ using UnityEngine.UI;
 ///
 /// 배경색과 글자 내용은 즉시 바뀌고, 손잡이와 글자 상자는 <see cref="_slideDuration"/>에 걸쳐
 /// 나란히 미끄러진다. 글자는 정렬을 바꾸지 않고 상자째 옮기므로 움직임이 끊기지 않는다.
-/// 글자 상자의 정렬은 프리팹에서 가운데로 두는 것을 전제로 한다.
+/// 글자 상자의 정렬은 프리팹에서 가운데로 두고, 상자는 알약 가운데에 앵커를 둔 것을 전제로 한다.
+/// 손잡이는 알약 폭을 숫자로 알지 못한다 — 여백 하나(<see cref="_knobPadding"/>)만 들고, 가장자리는 앵커가 정한다.
 ///
 /// 상태는 <see cref="Toggle"/>이 들고 있고 이 컴포넌트는 그리기만 한다.
 ///
@@ -27,13 +28,8 @@ public sealed class SettingsPillToggle : MonoBehaviour
     [SerializeField] private RectTransform _knob;
     [SerializeField] private TMP_Text _label;
 
-    [Tooltip("켜짐/꺼짐일 때 손잡이의 anchoredPosition.x. Figma 100x46 기준 60.8 / 5.56.")]
-    [SerializeField] private float _knobOnX = 60.8f;
-    [SerializeField] private float _knobOffX = 5.56f;
-
-    [Tooltip("켜짐/꺼짐일 때 글자 상자의 anchoredPosition.x. 손잡이가 없는 쪽 공간의 한가운데가 기준.")]
-    [SerializeField] private float _labelOnX = -19.6f;
-    [SerializeField] private float _labelOffX = 19.6f;
+    [Tooltip("손잡이와 알약 가장자리 사이의 여백(양쪽 같음). Figma 기준 5.56.")]
+    [SerializeField, Min(0f)] private float _knobPadding = 5.56f;
 
     [Tooltip("손잡이와 글자가 반대편까지 미끄러지는 데 걸리는 시간(초). 0이면 즉시 이동.")]
     [SerializeField] private float _slideDuration = 0.12f;
@@ -49,6 +45,7 @@ public sealed class SettingsPillToggle : MonoBehaviour
 
     private Toggle _toggle;
     private Coroutine _slide;
+    private float _progress; // 꺼짐 0, 켜짐 1. 미끄러지는 중에는 그 사이 값
 
     private void Awake()
     {
@@ -71,33 +68,26 @@ public sealed class SettingsPillToggle : MonoBehaviour
         // 숨어 있는 탭 안에서는 코루틴을 시작할 수 없어 바로 옮긴다.
         if (_slideDuration <= 0f || !isActiveAndEnabled)
         {
-            SetKnobX(KnobTargetX(on));
-            SetLabelX(LabelTargetX(on));
+            SetProgress(on ? 1f : 0f);
             return;
         }
 
         if (_slide != null) StopCoroutine(_slide);
-        _slide = StartCoroutine(Slide(on));
+        _slide = StartCoroutine(Slide(on ? 1f : 0f));
     }
 
-    private IEnumerator Slide(bool on)
+    private IEnumerator Slide(float target)
     {
-        float knobFrom = _knob != null ? _knob.anchoredPosition.x : 0f;
-        float labelFrom = _label != null ? _label.rectTransform.anchoredPosition.x : 0f;
-        float knobTo = KnobTargetX(on);
-        float labelTo = LabelTargetX(on);
+        float from = _progress;
 
         // 게임이 멈춰도 UI는 움직여야 하므로 unscaled 시간을 쓴다.
         for (float t = 0f; t < _slideDuration; t += Time.unscaledDeltaTime)
         {
-            float progress = t / _slideDuration;
-            SetKnobX(Mathf.Lerp(knobFrom, knobTo, progress));
-            SetLabelX(Mathf.Lerp(labelFrom, labelTo, progress));
+            SetProgress(Mathf.Lerp(from, target, t / _slideDuration));
             yield return null;
         }
 
-        SetKnobX(knobTo);
-        SetLabelX(labelTo);
+        SetProgress(target);
         _slide = null;
     }
 
@@ -105,8 +95,7 @@ public sealed class SettingsPillToggle : MonoBehaviour
     private void Redraw(bool on)
     {
         ApplyColorAndText(on);
-        SetKnobX(KnobTargetX(on));
-        SetLabelX(LabelTargetX(on));
+        SetProgress(on ? 1f : 0f);
     }
 
     private void ApplyColorAndText(bool on)
@@ -115,24 +104,40 @@ public sealed class SettingsPillToggle : MonoBehaviour
         if (_label != null) _label.text = on ? OnText : OffText;
     }
 
-    private float KnobTargetX(bool on) => on ? _knobOnX : _knobOffX;
-
-    private float LabelTargetX(bool on) => on ? _labelOnX : _labelOffX;
-
-    private void SetKnobX(float x)
+    /// <summary>
+    /// 손잡이와 글자를 progress(꺼짐 0 ~ 켜짐 1) 자리에 놓는다.
+    /// 손잡이는 앵커·피벗의 가로를 progress로 두어 알약 폭과 상관없이 가장자리에 붙는다(여백만 ±로 띄운다).
+    /// 글자 상자는 알약 가운데에서 손잡이가 없는 쪽으로 (여백 + 손잡이 폭)의 절반만큼 떨어진다 —
+    /// 손잡이가 없는 쪽 공간의 한가운데다.
+    /// </summary>
+    private void SetProgress(float progress)
     {
-        if (_knob == null) return;
-        var p = _knob.anchoredPosition;
-        p.x = x;
-        _knob.anchoredPosition = p;
-    }
+        _progress = progress;
+        float knobWidth = 0f;
 
-    private void SetLabelX(float x)
-    {
-        if (_label == null) return;
-        var rt = _label.rectTransform;
-        var p = rt.anchoredPosition;
-        p.x = x;
-        rt.anchoredPosition = p;
+        if (_knob != null)
+        {
+            knobWidth = _knob.rect.width;
+            var min = _knob.anchorMin;
+            var max = _knob.anchorMax;
+            var pivot = _knob.pivot;
+            min.x = max.x = pivot.x = progress;
+            _knob.anchorMin = min;
+            _knob.anchorMax = max;
+            _knob.pivot = pivot;
+
+            // 앵커·피벗을 바꾼 뒤에 위치를 정한다 — 앞의 세 줄이 위치를 함께 옮기기 때문이다.
+            var p = _knob.anchoredPosition;
+            p.x = Mathf.Lerp(_knobPadding, -_knobPadding, progress);
+            _knob.anchoredPosition = p;
+        }
+
+        if (_label != null)
+        {
+            var rt = _label.rectTransform;
+            var p = rt.anchoredPosition;
+            p.x = (1f - 2f * progress) * (_knobPadding + knobWidth) * 0.5f;
+            rt.anchoredPosition = p;
+        }
     }
 }
