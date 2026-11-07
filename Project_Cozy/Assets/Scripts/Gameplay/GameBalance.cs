@@ -46,6 +46,17 @@ public static class GameBalance
     /// <summary>소녀로 변신한 뒤 이 시간(초)이 지나면 스스로 동물로 돌아간다. 기획 2시간.</summary>
     public const float GirlFormSeconds = UsesTestValues ? 60f : 7200f;
 
+    // ===== 캐릭터 행동 =====
+
+    /// <summary>대기 상태에서 다음 행동(걷기·특수 대기)을 고르기까지 기다리는 시간의 최소·최대(초). 기획 10~12초.
+    /// 테스트는 동작을 빨리 보려고 줄였다.</summary>
+    public const float IdleSecondsMin = UsesTestValues ? 5f : 10f;
+    public const float IdleSecondsMax = UsesTestValues ? 6f : 12f;
+
+    /// <summary>캐릭터를 좌클릭한 채 이 시간(초)이 지나면 잡힌다. 그 전에 떼면 쓰담으로 끝난다. 기획 2초.
+    /// 테스트는 잡기까지가 답답하지 않게 줄였다. 2초가 맞는지는 기획에 다시 묻는 중이다(2026-11-08).</summary>
+    public const float GrabHoldSeconds = UsesTestValues ? 0.25f : 2f;
+
     // ===== 해금 =====
 
     /// <summary>

@@ -17,12 +17,9 @@ using UnityEngine.InputSystem.Utilities;
 [Serializable]
 public sealed class StateModule
 {
-    [Header("Durations (모두 초 단위)")]
-    [Tooltip("대기 상태에서 다음 행동을 고르기까지 기다리는 시간의 최소~최대(초).\n" +
-             "이 시간이 지나면 걷기와 특수 대기 중 하나를 확률로 고른다.\n" +
-             "기획 확정값 10~12초.")]
-    [SerializeField] private Vector2 _idleDurationRange = new Vector2(10f, 12f);
+    // 대기 시간(기획 10~12초)은 인스펙터가 아니라 GameBalance에 있다 — 출시 빌드와 테스트 빌드의 값이 다르다.
 
+    [Header("Durations (모두 초 단위)")]
     [Range(0f, 1f)]
     [Tooltip("대기 시간이 끝났을 때 특수 대기(하품·기지개 등)를 고를 확률.\n" +
              "나머지 확률로 걷기를 고른다. 기획 확정값 0.1.\n" +
@@ -90,7 +87,7 @@ public sealed class StateModule
     public float TransformDuration => _transformDuration;
     public float IdleActionDuration => _idleActionDuration;
     public float PetDuration => _petDuration;
-    public float NextIdleDuration() => RandomInRange(_idleDurationRange);
+    public float NextIdleDuration() => RandomInRange(new Vector2(GameBalance.IdleSecondsMin, GameBalance.IdleSecondsMax));
 
     /// <summary>대기 시간이 끝났을 때 특수 대기로 갈지 뽑는다. false면 걷기.</summary>
     public bool RollIdleAction() => UnityEngine.Random.value < _idleActionProbability;
