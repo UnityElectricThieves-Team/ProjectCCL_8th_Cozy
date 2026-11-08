@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -77,9 +78,9 @@ public sealed class InventoryPanelContentController : MonoBehaviour
     /// <summary>
     /// 화면에 놓지 않고 남은 장식만 골라 <see cref="_owned"/>에 담고 진열 순서로 정렬한다.
     ///
-    /// 기획의 정렬 규칙은 "가장 최근에 회수한 것부터 앞"인데, 회수한 순서를 아직 저장하지 않아
-    /// 이번에는 쓸 수 없다. 대신 상점과 같은 순서(싼 것부터, 가격이 같으면 id 순)로 둔다 —
-    /// 상점에서 본 차례대로 인벤토리에도 놓이는 편이 찾기 쉽다.
+    /// 정렬은 기획(Figma 인벤토리)대로 "가장 최근에 회수한 것부터 앞"이다(<see cref="ShopSystem.GetRecallOrder"/>).
+    /// 한 번도 회수하지 않은 장식(산 뒤 놓지 않은 것, 회수 순번이 생기기 전의 파일)은 그 뒤에 상점과 같은 순서
+    /// (싼 것부터, 가격이 같으면 id 순)로 둔다 — 상점에서 본 차례대로 놓이는 편이 찾기 쉽다.
     ///
     /// 상점의 정렬 함수를 가져다 쓰지 않고 같은 규칙을 여기 다시 적었다. 두 화면이 하나의 정렬
     /// 함수를 공유하면 한쪽의 진열 규칙을 바꿀 때 다른 쪽이 같이 끌려가는데,
@@ -99,12 +100,22 @@ public sealed class InventoryPanelContentController : MonoBehaviour
             if (item != null && shop.GetUnplacedCount(item.id) > 0) _owned.Add(item);
         }
 
-        _owned.Sort(CompareForDisplay);
+        _owned.Sort(_compareForDisplay);
     }
 
+    // Sort에 메서드 그룹을 넘기면 부를 때마다 대리자가 새로 만들어지므로 한 번 만들어 둔다.
+    private Comparison<ShopItemDefinition> _compareForDisplay;
+
+    private void Awake() => _compareForDisplay = CompareForDisplay;
+
     // 문화권에 따라 결과가 달라지지 않도록 문자열 비교는 Ordinal로 한다.
-    private static int CompareForDisplay(ShopItemDefinition a, ShopItemDefinition b)
+    private int CompareForDisplay(ShopItemDefinition a, ShopItemDefinition b)
     {
+        // 회수 순번이 큰(최근) 것이 앞. 회수한 적 없는 것은 -1이라 저절로 뒤로 간다.
+        var shop = ShopSystem.Instance;
+        int byRecall = shop.GetRecallOrder(b.id).CompareTo(shop.GetRecallOrder(a.id));
+        if (byRecall != 0) return byRecall;
+
         int byPrice = a.price.CompareTo(b.price);
         return byPrice != 0 ? byPrice : string.CompareOrdinal(a.id, b.id);
     }

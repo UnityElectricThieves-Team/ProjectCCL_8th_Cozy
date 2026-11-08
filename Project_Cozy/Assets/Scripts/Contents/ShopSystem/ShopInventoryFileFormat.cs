@@ -20,6 +20,13 @@ public class ShopInventoryFileFormat
     public Dictionary<string, int> ownedCounts = new();
 
     public List<PlacedDecorationData> placed = new();
+
+    /// <summary>
+    /// 상품 id → 마지막으로 회수한 순번. 인벤토리가 "가장 최근에 회수한 것부터 앞"으로 정렬하는 데 쓴다.
+    /// 시각이 아니라 순번이라 사용자가 시계를 바꿔도 순서가 뒤집히지 않는다. 다음 순번은 불러올 때 최댓값에서 계산하므로
+    /// 카운터를 따로 저장하지 않는다. 이 필드가 없던 옛 파일은 빈 사전으로 읽힌다.
+    /// </summary>
+    public Dictionary<string, long> recallOrder = new();
 }
 
 /// <summary>

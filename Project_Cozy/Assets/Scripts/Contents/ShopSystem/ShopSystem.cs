@@ -13,6 +13,7 @@ using UnityEngine;
 /// 그 짝을 맞추는 것이 이 클래스의 존재 이유다 — 지불과 인도가 모두 파일에 남아야 거래가 성립한다.
 ///
 /// 소유는 개수로 들고 있다(<see cref="ShopInventoryFileFormat"/> 주석 참고).
+/// 회수할 때마다 그 장식의 회수 순번도 찍는다 — 인벤토리가 최근에 회수한 것부터 보여 주는 기준이다.
 /// 구매가 일어날 때마다 즉시 저장한다. 하트와 같은 이유로 <see cref="SaveScheduler"/>를 거치지 않는다 —
 /// 구매는 가끔 일어나는 이산 이벤트라 저장 빈도를 묶을 이유가 없다.
 /// </summary>
@@ -33,6 +34,9 @@ public sealed class ShopSystem : MonoBehaviour
         _catalog != null && _catalog.decorations != null ? _catalog.decorations : Array.Empty<ShopItemDefinition>();
 
     private ShopInventoryFileFormat _inventory = new();
+
+    // 지금까지 찍은 회수 순번의 최댓값. 저장하지 않고 불러올 때 recallOrder에서 계산한다.
+    private long _lastRecallOrder;
 
     /// <summary>
     /// 산 개수나 놓인 목록이 바뀌었을 때 울린다(장식을 사서 놓았을 때, 놓인 장식을 회수했을 때). 바뀐 뒤에 울리므로,
@@ -56,6 +60,12 @@ public sealed class ShopSystem : MonoBehaviour
         // 에디터 세이브는 사람이 열어 고칠 수 있는 평문 JSON이라, 필드가 null인 파일이 들어올 수 있다.
         _inventory.ownedCounts ??= new Dictionary<string, int>();
         _inventory.placed ??= new List<PlacedDecorationData>();
+        _inventory.recallOrder ??= new Dictionary<string, long>();
+
+        foreach (long order in _inventory.recallOrder.Values)
+        {
+            if (order > _lastRecallOrder) _lastRecallOrder = order;
+        }
     }
 
     private void OnDestroy()
@@ -111,18 +121,40 @@ public sealed class ShopSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// 놓인 장식 중 <paramref name="shouldRecall"/>이 true인 것을 인벤토리로 회수한다 — 놓인 목록에서 빼고 저장한다.
+    /// 놓인 장식 중 <paramref name="shouldRecall"/>이 true인 것을 인벤토리로 회수한다 — 놓인 목록에서 빼고 회수 순번을 찍어 저장한다.
     /// 산 개수는 그대로라, 빠진 만큼 남은 개수(<see cref="GetUnplacedCount"/>)가 는다. 하트는 돌려주지 않는다(산 것을 거두는 것뿐이다).
     /// 회수한 것이 있으면 <see cref="OwnedChanged"/>를 울리고 개수를 돌려준다.
     /// </summary>
     public int RecallPlaced(Predicate<PlacedDecorationData> shouldRecall)
     {
-        int recalled = _inventory.placed.RemoveAll(shouldRecall);
+        // RemoveAll은 빠지는 항목을 알려 주지 않아 회수 순번을 찍을 수 없다. 뒤에서부터 돌며 직접 뺀다.
+        int recalled = 0;
+        for (int i = _inventory.placed.Count - 1; i >= 0; i--)
+        {
+            var placed = _inventory.placed[i];
+            if (!shouldRecall(placed)) continue;
+
+            _inventory.placed.RemoveAt(i);
+            MarkRecalled(placed.itemId);
+            recalled++;
+        }
         if (recalled == 0) return 0;
 
         Save();
         OwnedChanged?.Invoke();
         return recalled;
+    }
+
+    /// <summary>
+    /// 이 장식을 마지막으로 회수한 순번. 클수록 최근이다. 회수한 적이 없으면(옛 파일 포함) -1.
+    /// 인벤토리가 "가장 최근에 회수한 것부터 앞"으로 정렬하는 데 쓴다.
+    /// </summary>
+    public long GetRecallOrder(string id) => _inventory.recallOrder.TryGetValue(id, out long order) ? order : -1;
+
+    private void MarkRecalled(string id)
+    {
+        _lastRecallOrder++;
+        _inventory.recallOrder[id] = _lastRecallOrder;
     }
 
     /// <summary>
@@ -133,6 +165,8 @@ public sealed class ShopSystem : MonoBehaviour
     {
         _inventory.ownedCounts.Clear();
         _inventory.placed.Clear();
+        _inventory.recallOrder.Clear();
+        _lastRecallOrder = 0;
         Save();
         OwnedChanged?.Invoke();
     }
