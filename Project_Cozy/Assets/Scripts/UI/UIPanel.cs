@@ -30,6 +30,12 @@ public class UIPanel : MonoBehaviour
     public bool IsModal => _isModal;
 
     /// <summary>
+    /// 지금 보이고 조작할 수 있는가 — 열려 있고, 잠시 숨겨지지 않았고, 모달에 막히지 않았다.
+    /// <see cref="ApplyVisible"/>가 계산해 둔 값을 그대로 내보낸다. 호버 말풍선이 이 패널의 항목에 띄워도 되는지 볼 때 쓴다.
+    /// </summary>
+    public bool IsInteractable => _group != null && _group.interactable;
+
+    /// <summary>
     /// 닫아도 되는지 묻는다. false를 돌려주면 <see cref="UIManager.Close"/>가 닫지 않는다.
     /// 저장하지 않은 변경이 있을 때 확인 팝업을 띄우려는 쪽이 건다. 그쪽이 팝업 확인 뒤 변경을 정리하고 다시 닫기를 부른다.
     /// X 버튼·ESC·메뉴 버튼이 모두 UIManager.Close를 지나므로 이 질문 하나로 세 경로가 다 막힌다.

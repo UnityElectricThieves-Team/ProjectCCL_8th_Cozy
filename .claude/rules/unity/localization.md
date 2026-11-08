@@ -52,6 +52,7 @@ Unity Localization 패키지는 쓰지 않고 직접 만든 가벼운 표를 씁
 - **프리팹·씬·코드에 표시용 문장을 직접 넣지 않습니다.** 텍스트는 키(stringID)를 들고 있고, 실제 문장은 현재 언어의 표에서 가져옵니다.
 - **프리팹에 고정된 문구는 `LocalizedText`를 붙이고, 코드가 채우는 문구는 그 코드가 `LocalizationManager`에서 직접 가져옵니다.** 둘을 한 텍스트에 같이 쓰면 언어가 바뀔 때 서로 덮어씁니다.
 - **stringID는 `화면.구역.항목` 모양으로 점으로 나눕니다.** 첫 칸은 어느 화면인지를 PascalCase로 적고(`UISettings`, `UIShop`, `UIInventory`, `UICollection`, `UITutorial`), 나머지 칸은 소문자와 밑줄로 씁니다(예: `UISettings.row.always_on_top`). ID만 보고도 문구가 화면 어디에 있는지 알 수 있게 하려는 것입니다.
+  - 호버 말풍선 문구는 구역을 `tooltip`으로 씁니다(`UISettings.tooltip.auto_start`). 항목 칸은 같은 항목의 이름 키와 맞춥니다 — 이름이 `UISettings.row.auto_start`면 말풍선은 `UISettings.tooltip.auto_start`, 버튼 이름이 `UIInventory.button.retrieve`면 `UIInventory.tooltip.retrieve`. 이름과 설명을 짝으로 찾을 수 있게 하려는 것입니다.
   - 여러 화면이 함께 쓰는 **모드**의 문구는 첫 칸에 모드 이름을 씁니다. 장식 배치 모드(설치·이동·회수·제거)는 `UIPlacement`입니다. 설치는 상점에서, 나머지는 인벤토리에서 시작해서 어느 한 화면 소속으로 두면 다른 쪽이 어색해지기 때문입니다.
 - **문장을 조각내 이어 붙이지 않습니다.** 언어마다 어순이 달라 조각 단위로는 번역할 수 없습니다. 숫자·이름처럼 실행 중에 채워지는 부분이 있으면 문장 전체를 키 하나로 두고, 그 자리를 이름 붙인 변수로 비워 둡니다.
 - **변수 이름은 영어 대문자와 밑줄로 씁니다** (예: `{AGE}`, `{ITEM_COUNT}`). `{0}` 같은 번호보다 번역하는 사람이 무엇이 들어갈지 알기 쉽습니다.
@@ -66,6 +67,7 @@ Unity Localization 패키지는 쓰지 않고 직접 만든 가벼운 표를 씁
 - **배리언트에 붙인 컴포넌트를 "Apply to Base"로 올리지 않습니다.** ID까지 베이스로 올라가, 덮어쓰지 않은 모든 패널에 같은 문구가 뜹니다. 공통 프리팹에서 빈 ID로 새로 붙입니다.
 - `LocalizedText`는 한 오브젝트에 하나만 붙습니다. 공통 프리팹으로 옮길 때는 배리언트 쪽 컴포넌트를 먼저 지웁니다.
 - 탭이나 버튼처럼 패널마다 따로 있는 오브젝트는 그 패널 프리팹에 직접 붙입니다.
+- 설정 행의 호버 말풍선(`HoverTooltipSource`)도 `SettingsRow`에 빈 키로 한 번 붙이고 행마다 덮어씁니다. 다만 말풍선의 빈 키는 실수가 아니라 "말풍선 없음"이라 화면에 드러나지 않습니다([ui-panels.md](ui-panels.md)).
 
 ## 번역 대상과 비대상
 

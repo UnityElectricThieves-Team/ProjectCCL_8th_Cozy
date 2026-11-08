@@ -35,6 +35,9 @@ public class UIManager : MonoBehaviour
 
     private bool IsSuspended => _suspendOwners.Count > 0;
 
+    /// <summary>모달 패널(확인 팝업)이 떠 있는가. 패널에 속하지 않은 메뉴 바 항목의 호버 말풍선이 팝업 앞에 겹치지 않게 볼 때 쓴다.</summary>
+    public bool HasModal => TopModal() != null;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
