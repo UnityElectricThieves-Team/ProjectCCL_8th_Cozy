@@ -38,8 +38,8 @@ public static class GameBalance
     public const int AffinityPerHeartStep = 1;
     public const int HeartsPerAffinityStep = 1;
 
-    /// <summary>보유 하트 최대치. 기획 10억. 테스트는 상한에서 멈추는지 바로 보이면서 모든 상품을 살 수 있는 크기다.</summary>
-    public const int MaxHearts = UsesTestValues ? 2_000 : 1_000_000_000;
+    /// <summary>보유 하트 최대치. 기획 10억. 테스트도 같은 값이다 — 팀에 공유하는 개발 빌드에서 하트가 낮은 상한에 멈추면 버그로 보인다.</summary>
+    public const int MaxHearts = 1_000_000_000;
 
     // ===== 변신 =====
 
