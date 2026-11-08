@@ -7,6 +7,7 @@ using Assets.Scripts.Contents.CollectionSystem.Model;
 /// <summary>
 /// "어떤 캐릭터를 가졌고, 그중 누가 화면에 나와 있어야 하는가"의 주인. 캐릭터별 기록(보유·배치·누적 친밀도)을
 /// 파일에 들고, 시작할 때 화면에 나와 있어야 하는 캐릭터를 다시 등장시키며 친밀도를 되돌린다.
+/// 친밀도가 오르면 기록에 저장한 뒤 저장돼 있던 값과 비교해 오른 만큼 하트를 준다(<see cref="AffinityHeartReward"/>).
 /// 친밀도를 캐릭터(AffinityModule)가 직접 저장하지 않는 이유: Character 레이어는 저장소(Platform/Data)를
 /// 부르지 않고, 캐릭터 모듈은 캐릭터마다 따로 있어 파일 하나에 대응하지 않는다.
 ///
@@ -197,15 +198,18 @@ public class CharacterOwnership : MonoBehaviour
 
         if (!instance.TryGetComponent(out BaseCharacterController controller)) return;
 
-        // 저장된 친밀도를 되돌리고, 오를 때마다 기록에 써서 바로 저장한다(쓰담마다 저장).
+        // 저장된 친밀도를 되돌리고, 오를 때마다 기록에 써서 바로 저장한 뒤 오른 만큼 하트를 준다.
+        // 하트의 기준은 저장돼 있던 값이다 — 재시작해도 지난 하트를 다시 주지 않는다. 저장이 먼저인 이유는 AffinityHeartReward.Grant.
         // 복원은 이벤트를 울리지 않는다 — 이유는 AffinityModule.Restore 주석.
         var record = FindRecord(id);
         var affinity = controller.Affinity;
         affinity.Restore(record.cumulativeAffinity);
         Action<int> onChanged = value =>
         {
+            var before = record.cumulativeAffinity;
             record.cumulativeAffinity = value;
             Save();
+            AffinityHeartReward.Grant(before, value);
             RecordChanged?.Invoke(id);
         };
         affinity.AffinityChanged += onChanged;
