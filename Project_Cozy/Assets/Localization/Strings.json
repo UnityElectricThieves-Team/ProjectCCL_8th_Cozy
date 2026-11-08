@@ -137,6 +137,7 @@
   "UICollection.title": { "ko-KR": "도감", "en-US": "Collection", "ja-JP": "図鑑", "zh-Hans": "图鉴", "zh-Hant": "圖鑑" },
   "UICollection.button.photobook": { "ko-KR": "사진첩", "en-US": "Album", "ja-JP": "アルバム", "zh-Hans": "相册", "zh-Hant": "相簿" },
   "UICollection.button.return": { "ko-KR": "귀환", "en-US": "Recall", "ja-JP": "帰還", "zh-Hans": "召回", "zh-Hant": "召回" },
+  "UICollection.button.summon": { "ko-KR": "소환", "en-US": "Summon", "ja-JP": "召喚", "zh-Hans": "召唤", "zh-Hant": "召喚" },
   "UICollection.button.memory": { "ko-KR": "회상", "en-US": "Memories", "ja-JP": "回想", "zh-Hans": "回忆", "zh-Hant": "回憶" },
   "UICollection.button.wardrobe": { "ko-KR": "옷장", "en-US": "Wardrobe", "ja-JP": "クローゼット", "zh-Hans": "衣柜", "zh-Hant": "衣櫃" },
   "UICollection.affinity_empty": { "ko-KR": "친밀도: -", "en-US": "Affinity: -", "ja-JP": "親密度：-", "zh-Hans": "亲密度：-", "zh-Hant": "親密度：-" },

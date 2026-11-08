@@ -203,7 +203,7 @@ public class CharacterOwnership : MonoBehaviour
     /// <summary>
     /// 캐릭터를 해금한다. 보유 기록을 만들고 화면에 내보낸다 — 기획상 처음 해금된 캐릭터는 바로 떨어지며 등장한다.
     /// 대응표에 없는 id는 기록하지 않는다. 기록하면 지울 방법 없이 시작할 때마다 경고가 남는다.
-    /// 이미 보유한 캐릭터면 배치만 시도한다.
+    /// 이미 보유한 캐릭터면 아무 일도 하지 않는다 — 도감으로 귀환해 둔 캐릭터를 해금 경로(테스트 메뉴 등)가 다시 불러내지 않게.
     /// </summary>
     private void Unlock(string id)
     {
@@ -213,22 +213,89 @@ public class CharacterOwnership : MonoBehaviour
             return;
         }
 
-        if (FindRecord(id) == null) _data.records.Add(new CharacterRecord { id = id, placed = false });
-        Place(id);
+        if (FindRecord(id) != null) return;
+        _data.records.Add(new CharacterRecord { id = id, placed = false });
+        if (Summon(id)) return;
+
+        // 화면 상한에 걸려 소환이 거절돼도 해금 기록은 남긴다(Summon은 거절하면 저장하지 않는다).
+        // 그 캐릭터는 다음 실행에 숨은 채로 만들어지고, 도감에서 소환할 수 있다.
+        Save();
+        RecordChanged?.Invoke(id);
     }
 
-    /// <summary>보유한 캐릭터를 화면에 내보낸다. 이미 나와 있으면 아무 일도 하지 않는다 — 같은 캐릭터가 두 마리가 되지 않게.</summary>
-    private void Place(string id)
+    /// <summary>
+    /// 보유했지만 화면에 없는 캐릭터를 화면에 내보낸다(도감 [소환]). 이미 나와 있으면 아무 일도 하지 않는다 — 같은 캐릭터가 두 마리가 되지 않게.
+    /// 화면에 나온 캐릭터의 동시 상한에 걸리면 기록을 바꾸지 않고 거절한다 — 기록과 화면이 어긋나지 않게.
+    /// 바뀌었으면 true.
+    /// </summary>
+    public bool Summon(string id)
     {
         var record = FindRecord(id);
-        if (record == null || record.placed) return;
+        if (record == null || record.placed) return false;
+        var manager = CharacterManager.Instance;
+        if (manager != null && !manager.CanSpawn)
+        {
+            Debug.LogWarning($"[{nameof(CharacterOwnership)}] 화면에 나온 캐릭터가 상한이라 '{id}'를 내보내지 않았습니다.", this);
+            return false;
+        }
 
         record.placed = true;
         Save();
         RecordChanged?.Invoke(id);
 
-        // 뷰포트가 아직이면 기록만 해 둔다. 첫 확정 때 배치된 캐릭터 전부와 함께 등장한다.
-        if (IsViewportReady) SpawnCharacter(id);
+        // 뷰포트가 아직이면 기록만 해 둔다. 첫 확정 때 보유한 캐릭터 전부와 함께 만들어진다.
+        if (IsViewportReady) ShowOnField(id);
+        return true;
+    }
+
+    /// <summary>화면에 나와 있는 캐릭터를 도감으로 들여보낸다(도감 [귀환]). 파괴하지 않고 숨긴다 — 이유는 <see cref="SpawnAllOwned"/>.
+    /// 연출 없이 바로 사라진다(Figma "캐릭터가 사라짐"). 바뀌었으면 true.</summary>
+    public bool Recall(string id)
+    {
+        var record = FindRecord(id);
+        if (record == null || !record.placed) return false;
+
+        record.placed = false;
+        Save();
+        RecordChanged?.Invoke(id);
+
+        HideFromField(id);
+        return true;
+    }
+
+    /// <summary>이 캐릭터가 화면에 나와 있어야 하는가. 보유하지 않았으면 false.</summary>
+    public bool IsPlaced(string id) => FindRecord(id)?.placed ?? false;
+
+    /// <summary>
+    /// 숨겨 둔 캐릭터를 뷰포트 안 무작위 가로 위치 위에서 떨어뜨리며 보인다. 오브젝트가 없으면(스폰이 실패했던 경우) 새로 만든다.
+    ///
+    /// **켜기가 등록보다 먼저여야 한다.** 등록(<see cref="CharacterManager.Register"/>)이 거주 영역을 걸면서 접지를 강제하는데,
+    /// 꺼진 채로는 숨기 전 상태(대기 등)라 바닥으로 끌어내려 낙하가 사라진다. 켜는 순간 캐릭터가 스스로 낙하로 다시 들어가고
+    /// (BaseCharacterController.OnEnable), 낙하는 세로를 스스로 쥐어 끌려 내려가지 않는다.
+    /// </summary>
+    private void ShowOnField(string id)
+    {
+        var owned = FindCharacter(id);
+        if (owned == null || owned.controller == null)
+        {
+            SpawnCharacter(id);
+            return;
+        }
+
+        var go = owned.controller.gameObject;
+        go.transform.position = RandomDropPosition();
+        go.SetActive(true);
+        CharacterManager.Instance.Register(go);
+    }
+
+    // 뷰포트 안 무작위 가로 위치, 지면(뷰포트 아래 변)에서 _dropHeight 위. 뷰포트 위 변을 넘지 않는다.
+    private Vector3 RandomDropPosition()
+    {
+        var area = _cameraFitter.BaseRectToWorld(_viewportSettings.Viewport, _viewportSettings.BaseSpaceSize);
+        return new Vector3(
+            UnityEngine.Random.Range(area.xMin, area.xMax),
+            Mathf.Min(area.yMin + _dropHeight, area.yMax),
+            0f);
     }
 
     private void SpawnCharacter(string id)
@@ -241,13 +308,7 @@ public class CharacterOwnership : MonoBehaviour
             return;
         }
 
-        var area = _cameraFitter.BaseRectToWorld(_viewportSettings.Viewport, _viewportSettings.BaseSpaceSize);
-        var position = new Vector3(
-            UnityEngine.Random.Range(area.xMin, area.xMax),
-            Mathf.Min(area.yMin + _dropHeight, area.yMax),
-            0f);
-
-        var instance = CharacterManager.Instance.Spawn(prefab, position);
+        var instance = CharacterManager.Instance.Spawn(prefab, RandomDropPosition());
         if (instance == null)
         {
             Debug.LogWarning($"[{nameof(CharacterOwnership)}] 동시 존재 상한에 걸려 '{id}'를 등장시키지 못했습니다.", this);

@@ -46,6 +46,12 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     // 폼은 저장하지 않으므로 재시작하면 언제나 동물로 시작한다 — 기획의 "2시간 전에 껐다 켜도 동물로 복귀"가 이것으로 성립한다.
     private float _girlSince;
 
+    // Start가 한 번 돌았는가. 숨었다 다시 켜질 때(도감 소환)의 OnEnable과, 처음 켜질 때의 OnEnable을 가른다.
+    private bool _started;
+
+    // 다시 켜진 뒤 첫 Update에서 그림 상태를 다시 넣어야 하는가. 이유는 OnEnable 주석.
+    private bool _resyncVisual;
+
     /// <summary>거주 영역이 아직 안 들어온 씬에서 쓰는 지면 높이. 인스펙터로 열지 않는다 —
     /// 조절 가능한 바닥이 있으면 그게 다른 오차(발 위치 어긋남 등)의 보정값 노릇을 하다가,
     /// 지면 정의가 바뀌는 순간 보정이 통째로 사라진다. 실제로 그렇게 어긋난 전례가 있다.</summary>
@@ -114,16 +120,35 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     {
         _visual.ApplyStartup();
         _state.StartUp();
+        _started = true;
     }
 
     protected virtual void OnEnable()
     {
         _state.Subscribe();
         _scale.Subscribe();
+
+        // 숨었다 다시 켜지는 것은 도감 소환뿐이고, 소환은 언제나 위에서 떨어진다. 그래서 같은 상태여도 낙하로 다시 들어간다.
+        // "지면 위면 낙하, 아니면 대기"로 고르지 않는 이유: 그 판정은 아직 숨기 전의 거주 영역(옛 지면)으로 하게 된다.
+        // 상태는 여기서 바로 바꾼다 — 곧이어 등록될 때 접지 강제가 돌아도 낙하는 세로를 스스로 쥐어 바닥으로 끌려가지 않는다.
+        // 그림은 다음 Update로 미룬다 — Animator는 자식에 있어 루트의 OnEnable보다 늦게 켜지고, 그 사이 넣은 값은 지워질 수 있다.
+        // 처음 켜질 때는 Start(StartUp)가 시작 상태를 고른다.
+        if (_started)
+        {
+            _resyncVisual = true; // 먼저 켠다 — 아래 상태 전환이 아직 안 켜진 Animator에 값을 넣지 않게(OnStateChanged)
+            _state.ForceEnter(CharacterState.Fall);
+        }
     }
 
     protected virtual void Update()
     {
+        if (_resyncVisual)
+        {
+            _resyncVisual = false;
+            _visual.CancelOneShot();
+            _visual.Play(_state.CurrentStateId);
+        }
+
         var dt = Time.deltaTime;
         _state.Tick(dt);
         _visual.Tick(dt);
@@ -151,6 +176,8 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     private void OnStateChanged(CharacterState state)
     {
+        // 다시 켜진 직후에는 그림을 다음 Update에서 한꺼번에 맞춘다(OnEnable 주석).
+        if (_resyncVisual) return;
         _visual.Play(state);
     }
 

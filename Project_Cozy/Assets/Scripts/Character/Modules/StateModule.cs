@@ -268,6 +268,18 @@ public sealed class StateModule
 
     // ===== State 전환 =====
 
+    /// <summary>
+    /// 지금 상태와 같아도 나갔다가 다시 들어간다. 잠금 상태(WakeUp/Land/Transform)도 끊는다 — 진행 중이던 변신은 취소된다.
+    /// 숨었던 캐릭터가 다시 켜질 때만 쓴다. 꺼지면 그림 쪽 상태가 초기화되는데 이 상태 머신은 옛 상태를 들고 있어서,
+    /// 같은 상태라며 건너뛰면 그림과 상태가 어긋나고 낙하 속도 같은 상태 안의 값도 이어진다.
+    /// 이유는 .claude/rules/unity/character-state-machine.md "낙하와 최초 등장".
+    /// </summary>
+    public void ForceEnter(CharacterState nextId)
+    {
+        _current?.OnExit(_stateOwner);
+        EnterState(nextId);
+    }
+
     public void ChangeState(CharacterState nextId)
     {
         if (_current != null && _current.Id == nextId) return;

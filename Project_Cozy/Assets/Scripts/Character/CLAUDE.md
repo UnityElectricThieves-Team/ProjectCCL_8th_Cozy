@@ -52,7 +52,7 @@ Int 값은 [BaseCharacterAnimatorController.controller](../../Assets/Animations/
 
 ## 현재 들어 있는 것
 
-- **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`) + 공개 메서드(`OnPetInput`/`Request{Sleep,WakeUp,Fall,Pet,Grab,Transform}`). 도감으로 귀환해 꺼져 있는 동안에는 `Update`가 돌지 않으므로, `CharacterOwnership`이 `TickWhileHidden`으로 깨어 있는 시간의 친밀도만 흘려준다. 소녀 변신 금지와 캐릭터 크기는 거주 영역처럼 밖에서 주입받는다(`SetGirlTransformBanned`·`SetUserScale` — `CharacterManager`가 유저 설정을 읽어 건다). 소녀는 정해진 시간(기획 2시간)이 지나면 스스로 동물로 돌아간다. 폼은 저장하지 않아서 재시작하면 언제나 동물이다 — 기획이 "2시간 전에 껐다 켜도 동물로 복귀"로 정해 둔 것이 이것으로 성립하니, 폼을 저장하게 바꾸면 이 규칙을 따로 만들어야 한다.
+- **`BaseCharacterController.cs`** — 메인 컴포넌트, `IStateOwner` 구현. 라이프사이클 + 4 module + 지면(`IsFootOnGround`/`SnapToFloor`) + 거주 영역 + 자체 중력 + virtual hook(`RegisterExtraStates`) + 공개 메서드(`OnPetInput`/`Request{Sleep,WakeUp,Fall,Pet,Grab,Transform}`). 도감으로 귀환해 꺼져 있는 동안에는 `Update`가 돌지 않으므로, `CharacterOwnership`이 `TickWhileHidden`으로 깨어 있는 시간의 친밀도만 흘려준다. 다시 켜지면(소환) 낙하로 강제로 다시 들어가고 그림은 다음 프레임에 맞춘다. 숨어 있는 동안에도 소녀 시간은 흐른다 — 정본은 [character-ownership.md](../../../../.claude/rules/unity/character-ownership.md) 귀환·소환 절. 소녀 변신 금지와 캐릭터 크기는 거주 영역처럼 밖에서 주입받는다(`SetGirlTransformBanned`·`SetUserScale` — `CharacterManager`가 유저 설정을 읽어 건다). 소녀는 정해진 시간(기획 2시간)이 지나면 스스로 동물로 돌아간다. 폼은 저장하지 않아서 재시작하면 언제나 동물이다 — 기획이 "2시간 전에 껐다 켜도 동물로 복귀"로 정해 둔 것이 이것으로 성립하니, 폼을 저장하게 바꾸면 이 규칙을 따로 만들어야 한다.
 - **`CharacterState.cs`** — 통합 13-state enum + `CharacterForm` enum(Animal/Girl).
 - **`IStateOwner.cs`** — State 클래스가 의존할 owner 인터페이스. 정책 수치·물리·지면 판정·ChangeState API 노출. 지면 *높이*는 내주지 않는다 — 판정은 `IsFootOnGround` 하나로 모여 있다. 걷기 목적지용으로 거주 영역의 *가로* 범위(`TryGetWalkRange`)만 내주는 것도 같은 이유다. 사각형을 통째로 주면 아래 변이 곧 지면 높이가 되어 버린다.
 - **`CharacterInteractionRelay.cs`** — 자식 Visual에 부착, 변신 두 방향만 책임 (우클릭 → 동물에서 소녀로, Shift+우클릭 → 소녀에서 동물로). 기획이 방향마다 입력을 따로 정했다. 반대 방향 입력은 무시한다. `IHoverable`은 `OpaqueHoverable`에 양보하고, 좌클릭은 매니저 라우팅을 쓰지 않는다 — `HoldClickEvent`가 자체 폴링으로 누른 시간을 재야 하기 때문이다.
@@ -65,7 +65,7 @@ Int 값은 [BaseCharacterAnimatorController.controller](../../Assets/Animations/
 
 ## 상태 잠금 (기획서 §🛡️ 준수)
 
-`StateModule.IsLockedState`가 `WakeUp`/`Land`/`Transform` 진행 중을 판정. 이들 중에는 `Request*` API 모두 무시 — 모션 중단 방지. Phase 8 이후 `Gift Drop`/`Consume`도 잠금 후보로 추가 검토.
+`StateModule.IsLockedState`가 `WakeUp`/`Land`/`Transform` 진행 중을 판정. 이들 중에는 `Request*` API 모두 무시 — 모션 중단 방지. 예외는 숨었다 다시 켜질 때의 강제 재진입(`ForceEnter`) 하나다 — 이유는 [character-state-machine.md](../../../../.claude/rules/unity/character-state-machine.md) "낙하와 최초 등장". Phase 8 이후 `Gift Drop`/`Consume`도 잠금 후보로 추가 검토.
 
 ## 컨벤션
 
