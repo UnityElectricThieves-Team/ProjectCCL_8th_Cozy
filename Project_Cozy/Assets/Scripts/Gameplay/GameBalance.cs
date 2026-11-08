@@ -43,8 +43,9 @@ public static class GameBalance
 
     // ===== 변신 =====
 
-    /// <summary>소녀로 변신한 뒤 이 시간(초)이 지나면 스스로 동물로 돌아간다. 기획 2시간.</summary>
-    public const float GirlFormSeconds = UsesTestValues ? 60f : 7200f;
+    /// <summary>소녀로 변신한 뒤 이 시간(초)이 지나면 스스로 동물로 돌아간다. 기획 2시간.
+    /// 테스트는 줄이되 수면(<see cref="SleepAfterIdleSeconds"/>)보다 길게 둔다 — 출시 값과 같은 순서(방치하면 먼저 잠든다)로 보이게.</summary>
+    public const float GirlFormSeconds = UsesTestValues ? 300f : 7200f;
 
     // ===== 캐릭터 행동 =====
 
@@ -58,8 +59,8 @@ public static class GameBalance
     public const float GrabHoldSeconds = UsesTestValues ? 0.25f : 2f;
 
     /// <summary>이 시간(초) 동안 아무 입력이 없으면 잠든다. 기획 30분. 테스트는 30분을 기다려서는 수면을 시험할 수 없어
-    /// 2분으로 줄였다 — 대가로 에디터에서 2분만 손을 떼도 캐릭터가 잠든다.</summary>
-    public const float SleepAfterIdleSeconds = UsesTestValues ? 120f : 1800f;
+    /// 1분으로 줄였다 — 대가로 에디터에서 1분만 손을 떼도 캐릭터가 잠든다.</summary>
+    public const float SleepAfterIdleSeconds = UsesTestValues ? 60f : 1800f;
 
     // ===== 해금 =====
 
