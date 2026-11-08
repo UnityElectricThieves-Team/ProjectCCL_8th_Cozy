@@ -162,6 +162,34 @@ public sealed class ShopSystem : MonoBehaviour
     }
 
     /// <summary>
+    /// 놓인 목록의 칸 번호 placedIndex에 있는 장식을 baseX(베이스 공간 px, 그림의 가로 중앙)로 옮긴다. 이동 모드에서 새 자리를 확정한 순간에 부른다.
+    /// 저장하고 <see cref="OwnedChanged"/>를 울린다. 범위 밖이면 아무것도 바꾸지 않고 false.
+    /// </summary>
+    public bool MovePlacedAt(int placedIndex, float baseX)
+    {
+        if (placedIndex < 0 || placedIndex >= _inventory.placed.Count) return false;
+
+        _inventory.placed[placedIndex].x = baseX;
+        Save();
+        OwnedChanged?.Invoke();
+        return true;
+    }
+
+    /// <summary>
+    /// 인벤토리(아직 놓지 않은 것)에 있는 이 장식 하나를 baseX 자리에 놓는다. 이동 모드에서 인벤토리 장식을 놓은 순간에 부른다.
+    /// 이미 가진 것을 놓는 것이라 하트·개수는 그대로이고 놓인 목록에만 더한다. 남은 것이 없으면 false.
+    /// </summary>
+    public bool PlaceFromInventory(string id, float baseX)
+    {
+        if (GetUnplacedCount(id) <= 0) return false;
+
+        _inventory.placed.Add(new PlacedDecorationData { itemId = id, x = baseX });
+        Save();
+        OwnedChanged?.Invoke();
+        return true;
+    }
+
+    /// <summary>
     /// 놓인 목록의 칸 번호 placedIndex에 있는 장식 하나를 영구히 없앤다. 제거 모드에서 놓인 장식을 고른 순간에 부른다.
     /// 놓인 목록에서 빼고 가진 개수를 하나 줄인 뒤 저장하고 <see cref="OwnedChanged"/>를 울린다. 하트는 돌려주지 않는다(기획).
     /// 범위 밖이면 아무것도 바꾸지 않고 false.

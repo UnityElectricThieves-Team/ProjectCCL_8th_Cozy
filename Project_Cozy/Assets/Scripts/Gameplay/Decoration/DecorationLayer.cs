@@ -27,14 +27,15 @@ public readonly struct PlacedDecoration
 /// 그림의 아래 끝을 지면(확정 뷰포트의 아래 변)에 맞춘다.
 ///
 /// 이 컴포넌트는 <b>상점을 모른다</b> — 무엇을 어디에 놓을지는 밖에서 <see cref="SetDecorations"/>로 넣어 준다
-/// (배경의 <see cref="BackgroundStage"/>와 같은 자리). 그래야 이동·회수 모드가 같은 레이어를 그대로 쓸 수 있다.
+/// (배경의 <see cref="BackgroundStage"/>와 같은 자리). 그래야 이동·회수·제거 모드가 같은 레이어를 그대로 쓸 수 있다.
 ///
 /// 목록이 바뀌면 인스턴스를 전부 지우고 다시 만든다. 바뀌는 순간이 배치 모드에서 무언가를 확정할 때뿐이라 드물고 개수도 적다.
 /// 놓인 장식에는 고유 id가 없고, 저장 목록의 칸 번호(<see cref="PlacedDecoration.PlacedIndex"/>)로 가리킨다.
 /// 모드 중에 저장 목록을 바꾸는 것은 모드 자신의 확정뿐이라, 고른 순간부터 확정까지 칸 번호가 바뀌지 않는다.
 ///
-/// 배치 모드가 쓰는 렌더러 상태(호버 강조, 앞으로 당기기)는 이 레이어가 들고 있다. 다시 만들 때(<see cref="Rebuild"/>)
-/// 렌더러가 새로 생기므로, 상태를 두 클래스가 나눠 가지면 재생성 때 어긋난다. 강조는 다시 만들면 비우고, 앞으로 당기기는 지킨다.
+/// 배치 모드가 쓰는 렌더러 상태(호버 강조, 숨김, 앞으로 당기기)는 이 레이어가 들고 있다. 다시 만들 때(<see cref="Rebuild"/>)
+/// 렌더러가 새로 생기므로, 상태를 두 클래스가 나눠 가지면 재생성 때 어긋난다. 강조·숨김은 다시 만들면 비우고, 앞으로 당기기는 지킨다.
+/// 뷰포트가 다시 확정돼 자리를 다시 잡을 때(<see cref="Relayout"/>)도 숨김을 지킨다 — 들고 다니는 중에 원본이 나타나거나 장애물로 잡히지 않게.
 ///
 /// 배치는 뷰포트가 확정될 때(<see cref="ViewportScreenSettings.ViewportConfirmed"/>)와 목록이 바뀔 때만 다시 계산한다.
 /// 매 프레임 하는 일은 없다. 편집 중 프리뷰에는 따라가지 않는다(배경과 같은 판단).
@@ -63,6 +64,7 @@ public sealed class DecorationLayer : MonoBehaviour
     private int _highlightedIndex = -1;      // 그 렌더러의 저장 목록 칸 번호
     private Material _highlightOriginal;     // 강조 전 머티리얼. 강조를 풀 때 돌려준다
     private bool _broughtForward;
+    private int _hiddenIndex = -1;           // 이동 모드가 들고 다니는 동안 감춘 장식의 저장 목록 칸 번호
 
     private ViewportScreenSettings _viewportSettings;
     private BaseSpaceCameraFitter _cameraFitter;
@@ -178,6 +180,25 @@ public sealed class DecorationLayer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 저장 목록 칸 번호 placedIndex의 장식을 감춘다(-1이면 감춘 것을 되살린다). 이동 모드가 장식을 들고 다니는 동안 원본을 감춘다.
+    /// 감춘 장식은 <see cref="CollectBounds"/>·<see cref="TryFindAt"/>에서도 빠진다.
+    /// </summary>
+    public void SetHidden(int placedIndex)
+    {
+        if (placedIndex == _hiddenIndex) return;
+        _hiddenIndex = placedIndex;
+        Relayout();
+    }
+
+    /// <summary>저장 목록 칸 번호 placedIndex의 장식을 그린 프리팹. 이동 모드가 같은 장식을 들고 다니려고 쓴다.</summary>
+    public bool TryGetPrefab(int placedIndex, out GameObject prefab)
+    {
+        int i = FindInstanceIndex(placedIndex);
+        prefab = i >= 0 ? _decorations[i].Prefab : null;
+        return prefab != null;
+    }
+
     private int CurrentSortingOrder => _broughtForward ? BROUGHT_FORWARD_SORTING_ORDER : SORTING_ORDER;
 
     private void ClearHighlight()
@@ -211,6 +232,7 @@ public sealed class DecorationLayer : MonoBehaviour
         _highlighted = null;
         _highlightedIndex = -1;
         _highlightOriginal = null;
+        _hiddenIndex = -1;
 
         for (int i = 0; i < _instances.Count; i++)
         {
@@ -270,7 +292,7 @@ public sealed class DecorationLayer : MonoBehaviour
             pos.y += _area.yMin - bottom.y;
             root.position = pos;
 
-            renderer.enabled = true;
+            renderer.enabled = _decorations[i].PlacedIndex != _hiddenIndex;
         }
     }
 

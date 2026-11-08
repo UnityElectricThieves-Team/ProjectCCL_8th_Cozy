@@ -11,6 +11,7 @@ using UnityEngine.InputSystem;
 /// - <b>고르기</b>: 커서 아래의 놓인 장식을 붉게 강조하고, 좌클릭하면 그 장식을 대상으로 삼는다. 회수·제거·이동.
 /// - <b>들고 다니기</b>: 장식 하나(고스트)를 커서를 따라 지면 위로 움직이며 놓을 수 있는지를 초록/빨강으로 보여주고, 좌클릭으로 놓는다. 설치·이동.
 /// 설치는 들고 다니기만 하고 한 번 놓으면 모드가 끝난다. 회수·제거는 고르기만 하고, 한 번 처리한 뒤에도 고르기 단계에 남는다.
+/// 이동은 고르기 → 들고 다니기(원본은 감춤) → 놓으면 다시 고르기다. 인벤토리 장식도 고르기 단계에서 들어 올 수 있다.
 /// 우클릭·ESC는 언제나 모드 전체를 끝낸다. 들고 있던 것은 그대로 남고, 이미 확정한 것은 되돌리지 않는다.
 ///
 /// <b>상점을 모른다.</b> 무엇을 놓을지(프리팹)와 확정했을 때 할 일(콜백)을 진입 메서드로 받는다.
@@ -98,7 +99,10 @@ public sealed class DecorationPlacementController : MonoBehaviour
     private readonly Vector3[] _corners = new Vector3[4];
     private PointerEventData _pointerData;
 
-    private bool IsCarrying => _ghost != null;
+    // 이동
+    private Action<int, float> _onMovePlaced;
+    private Action<float> _confirmMovePlaced;   // 들고 있는 놓인 장식을 확정할 때. Awake에서 한 번 만든다
+    private int _carriedIndex = -1;             // 들고 있는 놓인 장식의 저장 목록 칸 번호(인벤토리 장식이면 -1)
 
     private void Awake()
     {
@@ -108,6 +112,8 @@ public sealed class DecorationPlacementController : MonoBehaviour
             return;
         }
         Instance = this;
+
+        _confirmMovePlaced = ConfirmMovePlaced;
 
         if (_ghostShader != null)
         {
@@ -178,6 +184,40 @@ public sealed class DecorationPlacementController : MonoBehaviour
     public bool EnterRemove(Action<int> onRemove) => EnterPicking(DecorationMode.Remove, onRemove);
 
     /// <summary>
+    /// 이동 모드에 들어간다. 놓인 장식을 고르면 그 장식을 들고 다니고(원본은 감춤), 새 자리에서 좌클릭하면
+    /// onMovePlaced(저장 목록 칸 번호, 새 가로 위치 베이스 px)를 부른 뒤 고르기 단계로 돌아간다.
+    /// 들고 있는 중 우클릭·ESC면 모드가 끝나고 원본은 원래 자리에 그대로다. 인벤토리 장식은 <see cref="CarryFromInventory"/>로 든다.
+    /// </summary>
+    public bool EnterMove(Action<int, float> onMovePlaced)
+    {
+        if (!CanEnter()) return false;
+
+        _onMovePlaced = onMovePlaced;
+        Begin(DecorationMode.Move);
+        return true;
+    }
+
+    /// <summary>
+    /// 이동 모드의 고르기 단계에서 인벤토리 장식 하나를 들고 다니기 시작한다. 놓으면 onConfirm(가로 위치, 베이스 px)을 부르고 고르기 단계로 돌아간다.
+    /// 이동 모드가 아니거나, 이미 들고 있거나, 입력을 멈춘 중이거나, 그림이 없는 프리팹이면 false.
+    /// </summary>
+    public bool CarryFromInventory(GameObject prefab, Action<float> onConfirm)
+    {
+        if (Mode != DecorationMode.Move || IsCarrying || IsInputPaused) return false;
+        if (prefab == null) return Refuse("장식 프리팹이 비어 있습니다");
+        if (!TryCreateGhost(prefab)) return false;
+
+        StartCarry(onConfirm);
+        return true;
+    }
+
+    /// <summary>장식을 들고 다니기 시작하거나(true) 내려놓았을 때(false) 울린다. 인벤토리가 들고 다니는 동안 슬롯 입력을 막는 데 쓴다.</summary>
+    public event Action<bool> CarryingChanged;
+
+    /// <summary>지금 장식(고스트)을 들고 다니는 중인가.</summary>
+    public bool IsCarrying => _ghost != null;
+
+    /// <summary>
     /// 모드 입력을 잠시 멈추거나(true) 되살린다(false). 수량 팝업처럼 모드 위에 질문을 띄우는 쪽이 건다.
     /// 멈추는 순간 눌림 기록을 비우고, 되살린 그 프레임에는 새 눌림을 기록하지 않는다 — 팝업을 ESC로 닫은 그 ESC가
     /// 같은 프레임에 모드의 눌림으로도 잡혀 모드까지 끝나는 일을 막는다(두 스크립트의 실행 순서에 따라 생긴다).
@@ -207,16 +247,21 @@ public sealed class DecorationPlacementController : MonoBehaviour
     {
         if (!IsActive) return;
 
+        bool wasCarrying = IsCarrying;
         DestroyGhost();
         _onConfirm = null;
         _onPick = null;
+        _onMovePlaced = null;
+        _carriedIndex = -1;
         _hoveredIndex = _pressedIndex = -1;
         IsInputPaused = false;
 
         // 씬을 내릴 때는 레이어가 먼저 파괴됐을 수 있다(Unity null 검사).
+        // 들고 있던 놓인 장식은 숨김을 풀면 원래 자리에 그대로 보인다 — 저장은 확정할 때만 일어나므로 되돌릴 것이 없다.
         if (_layer != null)
         {
             _layer.SetHighlighted(-1);
+            _layer.SetHidden(-1);
             _layer.SetBroughtForward(false);
         }
 
@@ -224,6 +269,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
         WorldInputLock.Release(this);
 
         Mode = DecorationMode.None;
+        if (wasCarrying) CarryingChanged?.Invoke(false);
         ModeChanged?.Invoke(DecorationMode.None);
     }
 
@@ -326,7 +372,26 @@ public sealed class DecorationPlacementController : MonoBehaviour
         _pressedIndex = -1;
         if (index < 0 || index != _hoveredIndex) return;
 
-        _onPick?.Invoke(index);
+        if (Mode == DecorationMode.Move) StartMovePlaced(index);
+        else _onPick?.Invoke(index);
+    }
+
+    // 고른 놓인 장식을 들고 다니기 시작한다. 원본은 감추고 같은 프리팹으로 고스트를 만든다.
+    // 감춘 원본은 겹침 판정에서도 빠져, 원래 자리 근처에 다시 놓을 수 있다.
+    private void StartMovePlaced(int placedIndex)
+    {
+        if (_layer == null || !_layer.TryGetPrefab(placedIndex, out GameObject prefab)) return;
+        if (!TryCreateGhost(prefab)) return;
+
+        _layer.SetHighlighted(-1); // 감추기 전에 강조를 벗긴다 — 감춘 렌더러에 강조 머티리얼이 남지 않게
+        _layer.SetHidden(placedIndex);
+        _carriedIndex = placedIndex;
+        StartCarry(_confirmMovePlaced);
+    }
+
+    private void ConfirmMovePlaced(float baseX)
+    {
+        if (_carriedIndex >= 0) _onMovePlaced?.Invoke(_carriedIndex, baseX);
     }
 
     // ── 들고 다니기 ────────────────────────────────────────
@@ -359,10 +424,11 @@ public sealed class DecorationPlacementController : MonoBehaviour
         }
         else _obstacles.Clear();
 
-        // 들기 시작하게 한 클릭의 뗌으로 바로 놓이지 않게 눌림 기록을 비운다.
+        // 들기 시작하게 한 클릭(놓인 장식을 고른 클릭, 인벤토리 슬롯 클릭)의 뗌으로 바로 놓이지 않게 눌림 기록을 비운다.
         ClearPresses();
         _hasColor = false;
         UpdateGhost();
+        CarryingChanged?.Invoke(true);
     }
 
     private void ConfirmCarry()
@@ -377,8 +443,23 @@ public sealed class DecorationPlacementController : MonoBehaviour
         }
         finally
         {
-            Exit(); // 설치는 한 번 놓으면 끝난다
+            // 설치는 한 번 놓으면 끝난다. 이동은 내려놓고 다시 고르기 단계로 돌아간다.
+            if (Mode == DecorationMode.Install) Exit();
+            else EndCarry();
         }
+    }
+
+    // 고스트를 치우고 감춘 원본을 되살린다. 확정 콜백이 이미 목록을 바꿨으면 레이어가 다시 그려 숨김도 비어 있다.
+    private void EndCarry()
+    {
+        if (!IsCarrying) return;
+
+        DestroyGhost();
+        _onConfirm = null;
+        _carriedIndex = -1;
+        if (_layer != null) _layer.SetHidden(-1);
+        ClearPresses();
+        CarryingChanged?.Invoke(false);
     }
 
     private void DestroyGhost()

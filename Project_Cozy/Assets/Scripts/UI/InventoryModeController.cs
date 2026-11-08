@@ -37,6 +37,8 @@ public sealed class InventoryModeController : MonoBehaviour
     private Action<int> _onRemovePlaced;
     private Action<ShopItemDefinition> _onSlotClicked;
     private Action<DecorationMode> _onModeChanged;
+    private Action<int, float> _onMovePlaced;
+    private Action<bool> _onCarryingChanged;
 
     private bool IsInMode => _mode != DecorationMode.None;
 
@@ -48,6 +50,8 @@ public sealed class InventoryModeController : MonoBehaviour
         _onRemovePlaced = RemovePlaced;
         _onSlotClicked = OnSlotClicked;
         _onModeChanged = OnModeChanged;
+        _onMovePlaced = MovePlaced;
+        _onCarryingChanged = OnCarryingChanged;
         _panel.CanClose = _canClose;
         if (_content != null) _content.SlotClicked += _onSlotClicked;
     }
@@ -62,6 +66,7 @@ public sealed class InventoryModeController : MonoBehaviour
             return;
         }
         _placement.ModeChanged += _onModeChanged;
+        _placement.CarryingChanged += _onCarryingChanged;
         _mode = _placement.Mode;
         RefreshSlotInput();
     }
@@ -70,7 +75,21 @@ public sealed class InventoryModeController : MonoBehaviour
     {
         if (_panel != null && _panel.CanClose == _canClose) _panel.CanClose = null;
         if (_content != null) _content.SlotClicked -= _onSlotClicked;
-        if (_placement != null) _placement.ModeChanged -= _onModeChanged;
+        if (_placement != null)
+        {
+            _placement.ModeChanged -= _onModeChanged;
+            _placement.CarryingChanged -= _onCarryingChanged;
+        }
+    }
+
+    /// <summary>
+    /// [이동] 버튼 OnClick. 놓인 장식을 누르면 들고 다니다 새 자리에 놓고, 인벤토리 장식을 누르면 꺼내 화면에 놓는다.
+    /// 놓을 때마다 다시 고르는 단계로 돌아가고, 우클릭·ESC까지 모드가 이어진다.
+    /// </summary>
+    public void EnterMoveMode()
+    {
+        if (_placement == null || IsInMode) return;
+        _placement.EnterMove(_onMovePlaced);
     }
 
     /// <summary>[회수] 버튼 OnClick. 놓인 장식을 누를 때마다 인벤토리로 거둔다. 우클릭·ESC까지 모드가 이어진다.</summary>
@@ -95,10 +114,14 @@ public sealed class InventoryModeController : MonoBehaviour
         RefreshSlotInput();
     }
 
-    private bool IsSlotInputAllowed()
-        => DecorationModeUi.TargetsInventorySlots(_mode) && _placement != null && !_placement.IsInputPaused;
+    private void OnCarryingChanged(bool carrying) => RefreshSlotInput();
 
-    // 슬롯 입력 허용이 바뀔 수 있는 순간(모드 바뀜, 팝업 열고 닫음)마다 부른다.
+    // 들고 다니는 동안에는 슬롯을 받지 않는다 — 그 클릭은 "여기에 놓기"이고, 인벤토리 위는 놓을 수 없는 자리다.
+    private bool IsSlotInputAllowed()
+        => DecorationModeUi.TargetsInventorySlots(_mode) && _placement != null
+           && !_placement.IsInputPaused && !_placement.IsCarrying;
+
+    // 슬롯 입력 허용이 바뀔 수 있는 순간(모드 바뀜, 팝업 열고 닫음, 들기 시작·끝)마다 부른다.
     private void RefreshSlotInput()
     {
         if (_content != null) _content.SetSlotHoverAllowed(IsSlotInputAllowed());
@@ -122,6 +145,29 @@ public sealed class InventoryModeController : MonoBehaviour
         if (item == null || !IsSlotInputAllowed()) return;
 
         if (_mode == DecorationMode.Remove) RemoveFromInventory(item);
+        else if (_mode == DecorationMode.Move) CarryFromInventory(item);
+    }
+
+    private void MovePlaced(int placedIndex, float baseX)
+    {
+        if (_mode != DecorationMode.Move) return;
+        ShopSystem.Instance?.MovePlacedAt(placedIndex, baseX);
+    }
+
+    // 인벤토리 장식을 들어 화면에 놓는다. 하트 없이 놓인 목록에만 더한다. 칸은 놓는 순간에 줄어든다.
+    private void CarryFromInventory(ShopItemDefinition item)
+    {
+        if (item.decorationPrefab == null)
+        {
+            Debug.LogWarning($"[{nameof(InventoryModeController)}] '{item.id}'에 장식 프리팹이 없어 들 수 없습니다.", this);
+            return;
+        }
+
+        string id = item.id;
+        _placement.CarryFromInventory(item.decorationPrefab, baseX =>
+        {
+            if (_mode == DecorationMode.Move) ShopSystem.Instance?.PlaceFromInventory(id, baseX);
+        });
     }
 
     // 한 개면 바로 지우고, 두 개 이상이면 몇 개를 지울지 묻는다(Figma 인벤토리 장식 삭제 시도).
