@@ -28,7 +28,8 @@ public class BaseSpaceCameraFitter : MonoBehaviour
 {
     // 1 월드 유닛이 몇 베이스 공간 픽셀인가. Unity 기본 임포트 PPU(100)와 같아서,
     // 임포트 PPU를 그대로 둔 스프라이트는 그림 1px = 베이스(마스터 캔버스) 1px가 된다.
-    private const float PIXELS_PER_UNIT = 100f;
+    // 인스턴스 없이 px 길이를 월드로 바꿔야 하는 곳(구름 둥둥 등)을 위해 공개한다.
+    public const float PIXELS_PER_UNIT = 100f;
 
     [Header("Master Canvas (design)")]
     [SerializeField, Tooltip("마스터 캔버스 우하단 모서리의 월드 좌표. 모든 프레이밍의 앵커")]

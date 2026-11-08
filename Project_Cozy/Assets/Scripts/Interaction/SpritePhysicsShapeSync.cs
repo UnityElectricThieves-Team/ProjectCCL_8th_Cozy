@@ -12,7 +12,11 @@ using UnityEngine;
 ///
 /// 콜라이더는 인터랙터블(IClickable 등)과 같은 GameObject에 있어야 하므로, 그림이 자식에 있는 구조(구름)도 있다.
 /// 그 경우 <see cref="_spriteRenderer"/>를 인스펙터에서 연결한다.
-/// 전제: 실행 중 그림과 콜라이더 사이의 상대 위치·배율은 변하지 않는다 — 외곽선은 프레임·반전이 바뀔 때만 다시 담는다.
+/// 외곽선은 프레임·반전이 바뀔 때만 다시 담는다.
+/// 그림이 다른 GameObject면, 담은 뒤 그림이 평행 이동한 만큼을 콜라이더 offset으로 따라간다(구름의 둥둥).
+/// 비교는 콜라이더 로컬 좌표로 한다 — 월드로 비교하면 루트가 끌려간 거리까지 offset에 더해진다.
+/// offset 대입은 물리 도형을 다시 만드는 일이라 값이 바뀌었을 때만 넣는다. 지금 이 동작을 쓰는 곳은 구름뿐이다.
+/// 회전·배율이 바뀌는 것은 따라가지 않는다.
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(PolygonCollider2D))]
@@ -27,11 +31,14 @@ public sealed class SpritePhysicsShapeSync : MonoBehaviour
     private bool _lastFlipX;
     private bool _lastFlipY;
     private bool _dirty;
+    private bool _rendererIsChild;          // 그림이 다른 GameObject라 평행 이동을 따라가야 하는가
+    private Vector2 _bakedRendererOrigin;   // 외곽선을 담을 때 그림 원점의 콜라이더 로컬 위치
 
     private void Awake()
     {
         _collider = GetComponent<PolygonCollider2D>();
         _spriteRenderer = ResolveRenderer();
+        _rendererIsChild = _spriteRenderer != null && _spriteRenderer.transform != transform;
     }
 
     private void OnEnable()
@@ -41,8 +48,24 @@ public sealed class SpritePhysicsShapeSync : MonoBehaviour
         Sync();
     }
 
-    // Animator·SpriteAnimator가 프레임을 바꾼 뒤에 본다. 바뀐 게 없으면 비교 몇 번으로 끝난다.
-    private void LateUpdate() => Sync();
+    // Animator·SpriteAnimator가 프레임을 바꾸고, 연출이 그림을 옮긴 뒤에 본다. 바뀐 게 없으면 비교 몇 번으로 끝난다.
+    private void LateUpdate()
+    {
+        Sync();
+        FollowRendererTranslation();
+    }
+
+    // 담은 뒤 그림이 옮겨 간 만큼을 offset으로. 외곽선을 다시 담지 않으므로 SetPath보다 싸다.
+    private void FollowRendererTranslation()
+    {
+        if (!_rendererIsChild) return;
+
+        Vector2 offset = RendererOriginInColliderSpace() - _bakedRendererOrigin;
+        if (offset != _collider.offset) _collider.offset = offset;
+    }
+
+    private Vector2 RendererOriginInColliderSpace() =>
+        transform.InverseTransformPoint(_spriteRenderer.transform.position);
 
     private void Sync()
     {
@@ -57,6 +80,13 @@ public sealed class SpritePhysicsShapeSync : MonoBehaviour
         _lastSprite = sprite;
         _lastFlipX = flipX;
         _lastFlipY = flipY;
+
+        // 외곽선은 지금 그림 위치로 담으므로(아래 행렬) 따라가던 offset은 0으로 돌린다.
+        if (_rendererIsChild)
+        {
+            _bakedRendererOrigin = RendererOriginInColliderSpace();
+            if (_collider.offset != Vector2.zero) _collider.offset = Vector2.zero;
+        }
 
         int shapeCount = sprite != null ? sprite.GetPhysicsShapeCount() : 0;
         _collider.pathCount = shapeCount;
