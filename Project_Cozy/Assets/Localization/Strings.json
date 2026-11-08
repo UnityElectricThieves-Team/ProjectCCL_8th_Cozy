@@ -152,6 +152,11 @@
 
   "UIPlacement.guide.install": { "ko-KR": "설치", "en-US": "Place", "ja-JP": "設置", "zh-Hans": "放置", "zh-Hant": "放置" },
   "UIPlacement.guide.cancel": { "ko-KR": "취소", "en-US": "Cancel", "ja-JP": "キャンセル", "zh-Hans": "取消", "zh-Hant": "取消" },
+  "UIPlacement.guide.move": { "ko-KR": "이동", "en-US": "Move", "ja-JP": "移動", "zh-Hans": "移动", "zh-Hant": "移動" },
+  "UIPlacement.guide.retrieve": { "ko-KR": "회수", "en-US": "Put Away", "ja-JP": "回収", "zh-Hans": "收回", "zh-Hant": "收回" },
+  "UIPlacement.guide.remove": { "ko-KR": "제거", "en-US": "Discard", "ja-JP": "削除", "zh-Hans": "丢弃", "zh-Hant": "丟棄" },
+  "UIPlacement.remove_count.question": { "ko-KR": "몇개를 삭제할까요?", "en-US": "How many do you want to discard?", "ja-JP": "いくつ削除しますか？", "zh-Hans": "要丢弃几个？", "zh-Hant": "要丟棄幾個？" },
+  "UIPlacement.remove_count.confirm": { "ko-KR": "삭제", "en-US": "Discard", "ja-JP": "削除", "zh-Hans": "丢弃", "zh-Hant": "丟棄" },
   "UIDemo.locked_notice": { "ko-KR": "데모에서는 아직 볼 수 없어요!", "en-US": "This isn't available in the demo yet!", "ja-JP": "デモ版ではまだご覧いただけません！", "zh-Hans": "试玩版中暂时无法查看！", "zh-Hant": "試玩版中暫時無法查看！" },
   "UIPopup.button.confirm": { "ko-KR": "확인", "en-US": "OK", "ja-JP": "OK", "zh-Hans": "确定", "zh-Hant": "確定" },
   "UIPopup.button.cancel": { "ko-KR": "취소", "en-US": "Cancel", "ja-JP": "キャンセル", "zh-Hans": "取消", "zh-Hant": "取消" }
