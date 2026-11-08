@@ -3678,6 +3678,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Row_AdministratorMode
       objectReference: {fileID: 0}
+    - target: {fileID: 8079825760227014891, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
+      propertyPath: _stringId
+      value: UISettings.tooltip.admin_mode
+      objectReference: {fileID: 0}
     - target: {fileID: 8154074238630975652, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
       propertyPath: m_text
       value: "\uAD00\uB9AC\uC790 \uBAA8\uB4DC"
@@ -5269,6 +5273,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Row_CloudCount
       objectReference: {fileID: 0}
+    - target: {fileID: 7093145711800131967, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
+      propertyPath: _stringId
+      value: UISettings.tooltip.cloud_count
+      objectReference: {fileID: 0}
     - target: {fileID: 7162891200579256624, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_text
       value: "\uAD6C\uB984 \uD45C\uAE30"
@@ -5717,6 +5725,10 @@ PrefabInstance:
     - target: {fileID: 5299107104133675250, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
       propertyPath: m_Name
       value: Row_AutoStart
+      objectReference: {fileID: 0}
+    - target: {fileID: 8079825760227014891, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
+      propertyPath: _stringId
+      value: UISettings.tooltip.auto_start
       objectReference: {fileID: 0}
     - target: {fileID: 8154074238630975652, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
       propertyPath: m_text
@@ -6339,6 +6351,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Row_AffinityVisibility
       objectReference: {fileID: 0}
+    - target: {fileID: 7093145711800131967, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
+      propertyPath: _stringId
+      value: UISettings.tooltip.affinity_count
+      objectReference: {fileID: 0}
     - target: {fileID: 7162891200579256624, guid: ecf8c0a05abd6fd46bdf72af3c89037b, type: 3}
       propertyPath: m_text
       value: "\uCE5C\uBC00\uB3C4 \uD45C\uAE30"
@@ -6519,6 +6535,10 @@ PrefabInstance:
     - target: {fileID: 5299107104133675250, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
       propertyPath: m_Name
       value: Row_GirlTransformBanned
+      objectReference: {fileID: 0}
+    - target: {fileID: 8079825760227014891, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
+      propertyPath: _stringId
+      value: UISettings.tooltip.girl_transform_ban
       objectReference: {fileID: 0}
     - target: {fileID: 8154074238630975652, guid: 1cab4949c60b48349bceb2190ad4c595, type: 3}
       propertyPath: m_text
