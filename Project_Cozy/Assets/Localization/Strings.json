@@ -151,6 +151,7 @@
 
   "UIPlacement.guide.install": { "ko-KR": "설치", "en-US": "Place", "ja-JP": "設置", "zh-Hans": "放置", "zh-Hant": "放置" },
   "UIPlacement.guide.cancel": { "ko-KR": "취소", "en-US": "Cancel", "ja-JP": "キャンセル", "zh-Hans": "取消", "zh-Hant": "取消" },
+  "UIDemo.locked_notice": { "ko-KR": "데모에서는 아직 볼 수 없어요!", "en-US": "This isn't available in the demo yet!", "ja-JP": "デモ版ではまだご覧いただけません！", "zh-Hans": "试玩版中暂时无法查看！", "zh-Hant": "試玩版中暫時無法查看！" },
   "UIPopup.button.confirm": { "ko-KR": "확인", "en-US": "OK", "ja-JP": "OK", "zh-Hans": "确定", "zh-Hant": "確定" },
   "UIPopup.button.cancel": { "ko-KR": "취소", "en-US": "Cancel", "ja-JP": "キャンセル", "zh-Hans": "取消", "zh-Hant": "取消" }
 }

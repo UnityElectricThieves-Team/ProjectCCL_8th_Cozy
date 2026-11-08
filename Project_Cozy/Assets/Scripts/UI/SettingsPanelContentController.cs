@@ -25,6 +25,7 @@ public sealed class SettingsPanelContentController : MonoBehaviour
     private const string GirlTransformBanMessageId = "UISettings.popup.girl_transform_ban";
     private const string QuitMessageId = "UISettings.popup.quit";
     private const string ResetGameMessageId = "UISettings.popup.reset_game";
+    private const string DemoLockedMessageId = "UIDemo.locked_notice";
 
     [Header("탭 배경 이미지")]
     [Tooltip("활성/비활성 색을 칠할 탭 배경 이미지.")]
@@ -196,7 +197,18 @@ public sealed class SettingsPanelContentController : MonoBehaviour
             () => { if (_girlTransformBannedToggle != null) _girlTransformBannedToggle.isOn = false; });
     }
 
-    // ===== 일반 탭 아래 버튼. OnClick()에 인스펙터로 건다. [버그&피드백]·[크레딧]은 아직 연결할 화면이 없어 버튼만 있다. =====
+    // ===== 일반 탭 아래 버튼. OnClick()에 인스펙터로 건다. [버그&피드백]·[크레딧]은 데모에서 볼 수 없다는 안내만 띄운다. =====
+
+    // 두 버튼을 하나로 합치지 않는다 — 정식판에서 구글 폼·엔딩 크레딧으로 갈라질 때 프리팹을 다시 고치지 않게.
+    public void OnFeedbackClicked()
+    {
+        if (ConfirmPopup.Instance != null) ConfirmPopup.Instance.ShowNotice(DemoLockedMessageId);
+    }
+
+    public void OnCreditClicked()
+    {
+        if (ConfirmPopup.Instance != null) ConfirmPopup.Instance.ShowNotice(DemoLockedMessageId);
+    }
 
     public void OnQuitClicked()
     {
