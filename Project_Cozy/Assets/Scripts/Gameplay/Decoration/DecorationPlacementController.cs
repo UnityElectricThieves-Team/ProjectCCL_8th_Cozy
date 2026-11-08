@@ -5,20 +5,27 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 장식 설치 모드. 장식 하나(고스트)를 커서를 따라 지면 위로 움직이며 놓을 수 있는지를 초록/빨강으로 보여주고,
-/// 좌클릭으로 확정, 우클릭·ESC로 취소한다. 규약은 .claude/rules/unity/decoration-placement.md.
+/// 장식 배치 모드(설치·이동·회수·제거). 규약은 .claude/rules/unity/decoration-placement.md.
 ///
-/// <b>상점을 모른다.</b> 무엇을 놓을지(프리팹)와 확정했을 때 할 일(콜백)을 <see cref="Enter"/>로 받는다.
-/// 확정 콜백에는 놓을 자리의 가로 위치(베이스 공간 px)만 넘긴다 — 하트 차감·저장은 호출한 쪽의 일이다.
+/// 모드는 두 단계로 움직인다.
+/// - <b>고르기</b>: 커서 아래의 놓인 장식을 붉게 강조하고, 좌클릭하면 그 장식을 대상으로 삼는다. 회수·제거·이동.
+/// - <b>들고 다니기</b>: 장식 하나(고스트)를 커서를 따라 지면 위로 움직이며 놓을 수 있는지를 초록/빨강으로 보여주고, 좌클릭으로 놓는다. 설치·이동.
+/// 설치는 들고 다니기만 하고 한 번 놓으면 모드가 끝난다. 회수·제거는 고르기만 하고, 한 번 처리한 뒤에도 고르기 단계에 남는다.
+/// 우클릭·ESC는 언제나 모드 전체를 끝낸다. 들고 있던 것은 그대로 남고, 이미 확정한 것은 되돌리지 않는다.
+///
+/// <b>상점을 모른다.</b> 무엇을 놓을지(프리팹)와 확정했을 때 할 일(콜백)을 진입 메서드로 받는다.
+/// 콜백에는 놓을 자리의 가로 위치(베이스 공간 px)나 고른 장식의 저장 목록 칸 번호만 넘긴다 — 하트·저장은 호출한 쪽의 일이다.
 ///
 /// 모드 동안 두 가지를 건다. 둘 다 자신을 소유자로 걸고, <see cref="Exit"/>와 OnDisable에서 반드시 푼다.
-/// - 창의 클릭 통과 정지: 투명한 곳에서도 클릭이 우리 창에 와야 그 자리에 놓을 수 있다.
+/// - 창의 클릭 통과 정지: 투명한 곳에서도 클릭이 우리 창에 와야 그 자리에 놓거나 장식을 고를 수 있다.
 /// - 월드 입력 잠금: 모드 중 캐릭터·구름은 반응하지 않는다(기획 "다른 곳은 좌클릭해도 무반응").
-/// 열린 패널을 잠시 숨기는 일은 이 컨트롤러가 하지 않는다. <see cref="ActiveChanged"/>를 듣는 UI 쪽이 맡는다.
+/// 열린 패널을 잠시 숨기는 일은 이 컨트롤러가 하지 않는다. <see cref="ModeChanged"/>를 듣는 UI 쪽이 맡는다.
+/// 이벤트에 모드 값을 실어 보내므로, 듣는 쪽이 이벤트 전후로 <see cref="Mode"/>를 따로 읽는 순서에 기대지 않는다.
 ///
 /// 확정·취소는 <b>모드 안에서 누른 버튼을 뗄 때</b> 처리한다. 월드 폴러와 UI의 ESC 처리는 모두 "누른 순간"에만 반응하므로,
 /// 누를 때 아직 잠겨 있으면 같은 프레임에 클릭이 캐릭터나 패널로 새어 나가지 않는다. 모드에 들어오게 한 클릭(상점 버튼)은
-/// 모드 밖에서 눌렸으므로 그 뗌은 무시된다.
+/// 모드 밖에서 눌렸으므로 그 뗌은 무시된다. 커서가 보이는 UI 위에서 누른 클릭은 뗄 때 아무것도 하지 않는다 —
+/// 패널 헤더를 누른 채 장식 위로 끌어가서 떼면 그 장식이 처리되는 일을 막는다. 고르기는 누른 대상과 뗀 대상이 같을 때만 한다.
 ///
 /// 판정은 콜라이더 없이 사각형 계산으로 한다. 장식에 콜라이더를 달지 않기 때문이다.
 /// 씬에 하나만 둔다.
@@ -33,9 +40,13 @@ public sealed class DecorationPlacementController : MonoBehaviour
 
     private static readonly Color VALID_COLOR = new Color(0f, 0x90 / 255f, 0f, 1f);   // #009000
     private static readonly Color INVALID_COLOR = new Color(1f, 0f, 0f, 1f);           // #FF0000
+    private static readonly Color HOVER_COLOR = new Color(0x64 / 255f, 0f, 0f, 1f);    // #640000
+    private const float HOVER_AMOUNT = 0.3f;   // 기획: 호버한 대상에 #640000 + 투명도 30%
     private static readonly int OVERLAY_COLOR_ID = Shader.PropertyToID("_OverlayColor");
+    private static readonly int OVERLAY_AMOUNT_ID = Shader.PropertyToID("_OverlayAmount");
+    private static readonly int ALPHA_ID = Shader.PropertyToID("_Alpha");
 
-    [Tooltip("고스트에 쓰는 덧입히기 셰이더(Assets/Shaders/SpriteTintOverlay). 필드로 참조해야 빌드에 포함된다.")]
+    [Tooltip("고스트와 호버 강조에 쓰는 덧입히기 셰이더(Assets/Shaders/SpriteTintOverlay). 필드로 참조해야 빌드에 포함된다.")]
     [SerializeField] private Shader _ghostShader;
 
     // 직렬화 필드는 #if UNITY_EDITOR로 감싸지 않는다 — 에디터와 빌드의 직렬화 배치가 달라져 빌드에서 경고·오류가 난다.
@@ -44,10 +55,12 @@ public sealed class DecorationPlacementController : MonoBehaviour
     [Tooltip("인스펙터 ⋮ 메뉴 'Test: Enter'로 들고 들어갈 장식 프리팹. 확정해도 저장하지 않고 로그만 남긴다.")]
     [SerializeField] private GameObject _testPrefab;
 
-    /// <summary>설치 모드에 들어가거나(true) 나올 때(false) 울린다. 강제 종료(OnDisable) 때도 울린다.</summary>
-    public event Action<bool> ActiveChanged;
+    /// <summary>모드에 들어가거나 나올 때(<see cref="DecorationMode.None"/>) 울린다. 강제 종료(OnDisable) 때도 울린다.</summary>
+    public event Action<DecorationMode> ModeChanged;
 
-    public bool IsActive { get; private set; }
+    public DecorationMode Mode { get; private set; }
+
+    public bool IsActive => Mode != DecorationMode.None;
 
     private ViewportScreenSettings _viewportSettings;
     private BaseSpaceCameraFitter _cameraFitter;
@@ -56,17 +69,25 @@ public sealed class DecorationPlacementController : MonoBehaviour
     private WindowsCursorToUnityScreen _cursorSource;
     private DecorationLayer _layer;
 
+    // 들고 다니기
     private Material _ghostMaterial;
     private GameObject _ghost;
     private SpriteRenderer _ghostRenderer;
     private Action<float> _onConfirm;
-
     private Rect _area;                 // 확정 뷰포트의 월드 사각형(지면 = 아래 변)
     private float _ghostBaseX;          // 지금 고스트 자리의 가로 위치(베이스 공간 px)
     private bool _isValid;
     private bool _hasColor;             // 색을 한 번이라도 칠했는가(첫 프레임은 무조건 칠한다)
 
+    // 고르기
+    private Material _hoverMaterial;
+    private Action<int> _onPick;
+    private int _hoveredIndex = -1;     // 커서 아래 놓인 장식의 저장 목록 칸 번호
+    private int _pressedIndex = -1;     // 좌클릭을 누른 순간의 대상
+
+    private bool _cursorOverUi;         // 이번 프레임 커서가 보이는 UI 위인가
     private bool _leftPressedInMode;
+    private bool _leftPressedOverUi;
     private bool _rightPressedInMode;
     private bool _escPressedInMode;
 
@@ -75,6 +96,8 @@ public sealed class DecorationPlacementController : MonoBehaviour
     private readonly List<RaycastResult> _uiHits = new();
     private readonly Vector3[] _corners = new Vector3[4];
     private PointerEventData _pointerData;
+
+    private bool IsCarrying => _ghost != null;
 
     private void Awake()
     {
@@ -85,7 +108,17 @@ public sealed class DecorationPlacementController : MonoBehaviour
         }
         Instance = this;
 
-        if (_ghostShader != null) _ghostMaterial = new Material(_ghostShader);
+        if (_ghostShader != null)
+        {
+            _ghostMaterial = new Material(_ghostShader);
+
+            // 호버 강조는 같은 셰이더로 색만 다르게, 투명하지 않게 덧입힌다. SpriteRenderer.color는 곱하기라 덧입히기가 안 된다.
+            // 만드는 것은 여기지만 렌더러에 씌우고 벗기는 것은 레이어다 — 렌더러 상태를 레이어 한 곳이 들게 하려는 것이다.
+            _hoverMaterial = new Material(_ghostShader);
+            _hoverMaterial.SetColor(OVERLAY_COLOR_ID, HOVER_COLOR);
+            _hoverMaterial.SetFloat(OVERLAY_AMOUNT_ID, HOVER_AMOUNT);
+            _hoverMaterial.SetFloat(ALPHA_ID, 1f);
+        }
     }
 
     private void Start()
@@ -98,6 +131,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
         _cursorSource = FindFirstObjectByType<WindowsCursorToUnityScreen>();
         _layer = FindFirstObjectByType<DecorationLayer>();
         if (_cameraFitter != null) _camera = _cameraFitter.GetComponent<Camera>();
+        if (_layer != null) _layer.SetHighlightMaterial(_hoverMaterial);
     }
 
     private void OnDisable()
@@ -112,6 +146,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
     private void OnDestroy()
     {
         if (_ghostMaterial != null) Destroy(_ghostMaterial);
+        if (_hoverMaterial != null) Destroy(_hoverMaterial);
         if (Instance == this) Instance = null;
     }
 
@@ -119,65 +154,86 @@ public sealed class DecorationPlacementController : MonoBehaviour
     /// 설치 모드에 들어간다. 확정하면 onConfirm(놓을 자리의 가로 위치, 베이스 공간 px)을 부르고 모드를 나온다.
     /// 들어가지 못하면 경고만 남기고 false — 프리팹이 없거나, 이미 모드 중이거나, 뷰포트 편집 중이거나, 뷰포트 준비 전일 때.
     /// </summary>
-    public bool Enter(GameObject prefab, Action<float> onConfirm)
+    public bool EnterInstall(GameObject prefab, Action<float> onConfirm)
     {
         if (prefab == null) return Refuse("장식 프리팹이 비어 있습니다");
-        if (IsActive) return Refuse("이미 설치 모드입니다");
-        if (_viewportSettings == null || _cameraFitter == null || _camera == null) return Refuse("뷰포트·카메라를 찾지 못했습니다");
-        if (!_viewportSettings.IsReady) return Refuse("뷰포트가 아직 준비되지 않았습니다");
-        if (_viewportSettings.IsEditing) return Refuse("뷰포트 편집 중에는 설치할 수 없습니다");
-        if (_ghostMaterial == null) return Refuse("고스트 셰이더가 연결되지 않았습니다");
+        if (!CanEnter()) return false;
+        if (!TryCreateGhost(prefab)) return false;
 
-        _ghost = Instantiate(prefab, transform);
-        _ghostRenderer = _ghost.GetComponentInChildren<SpriteRenderer>();
-        if (_ghostRenderer == null || _ghostRenderer.sprite == null)
-        {
-            Destroy(_ghost);
-            _ghost = null;
-            return Refuse($"장식 프리팹 '{prefab.name}'에 그림이 없습니다");
-        }
-        _ghostRenderer.sharedMaterial = _ghostMaterial;
-        _ghostRenderer.sortingOrder = GHOST_SORTING_ORDER;
-
-        _onConfirm = onConfirm;
-        _area = _cameraFitter.BaseRectToWorld(_viewportSettings.Viewport, _viewportSettings.BaseSpaceSize);
-        CollectBlockedAreas();
-        if (_layer != null) _layer.CollectBounds(_obstacles);
-        else _obstacles.Clear();
-
-        if (_windowManager != null) _windowManager.AcquireClickThroughSuspend(this);
-        WorldInputLock.Acquire(this);
-
-        _leftPressedInMode = _rightPressedInMode = _escPressedInMode = false;
-        _hasColor = false;
-        IsActive = true;
-        UpdateGhost();
-
-        ActiveChanged?.Invoke(true);
+        Begin(DecorationMode.Install);
+        StartCarry(onConfirm);
         return true;
     }
 
-    /// <summary>설치 모드를 나온다. 확정·취소·강제 종료가 모두 이 한 곳을 지난다. 여러 번 불려도 한 번만 동작한다.</summary>
+    /// <summary>
+    /// 회수 모드에 들어간다. 놓인 장식을 고르면 onRecall(저장 목록 칸 번호)을 부르고 고르기 단계에 남는다. 우클릭·ESC로 끝난다.
+    /// </summary>
+    public bool EnterRecall(Action<int> onRecall) => EnterPicking(DecorationMode.Recall, onRecall);
+
+    /// <summary>모드를 나온다. 취소·설치 확정·강제 종료가 모두 이 한 곳을 지난다. 여러 번 불려도 한 번만 동작한다.</summary>
     public void Exit()
     {
         if (!IsActive) return;
-        IsActive = false;
 
-        if (_ghost != null) Destroy(_ghost);
-        _ghost = null;
-        _ghostRenderer = null;
+        DestroyGhost();
         _onConfirm = null;
+        _onPick = null;
+        _hoveredIndex = _pressedIndex = -1;
+
+        // 씬을 내릴 때는 레이어가 먼저 파괴됐을 수 있다(Unity null 검사).
+        if (_layer != null)
+        {
+            _layer.SetHighlighted(-1);
+            _layer.SetBroughtForward(false);
+        }
 
         if (_windowManager != null) _windowManager.ReleaseClickThroughSuspend(this);
         WorldInputLock.Release(this);
 
-        ActiveChanged?.Invoke(false);
+        Mode = DecorationMode.None;
+        ModeChanged?.Invoke(DecorationMode.None);
+    }
+
+    private bool EnterPicking(DecorationMode mode, Action<int> onPick)
+    {
+        if (!CanEnter()) return false;
+
+        _onPick = onPick;
+        Begin(mode);
+        return true;
+    }
+
+    private bool CanEnter()
+    {
+        if (IsActive) return Refuse("이미 배치 모드입니다");
+        if (_viewportSettings == null || _cameraFitter == null || _camera == null) return Refuse("뷰포트·카메라를 찾지 못했습니다");
+        if (!_viewportSettings.IsReady) return Refuse("뷰포트가 아직 준비되지 않았습니다");
+        if (_viewportSettings.IsEditing) return Refuse("뷰포트 편집 중에는 배치 모드에 들어갈 수 없습니다");
+        if (_ghostMaterial == null) return Refuse("덧입히기 셰이더가 연결되지 않았습니다");
+        return true;
+    }
+
+    // 모든 모드가 공통으로 거는 것. 설치를 뺀 모드는 놓인 장식을 캐릭터 앞으로 당긴다(기획 이동/회수/제거 모드).
+    private void Begin(DecorationMode mode)
+    {
+        if (_windowManager != null) _windowManager.AcquireClickThroughSuspend(this);
+        WorldInputLock.Acquire(this);
+
+        ClearPresses();
+        _hoveredIndex = _pressedIndex = -1;
+        if (mode != DecorationMode.Install && _layer != null) _layer.SetBroughtForward(true);
+
+        Mode = mode;
+        ModeChanged?.Invoke(mode);
     }
 
     private void Update()
     {
         if (!IsActive) return;
-        UpdateGhost();
+
+        if (IsCarrying) UpdateGhost();
+        else UpdatePicking();
+
         HandleInput();
     }
 
@@ -188,7 +244,12 @@ public sealed class DecorationPlacementController : MonoBehaviour
 
         if (mouse != null)
         {
-            if (mouse.leftButton.wasPressedThisFrame) _leftPressedInMode = true;
+            if (mouse.leftButton.wasPressedThisFrame)
+            {
+                _leftPressedInMode = true;
+                _leftPressedOverUi = _cursorOverUi;
+                _pressedIndex = IsCarrying ? -1 : _hoveredIndex;
+            }
             if (mouse.rightButton.wasPressedThisFrame) _rightPressedInMode = true;
         }
         // 포커스가 없을 때의 ESC는 다른 앱의 것이다(UIManager와 같은 원칙).
@@ -200,19 +261,97 @@ public sealed class DecorationPlacementController : MonoBehaviour
         if (_leftPressedInMode && mouse != null && mouse.leftButton.wasReleasedThisFrame)
         {
             _leftPressedInMode = false;
-            if (!_isValid) return; // 놓을 수 없는 자리에서는 무반응
+            if (_leftPressedOverUi) return; // UI 위에서 누른 클릭은 그 UI의 것이다
 
-            Action<float> confirm = _onConfirm;
-            float baseX = _ghostBaseX;
-            try
-            {
-                confirm?.Invoke(baseX);
-            }
-            finally
-            {
-                Exit();
-            }
+            if (IsCarrying) ConfirmCarry();
+            else Pick();
         }
+    }
+
+    // ── 고르기 ─────────────────────────────────────────────
+
+    private void UpdatePicking()
+    {
+        Vector2 screen = ReadCursorScreen();
+        _cursorOverUi = IsPointerOverUI(screen);
+
+        int index = -1;
+        if (!_cursorOverUi && _layer != null)
+        {
+            Vector3 world = _camera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, 0f));
+            _layer.TryFindAt(world, out index);
+        }
+        _hoveredIndex = index;
+        if (_layer != null) _layer.SetHighlighted(index);
+    }
+
+    // 누른 대상과 뗀 대상이 같을 때만 처리한다. 다르거나 빈 곳이면 무반응(기획 "다른 곳은 좌클릭해도 무반응").
+    private void Pick()
+    {
+        int index = _pressedIndex;
+        _pressedIndex = -1;
+        if (index < 0 || index != _hoveredIndex) return;
+
+        _onPick?.Invoke(index);
+    }
+
+    // ── 들고 다니기 ────────────────────────────────────────
+
+    // 고스트를 만든다. 그림이 없는 프리팹이면 만들지 않고 false.
+    private bool TryCreateGhost(GameObject prefab)
+    {
+        _ghost = Instantiate(prefab, transform);
+        _ghostRenderer = _ghost.GetComponentInChildren<SpriteRenderer>();
+        if (_ghostRenderer == null || _ghostRenderer.sprite == null)
+        {
+            DestroyGhost();
+            return Refuse($"장식 프리팹 '{prefab.name}'에 그림이 없습니다");
+        }
+        _ghostRenderer.sharedMaterial = _ghostMaterial;
+        _ghostRenderer.sortingOrder = GHOST_SORTING_ORDER;
+        return true;
+    }
+
+    // 만들어 둔 고스트를 들고 다니기 시작한다. 판정에 쓸 뷰포트·금지 영역·다른 장식은 이때 한 번 모은다.
+    private void StartCarry(Action<float> onConfirm)
+    {
+        _onConfirm = onConfirm;
+        _area = _cameraFitter.BaseRectToWorld(_viewportSettings.Viewport, _viewportSettings.BaseSpaceSize);
+        CollectBlockedAreas();
+        if (_layer != null)
+        {
+            _layer.SetHighlighted(-1);
+            _layer.CollectBounds(_obstacles);
+        }
+        else _obstacles.Clear();
+
+        // 들기 시작하게 한 클릭의 뗌으로 바로 놓이지 않게 눌림 기록을 비운다.
+        ClearPresses();
+        _hasColor = false;
+        UpdateGhost();
+    }
+
+    private void ConfirmCarry()
+    {
+        if (!_isValid) return; // 놓을 수 없는 자리에서는 무반응
+
+        Action<float> confirm = _onConfirm;
+        float baseX = _ghostBaseX;
+        try
+        {
+            confirm?.Invoke(baseX);
+        }
+        finally
+        {
+            Exit(); // 설치는 한 번 놓으면 끝난다
+        }
+    }
+
+    private void DestroyGhost()
+    {
+        if (_ghost != null) Destroy(_ghost);
+        _ghost = null;
+        _ghostRenderer = null;
     }
 
     // 고스트를 커서 가로 위치로 옮겨 지면에 앉히고, 놓을 수 있는지 판정해 색을 칠한다.
@@ -234,7 +373,8 @@ public sealed class DecorationPlacementController : MonoBehaviour
         Bounds b = _ghostRenderer.bounds;
         _ghostBaseX = _cameraFitter.WorldXToBaseX(b.center.x, _viewportSettings.BaseSpaceSize);
 
-        bool valid = IsInsideViewport(b) && !OverlapsAny(b) && !IsPointerOverUI(screen);
+        _cursorOverUi = IsPointerOverUI(screen);
+        bool valid = IsInsideViewport(b) && !OverlapsAny(b) && !_cursorOverUi;
         if (!_hasColor || valid != _isValid)
         {
             _isValid = valid;
@@ -262,7 +402,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
         return false;
     }
 
-    // 금지 영역(우측 메뉴창 등)을 월드 사각형으로 바꿔 둔다. 창 배치가 바뀌었을 수 있으니 모드에 들어올 때마다 다시 한다.
+    // 금지 영역(우측 메뉴창 등)을 월드 사각형으로 바꿔 둔다. 창 배치가 바뀌었을 수 있으니 들기 시작할 때마다 다시 한다.
     // UI 캔버스는 Screen Space Overlay라 GetWorldCorners가 곧 화면 px다.
     private void CollectBlockedAreas()
     {
@@ -278,7 +418,15 @@ public sealed class DecorationPlacementController : MonoBehaviour
         }
     }
 
-    // 커서가 보이는 UI 위에 있으면 놓지 않는다 — 그 UI의 클릭과 설치가 동시에 일어나기 때문이다.
+    // ── 공통 ───────────────────────────────────────────────
+
+    private void ClearPresses()
+    {
+        _leftPressedInMode = _leftPressedOverUi = _rightPressedInMode = _escPressedInMode = false;
+        _pressedIndex = -1;
+    }
+
+    // 커서가 보이는 UI 위인가. 그 UI의 클릭과 모드의 동작이 동시에 일어나지 않게 한다.
     // 인자 없는 IsPointerOverGameObject는 클릭 통과를 오가는 이 앱에서 낡은 값을 줄 수 있어, 좌표를 직접 넣어 레이캐스트한다(WindowManager와 같은 방식).
     private bool IsPointerOverUI(Vector2 screen)
     {
@@ -304,7 +452,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
 
     private bool Refuse(string reason)
     {
-        Debug.LogWarning($"[{nameof(DecorationPlacementController)}] 설치 모드에 들어가지 않습니다: {reason}", this);
+        Debug.LogWarning($"[{nameof(DecorationPlacementController)}] 배치 모드에 들어가지 않습니다: {reason}", this);
         return false;
     }
 
@@ -312,7 +460,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
     [ContextMenu("Test: Enter")]
     private void TestEnter()
     {
-        Enter(_testPrefab, baseX => Debug.Log($"[{nameof(DecorationPlacementController)}] 테스트 확정: x = {baseX:F1} (베이스 px)", this));
+        EnterInstall(_testPrefab, baseX => Debug.Log($"[{nameof(DecorationPlacementController)}] 테스트 확정: x = {baseX:F1} (베이스 px)", this));
     }
 #endif
 }

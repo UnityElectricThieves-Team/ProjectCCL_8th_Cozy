@@ -222,7 +222,7 @@ public sealed class ShopPanelContentController : MonoBehaviour
         // 하트 차감·소유 기록·놓인 목록·저장은 ShopSystem이 한 번에 처리한다 — 여기서 TrySpend를 직접 부르면
         // 하트만 빠져나가고 산 물건이 아무 데도 남지 않는다(배경 탭이 BackgroundSystem에 맡기는 것과 같은 구조).
         // 성공하면 OwnedChanged가 울려 Refresh와 장식 레이어 갱신으로 이어진다.
-        placement.Enter(item.decorationPrefab, baseX => ShopSystem.Instance?.TryBuyAndPlace(item, baseX));
+        placement.EnterInstall(item.decorationPrefab, baseX => ShopSystem.Instance?.TryBuyAndPlace(item, baseX));
     }
 
     private void UpdateTabVisuals()

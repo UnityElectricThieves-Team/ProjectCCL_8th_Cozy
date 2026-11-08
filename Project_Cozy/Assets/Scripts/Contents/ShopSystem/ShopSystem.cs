@@ -146,6 +146,22 @@ public sealed class ShopSystem : MonoBehaviour
     }
 
     /// <summary>
+    /// 놓인 목록의 칸 번호 placedIndex에 있는 장식 하나를 인벤토리로 회수한다. 회수 모드에서 장식을 고른 순간에 부른다.
+    /// 회수 순번을 찍고 저장한 뒤 <see cref="OwnedChanged"/>를 울린다. 하트는 돌려주지 않는다. 범위 밖이면 아무것도 바꾸지 않고 false.
+    /// </summary>
+    public bool RecallPlacedAt(int placedIndex)
+    {
+        if (placedIndex < 0 || placedIndex >= _inventory.placed.Count) return false;
+
+        string id = _inventory.placed[placedIndex].itemId;
+        _inventory.placed.RemoveAt(placedIndex);
+        MarkRecalled(id);
+        Save();
+        OwnedChanged?.Invoke();
+        return true;
+    }
+
+    /// <summary>
     /// 이 장식을 마지막으로 회수한 순번. 클수록 최근이다. 회수한 적이 없으면(옛 파일 포함) -1.
     /// 인벤토리가 "가장 최근에 회수한 것부터 앞"으로 정렬하는 데 쓴다.
     /// </summary>

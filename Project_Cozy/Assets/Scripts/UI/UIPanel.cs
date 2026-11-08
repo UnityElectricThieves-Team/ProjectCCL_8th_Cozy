@@ -8,8 +8,9 @@ using UnityEngine;
 /// 설정 등 구체 패널은 이 클래스를 상속해 내용물을 채운다.
 ///
 /// 보이는지는 두 상태로 정한다 — 열려 있는가(<see cref="IsOpen"/>)와 잠시 숨겨졌는가(<see cref="SetSuspended"/>).
-/// 장식 설치 모드처럼 패널을 닫지 않고 잠시 비켜 두는 경우가 있어서다. 숨김을 열림과 같은 값(알파)으로 표현하면,
+/// 장식 배치 모드처럼 패널을 닫지 않고 잠시 비켜 두는 경우가 있어서다. 숨김을 열림과 같은 값(알파)으로 표현하면,
 /// 숨긴 동안 열린 패널이 "닫힌 패널"로 읽혀 열림 상태의 뜻이 깨진다.
+/// 장식 이동·회수·제거 모드는 그 입력 대상이 들어 있는 패널을 남긴다(<see cref="VisibleDuringInventoryModes"/>).
 ///
 /// 모달 패널(<see cref="IsModal"/>, 확인 팝업)이 떠 있는 동안 다른 패널은 보이되 조작되지 않는다(<see cref="SetBlocked"/>).
 /// </summary>
@@ -18,6 +19,10 @@ public class UIPanel : MonoBehaviour
 {
     [SerializeField, Tooltip("켜면 이 패널이 열려 있는 동안 다른 패널을 열 수 없고, 열린 패널도 조작되지 않는다. 확인 팝업용.")]
     private bool _isModal;
+
+    [SerializeField]
+    [Tooltip("장식 이동·회수·제거 중에도 보임. 켜면 장식 이동·회수·제거 모드 동안 숨기지 않는다. 그 모드의 입력 대상이 들어 있는 패널(인벤토리, 수량 팝업)만 켠다. 설치 모드와 뷰포트 편집 중에는 그래도 숨는다.")]
+    private bool _visibleDuringInventoryModes;
 
     private CanvasGroup _group;
     private bool _isOpen;
@@ -28,6 +33,9 @@ public class UIPanel : MonoBehaviour
     public bool IsOpen => _isOpen;
 
     public bool IsModal => _isModal;
+
+    /// <summary>장식 이동·회수·제거 모드 동안에도 숨기지 않는 패널인가. 숨길지는 <see cref="UIManager"/>가 정한다.</summary>
+    public bool VisibleDuringInventoryModes => _visibleDuringInventoryModes;
 
     /// <summary>
     /// 지금 보이고 조작할 수 있는가 — 열려 있고, 잠시 숨겨지지 않았고, 모달에 막히지 않았다.

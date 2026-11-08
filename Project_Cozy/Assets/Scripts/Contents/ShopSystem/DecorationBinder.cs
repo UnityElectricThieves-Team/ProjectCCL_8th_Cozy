@@ -101,7 +101,8 @@ public sealed class DecorationBinder : MonoBehaviour
         {
             ShopItemDefinition item = FindItem(placed[i].itemId);
             if (item == null || item.decorationPrefab == null) continue;
-            _buffer.Add(new PlacedDecoration(item.decorationPrefab, placed[i].x));
+            // 저장 목록의 칸 번호를 함께 싣는다. 건너뛴 칸이 있으면 레이어의 칸 번호와 달라지기 때문이다.
+            _buffer.Add(new PlacedDecoration(item.decorationPrefab, placed[i].x, i));
         }
         _layer.SetDecorations(_buffer);
     }
