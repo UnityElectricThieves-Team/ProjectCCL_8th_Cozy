@@ -17,7 +17,7 @@
 - `DraggableObject2D.cs` — 마우스 좌클릭 드래그로 transform 위치를 갱신. 매니저 라우팅 대신 자체로 `Mouse.current`를 폴링하고 자기 `Collider2D.OverlapPoint`로 press 시작을 판정. `PressEnded(bool wasDrag)` 이벤트로 드래그/클릭 분리 신호를 같은 GameObject의 `IClickable` 측에 공급. `SetBounds`로 영역을 받으면 그 경계에서 멈춘다(구름은 뷰포트 안). 누르는 동안 `WindowManager`의 클릭 통과를 자기 소유로 멈춘다 — 경계에 걸려 커서가 투명한 곳에서 버튼을 떼도 드래그가 끝나게 하려는 것이다.
 - `InputInteractionTestProbe.cs` — `IRightClickable`을 뺀 3개 인터페이스를 구현하고 `Debug.Log`만 하는 시연/테스트용. 인터랙터블 셋업이 맞는지 확인할 때 GameObject에 부착.
 - `OpaqueHoverable.cs` — `IHoverable`을 받아 sprite 픽셀 알파를 검사한 뒤, *불투명 영역에서만* UnityEvent(`_onOpaqueHoverEnter` / `_onOpaqueHoverExit`)로 다시 발사. 사용 조건은 같은 GameObject에 `Collider2D` + sprite 텍스처의 `Read/Write Enabled = true`. 이벤트를 구독하지 않고 *지금 호버 중인가*만 필요한 쪽을 위해 `IsOpaqueHovered`도 노출한다.
-- `SpritePhysicsShapeSync.cs` — 인터랙터블이 아니라 콜라이더 모양 도우미. 지금 보이는 스프라이트 프레임의 외곽선(physics shape)을 같은 GameObject의 `PolygonCollider2D`에 옮겨 담는다. 프레임·좌우 반전이 바뀔 때만 다시 담는다. 그림이 자식에 있으면 `_spriteRenderer`를 연결한다. 반전 처리는 `SpriteFlip.cs`를 `OpaqueHoverable`과 같이 쓴다.
+- `SpritePhysicsShapeSync.cs` — 인터랙터블이 아니라 콜라이더 모양 도우미. 지금 보이는 스프라이트 프레임의 외곽선(physics shape)을 같은 GameObject의 `PolygonCollider2D`에 옮겨 담는다. 프레임·좌우 반전이 바뀔 때만 다시 담는다. 그림이 자식에 있으면 `_spriteRenderer`를 연결하고, 그 자식이 평행 이동하면(구름의 둥둥) 콜라이더 offset으로 따라간다. 반전 처리는 `SpriteFlip.cs`를 `OpaqueHoverable`과 같이 쓴다.
 - `HoldClickEvent.cs` — 좌클릭을 *누른 순간*과 *누른 채 임계 시간에 도달한 순간* 둘로 갈라 UnityEvent로 발사. 캐릭터의 쓰담·잡기가 이걸로 갈린다. `DraggableObject2D`와 같은 이유로 매니저 라우팅 대신 자체 폴링한다 — 매니저는 down에서 한 번 쏘고 끝이라 *누르고 있는 대상*을 붙잡아 두지 못한다. `OpaqueHoverable`이 같이 있으면 알파 판정을 빌려 쓴다.
 
 ## 컨벤션
@@ -27,7 +27,7 @@
 - **잠금은 소유자별로 걸고 푼다.** 의미론은 `WindowManager`의 창 동작 정지와 같다([Platform/CLAUDE.md](../Platform/CLAUDE.md)의 "창 동작 정지"). 같은 owner의 중복 걸기·풀기는 한 번으로 치고, 걸지 않은 owner로 풀어도 무해하며, 모든 소유자가 풀어야 풀린다. 건 컴포넌트는 `OnDisable`에서도 자기 것을 푼다 — 남으면 캐릭터가 영영 반응하지 않는다. 이 프로젝트는 도메인 리로드 없이 플레이 모드에 들어가므로, 정적 집합은 플레이 시작마다 비운다.
 - **인터페이스는 작게.** 새 상호작용 종류가 생길 때마다 인터페이스를 늘리기보다, 기존 넷 중 의미가 맞는 게 있으면 재사용. 정말 새 의미면 같은 파일에 추가.
 - **매니저는 *어떤 객체가 무엇을 하는지* 모른다.** 매니저는 콜라이더 위치와 sortingOrder만 본다. 구체 행동은 인터페이스 구현 측. 매니저에 게임 로직을 직접 넣지 말 것.
-- **포인터-이동-없음 최적화의 전제.** `_skipRescanWhenPointerUnchanged = true`는 *마우스가 정지 중인 동안 인터랙터블도 움직이지 않는다*는 전제 위에 있다. 펫이 마우스 밑으로 *알아서* 들어오는 시나리오가 생기면 끄거나, 인터랙터블 측에서 "위치 변경" 신호를 매니저에 push하는 메커니즘 추가. 알려진 예외: `SpritePhysicsShapeSync`를 단 오브젝트는 애니메이션만으로 판정 모양이 바뀌어서, 커서가 멈춰 있으면 매니저의 호버 통지가 한 박자 늦을 수 있다. 바탕화면 클릭 통과는 `WindowManager`가 매 프레임 따로 판정하므로 영향이 없다.
+- **포인터-이동-없음 최적화의 전제.** `_skipRescanWhenPointerUnchanged = true`는 *마우스가 정지 중인 동안 인터랙터블도 움직이지 않는다*는 전제 위에 있다. 펫이 마우스 밑으로 *알아서* 들어오는 시나리오가 생기면 끄거나, 인터랙터블 측에서 "위치 변경" 신호를 매니저에 push하는 메커니즘 추가. 알려진 예외: `SpritePhysicsShapeSync`를 단 오브젝트는 애니메이션만으로 판정 모양이 바뀌고, 구름은 둥둥 떠다녀 판정 위치까지 스스로 바뀐다. 그래서 커서가 멈춰 있으면 매니저의 호버 통지가 한 박자 늦을 수 있다(구름은 호버를 받지 않는다). 바탕화면 클릭 통과는 `WindowManager`가 매 프레임 따로 판정하므로 영향이 없다.
 - 그 외 네이밍 규칙은 [Scripts/CLAUDE.md](../CLAUDE.md) + [.claude/rules/unity/csharp.md](../../../../.claude/rules/unity/csharp.md) 참조.
 
 ## 추후 후보 (지금은 만들지 않음)
