@@ -34,6 +34,13 @@ OS 의존 코드(Win32, WinAPI, DwmApi, LL Hook 등) 격리 레이어.
 - LL 훅은 받은 메시지에 반복 표시가 없으므로 눌린 키 상태를 직접 들고, 그 상태는 훅 스레드에서만 고친다. keyup을 놓치면 그 키를 1회 덜 셀 수 있지만 덜 세는 쪽으로만 틀리므로 받아들인다.
 - 아직 이 약속을 따르지 않는 소스가 있다 — [Platform/CLAUDE.md](../../../Project_Cozy/Assets/Scripts/Platform/CLAUDE.md)의 Input 절 참조.
 
+### OutFocus 훅의 static 이벤트는 `BeforeSceneLoad` 이후에 구독한다
+
+- OutFocus 훅(`OutFocusKeyHook`·`OutFocusMouseHook`)은 도메인 리로드를 끈 에디터를 위해 `SubsystemRegistration` 단계에서 자기 static 이벤트를 비운다.
+- 그래서 `[RuntimeInitializeOnLoadMethod]`로 구독하는 static 클래스는 `BeforeSceneLoad` 이후 단계에서 구독한다. 같은 `SubsystemRegistration`에서 구독하면 클래스끼리의 실행 순서가 정해져 있지 않아, 훅이 나중에 돌면 구독이 지워진다.
+- 이 실수는 빌드에서만 드러난다. 에디터에서는 훅 자체가 꺼져 있어(Editor 보호) 창 밖 입력이 원래 들어오지 않기 때문이다. 자기 상태의 초기화(지난 구독 정리 등)는 `SubsystemRegistration`에서 해도 된다.
+- 컴포넌트가 `OnEnable`에서 구독하는 것은 이 문제와 무관하다.
+
 ### 책임 경계
 
 - 게임 로직(구름 클릭, 친밀도, 변신 등)이 **P/Invoke를 직접 호출하면 안 된다.** Platform/ 안에서 wrapper API를 노출하고, 게임 로직은 wrapper만 호출.

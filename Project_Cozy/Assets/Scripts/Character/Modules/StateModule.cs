@@ -59,12 +59,7 @@ public sealed class StateModule
              "거주 영역이 이 값의 두 배보다 좁으면 반대쪽 끝으로 간다.")]
     [SerializeField] private float _walkMinDistance = 0.054f;
 
-    [Header("Sleep policy")]
-    [Tooltip("이 시간 동안 유저 입력이 하나도 없으면 취침에 들어간다(초).\n" +
-             "확률 판정은 없다 — 시간이 차면 잔다. 기획 확정값은 30분 = 1800초.\n" +
-             "캐릭터를 향한 좌클릭은 이 시간을 초기화하지만 캐릭터를 깨우지는 않는다.\n" +
-             "동작을 확인할 때는 5초쯤으로 낮췄다가 되돌릴 것.")]
-    [SerializeField] private float _idleThresholdSeconds = 1800f;
+    // 잠드는 무입력 시간(기획 30분)도 GameBalance에 있다. 마지막 입력 시각은 캐릭터마다 들지 않고 UserInputClock 하나가 든다.
 
     [Header("Debug")]
     [SerializeField] private bool _logStateChanges = true;
@@ -77,7 +72,13 @@ public sealed class StateModule
     private BaseCharacterState _current;
 
     private IDisposable _anyButtonSubscription;
-    private float _lastInputAt;
+
+    /// <summary>
+    /// 사용자가 잠들 만큼 오래 입력하지 않았는가. 수면 정책의 판정식은 이것 하나다 — 화면 안 캐릭터가 잠드는 조건이자,
+    /// 화면 밖(도감으로 귀환한) 캐릭터의 시간 친밀도를 멈추는 조건이다. 둘이 같은 식을 써야 잠드는 조건이 바뀌어도 갈라지지 않는다.
+    /// 입력을 캐릭터마다 세지 않고 <see cref="UserInputClock"/> 하나로 재는 이유는 그 클래스 주석.
+    /// </summary>
+    public static bool IsUserIdle => UserInputClock.SecondsSinceLastInput >= GameBalance.SleepAfterIdleSeconds;
 
     public float WalkSpeed => _walkSpeed;
     public float RunSpeed => _runSpeed;
@@ -126,8 +127,6 @@ public sealed class StateModule
     {
         var startId = _stateOwner.IsFootOnGround() ? CharacterState.Idle : CharacterState.Fall;
         EnterState(startId);
-
-        _lastInputAt = Time.time;
     }
 
     public void Subscribe()
@@ -160,7 +159,7 @@ public sealed class StateModule
 
         // Sleep 정책 — 확률 판정은 없다. 무입력이 임계에 닿으면 잔다.
         if (CurrentStateId == CharacterState.Sleep) return;
-        if (Time.time - _lastInputAt < _idleThresholdSeconds) return;
+        if (!IsUserIdle) return;
         RequestSleep();
     }
 
@@ -269,6 +268,18 @@ public sealed class StateModule
 
     // ===== State 전환 =====
 
+    /// <summary>
+    /// 지금 상태와 같아도 나갔다가 다시 들어간다. 잠금 상태(WakeUp/Land/Transform)도 끊는다 — 진행 중이던 변신은 취소된다.
+    /// 숨었던 캐릭터가 다시 켜질 때만 쓴다. 꺼지면 그림 쪽 상태가 초기화되는데 이 상태 머신은 옛 상태를 들고 있어서,
+    /// 같은 상태라며 건너뛰면 그림과 상태가 어긋나고 낙하 속도 같은 상태 안의 값도 이어진다.
+    /// 이유는 .claude/rules/unity/character-state-machine.md "낙하와 최초 등장".
+    /// </summary>
+    public void ForceEnter(CharacterState nextId)
+    {
+        _current?.OnExit(_stateOwner);
+        EnterState(nextId);
+    }
+
     public void ChangeState(CharacterState nextId)
     {
         if (_current != null && _current.Id == nextId) return;
@@ -295,19 +306,17 @@ public sealed class StateModule
     private void OnOutFocusKey(Key _) => RecordInput(false);
     private void OnOutFocusMouseButton(MouseButton _) => RecordInput(false);
 
-    /// <summary>입력이 있었음을 기록한다. 두 가지를 서로 다른 조건으로 처리한다.
+    /// <summary>입력이 있었을 때 기상 여부를 정한다.
     ///
-    /// **무입력 타이머는 어떤 입력이든 초기화한다.** 유저가 캐릭터를 만지고 있다는 것도 자리에
-    /// 있다는 뜻이다. 여기서 갱신하지 않으면 쓰담이 끝나 대기로 돌아온 직후에 "마지막 입력이
-    /// 30분 전"이라는 이유로 곧바로 다시 잠든다.
+    /// **무입력 시각은 여기서 기록하지 않는다.** 캐릭터를 향한 클릭까지 포함해 모든 입력이
+    /// <see cref="UserInputClock"/>에 기록된다. 유저가 캐릭터를 만지고 있다는 것도 자리에 있다는 뜻이라,
+    /// 그것까지 세야 쓰담이 끝나 대기로 돌아온 직후에 곧바로 다시 잠들지 않는다.
     ///
     /// **기상은 캐릭터를 향하지 않은 입력에만 시킨다.** 확정안은 자는 캐릭터를 좌클릭하면
     /// 깨우는 대신 쓰담이 뜨도록 정하고 있다. 쓰담 모션이 끝나면 대기로 나오므로 결과적으로는
     /// 일어나지만, 기상 모션을 거치지 않는다는 점이 다르다.</summary>
     private void RecordInput(bool aimedAtCharacter)
     {
-        _lastInputAt = Time.time;
-
         if (aimedAtCharacter) return;
         if (CurrentStateId == CharacterState.Sleep) RequestWakeUp();
     }

@@ -8,7 +8,9 @@ using UnityEngine;
 ///
 /// - 무엇을 스폰할지(prefab)는 호출자가 인자로 넘긴다. 총량 캡(<see cref="_maxCount"/>)은
 ///   prefab 종류와 무관하게 공통 적용된다.
-/// - 캐릭터가 Destroy되면 슬롯이 비어 재스폰 가능.
+/// - 캐릭터가 Destroy되면 슬롯이 비어 재스폰 가능. 파괴하지 않고 숨기는 캐릭터(도감으로 귀환)는 <see cref="Unregister"/>로
+///   목록에서 뺀다 — 들어오는 문은 <see cref="Register"/>, 나가는 문은 파괴 또는 <see cref="Unregister"/>.
+///   그래서 살아있는 목록과 동시 존재 상한은 "화면에 나온" 캐릭터만 센다.
 /// - **추적 목록에 들어오는 문은 <see cref="Register"/> 하나다.** 스폰이든 씬 배치든 여기를 지나므로,
 ///   "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 새는 경로가 없다.
 /// - 씬 배치 캐릭터도 시작 시 찾아 <see cref="Register"/>를 지나므로 규칙에서 빠지지 않는다.
@@ -102,6 +104,14 @@ public class CharacterManager : MonoBehaviour
         _alive.Add(character);
         ApplyUserSettings(character);
         Registered?.Invoke(character);
+    }
+
+    /// <summary>추적 목록에서 뺀다. 파괴하지 않고 화면에서 숨길 때(도감 귀환) 부른다. 다시 보일 때는 <see cref="Register"/>를
+    /// 다시 부르면 된다 — 그때 유저 설정과 거주 영역(<see cref="Registered"/>)이 다시 걸려 숨어 있는 동안 바뀐 것을 따라잡는다.</summary>
+    public void Unregister(GameObject character)
+    {
+        if (character == null) return;
+        _alive.Remove(character);
     }
 
     /// <summary>설정이 바뀔 때 살아있는 캐릭터 전부에 다시 건다. 어느 항목이 바뀌었는지는 모르지만,
