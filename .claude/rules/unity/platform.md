@@ -26,6 +26,14 @@ OS 의존 코드(Win32, WinAPI, DwmApi, LL Hook 등) 격리 레이어.
 - 콜백 내부에서 `UnityEngine` API 직접 호출 금지.
 - 패턴: 콜백에서 `ConcurrentQueue`로 enqueue → 메인 스레드 `Update`에서 dequeue.
 
+### 입력 소스는 누른 순간만 알린다
+
+- 키 입력을 방송하는 소스는 "안 눌림→눌림"일 때만 알린다. 키를 꾹 눌러 생기는 OS 자동 반복은 보내지 않는다.
+- 이유: 기획(Figma 스폰 기운 표)이 "꾹 눌러도 1회"이고, 창 안 경로(`InputSystem.onAnyButtonPress`)와 마우스 훅이 이미 누른 순간만 알린다. 소스 하나만 반복을 섞으면 같은 "눌림" 이벤트가 경로마다 다른 뜻이 된다.
+- 반복은 소비자가 아니라 출처(훅)에서 거른다. 소비자마다 거르면 한 곳이 빠진다.
+- LL 훅은 받은 메시지에 반복 표시가 없으므로 눌린 키 상태를 직접 들고, 그 상태는 훅 스레드에서만 고친다. keyup을 놓치면 그 키를 1회 덜 셀 수 있지만 덜 세는 쪽으로만 틀리므로 받아들인다.
+- 아직 이 약속을 따르지 않는 소스가 있다 — [Platform/CLAUDE.md](../../../Project_Cozy/Assets/Scripts/Platform/CLAUDE.md)의 Input 절 참조.
+
 ### 책임 경계
 
 - 게임 로직(구름 클릭, 친밀도, 변신 등)이 **P/Invoke를 직접 호출하면 안 된다.** Platform/ 안에서 wrapper API를 노출하고, 게임 로직은 wrapper만 호출.
