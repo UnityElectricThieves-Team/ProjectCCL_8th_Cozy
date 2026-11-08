@@ -1049,6 +1049,7 @@ GameObject:
   - component: {fileID: 319457227}
   - component: {fileID: 319457229}
   - component: {fileID: 319457230}
+  - component: {fileID: 319457231}
   m_Layer: 0
   m_Name: OverlayWindow
   m_TagString: Untagged
@@ -1142,6 +1143,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ViewportLivingAreaBinder
   _viewportSettings: {fileID: 319457227}
   _cameraFitter: {fileID: 788830929}
+--- !u!114 &319457231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319457221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f2bce2faa678af4d89127d849b42be4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameCursor
+  _texture: {fileID: 2800000, guid: 9e32e18acdca05b4e91355fed92a41ce, type: 3}
+  _hotspot: {x: 20, y: 22}
+  _viewportSettings: {fileID: 319457227}
 --- !u!1 &337577130
 GameObject:
   m_ObjectHideFlags: 0

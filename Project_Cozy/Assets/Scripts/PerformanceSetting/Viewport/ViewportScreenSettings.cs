@@ -452,8 +452,9 @@ public class ViewportScreenSettings : MonoBehaviour
             Mathf.RoundToInt(_baseSpaceScreenRect.height * (float)MasterCanvasWidthPx / _baseSpaceScreenRect.width));
     }
 
-    /// <summary>베이스 px 하나가 화면에서 몇 px인가 = 작업 영역 폭 / 마스터 캔버스 폭. 4K에서 1.</summary>
-    private float ScreenPxPerBasePx => _baseSpaceScreenRect.width / (float)MasterCanvasWidthPx;
+    /// <summary>베이스 px 하나가 화면에서 몇 px인가 = 작업 영역 폭 / 마스터 캔버스 폭. 4K에서 1.
+    /// UI CanvasScaler와 같은 배율이고, 줌은 곱하지 않는다. 바뀌는 때는 <see cref="ViewportConfirmed"/>가 울릴 때뿐이다.</summary>
+    public float ScreenPxPerBasePx => _baseSpaceScreenRect.width / (float)MasterCanvasWidthPx;
 
     private RectInt WorkAreaPxToBasePx(RectInt r)
     {
