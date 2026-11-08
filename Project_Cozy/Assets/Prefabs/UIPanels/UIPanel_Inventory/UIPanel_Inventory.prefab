@@ -120,7 +120,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6040790507254143687}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4483653369110560636}
+        m_TargetAssemblyTypeName: InventoryModeController, Assembly-CSharp
+        m_MethodName: EnterRemoveMode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1160629107174910880
 GameObject:
   m_ObjectHideFlags: 0
@@ -1019,7 +1031,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6839858969814239649}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4483653369110560636}
+        m_TargetAssemblyTypeName: InventoryModeController, Assembly-CSharp
+        m_MethodName: EnterRecallMode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6669551663428047475
 GameObject:
   m_ObjectHideFlags: 0
@@ -1140,7 +1164,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 137678679635557141}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4483653369110560636}
+        m_TargetAssemblyTypeName: InventoryModeController, Assembly-CSharp
+        m_MethodName: EnterMoveMode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &7013983856269718719
 GameObject:
   m_ObjectHideFlags: 0
@@ -1454,10 +1490,6 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uC778\uBCA4\uD1A0\uB9AC"
       objectReference: {fileID: 0}
-    - target: {fileID: 8195852062261182608, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
-      propertyPath: _stringId
-      value: UIInventory.title
-      objectReference: {fileID: 0}
     - target: {fileID: 720830970228027634, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1485,6 +1517,10 @@ PrefabInstance:
     - target: {fileID: 1219180686310085713, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_PreferredHeight
       value: 145
+      objectReference: {fileID: 0}
+    - target: {fileID: 1238764298296425085, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
+      propertyPath: _visibleDuringInventoryModes
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2814391997367924186, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_Name
@@ -1606,6 +1642,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8195852062261182608, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
+      propertyPath: _stringId
+      value: UIInventory.title
+      objectReference: {fileID: 0}
     - target: {fileID: 8527690896502415968, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1646,6 +1686,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 8028410454299327737}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2814391997367924186, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4483653369110560636}
     - targetCorrespondingSourceObject: {fileID: 6689786341084868828, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4387670103014550997}
@@ -1674,6 +1717,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventoryPanelContentController
   _content: {fileID: 6880758001699179102}
   _slotPrefab: {fileID: 2785571026810645887, guid: 6620eb5000c16964daa361bae3973e59, type: 3}
+--- !u!1 &5726117890261353869 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2814391997367924186, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
+  m_PrefabInstance: {fileID: 7528324771698225239}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4483653369110560636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5726117890261353869}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 637c728b3ae4dac48b25a50656519794, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryModeController
+  _content: {fileID: 4387670103014550997}
 --- !u!224 &7095734079702827173 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 720830970228027634, guid: 869541cdd23e6e54fb0b35c140057d34, type: 3}
