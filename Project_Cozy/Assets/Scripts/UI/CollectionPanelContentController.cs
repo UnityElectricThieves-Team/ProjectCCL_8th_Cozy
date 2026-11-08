@@ -32,7 +32,7 @@ public sealed class CollectionPanelContentController : MonoBehaviour
     [Tooltip("중앙 풀 일러스트.")]
     [SerializeField] private Image _illustration;
     [SerializeField] private TMP_Text _nameText;
-    [Tooltip("나이·키·생일·취미를 여러 줄로 보여줄 텍스트.")]
+    [Tooltip("도감 프로필 여러 줄(UICollection.profile 틀)을 보여줄 텍스트.")]
     [SerializeField] private TMP_Text _infoText;
     [Tooltip("누적 친밀도. 캐릭터 기록에서 읽는다.")]
     [SerializeField] private TMP_Text _affinityText;
@@ -201,9 +201,10 @@ public sealed class CollectionPanelContentController : MonoBehaviour
         var birthday = entry.Birthday == DateTime.MinValue
             ? "-"
             : LocalizationManager.Localize("UICollection.birthday_value", ("MONTH", entry.Birthday.Month), ("DAY", entry.Birthday.Day));
+        var breed = string.IsNullOrEmpty(entry.Breed) ? "-" : entry.Breed;
         var hobby = string.IsNullOrEmpty(entry.Hobby) ? "-" : entry.Hobby;
 
-        return LocalizationManager.Localize("UICollection.profile", ("AGE", age), ("HEIGHT", height), ("BIRTHDAY", birthday), ("HOBBY", hobby));
+        return LocalizationManager.Localize("UICollection.profile", ("BREED", breed), ("AGE", age), ("HEIGHT", height), ("BIRTHDAY", birthday), ("HOBBY", hobby));
     }
 
 #if UNITY_EDITOR

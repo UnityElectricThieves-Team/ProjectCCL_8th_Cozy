@@ -67,6 +67,8 @@ namespace Assets.Scripts.Contents.CollectionSystem.Model
     }
     /// <summary>
     /// 도감 내의 Collection 데이터 구조
+    /// 필드를 바꾸면 툴을 Publish 구성으로 다시 빌드해 Tool/Bin을 같은 커밋에 넣는다.
+    /// 그러지 않으면 옛 툴로 내보낼 때 새 필드가 사라진다(옛 모델에 없는 속성은 읽을 때 버려진다).
     /// </summary>
     public class CollectionData
     {
@@ -77,6 +79,8 @@ namespace Assets.Scripts.Contents.CollectionSystem.Model
         // 해금에 필요한 누적 스폰 기운. 미해금 화면에 안내로 보여준다.
         public int RequiredSpawnEnergy { get; set; } = 0;
         public string Name { get; set; } = string.Empty;
+        // 품종. 도감 프로필 첫 줄에 보인다.
+        public string Breed { get; set; } = string.Empty;
         public int Age { get; set; } = 0;
         public int Height { get; set; } = 0;
         public DateTime Birthday { get; set; } = DateTime.MinValue;
