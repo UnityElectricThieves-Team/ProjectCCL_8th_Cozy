@@ -86,7 +86,6 @@ MonoBehaviour:
   _hoverGate: {fileID: 0}
   _gravity: 2.16
   _state:
-    _idleDurationRange: {x: 5, y: 6}
     _idleActionProbability: 0.1
     _idleActionDuration: 1.2
     _petDuration: 1.2
@@ -104,10 +103,6 @@ MonoBehaviour:
     _girlOverride: {fileID: 22100000, guid: dc96266d532d3d84c8c16520cd609833, type: 2}
     _startForm: 0
     _startState: 0
-  _affinity:
-    _humanTransformThreshold: 100
-    _affinityPerPet: 10
-    _affinityHardCap: 100000000
   _scale:
     _baseScale: {x: 0.5, y: 0.5, z: 1}
 --- !u!1 &5691119776310040808
@@ -123,7 +118,6 @@ GameObject:
   - component: {fileID: 5591664294296824350}
   - component: {fileID: 4528180928151775974}
   - component: {fileID: 3200586724842295907}
-  - component: {fileID: 1571698509915394532}
   - component: {fileID: 4492434332927753031}
   - component: {fileID: 8019377413400777602}
   - component: {fileID: 5211965052187702407}
@@ -265,20 +259,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterInteractionRelay
   _owner: {fileID: 0}
---- !u!114 &1571698509915394532
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5691119776310040808}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6eee7b475867c4459780307eba0efd9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BridgeAffinityHeart
-  _affinityStepSize: 100
-  _heartsPerStep: 10
 --- !u!114 &4492434332927753031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -291,7 +271,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d6f084bff55dbf4588dfb3ef9b66c78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HoldClickEvent
-  _holdSeconds: 0.25
   _opaqueGate: {fileID: 0}
   _cursorSource: {fileID: 0}
   _camera: {fileID: 0}

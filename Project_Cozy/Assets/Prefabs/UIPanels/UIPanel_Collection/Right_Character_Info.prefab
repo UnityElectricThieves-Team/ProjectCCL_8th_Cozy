@@ -1667,7 +1667,6 @@ GameObject:
   - component: {fileID: 8369035793545215088}
   - component: {fileID: 2188242180817320076}
   - component: {fileID: 4368321796138690392}
-  - component: {fileID: 6372837160949369182}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1794,19 +1793,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &6372837160949369182
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7871224000642493247}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91b3586112a0df3418bb6b44effc193f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
-  _stringId: UICollection.button.return
 --- !u!1 &8469437816330155377
 GameObject:
   m_ObjectHideFlags: 0
