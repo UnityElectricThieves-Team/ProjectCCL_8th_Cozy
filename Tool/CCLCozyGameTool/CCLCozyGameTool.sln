@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37411.7 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectionTool", "CollectionTool\CollectionTool.csproj", "{F1077EB3-9F67-4953-83E0-C7F83D0DA98D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Publish|Any CPU = Publish|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F1077EB3-9F67-4953-83E0-C7F83D0DA98D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1077EB3-9F67-4953-83E0-C7F83D0DA98D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1077EB3-9F67-4953-83E0-C7F83D0DA98D}.Publish|Any CPU.ActiveCfg = Publish|Any CPU
+		{F1077EB3-9F67-4953-83E0-C7F83D0DA98D}.Publish|Any CPU.Build.0 = Publish|Any CPU
+		{F1077EB3-9F67-4953-83E0-C7F83D0DA98D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1077EB3-9F67-4953-83E0-C7F83D0DA98D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C90FDB2-D5F8-4A99-88FA-814D6C7593A3}
+	EndGlobalSection
+EndGlobal

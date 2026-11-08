@@ -9,7 +9,7 @@
 // 사용:
 //   1) 씬에 CharacterManager가 배치되어 있어야 함.
 //   2) 이 컴포넌트의 Character Prefab 슬롯에 스폰할 프리팹, Test Anchor 슬롯에
-//      기준 위치(예: 별 StarKK)를 할당(비우면 이 GameObject 위치).
+//      기준 위치(예: 구름 오브젝트)를 할당(비우면 이 GameObject 위치).
 //   3) Play → 좌하단 "Spawn Character" 버튼 클릭 시마다 anchor 근처에 스폰.
 //
 // 버튼은 ColorKey 창의 Normal 모드에서 클릭된다(핑크=비검정 픽셀이라 통과 안 함).
@@ -27,7 +27,7 @@ public class CharacterSpawner : MonoBehaviour
     private GameObject characterPrefab;
 
     [Header("스폰 위치")]
-    [SerializeField, Tooltip("스폰 기준 위치(예: 별 StarKK). 비우면 이 GameObject 위치.")]
+    [SerializeField, Tooltip("스폰 기준 위치(예: 구름 오브젝트). 비우면 이 GameObject 위치.")]
     private Transform _testAnchor;
     [SerializeField, Tooltip("매 스폰마다 흩뿌리는 반경 — 겹침 방지")]
     private float spawnSpread = 1.5f;

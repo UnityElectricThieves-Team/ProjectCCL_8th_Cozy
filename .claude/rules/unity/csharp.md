@@ -1,13 +1,13 @@
 ---
 paths:
-  - "**/*.cs"
+  - "Project_Cozy/Assets/Scripts/**/*.cs"
 ---
 
 # C# / Unity 스크립트 규칙
 
 ## 코딩 스타일
 
-- **Namespace 미사용.** 팀 컨벤션에 따라 글로벌 namespace 유지.
+- **Namespace 미사용.** 글로벌 namespace를 유지한다. 게임 코드(`Assets/Scripts/`)에만 적용되는 규칙이다 — `Tool/`의 WPF 프로젝트는 `namespace CollectionTool`을 쓴다.
 - 클래스명·메서드명은 `PascalCase`, 필드·로컬은 `camelCase`.
 - 새 파일 추가 시 같은 폴더의 기존 파일 스타일을 그대로 따른다 (인덴트, 중괄호 위치 등).
 

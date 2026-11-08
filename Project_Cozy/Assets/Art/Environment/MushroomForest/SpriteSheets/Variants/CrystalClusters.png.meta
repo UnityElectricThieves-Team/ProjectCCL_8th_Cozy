@@ -1,0 +1,516 @@
+fileFormatVersion: 2
+guid: 509e5e45e945eb948b8f006170321c6e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3430555505941350446
+    second: CrystalClusters_0
+  - first:
+      213: 7374988230563092853
+    second: CrystalClusters_1
+  - first:
+      213: 6875111992523098648
+    second: CrystalClusters_2
+  - first:
+      213: 2104360757257408758
+    second: CrystalClusters_3
+  - first:
+      213: -2431220344136072022
+    second: CrystalClusters_4
+  - first:
+      213: -5437987772375137236
+    second: CrystalClusters_5
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CrystalClusters_0
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 500
+        width: 632
+        height: 490
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline:
+      - - {x: -205, y: -28}
+        - {x: -215, y: -29}
+        - {x: -221, y: -35}
+        - {x: -220, y: -38}
+        - {x: -209, y: -38}
+        - {x: -209, y: -39}
+        - {x: -206, y: -42}
+        - {x: -211, y: -38}
+        - {x: -221, y: -38}
+        - {x: -230, y: -31}
+        - {x: -268, y: -39}
+        - {x: -307, y: -74}
+        - {x: -316, y: -110}
+        - {x: -316, y: -129}
+        - {x: -298, y: -131}
+        - {x: -296, y: -125}
+        - {x: -296.73334, y: -119.13333}
+        - {x: -293, y: -121}
+        - {x: -290, y: -120}
+        - {x: -285, y: -164}
+        - {x: -285, y: -168.2}
+        - {x: -289, y: -169}
+        - {x: -301, y: -172}
+        - {x: -316, y: -184}
+        - {x: -316, y: -198}
+        - {x: -168, y: -238}
+        - {x: -132, y: -245}
+        - {x: 271, y: -245}
+        - {x: 316, y: -187}
+        - {x: 316, y: -53}
+        - {x: 254, y: -32}
+        - {x: 221, y: -48}
+        - {x: 218, y: -50}
+        - {x: 210, y: -52}
+        - {x: 208, y: -54}
+        - {x: 206, y: -54}
+        - {x: 210, y: -50}
+        - {x: 217, y: -50}
+        - {x: 221, y: -47}
+        - {x: 225, y: -45}
+        - {x: 228, y: -42}
+        - {x: 239, y: -23}
+        - {x: 217, y: 105}
+        - {x: 135, y: 50}
+        - {x: 90, y: 65}
+        - {x: 88, y: 64}
+        - {x: 88, y: 65}
+        - {x: 94, y: 65}
+        - {x: 97, y: 68}
+        - {x: 97, y: 70}
+        - {x: 95, y: 72}
+        - {x: 104, y: 79}
+        - {x: 134, y: 109}
+        - {x: 116, y: 171}
+        - {x: 75, y: 245}
+        - {x: 1, y: 245}
+        - {x: -79, y: 205}
+        - {x: -273, y: 126}
+        - {x: -280, y: 4}
+        - {x: -215, y: -28}
+        - {x: -201, y: -26}
+        - {x: -199, y: -29}
+        - {x: -195, y: -33}
+        - {x: -195, y: -35}
+        - {x: -201, y: -28}
+      - - {x: 76, y: 62.5}
+        - {x: 76, y: 63}
+        - {x: 77, y: 62}
+      - - {x: -181, y: -61}
+        - {x: -182, y: -60}
+        - {x: -180, y: -61}
+      - - {x: -227, y: -119}
+        - {x: -227, y: -117}
+        - {x: -226, y: -115}
+        - {x: -226, y: -119}
+        - {x: -225.33333, y: -119.83333}
+      - - {x: -223, y: -123}
+        - {x: -224, y: -121.5}
+        - {x: -222, y: -124}
+      - - {x: -227, y: -129}
+        - {x: -226, y: -131}
+        - {x: -228, y: -129}
+      - - {x: 277.5, y: -160}
+        - {x: 279, y: -161}
+        - {x: 279, y: -161.8}
+      - - {x: 281, y: -177}
+        - {x: 281, y: -176}
+        - {x: 289, y: -176}
+        - {x: 289, y: -177}
+        - {x: 290, y: -178}
+      - - {x: -191, y: -42}
+        - {x: -187, y: -46}
+        - {x: -187, y: -50}
+        - {x: -186, y: -52}
+        - {x: -188, y: -52}
+        - {x: -187, y: -47}
+        - {x: -189, y: -45}
+        - {x: -195, y: -38}
+        - {x: -195, y: -36}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e2805e98e08cb9f20800000000000000
+      internalID: 3430555505941350446
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrystalClusters_1
+      rect:
+        serializedVersion: 2
+        x: 666
+        y: 768
+        width: 358
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5795669a8b8395660800000000000000
+      internalID: 7374988230563092853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrystalClusters_2
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 19
+        width: 600
+        height: 418
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline:
+      - - {x: 194, y: -189}
+        - {x: 245, y: -180}
+        - {x: 300, y: -99}
+        - {x: 300, y: -43}
+        - {x: 271, y: -28}
+        - {x: 213, y: -21}
+        - {x: 186, y: -32}
+        - {x: 181.9697, y: -34.878784}
+        - {x: 180, y: -27}
+        - {x: 176, y: -20}
+        - {x: 173, y: -19}
+        - {x: 170, y: -22}
+        - {x: 169, y: -24}
+        - {x: 166.33333, y: -24}
+        - {x: 169, y: -22}
+        - {x: 173, y: -17}
+        - {x: 196, y: 31}
+        - {x: 181.86916, y: 19.392517}
+        - {x: 181, y: 22}
+        - {x: 178, y: 22}
+        - {x: 176, y: 20}
+        - {x: 176, y: 18}
+        - {x: 177.88235, y: 16.117645}
+        - {x: 168, y: 8}
+        - {x: 163.66667, y: 3.6666718}
+        - {x: 165, y: 7}
+        - {x: 172, y: 28}
+        - {x: 187, y: 114}
+        - {x: 63, y: 204}
+        - {x: -79, y: 204}
+        - {x: -81, y: 203}
+        - {x: -205, y: 29}
+        - {x: -198, y: 8}
+        - {x: -176, y: -17}
+        - {x: -172, y: -15}
+        - {x: -170, y: -13}
+        - {x: -170, y: -5}
+        - {x: -169, y: -24}
+        - {x: -276, y: 38}
+        - {x: -289, y: 32}
+        - {x: -300, y: -44}
+        - {x: -300, y: -116}
+        - {x: -299, y: -117}
+        - {x: -295, y: -115}
+        - {x: -291, y: -111}
+        - {x: -287, y: -103}
+        - {x: -287, y: -99}
+        - {x: -285, y: -99}
+        - {x: -286, y: -100}
+        - {x: -287, y: -104}
+        - {x: -285, y: -109}
+        - {x: -282, y: -109}
+        - {x: -266, y: -165}
+        - {x: -208, y: -191}
+        - {x: -140, y: -206}
+        - {x: -89, y: -209}
+        - {x: 85, y: -209}
+      - - {x: 151, y: -8}
+        - {x: 155, y: -5}
+        - {x: 159.14815, y: -1.3703766}
+        - {x: 151, y: -11}
+      - - {x: 184, y: -15}
+        - {x: 183, y: -12}
+        - {x: 180, y: -12}
+        - {x: 178, y: -14}
+        - {x: 179, y: -17}
+        - {x: 182, y: -17}
+      - - {x: 109, y: -23}
+        - {x: 110, y: -22}
+        - {x: 111, y: -22}
+        - {x: 108, y: -24}
+        - {x: 107.66667, y: -24}
+      - - {x: 111, y: -22}
+        - {x: 114, y: -22}
+        - {x: 116, y: -23}
+      - - {x: 173, y: -41}
+        - {x: 174, y: -40}
+        - {x: 180.4, y: -36}
+        - {x: 179, y: -37}
+        - {x: 175, y: -41}
+      - - {x: 129, y: -42}
+        - {x: 130, y: -43}
+        - {x: 130, y: -45}
+      - - {x: 218, y: -68}
+        - {x: 215.10527, y: -65.684204}
+        - {x: 217, y: -66}
+        - {x: 220.33333, y: -68}
+      - - {x: 227, y: -72}
+        - {x: 224, y: -69}
+        - {x: 225, y: -69}
+        - {x: 228, y: -72}
+      - - {x: 234, y: -76}
+        - {x: 234, y: -75}
+        - {x: 235, y: -76}
+      - - {x: 240, y: -78}
+        - {x: 238, y: -78}
+        - {x: 237.5, y: -78.5}
+        - {x: 237, y: -78}
+        - {x: 238, y: -78}
+        - {x: 239, y: -77}
+        - {x: 243, y: -80}
+        - {x: 243, y: -81}
+      - - {x: 197, y: -100}
+        - {x: 198, y: -100}
+        - {x: 199, y: -101}
+      - - {x: 147, y: -18}
+        - {x: 151, y: -13}
+        - {x: 151, y: -14}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 81a0e596eed496f50800000000000000
+      internalID: 6875111992523098648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrystalClusters_3
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 370
+        width: 124
+        height: 108
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f0999795f0343d10800000000000000
+      internalID: 2104360757257408758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrystalClusters_4
+      rect:
+        serializedVersion: 2
+        x: 523
+        y: 194
+        width: 474
+        height: 532
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 14, z: 0, w: 0}
+      customData: 
+      outline:
+      - - {x: 152, y: -236}
+        - {x: 230, y: -205}
+        - {x: 215, y: -158}
+        - {x: 198, y: -158}
+        - {x: 209, y: -150}
+        - {x: 237, y: -123}
+        - {x: 237, y: 92}
+        - {x: 115, y: 257}
+        - {x: 40, y: 257}
+        - {x: 3, y: 215}
+        - {x: -39.399994, y: 123}
+        - {x: -40, y: 123}
+        - {x: -42, y: 121}
+        - {x: -42, y: 118}
+        - {x: -41.797623, y: 117.79762}
+        - {x: -50, y: 100}
+        - {x: -54, y: 62}
+        - {x: -47, y: 12}
+        - {x: -157, y: 27}
+        - {x: -225, y: -25}
+        - {x: -225, y: -93}
+        - {x: -209, y: -101}
+        - {x: -225, y: -119}
+        - {x: -225, y: -149}
+        - {x: -219, y: -192}
+        - {x: -188, y: -222}
+        - {x: -10, y: -253}
+        - {x: 81, y: -253}
+      - - {x: -98, y: -55}
+        - {x: -97, y: -55}
+        - {x: -96, y: -54}
+        - {x: -97.69231, y: -56.538467}
+      - - {x: 189, y: -166}
+        - {x: 188, y: -166}
+        - {x: 188, y: -164}
+        - {x: 189.66667, y: -164}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aa401196af1924ed0800000000000000
+      internalID: -2431220344136072022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CrystalClusters_5
+      rect:
+        serializedVersion: 2
+        x: 819
+        y: 41
+        width: 176
+        height: 120
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c2489a6cee26884b0800000000000000
+      internalID: -5437987772375137236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: ff37e3e994aa2fb40a36230e979b1ed1
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CrystalClusters_0: 3430555505941350446
+      CrystalClusters_1: 7374988230563092853
+      CrystalClusters_2: 6875111992523098648
+      CrystalClusters_3: 2104360757257408758
+      CrystalClusters_4: -2431220344136072022
+      CrystalClusters_5: -5437987772375137236
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

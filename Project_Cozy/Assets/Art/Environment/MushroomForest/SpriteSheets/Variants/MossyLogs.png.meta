@@ -1,0 +1,359 @@
+fileFormatVersion: 2
+guid: 17a4f09d002d1164eab950f9b5ba1520
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8729902560029270816
+    second: MossyLogs_0
+  - first:
+      213: 4963219247029649408
+    second: MossyLogs_1
+  - first:
+      213: -6415516154796455586
+    second: MossyLogs_2
+  - first:
+      213: 4431491373353108134
+    second: MossyLogs_3
+  - first:
+      213: -4230101606061058965
+    second: MossyLogs_4
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: MossyLogs_0
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 812
+        width: 493
+        height: 194
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 02361561028d62970800000000000000
+      internalID: 8729902560029270816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyLogs_1
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 635
+        width: 524
+        height: 389
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline:
+      - - {x: 262, y: 194.5}
+        - {x: 258, y: 194.5}
+        - {x: 258, y: 192.5}
+        - {x: 261, y: 189.5}
+        - {x: 262, y: 189.5}
+      - - {x: -256, y: -191.5}
+        - {x: -158, y: -194.5}
+        - {x: 200, y: -194.5}
+        - {x: 254, y: -188.5}
+        - {x: 257, y: -189.5}
+        - {x: 262, y: -181.5}
+        - {x: 262, y: -101.5}
+        - {x: 233, y: -73.5}
+        - {x: 218, y: 17.5}
+        - {x: 199, y: 25.5}
+        - {x: 194, y: 25.5}
+        - {x: 173, y: 53.5}
+        - {x: 153, y: 73.5}
+        - {x: 91, y: 73.5}
+        - {x: 26, y: 73.5}
+        - {x: -92, y: 73.5}
+        - {x: -261, y: 6.5}
+        - {x: -262, y: -175.5}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0008591eb95e0e440800000000000000
+      internalID: 4963219247029649408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyLogs_2
+      rect:
+        serializedVersion: 2
+        x: 369
+        y: 370
+        width: 362
+        height: 247
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline:
+      - - {x: 181, y: -119.5}
+        - {x: 181, y: 96.5}
+        - {x: -26, y: 123.5}
+        - {x: -73, y: 123.5}
+        - {x: -105, y: 108.5}
+        - {x: -181, y: 5.5}
+        - {x: -181, y: -123.5}
+        - {x: 151, y: -123.5}
+      - - {x: 155, y: 30.5}
+        - {x: 156, y: 26.5}
+        - {x: 155.71428, y: 26.21428}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e59c39e4c0287f6a0800000000000000
+      internalID: -6415516154796455586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyLogs_3
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 37
+        width: 493
+        height: 437
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline:
+      - - {x: 246.5, y: -18.5}
+        - {x: 218.5, y: 112.5}
+        - {x: 166.5, y: 217.5}
+        - {x: 128.5, y: 217.5}
+        - {x: 108.5, y: 200.5}
+        - {x: 88.5, y: 166.5}
+        - {x: -214.5, y: 25.5}
+        - {x: -241.5, y: -30.5}
+        - {x: -246.5, y: -62.5}
+        - {x: -246.5, y: -211.5}
+        - {x: -182.5, y: -218.5}
+        - {x: 246.5, y: -218.5}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a28bedcce1df7d30800000000000000
+      internalID: 4431491373353108134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyLogs_4
+      rect:
+        serializedVersion: 2
+        x: 1019
+        y: 0
+        width: 5
+        height: 6
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b64dbe65009ab45c0800000000000000
+      internalID: -4230101606061058965
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyLogs_5
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 486
+        width: 379
+        height: 293
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e48346ed64d65904784ec3a2636642d3
+      internalID: -2009512003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MossyLogs_6
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 35
+        width: 499
+        height: 371
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline:
+      - - {x: 249.5, y: 0.5}
+        - {x: 249.5, y: 73.5}
+        - {x: 232.5, y: 100.5}
+        - {x: 201.5, y: 107.5}
+        - {x: 172.5, y: 123.5}
+        - {x: 146.5, y: 118.5}
+        - {x: 21.5, y: 131.5}
+        - {x: -47.5, y: 182.5}
+        - {x: -120.5, y: 182.5}
+        - {x: -136.5, y: 180.5}
+        - {x: -134.5, y: 169.5}
+        - {x: -133.5, y: 166.5}
+        - {x: -146.5, y: 166.5}
+        - {x: -148.5, y: 164.5}
+        - {x: -148.5, y: 160.5}
+        - {x: -154.5, y: 165.5}
+        - {x: -183.5, y: 153.5}
+        - {x: -249.5, y: 71.5}
+        - {x: -249.5, y: -183.5}
+        - {x: 249.5, y: -183.5}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3c4bac89175913c4db2a1ff1360f5bfd
+      internalID: -1334902876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 7c846219e4e014d41b402fa61293db08
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      MossyLogs_0: 8729902560029270816
+      MossyLogs_1: 4963219247029649408
+      MossyLogs_2: -6415516154796455586
+      MossyLogs_3: 4431491373353108134
+      MossyLogs_4: -4230101606061058965
+      MossyLogs_5: -2009512003
+      MossyLogs_6: -1334902876
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

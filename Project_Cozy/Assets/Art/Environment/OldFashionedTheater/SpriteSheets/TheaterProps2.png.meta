@@ -1,0 +1,333 @@
+fileFormatVersion: 2
+guid: a2a7dcec69d50514696c15c1eb46bcfc
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2488126202718382011
+    second: TheaterProps2_0
+  - first:
+      213: 8623913490532951740
+    second: TheaterProps2_1
+  - first:
+      213: 7216258694830990067
+    second: TheaterProps2_2
+  - first:
+      213: -9107549592320474392
+    second: TheaterProps2_3
+  - first:
+      213: 8042965310799370844
+    second: TheaterProps2_4
+  - first:
+      213: -5617980309262567320
+    second: TheaterProps2_5
+  - first:
+      213: 8736165786504685596
+    second: TheaterProps2_6
+  - first:
+      213: -3359808804370047671
+    second: TheaterProps2_7
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Theater_Popcorn
+      rect:
+        serializedVersion: 2
+        x: 387
+        y: 728
+        width: 239
+        height: 330
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aa1fcd5d122b2f54ebef171d13ce5e29
+      internalID: 235910865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Theater_Soda
+      rect:
+        serializedVersion: 2
+        x: 824
+        y: 722
+        width: 240
+        height: 397
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6ec5f852ccb96bf48aafcf2b5e4bd61b
+      internalID: -2073222555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Theater_Ticket
+      rect:
+        serializedVersion: 2
+        x: 1230
+        y: 777
+        width: 295
+        height: 258
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8f7ab2fe67140be4a93c40c02e9949fc
+      internalID: -1992538116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Theater_FilmReel
+      rect:
+        serializedVersion: 2
+        x: 1653
+        y: 731
+        width: 306
+        height: 303
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b1d6bbe7077fc843a35e0e4fbdc9b42
+      internalID: 852706090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Theater_Clapperboard
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 304
+        width: 308
+        height: 298
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af6e14e0e8874844abcaefb7069b9b05
+      internalID: 1695953835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Theater_StarFrame
+      rect:
+        serializedVersion: 2
+        x: 767
+        y: 329
+        width: 338
+        height: 321
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1001253e7fcee8e4b97dcb8419d11149
+      internalID: 1043120810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Theater_PropRoll
+      rect:
+        serializedVersion: 2
+        x: 1209
+        y: 363
+        width: 330
+        height: 203
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be66ed7cf702e92458a8f38297fab6a1
+      internalID: 2123676391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Theater_PropSword
+      rect:
+        serializedVersion: 2
+        x: 1634
+        y: 338
+        width: 313
+        height: 271
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d57cef14b885184c89bc7ccf5fb34f1
+      internalID: 1813753864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: b63b8f483c9411440bef2dae4a99b68d
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      TheaterProps2_0: -2488126202718382011
+      TheaterProps2_1: 8623913490532951740
+      TheaterProps2_2: 7216258694830990067
+      TheaterProps2_3: -9107549592320474392
+      TheaterProps2_4: 8042965310799370844
+      TheaterProps2_5: -5617980309262567320
+      TheaterProps2_6: 8736165786504685596
+      TheaterProps2_7: -3359808804370047671
+      Theater_Clapperboard: 1695953835
+      Theater_FilmReel: 852706090
+      Theater_Popcorn: 235910865
+      Theater_PropRoll: 2123676391
+      Theater_PropSword: 1813753864
+      Theater_Soda: -2073222555
+      Theater_StarFrame: 1043120810
+      Theater_Ticket: -1992538116
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,53 @@
+using UnityEngine;
+
+/// <summary>
+/// 상점에 진열되는 상품 하나의 "정의". 게임 내내 바뀌지 않는 카탈로그 데이터만 담는다 —
+/// 저장·조회에 쓰는 안정적 <see cref="id"/>, 아이콘, 가격(하트),
+/// 그리고 배경 상품이면 실제로 화면에 깔릴 프리팹(<see cref="backgroundPrefab"/>).
+///
+/// 표시 이름은 여기 담지 않고 번역 표에서 <see cref="NameKey"/>로 찾는다. 키를 id에서 만드는 것은
+/// id가 저장 키라 한번 정하면 바뀌지 않기 때문이다 — 키 칸을 따로 두면 둘이 어긋날 수 있다.
+///
+/// 구매 여부 같은 플레이어별 런타임 상태는 여기 담지 않는다. ScriptableObject는 전역 공유 에셋이라
+/// 플레이어마다 다른 값을 담을 수 없고, 에디터에서는 그 변경이 .asset 파일에 눌러앉기 때문이다.
+/// "누가 무엇을 샀는가"는 별도 런타임 상태(산 id 집합)가 들고, 이 정의는 순수하게 읽기 전용으로 둔다.
+///
+/// 아이템 하나 = .asset 파일 하나. 우클릭 Create → Cozy/Shop/Shop Item.
+///
+/// 장식·배경 상품은 화면에 놓을 프리팹(<see cref="decorationPrefab"/>·<see cref="backgroundPrefab"/>)을 직접 참조한다. 프리팹이 지금
+/// Resources 폴더에 있어도 경로로 읽지 않는다 — 참조로 물어야 프리팹을 옮기거나 이름을 바꿔도 연결이 끊기지 않는다.
+/// </summary>
+[CreateAssetMenu(menuName = "Cozy/Shop/Shop Item")]
+public class ShopItemDefinition : ScriptableObject
+{
+    [Tooltip("저장·조회에 쓰는 안정적 식별자. 예: shop_item_1_flowerpot. 한번 정하면 바꾸지 않는다.")]
+    public string id;
+
+    /// <summary>번역 표에서 상품 이름을 찾는 stringID. 예: UIShop.item.shop_item_1_flowerpot</summary>
+    public string NameKey => "UIShop.item." + id;
+
+    [Tooltip("상품 아이콘(png import된 Sprite).")]
+    public Sprite icon;
+
+    [Tooltip("구매에 드는 하트 수.")]
+    public int price;
+
+    [Tooltip("배경 전용. 사용 중일 때 화면에 깔리는 프리팹(Resources/Backgrounds/<이름>/background.prefab). 장식은 비워 둔다.")]
+    public GameObject backgroundPrefab;
+
+    [Tooltip("장식 전용. 설치하면 화면에 놓이는 프리팹(Resources/Decorations/<이름>/decoration.prefab). 배경은 비워 둔다.")]
+    public GameObject decorationPrefab;
+
+    [Tooltip("장식 전용. 어디에 놓을 수 있는 장식인가.")]
+    public DecorationPlacementKind placementKind = DecorationPlacementKind.Floor;
+}
+
+/// <summary>
+/// 장식을 어디에 놓을 수 있는가. 지금은 바닥에 붙는 장식만 있다.
+/// Figma에는 바닥 전용이 아닌 장식도 적혀 있지만 그런 장식이 실제로 있는지 기획 확인을 기다리는 중이라,
+/// 값은 하나만 두고 저장 형식이 그 구분을 받을 자리만 마련해 둔다.
+/// </summary>
+public enum DecorationPlacementKind
+{
+    Floor,
+}

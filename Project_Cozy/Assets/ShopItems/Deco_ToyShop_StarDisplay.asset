@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6111ad88a1bd97647bb7ebdd01ee283e, type: 3}
+  m_Name: Deco_ToyShop_StarDisplay
+  m_EditorClassIdentifier: Assembly-CSharp::ShopItemDefinition
+  id: deco_toyshop_stardisplay
+  icon: {fileID: 21300000, guid: d6fcaf984cee27542a8e88fe47eab99e, type: 3}
+  price: 10
+  backgroundPrefab: {fileID: 0}
+  decorationPrefab: {fileID: 3294306457511015096, guid: 018bdb650bb82f04eb400fca4ea205e0, type: 3}
+  placementKind: 0

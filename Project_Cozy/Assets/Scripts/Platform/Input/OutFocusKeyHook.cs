@@ -10,46 +10,80 @@ using UnityEngine.InputSystem;
 /// 본 클래스는 keydown 필터링과 <see cref="Key"/> 매핑/보고만 담당한다.
 ///
 /// 포커스 무관 통합 입력 소스는 <see cref="GlobalKeyInput"/> 쪽. 본 컴포넌트는 *OutFocus 전용*이라는 의미를 이름과 동작에서 일치시킨 별개 추상화.
-/// 현재 keydown만, 모디파이어/조합키/keyup 미지원.
+/// 누른 순간만 보고한다 — 키를 꾹 눌러 생기는 자동 반복은 거른다(기획: 꾹 눌러도 스폰 기운 1회).
+/// LL 훅에는 반복 표시가 없어서 눌린 키를 직접 기억한다. 모디파이어/조합키/keyup은 보고하지 않는다.
 /// </summary>
-[DefaultExecutionOrder(-100)]
 public class OutFocusKeyHook : OutFocusLowLevelHook
 {
-    /// <summary>씬 단일 인스턴스. WH_KEYBOARD_LL이 OS-wide라 씬당 1개만 존재해야 정상. 중복 부착 시 두 번째는 Awake에서 자기 컴포넌트만 Destroy.</summary>
-    public static OutFocusKeyHook Instance { get; private set; }
+    // 씬 단일 인스턴스 추적 — 외부 참조용이 아니라 중복 부착 방지용. 소비자는 static <see cref="KeyPressed"/> 이벤트를 구독한다.
+    // WH_KEYBOARD_LL이 OS-wide라 씬당 1개만 존재해야 정상. 중복 부착 시 두 번째는 Awake에서 자기 컴포넌트만 Destroy.
+    static OutFocusKeyHook _instance;
 
     void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (_instance != null && _instance != this)
         {
             Destroy(this);
             return;
         }
-        Instance = this;
+        _instance = this;
     }
 
     protected override void OnDestroy()
     {
-        if (Instance == this) Instance = null;
+        if (_instance == this) _instance = null;
         base.OnDestroy();
     }
 
     const int WH_KEYBOARD_LL = 13;
     const int WM_KEYDOWN     = 0x0100;
+    const int WM_KEYUP       = 0x0101;
     const int WM_SYSKEYDOWN  = 0x0104;
+    const int WM_SYSKEYUP    = 0x0105;
 
-    /// <summary>OutFocus 상태에서 키가 눌렸을 때 발생. 인자는 매핑된 <see cref="Key"/> (매핑 실패 시 <see cref="Key.None"/>).</summary>
-    public event Action<Key> KeyPressed;
+    // 지금 눌려 있는 가상 키. 훅 전용 스레드(OnHookMessage)에서만 읽고 쓴다.
+    // 저수준 훅은 자동 반복 keydown도 매번 받고 반복 표시가 없어서, 눌린 상태를 직접 들고 첫 keydown만 보낸다.
+    // keyup을 놓치면(보안 데스크톱, 같은 가상 키를 쓰는 두 Enter 등) 그 키의 다음 1회를 덜 세고 스스로 풀린다 — 받아들임.
+    readonly bool[] _keyHeld = new bool[256];
+
+    /// <summary>OutFocus 상태에서 키가 눌렸을 때 발생. 인자는 매핑된 <see cref="Key"/> (매핑 실패 시 <see cref="Key.None"/>).
+    /// static 이벤트 — 소비자는 인스턴스 참조 없이 <c>OutFocusKeyHook.KeyPressed += ...</c>로 구독한다.</summary>
+    public static event Action<Key> KeyPressed;
+
+    // Enter Play Mode에서 도메인 리로드를 끄면 static 필드가 이전 Play의 값을 그대로 들고 있으므로, 시작할 때 비운다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetState()
+    {
+        KeyPressed = null;
+        _instance = null;
+    }
 
     protected override int HookId => WH_KEYBOARD_LL;
+
+    protected override void OnEnable()
+    {
+        // 꺼져 있던 동안의 keyup은 못 받았으므로 비우고 시작한다.
+        // 훅 스레드는 base.OnEnable의 Thread.Start에서 시작하므로 그 전에 메인 스레드에서 비워도 된다.
+        // (이전 스레드가 StopHookThread의 Join 시간 초과로 아직 살아 있으면 잠깐 겹칠 수 있다 — 결과는 1회 덜 세는 정도)
+        Array.Clear(_keyHeld, 0, _keyHeld.Length);
+        base.OnEnable();
+    }
 
     // 전용 스레드에서 호출됨 — UnityEngine API 호출 금지. Win32KeyMap.ToKey는 순수 함수라 안전.
     protected override void OnHookMessage(IntPtr wParam, IntPtr lParam)
     {
+        int vkCode = Marshal.ReadInt32(lParam);
+        int slot = vkCode & 0xFF; // 배열 범위 보호. 가상 키는 1~254라 값은 바뀌지 않는다.
+
         if (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN)
         {
-            int vkCode = Marshal.ReadInt32(lParam);
+            if (_keyHeld[slot]) return; // 자동 반복
+            _keyHeld[slot] = true;
             Enqueue((int)Win32KeyMap.ToKey(vkCode));
+        }
+        else if (wParam == (IntPtr)WM_KEYUP || wParam == (IntPtr)WM_SYSKEYUP)
+        {
+            _keyHeld[slot] = false;
         }
     }
 

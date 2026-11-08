@@ -1,7 +1,6 @@
 ---
 paths:
   - "Project_Cozy/ProjectSettings/**"
-  - "**/ProjectSettings/*.asset"
 ---
 
 # ProjectSettings 작업 규칙
@@ -15,7 +14,6 @@ paths:
 
 `Project_Cozy/ProjectSettings/*` 전체는 머지 충돌 다발 영역이다.
 
-- 작업 시작 전 디스코드에 알림.
 - 다른 작업과 함께 묶이지 않도록 별도 커밋으로 분리.
 
 ## 의도치 않은 변경 점검

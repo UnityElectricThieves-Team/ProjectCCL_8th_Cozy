@@ -35,6 +35,14 @@ public sealed class OpaqueHoverable : MonoBehaviour, IHoverable
     // Camera.main 캐시 (매 프레임 GameObject.FindWithTag 회피)
     private Camera _resolvedCamera;
 
+    /// <summary>지금 이 스프라이트의 불투명 픽셀 위에 커서가 있는가.
+    /// enter를 쏜 뒤 exit를 쏘기 전까지 true다.
+    ///
+    /// 이벤트를 구독하지 않고 *지금 상태*만 필요한 쪽이 쓴다 — 클릭이 캐릭터를 향한 것인지 가리거나,
+    /// 그 입력을 캐릭터 입력으로 셀지 판정할 때다. 이벤트 순서에 기대지 않는 단순 조회라
+    /// 컴포넌트 실행 순서가 어떻든 같은 답이 나온다.</summary>
+    public bool IsOpaqueHovered => _firedEnter;
+
     private void Awake()
     {
         if (_spriteRenderer == null) _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -106,11 +114,10 @@ public sealed class OpaqueHoverable : MonoBehaviour, IHoverable
         Vector3 mouseWorld = cam.ScreenToWorldPoint(new Vector3(mouseScreen.x, mouseScreen.y, 0f));
 
         // 월드 → SpriteRenderer 로컬 (transform.localScale, 회전 모두 자동 보정됨)
-        Vector3 local = _spriteRenderer.transform.InverseTransformPoint(mouseWorld);
+        Vector2 local = _spriteRenderer.transform.InverseTransformPoint(mouseWorld);
 
         // flipX/flipY는 SpriteRenderer 옵션이라 transform 외부에서 따로 보정
-        if (_spriteRenderer.flipX) local.x = -local.x;
-        if (_spriteRenderer.flipY) local.y = -local.y;
+        local = SpriteFlip.Apply(local, _spriteRenderer.flipX, _spriteRenderer.flipY);
 
         Sprite sp = _spriteRenderer.sprite;
         float ppu = sp.pixelsPerUnit;

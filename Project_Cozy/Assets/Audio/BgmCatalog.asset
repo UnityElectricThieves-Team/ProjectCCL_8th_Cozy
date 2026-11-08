@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6f98d0f78067f4489a59d52f62336be, type: 3}
+  m_Name: BgmCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::BgmCatalog
+  _entries:
+  - id: cozy-song
+    displayName: cozy song
+    clip: {fileID: 8300000, guid: e009597de9ffdff4aaa9a25f11251d6c, type: 3}
+  - id: cozy-song-2
+    displayName: cozy song2
+    clip: {fileID: 8300000, guid: 5075c0993925b0945b840d4e66cd8412, type: 3}
+  - id: celestial-awakening
+    displayName: Celestial Awakening
+    clip: {fileID: 8300000, guid: f44bf3fcc300c1b44a9dcaf9187cf762, type: 3}
+  - id: new-world
+    displayName: NewWorld
+    clip: {fileID: 8300000, guid: 86dd96b6289785046a3b3ad5b4023f9d, type: 3}
+  - id: star
+    displayName: Star
+    clip: {fileID: 8300000, guid: 0d93560686c48e04ea5bf09d25466942, type: 3}
+  - id: the-sky-opens
+    displayName: The Sky Opens
+    clip: {fileID: 8300000, guid: 3e2bbb7807b9ead408b61498846dda9a, type: 3}
+  - id: tiny-toyroom-day
+    displayName: Tiny Toyroom Day
+    clip: {fileID: 8300000, guid: e61e7bcf897efa040b181de973beabfc, type: 3}
+  - id: village-at-dusk
+    displayName: Village at Dusk
+    clip: {fileID: 8300000, guid: 63e9b9a0bbff07146bc11af9a5225e6c, type: 3}
+  - id: warm-christmas
+    displayName: Warm Christmas
+    clip: {fileID: 8300000, guid: e11a8141cf862da43b993c25335d60ef, type: 3}

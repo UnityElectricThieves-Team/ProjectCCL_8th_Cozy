@@ -1,0 +1,311 @@
+using System;
+using System.IO;
+using UnityEngine;
+
+/// <summary>
+/// 유저 환경 설정의 런타임 소유자. 설정 패널이 값을 쓰고, 각 설정을 실제로 적용하는 쪽(창·캐릭터 등)이 읽는다.
+/// 값이 바뀔 때마다 즉시 파일에 기록한다 — 설정은 가끔 바뀌는 이산 이벤트라 <see cref="SaveScheduler"/>로
+/// 빈도를 묶을 이유가 없다(하트·상점과 같은 판단).
+///
+/// 예외는 볼륨 하나다. 슬라이더는 끄는 동안 매 프레임 값을 보내므로, <see cref="SetVolume"/>은 값만 바꾸고
+/// 파일 기록은 손을 뗄 때 부르는 <see cref="CommitVolume"/>과 종료 시로 미룬다. 같은 이유로 볼륨은
+/// <see cref="Changed"/> 대신 전용 <see cref="VolumeChanged"/>를 울린다 — Changed 구독자들은 이산 이벤트를 전제로 만들어졌다.
+///
+/// 그래픽 탭(캐릭터·UI·전체 크기, 모니터)도 예외다. Figma가 "변경 즉시 화면에 보이다가 [저장]을 눌러야 최종 확정"으로 정해서,
+/// <see cref="SetCharacterScaleStep"/> 등은 지금 값만 바꿔 <see cref="GraphicsChanged"/>를 울리고, 파일에는 <see cref="CommitGraphics"/>
+/// 때만 쓴다. 저장한 값은 <see cref="_data"/>에, 지금 화면의 값은 따로 든다 — 그래서 다른 설정이 저장될 때 미리보기 값이 섞여 들어가지 않는다.
+/// 적용하는 쪽은 지금 값을 읽는다(미리보기도 화면에 보여야 하므로).
+///
+/// 설정 패널과 이 매니저 사이의 일치, 그리고 저장·복원까지만 책임진다.
+/// 실제 적용은 각 소비자가 여기 값을 읽어 처리한다. 지금 연결된 소비자:
+/// 언어(<see cref="LocalizationManager"/>), 소녀 변신 금지·캐릭터 크기(<see cref="CharacterManager"/>가 캐릭터에 건다),
+/// 소리 탭(<see cref="BgmPlayer"/>), 항상 위·자동 실행(<see cref="DesktopIntegrationApplier"/>),
+/// 관리자 모드(<see cref="SpawnPointManager"/>가 다른 앱 입력을 셀지 정한다), 전체 크기(<see cref="WorldZoomApplier"/>), UI 크기(<see cref="UIScaleApplier"/>),
+/// 모니터(<see cref="MonitorApplier"/>), 구름·캐릭터 수치(<see cref="CountLabel"/>).
+///
+/// 씬 단일 인스턴스(Singleton). <see cref="HeartSystem"/>과 같은 패턴.
+/// </summary>
+[DefaultExecutionOrder(-100)]
+[DisallowMultipleComponent]
+public sealed class SettingsManager : MonoBehaviour
+{
+    public static SettingsManager Instance { get; private set; }
+
+    private SettingsFileFormat _data = new();
+
+    /// <summary>어느 설정이든 값이 바뀌면 울린다. 설정 패널이 이걸 받아 표시를 다시 맞춘다 —
+    /// 패널 외의 곳에서 값이 바뀌어도 화면이 어긋나지 않게 하는 장치다.</summary>
+    public event Action Changed;
+
+    /// <summary>볼륨이 바뀌면 울린다. 슬라이더를 끄는 동안 매 프레임 울릴 수 있다.</summary>
+    public event Action VolumeChanged;
+
+    // 볼륨이 바뀌었지만 아직 파일에 쓰지 않았다.
+    private bool _volumeDirty;
+
+    /// <summary>그래픽 탭의 지금 값(미리보기 포함)이 바뀌면 울린다. 저장·되돌리기·초기화 때도 울린다.</summary>
+    public event Action GraphicsChanged;
+
+    // 그래픽 탭의 지금 값. 저장한 값은 _data에 있다.
+    private int _characterScaleStep;
+    private int _uiScaleStep;
+    private int _worldZoomStep;
+    private MonitorSelection _monitor;
+
+    /// <summary>캐릭터 크기의 지금 단계(<see cref="GraphicsScaleSteps.Character"/>). 저장 전 미리보기일 수 있다.</summary>
+    public int CharacterScaleStep => _characterScaleStep;
+
+    /// <summary>UI 크기의 지금 단계(<see cref="GraphicsScaleSteps.UI"/>). 저장 전 미리보기일 수 있다.</summary>
+    public int UIScaleStep => _uiScaleStep;
+
+    /// <summary>전체 크기(줌)의 지금 단계(<see cref="GraphicsScaleSteps.WorldZoom"/>). 저장 전 미리보기일 수 있다.</summary>
+    public int WorldZoomStep => _worldZoomStep;
+
+    /// <summary>창을 띄울 모니터의 지금 선택. 저장 전 미리보기일 수 있다. 실제로 그 모니터를 찾아 창을 옮기는 쪽은 <see cref="MonitorApplier"/>.</summary>
+    public MonitorSelection Monitor => _monitor;
+
+    /// <summary>그래픽 탭에 저장하지 않은 변경이 있는가. 바꿨다가 원래 값으로 돌려 놓으면 false다.</summary>
+    public bool HasUnsavedGraphics =>
+        _characterScaleStep != _data.characterScaleStep || _uiScaleStep != _data.uiScaleStep
+        || _worldZoomStep != _data.worldZoomStep || !_monitor.Equals(SavedMonitor);
+
+    private MonitorSelection SavedMonitor => new MonitorSelection(_data.monitorDevice,
+        new RectInt(_data.monitorX, _data.monitorY, _data.monitorWidth, _data.monitorHeight));
+
+    public void SetMonitor(MonitorSelection monitor)
+    {
+        if (_monitor.Equals(monitor)) return;
+        _monitor = monitor;
+        GraphicsChanged?.Invoke();
+    }
+
+    public void SetCharacterScaleStep(int step)
+    {
+        step = GraphicsScaleSteps.Character.Clamp(step);
+        if (_characterScaleStep == step) return;
+        _characterScaleStep = step;
+        GraphicsChanged?.Invoke();
+    }
+
+    public void SetUIScaleStep(int step)
+    {
+        step = GraphicsScaleSteps.UI.Clamp(step);
+        if (_uiScaleStep == step) return;
+        _uiScaleStep = step;
+        GraphicsChanged?.Invoke();
+    }
+
+    public void SetWorldZoomStep(int step)
+    {
+        step = GraphicsScaleSteps.WorldZoom.Clamp(step);
+        if (_worldZoomStep == step) return;
+        _worldZoomStep = step;
+        GraphicsChanged?.Invoke();
+    }
+
+    /// <summary>그래픽 탭의 지금 값을 확정해 파일에 쓴다. 그래픽 [저장] 버튼.</summary>
+    public void CommitGraphics()
+    {
+        if (!HasUnsavedGraphics) return;
+        _data.characterScaleStep = _characterScaleStep;
+        _data.uiScaleStep = _uiScaleStep;
+        _data.worldZoomStep = _worldZoomStep;
+        _data.monitorDevice = _monitor.DeviceName;
+        _data.monitorX = _monitor.Bounds.x;
+        _data.monitorY = _monitor.Bounds.y;
+        _data.monitorWidth = _monitor.Bounds.width;
+        _data.monitorHeight = _monitor.Bounds.height;
+        Save();
+        GraphicsChanged?.Invoke();
+    }
+
+    /// <summary>저장하지 않은 그래픽 변경을 버리고 마지막으로 저장한 값으로 돌아간다.</summary>
+    public void RevertGraphics()
+    {
+        if (!HasUnsavedGraphics) return;
+        _characterScaleStep = _data.characterScaleStep;
+        _uiScaleStep = _data.uiScaleStep;
+        _worldZoomStep = _data.worldZoomStep;
+        _monitor = SavedMonitor;
+        GraphicsChanged?.Invoke();
+    }
+
+    /// <summary>그래픽 탭을 기본값으로 바꾼다. 미리보기일 뿐이라 [저장]을 눌러야 파일에 남는다.</summary>
+    public void ResetGraphicsToDefaults()
+    {
+        SetCharacterScaleStep(GraphicsScaleSteps.Character.DefaultIndex);
+        SetUIScaleStep(GraphicsScaleSteps.UI.DefaultIndex);
+        SetWorldZoomStep(GraphicsScaleSteps.WorldZoom.DefaultIndex);
+    }
+
+    public bool AlwaysOnTop
+    {
+        get => _data.topmost;
+        set { if (_data.topmost == value) return; _data.topmost = value; Commit(); }
+    }
+
+    /// <summary>표시 언어의 BCP 47 태그(<see cref="LanguageCodes"/>).</summary>
+    public string Language
+    {
+        get => _data.language;
+        set { if (_data.language == value) return; _data.language = value; Commit(); }
+    }
+
+    public CountVisibility SpawnerCountVisibility
+    {
+        get => _data.spawnerCountVisibility;
+        set { if (_data.spawnerCountVisibility == value) return; _data.spawnerCountVisibility = value; Commit(); }
+    }
+
+    public CountVisibility AffinityVisibility
+    {
+        get => _data.affinityVisibility;
+        set { if (_data.affinityVisibility == value) return; _data.affinityVisibility = value; Commit(); }
+    }
+
+    public bool AutoStart
+    {
+        get => _data.autoStart;
+        set { if (_data.autoStart == value) return; _data.autoStart = value; Commit(); }
+    }
+
+    public bool AdministratorMode
+    {
+        get => _data.administratorMode;
+        set { if (_data.administratorMode == value) return; _data.administratorMode = value; Commit(); }
+    }
+
+    public bool GirlTransformBanned
+    {
+        get => _data.girlTransformBanned;
+        set { if (_data.girlTransformBanned == value) return; _data.girlTransformBanned = value; Commit(); }
+    }
+
+    public bool Muted
+    {
+        get => _data.muted;
+        set { if (_data.muted == value) return; _data.muted = value; Commit(); }
+    }
+
+    /// <summary><see cref="BgmCatalog"/>의 곡 id. 빈 문자열이면 목록의 첫 곡.</summary>
+    public string BgmTrackId
+    {
+        get => _data.bgmTrackId;
+        set { value ??= ""; if (_data.bgmTrackId == value) return; _data.bgmTrackId = value; Commit(); }
+    }
+
+    public float GetVolume(VolumeChannel channel) => channel switch
+    {
+        VolumeChannel.Music => _data.musicVolume,
+        VolumeChannel.Sfx => _data.sfxVolume,
+        _ => _data.masterVolume,
+    };
+
+    /// <summary>
+    /// 볼륨을 바꾸고 <see cref="VolumeChanged"/>를 울린다. **파일에는 쓰지 않는다** — 손을 뗄 때 <see cref="CommitVolume"/>을 부른다.
+    /// 다른 설정이 저장될 때나 종료할 때도 함께 기록된다.
+    /// </summary>
+    public void SetVolume(VolumeChannel channel, float value)
+    {
+        value = Mathf.Clamp01(value);
+        if (GetVolume(channel) == value) return;
+        switch (channel)
+        {
+            case VolumeChannel.Music: _data.musicVolume = value; break;
+            case VolumeChannel.Sfx: _data.sfxVolume = value; break;
+            default: _data.masterVolume = value; break;
+        }
+        _volumeDirty = true;
+        VolumeChanged?.Invoke();
+    }
+
+    /// <summary>아직 파일에 쓰지 않은 볼륨 변경이 있으면 저장한다.</summary>
+    public void CommitVolume()
+    {
+        if (_volumeDirty) Save();
+    }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
+        // 복원은 이벤트를 쏘지 않는다. 이 시점엔 구독자가 아직 없고(실행 순서 -100),
+        // 설정 패널은 자기 Start에서 현재 값을 직접 읽어 그린다(HeartSystem과 같은 방식).
+        // 파일이 없는지는 읽기 전에 따로 본다 — Load는 파일이 없을 때와 깨졌을 때 모두 기본값을 돌려줘 둘을 구분할 수 없다.
+        bool firstRun = !File.Exists(GameDataPaths.Settings);
+        _data = UserDataSaveIO.Load<SettingsFileFormat>(GameDataPaths.Settings);
+        Sanitize();
+        _characterScaleStep = _data.characterScaleStep;
+        _uiScaleStep = _data.uiScaleStep;
+        _worldZoomStep = _data.worldZoomStep;
+        _monitor = SavedMonitor;
+
+        // 첫 실행만 OS 언어를 따른다. 바로 저장해 두어야 다음 실행부터는 사용자가 고른 언어(또는 이 값)를 그대로 쓴다.
+        // 파일이 깨져 기본값으로 돌아온 경우는 첫 실행이 아니므로 건드리지 않는다.
+        if (firstRun)
+        {
+            _data.language = LanguageCodes.FromSystemLanguage(Application.systemLanguage);
+            Save();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
+    // 슬라이더 손 뗌이 Unity에 오지 않는 경우(드래그 중 투명 영역으로 나가 클릭 통과된 경우, 키보드 조작)의 마지막 대비.
+    private void OnApplicationQuit() => CommitVolume();
+
+    /// <summary>
+    /// 에디터 세이브는 사람이 열어 고칠 수 있는 평문 JSON이라 enum 범위 밖 정수나 지원하지 않는 언어 태그가 들어올 수 있다.
+    /// 그대로 두면 매니저는 그 값을 들고 드롭다운은 옵션 수에 맞춰 잘라 보여줘 둘이 어긋난다. 기본값으로 되돌린다.
+    /// 언어를 정수로 저장하던 옛 파일도 여기서 기본 언어로 돌아간다.
+    /// </summary>
+    private void Sanitize()
+    {
+        var defaults = new SettingsFileFormat();
+        if (Array.IndexOf(LanguageCodes.All, _data.language) < 0) _data.language = defaults.language;
+        if (!Enum.IsDefined(typeof(CountVisibility), _data.spawnerCountVisibility)) _data.spawnerCountVisibility = defaults.spawnerCountVisibility;
+        if (!Enum.IsDefined(typeof(CountVisibility), _data.affinityVisibility)) _data.affinityVisibility = defaults.affinityVisibility;
+        // Clamp01은 NaN을 그대로 돌려주므로 NaN은 따로 기본값으로 되돌린다. 그대로 두면 믹서에 NaN이 들어간다.
+        _data.masterVolume = float.IsNaN(_data.masterVolume) ? defaults.masterVolume : Mathf.Clamp01(_data.masterVolume);
+        _data.musicVolume = float.IsNaN(_data.musicVolume) ? defaults.musicVolume : Mathf.Clamp01(_data.musicVolume);
+        _data.sfxVolume = float.IsNaN(_data.sfxVolume) ? defaults.sfxVolume : Mathf.Clamp01(_data.sfxVolume);
+        _data.bgmTrackId ??= defaults.bgmTrackId;
+        _data.monitorDevice ??= defaults.monitorDevice;
+        // 단계 수를 줄이면 옛 파일의 단계 번호가 범위를 넘을 수 있다. 끝 단계로 자른다.
+        _data.characterScaleStep = GraphicsScaleSteps.Character.Clamp(_data.characterScaleStep);
+        _data.uiScaleStep = GraphicsScaleSteps.UI.Clamp(_data.uiScaleStep);
+        _data.worldZoomStep = GraphicsScaleSteps.WorldZoom.Clamp(_data.worldZoomStep);
+    }
+
+    /// <summary>값이 바뀐 직후. 저장하고 방송한다.</summary>
+    private void Commit()
+    {
+        Save();
+        Changed?.Invoke();
+    }
+
+    /// <summary>
+    /// 현재 설정 전체를 파일에 기록한다. 쓰기 실패(디스크 잠금 등)는 로그만 남기고 삼킨다 —
+    /// 저장이 안 됐다고 방금 바꾼 설정을 되돌리면 화면과 값이 갈라져 더 이상해진다.
+    /// </summary>
+    private void Save()
+    {
+        try
+        {
+            UserDataSaveIO.Save(GameDataPaths.Settings, _data);
+            _volumeDirty = false; // 볼륨도 _data에 함께 들어 있어 방금 기록됐다
+        }
+        catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+        {
+            Debug.LogError($"[{nameof(SettingsManager)}] 설정 저장 실패: {e.Message}", this);
+        }
+    }
+}
