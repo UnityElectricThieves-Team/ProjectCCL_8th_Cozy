@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 /// <summary>
 /// 패널의 타이틀바에 붙여, 타이틀바를 잡고 드래그하면 패널 전체를 옮긴다.
-/// 누르는 순간 그 패널을 맨 앞으로 가져온다(UIManager를 거쳐 최상단 추적도 함께 갱신).
+/// 누른 패널을 맨 앞으로 가져오는 일은 하지 않는다 — 패널 어디를 누르든 <see cref="UIManager"/>가 한 곳에서 한다.
 /// 패널이 화면 밖으로 완전히 나가지 않도록 캔버스 안에 클램프한다.
 ///
 /// 붙는 곳: 타이틀바 GameObject. 포인터 이벤트를 받으려면 그 위에 Raycast Target인
@@ -14,26 +14,19 @@ using UnityEngine.EventSystems;
 /// 패널 부모의 배율(UI 크기 — <see cref="UIScaleApplier"/>)을 함께 본다. 부모가 커지면 같은 anchoredPosition도
 /// 화면에서 그만큼 멀리 놓이므로, 드래그 이동량은 그 배율로 나누고 클램프 범위는 그 배율로 줄인다.
 /// </summary>
-public class DraggablePanel : MonoBehaviour, IPointerDownHandler, IDragHandler
+public class DraggablePanel : MonoBehaviour, IDragHandler
 {
-    private UIPanel _panel;
     private RectTransform _panelRect;  // 옮길 대상(패널 루트)
     private RectTransform _canvasRect; // 클램프 기준(루트 캔버스)
     private Canvas _canvas;            // scaleFactor 보정용
 
     private void Awake()
     {
-        _panel = GetComponentInParent<UIPanel>();
-        if (_panel != null) _panelRect = _panel.GetComponent<RectTransform>();
+        var panel = GetComponentInParent<UIPanel>();
+        if (panel != null) _panelRect = panel.GetComponent<RectTransform>();
 
         _canvas = GetComponentInParent<Canvas>();
         if (_canvas != null) _canvasRect = _canvas.GetComponent<RectTransform>();
-    }
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        // 누르면 이 패널을 맨 앞으로 + UIManager의 최상단(_open 끝) 추적 갱신.
-        if (_panel != null) UIManager.Instance?.Open(_panel);
     }
 
     public void OnDrag(PointerEventData eventData)

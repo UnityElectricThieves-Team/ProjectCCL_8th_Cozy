@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 /// <summary>
 /// 씬에 하나 존재하는 UI 매니저. 패널 열기/닫기를 관리한다.
 /// 여러 패널이 동시에 열릴 수 있다 — 열린 패널을 리스트로 들고, 리스트 끝이
-/// 가장 앞(위)에 그려지는 최상단 패널이다. 패널을 열거나 다시 누르면 맨 앞으로 온다.
+/// 가장 앞(위)에 그려지는 최상단 패널이다. 패널을 열거나, 패널 어디든 누르면 맨 앞으로 온다.
 /// ESC 닫기는 우리 창이 포커스일 때만 — 데스크톱에서 다른 앱의 ESC를 가로채지 않게.
 ///
 /// 장식 설치 모드와 뷰포트 편집 동안에는 열린 패널을 닫지 않고 잠시 숨긴다(<see cref="UIPanel.SetSuspended"/>).
@@ -32,6 +33,10 @@ public class UIManager : MonoBehaviour
 
     private DecorationPlacementController _placement;
     private ViewportScreenSettings _viewport;
+
+    // 누른 패널을 찾는 레이캐스트용. 클릭마다 새로 만들지 않고 재사용한다.
+    private PointerEventData _pressData;
+    private readonly List<RaycastResult> _pressHits = new();
 
     private bool IsSuspended => _suspendOwners.Count > 0;
 
@@ -137,7 +142,45 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
-        if (IsSuspended || _open.Count == 0 || !Application.isFocused) return;
+        if (IsSuspended || _open.Count == 0) return;
+        BringPressedPanelToFront();
+        CloseTopOnEscape();
+    }
+
+    // 왼쪽 버튼을 누른 프레임에만, 커서 아래 맨 앞 UI가 속한 열린 패널을 맨 앞으로 가져온다(ESC 대상이 된다).
+    // 패널 루트에 IPointerDownHandler를 달면 버튼·탭이 이벤트를 먼저 가져가 본문 클릭을 놓친다.
+    // 포커스는 보지 않는다 — 창 밖에서 들어온 첫 클릭 프레임엔 아직 포커스가 없을 수 있다.
+    private void BringPressedPanelToFront()
+    {
+        var mouse = Mouse.current;
+        var eventSystem = EventSystem.current;
+        if (mouse == null || eventSystem == null || !mouse.leftButton.wasPressedThisFrame) return;
+
+        _pressData ??= new PointerEventData(eventSystem);
+        _pressData.position = mouse.position.ReadValue();
+        _pressHits.Clear();
+        eventSystem.RaycastAll(_pressData, _pressHits);
+        if (_pressHits.Count == 0) return;
+
+        // 모달이 떠 있으면 Open이 거절하므로 팝업이 맨 위로 남는다.
+        UIPanel pressed = FindOpenPanelContaining(_pressHits[0].gameObject.transform);
+        if (pressed != null) Open(pressed);
+    }
+
+    // 열린 패널 중 hit을 자식으로 가진 것. 앞(리스트 끝)부터 본다.
+    private UIPanel FindOpenPanelContaining(Transform hit)
+    {
+        for (int i = _open.Count - 1; i >= 0; i--)
+        {
+            if (_open[i] != null && hit.IsChildOf(_open[i].transform)) return _open[i];
+        }
+        return null;
+    }
+
+    // ESC는 우리 창에 포커스가 있을 때만 — 다른 앱에서 누른 ESC를 가로채지 않게.
+    private void CloseTopOnEscape()
+    {
+        if (!Application.isFocused) return;
 
         var keyboard = Keyboard.current;
         if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
