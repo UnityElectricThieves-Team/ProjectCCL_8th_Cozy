@@ -6,7 +6,8 @@ using Assets.Scripts.Contents.CollectionSystem.Model;
 
 /// <summary>
 /// "어떤 캐릭터를 가졌고, 그중 누가 화면에 나와 있어야 하는가"의 주인. 캐릭터별 기록(보유·배치·누적 친밀도)을
-/// 파일에 들고, 시작할 때 화면에 나와 있어야 하는 캐릭터를 다시 등장시키며 친밀도를 되돌린다.
+/// 파일에 들고, 시작할 때 보유한 캐릭터를 모두 만들어(화면에 없어야 하는 것은 숨겨) 친밀도를 되돌린다.
+/// 숨긴 캐릭터는 Update가 돌지 않으므로 깨어 있는 시간의 친밀도를 이 클래스가 대신 흘려준다.
 /// 친밀도가 오르면 기록에 저장한 뒤 저장돼 있던 값과 비교해 오른 만큼 하트를 준다(<see cref="AffinityHeartReward"/>).
 /// 친밀도를 캐릭터(AffinityModule)가 직접 저장하지 않는 이유: Character 레이어는 저장소(Platform/Data)를
 /// 부르지 않고, 캐릭터 모듈은 캐릭터마다 따로 있어 파일 하나에 대응하지 않는다.
@@ -71,8 +72,17 @@ public class CharacterOwnership : MonoBehaviour
     // 뷰포트가 처음 확정되기를 기다리는 중인가. 첫 신호에서 등장시키고 구독을 푼다.
     private bool _waitingForViewport;
 
-    // 등장시킨 캐릭터의 친밀도 구독. 파괴될 때 풀기 위해 들고 있다.
-    private readonly List<(AffinityModule affinity, Action<int> handler)> _affinitySubscriptions = new();
+    /// <summary>이 클래스가 만든 캐릭터 하나. 화면에 없어도(숨겨도) 오브젝트와 친밀도 구독은 그대로 든다.</summary>
+    private sealed class OwnedCharacter
+    {
+        public string id;
+        public BaseCharacterController controller;
+        public Action<int> onAffinityChanged;
+    }
+
+    // 만든 캐릭터 전부 — 화면에 나온 것과 숨긴 것 모두. 구독 해제·초기화·화면 밖 시간 친밀도가 이 목록 하나를 돈다.
+    // 캐릭터가 몇 종뿐이라 선형 탐색으로 충분하다(FindRecord와 같은 판단).
+    private readonly List<OwnedCharacter> _characters = new();
 
     // 해금 순서 — 도감 정의에서 뽑은 (캐릭터 id, 필요 누적 스폰 기운)을 필요 기운 오름차순으로 든다.
     private readonly List<(string id, int requiredEnergy)> _unlockSteps = new();
@@ -106,7 +116,7 @@ public class CharacterOwnership : MonoBehaviour
         // 뷰포트가 이미 확정됐으면 바로, 아니면 첫 확정 신호를 기다린다.
         if (_viewportSettings.IsReady)
         {
-            SpawnAllPlaced();
+            SpawnAllOwned();
             return;
         }
         _waitingForViewport = true;
@@ -120,9 +130,19 @@ public class CharacterOwnership : MonoBehaviour
         if (_waitingForViewport && _viewportSettings != null)
             _viewportSettings.ViewportConfirmed -= OnFirstViewportConfirmed;
 
-        for (int i = 0; i < _affinitySubscriptions.Count; i++)
-            _affinitySubscriptions[i].affinity.AffinityChanged -= _affinitySubscriptions[i].handler;
-        _affinitySubscriptions.Clear();
+        UnsubscribeAll();
+    }
+
+    // 화면에 없는(숨긴) 캐릭터는 Update가 돌지 않으므로, 깨어 있는 시간의 친밀도를 여기서 대신 흘려준다.
+    // 화면에 나온 캐릭터는 자기 Update가 센다 — TickWhileHidden이 켜진 캐릭터는 건너뛰므로 두 번 세지 않는다.
+    private void Update()
+    {
+        var dt = Time.deltaTime;
+        for (int i = 0; i < _characters.Count; i++)
+        {
+            var controller = _characters[i].controller;
+            if (controller != null && !controller.gameObject.activeSelf) controller.TickWhileHidden(dt);
+        }
     }
 
     // ViewportConfirmed는 확정될 때마다 울리지만, 등장은 처음 한 번만 필요하다.
@@ -130,16 +150,54 @@ public class CharacterOwnership : MonoBehaviour
     {
         _waitingForViewport = false;
         _viewportSettings.ViewportConfirmed -= OnFirstViewportConfirmed;
-        SpawnAllPlaced();
+        SpawnAllOwned();
+    }
+
+    private void UnsubscribeAll()
+    {
+        for (int i = 0; i < _characters.Count; i++)
+        {
+            var owned = _characters[i];
+            if (owned.controller != null) owned.controller.Affinity.AffinityChanged -= owned.onAffinityChanged;
+        }
     }
 
     private bool IsViewportReady => !_waitingForViewport && _viewportSettings != null
         && _viewportSettings.IsReady && _cameraFitter != null && CharacterManager.Instance != null;
 
-    private void SpawnAllPlaced()
+    /// <summary>
+    /// 보유한 캐릭터를 모두 만들고, 화면에 나와 있지 않아야 하는 것은 바로 숨긴다.
+    /// 숨긴 캐릭터도 오브젝트를 두는 이유: 친밀도·변신 카운터·소녀 상태가 오브젝트 안에 있어서, 파괴하면 잃는다.
+    /// 그리고 화면 밖 캐릭터도 깨어 있는 동안 시간 친밀도를 받는다(기획 "화면 표시 여부와 무관"). 꺼진 오브젝트는
+    /// Update·렌더·판정이 멈추고, 그림은 대응표가 프리팹을 참조해 원래부터 메모리에 있으므로 비용이 거의 없다.
+    /// </summary>
+    private void SpawnAllOwned()
     {
         for (int i = 0; i < _data.records.Count; i++)
-            if (_data.records[i].placed) SpawnCharacter(_data.records[i].id);
+        {
+            var record = _data.records[i];
+            SpawnCharacter(record.id);
+            if (!record.placed) HideFromField(record.id);
+        }
+    }
+
+    /// <summary>캐릭터를 파괴하지 않고 화면에서 숨긴다. 살아있는 목록에서 빼고(<see cref="CharacterManager.Unregister"/>) 끈다.
+    /// 목록에서 빼는 이유: 그 목록과 동시 존재 상한은 "화면에 나온" 캐릭터를 뜻한다.</summary>
+    private void HideFromField(string id)
+    {
+        var owned = FindCharacter(id);
+        if (owned == null || owned.controller == null) return;
+
+        var go = owned.controller.gameObject;
+        if (CharacterManager.Instance != null) CharacterManager.Instance.Unregister(go);
+        go.SetActive(false);
+    }
+
+    private OwnedCharacter FindCharacter(string id)
+    {
+        for (int i = 0; i < _characters.Count; i++)
+            if (_characters[i].id == id) return _characters[i];
+        return null;
     }
 
     /// <summary>
@@ -213,7 +271,7 @@ public class CharacterOwnership : MonoBehaviour
             RecordChanged?.Invoke(id);
         };
         affinity.AffinityChanged += onChanged;
-        _affinitySubscriptions.Add((affinity, onChanged));
+        _characters.Add(new OwnedCharacter { id = id, controller = controller, onAffinityChanged = onChanged });
     }
 
     /// <summary>지금 누적 스폰 기운으로 해금할 수 있는데 아직 보유하지 않은 캐릭터가 있는가.
@@ -324,9 +382,13 @@ public class CharacterOwnership : MonoBehaviour
     public void ResetProgress()
     {
         // 파괴할 캐릭터의 친밀도 모듈을 붙든 구독을 먼저 끊는다.
-        for (int i = 0; i < _affinitySubscriptions.Count; i++)
-            _affinitySubscriptions[i].affinity.AffinityChanged -= _affinitySubscriptions[i].handler;
-        _affinitySubscriptions.Clear();
+        UnsubscribeAll();
+
+        // 숨긴 캐릭터는 살아있는 목록에 없으므로 자기 목록으로도 파괴한다. 씬에 직접 놓은 테스트 캐릭터는
+        // 자기 목록에 없으므로 살아있는 목록으로도 파괴한다. 둘에 같이 든 것을 두 번 Destroy해도 괜찮다.
+        for (int i = 0; i < _characters.Count; i++)
+            if (_characters[i].controller != null) Destroy(_characters[i].controller.gameObject);
+        _characters.Clear();
 
         if (CharacterManager.Instance != null)
         {

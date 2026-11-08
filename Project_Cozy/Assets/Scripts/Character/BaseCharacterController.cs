@@ -167,6 +167,15 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         RequestPet();
     }
 
+    /// <summary>화면에서 숨은(꺼진) 동안 깨어 있는 시간의 친밀도만 흘린다. 꺼진 오브젝트는 <see cref="Update"/>가 돌지 않으므로
+    /// 기록을 가진 쪽(<c>CharacterOwnership</c>)이 매 프레임 부른다. 깨어 있는지는 화면 안 수면과 같은 판정(<see cref="StateModule.IsUserIdle"/>)이다.
+    /// 켜져 있으면 아무것도 하지 않는다 — 그때는 자기 Update가 세므로 두 번 세지 않게 한다.</summary>
+    public void TickWhileHidden(float dt)
+    {
+        if (isActiveAndEnabled) return;
+        _affinity.TickAwake(dt, StateModule.IsUserIdle);
+    }
+
     // ===== External triggers — StateModule에 위임 =====
     public void RequestSleep() => _state.RequestSleep();
     public void RequestWakeUp() => _state.RequestWakeUp();
