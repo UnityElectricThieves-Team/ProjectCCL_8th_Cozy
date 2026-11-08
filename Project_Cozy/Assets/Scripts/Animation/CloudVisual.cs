@@ -8,8 +8,10 @@ using UnityEngine;
 /// 판정(루트의 콜라이더)은 <see cref="SpritePhysicsShapeSync"/>가 그림의 평행 이동을 따라가게 맞춘다.
 /// 콜라이더를 다시 만드는 비용 때문에 이동은 마스터 캔버스 1px(월드 1/PPU) 단위로 끊어, 1px이 바뀔 때만 옮긴다.
 ///
-/// 반짝임은 같은 그림을 흰색으로 그리는 자식(<see cref="_shine"/>)의 알파를 오르내려, 그림이 흰색 쪽으로 밝아졌다
-/// 돌아오게 한다. 반짝이지 않을 때는 그 렌더러를 꺼서 그리는 비용이 없다.
+/// 반짝임은 같은 그림을 조금 키워 구름 뒤에 노랗게 그리는 자식(<see cref="_shine"/>)의 알파를 오르내려,
+/// 구름 가장자리 밖으로 빛나는 테두리가 깜박이게 한다. 구름 몸통이 흰색이라 위에 흰색을 덮는 방식은 보이지 않았다.
+/// 색·배율·뒤에 그리는 순서는 프리팹의 Shine에 두고, 여기서는 알파만 바꾼다.
+/// 반짝이지 않을 때는 그 렌더러를 꺼서 그리는 비용이 없다.
 ///
 /// 수치는 연출 값이라 GameBalance가 아니라 여기 둔다(.claude/rules/unity/interaction-hit.md의 구름 연출 절).
 /// </summary>
@@ -24,11 +26,11 @@ public sealed class CloudVisual : MonoBehaviour
     [SerializeField, Min(0.1f)] private float _bobPeriodSeconds = 3f;
 
     [Header("반짝임")]
-    [Tooltip("같은 그림을 흰색으로 그리는 자식 SpriteRenderer. 정렬 순서는 이 그림보다 하나 위.")]
+    [Tooltip("같은 그림을 조금 키워 구름 뒤에 노랗게 그리는 자식 SpriteRenderer. 정렬 순서는 이 그림보다 하나 아래.")]
     [SerializeField] private SpriteRenderer _shine;
     [Tooltip("한 번 밝아졌다 돌아오는 데 걸리는 시간(초).")]
     [SerializeField, Min(0.1f)] private float _shinePeriodSeconds = 0.5f;
-    [Tooltip("가장 밝을 때 흰 덧그림의 알파.")]
+    [Tooltip("가장 밝을 때 빛 테두리의 알파.")]
     [SerializeField, Range(0f, 1f)] private float _shinePeakAlpha = 0.7f;
 
     private Vector3 _restLocalPosition;

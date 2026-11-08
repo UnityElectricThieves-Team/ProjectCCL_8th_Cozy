@@ -106,7 +106,7 @@
 - `unity/character-affinity.md` — 캐릭터 친밀도 규약(누적값 하나·줄지 않음, 저장은 CharacterOwnership이 쓰담마다, 복원은 이벤트 없이, 하트는 저장된 친밀도 기준). 친밀도 모듈·하트 지급·캐릭터 기록·상태 글자 스크립트를 열 때
 - `unity/character-shadow.md` — 캐릭터 그림자 규약. `ShadowProjector`·캐릭터 프리팹을 열 때
 - `unity/character-state-machine.md` — 캐릭터 상태 전이 확정안. **캐릭터 행동 로직의 유일한 본.** Character 스크립트·캐릭터 프리팹·Animator 자산을 열 때
-- `unity/interaction-hit.md` — 월드 오브젝트의 마우스 판정 규약(판정은 그림 외곽선에서, 콜라이더와 픽셀 검사의 역할 분담, 콜라이더 위치, 구름 연출 — 그림만 둥둥·판정은 offset으로 따라감·활성은 흰 덧그림·수치는 컴포넌트에). Interaction 스크립트·`CloudController`·`CloudVisual`·캐릭터·구름 프리팹·캐릭터 그림 임포트 설정을 열 때
+- `unity/interaction-hit.md` — 월드 오브젝트의 마우스 판정 규약(판정은 그림 외곽선에서, 콜라이더와 픽셀 검사의 역할 분담, 콜라이더 위치, 구름 연출 — 그림만 둥둥·판정은 offset으로 따라감·활성은 뒤의 빛 테두리·수치는 컴포넌트에). Interaction 스크립트·`CloudController`·`CloudVisual`·캐릭터·구름 프리팹·캐릭터 그림 임포트 설정을 열 때
 - `unity/background.md` — 배경 규약(아트 프리팹을 그대로 씀, 그림 아래 끝을 뷰포트 아래 변에, 뷰포트 밖은 마스크로 자름, 콜라이더 금지). 배경 스크립트·`Background.prefab`·배경 프리팹·배경 아트를 열 때
 - `unity/viewport-coordinates.md` — 월드 좌표 단위 규약(베이스 공간 px = 마스터 캔버스 기준 px, 폭 기준 배율, 월드 PPU 상수 100·앵커 불변, 저장 단위). 뷰포트·배경·장식 스크립트를 열 때
 - `unity/decoration-placement.md` — 장식 배치 모드(설치·이동·회수·제거)의 공통 골격, 고르기 판정, 설치 가능 판정과 색, 앞뒤 순서, 구매 시점과 저장, 회수 순번, 수량 팝업, 이동·회수·제거 모드의 패널 예외, 장식에 콜라이더를 달지 않는 이유, 인벤토리 갱신 시점. 상점·인벤토리·장식 스크립트, 장식 프리팹을 열 때

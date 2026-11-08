@@ -180,7 +180,8 @@ public sealed class CloudController : MonoBehaviour, IClickable
     {
         if (GetComponent<Collider2D>() == null)
             Debug.LogWarning($"[{nameof(CloudController)}] '{name}' needs a Collider2D for clicks to register.", this);
-        if (GetComponentInChildren<CloudVisual>(true) == null)
+        // 칸을 먼저 본다 — 프리팹 임포트 중에는 자식 탐색이 비어 나와 경고가 거짓으로 뜬다.
+        if (_visual == null && GetComponentInChildren<CloudVisual>(true) == null)
             Debug.LogWarning($"[{nameof(CloudController)}] '{name}' has no CloudVisual — the cloud won't bob or shine.", this);
     }
 #endif
