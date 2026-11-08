@@ -90,6 +90,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
     private bool _leftPressedOverUi;
     private bool _rightPressedInMode;
     private bool _escPressedInMode;
+    private int _unpausedFrame = -1;    // 입력 정지를 푼 프레임. 이 프레임의 눌림은 기록하지 않는다
 
     private readonly List<Bounds> _obstacles = new();
     private readonly List<Rect> _blockedAreas = new();
@@ -170,6 +171,37 @@ public sealed class DecorationPlacementController : MonoBehaviour
     /// </summary>
     public bool EnterRecall(Action<int> onRecall) => EnterPicking(DecorationMode.Recall, onRecall);
 
+    /// <summary>
+    /// 제거 모드에 들어간다. 놓인 장식을 고르면 onRemove(저장 목록 칸 번호)를 부르고 고르기 단계에 남는다. 우클릭·ESC로 끝난다.
+    /// 인벤토리 장식의 제거는 이 컨트롤러를 거치지 않는다(UI가 슬롯 클릭을 직접 받는다).
+    /// </summary>
+    public bool EnterRemove(Action<int> onRemove) => EnterPicking(DecorationMode.Remove, onRemove);
+
+    /// <summary>
+    /// 모드 입력을 잠시 멈추거나(true) 되살린다(false). 수량 팝업처럼 모드 위에 질문을 띄우는 쪽이 건다.
+    /// 멈추는 순간 눌림 기록을 비우고, 되살린 그 프레임에는 새 눌림을 기록하지 않는다 — 팝업을 ESC로 닫은 그 ESC가
+    /// 같은 프레임에 모드의 눌림으로도 잡혀 모드까지 끝나는 일을 막는다(두 스크립트의 실행 순서에 따라 생긴다).
+    /// 거는 곳이 하나뿐이라 소유자를 따로 두지 않는다. <see cref="Exit"/>가 풀어 준다.
+    /// </summary>
+    public void SetInputPaused(bool paused)
+    {
+        if (IsInputPaused == paused) return;
+        IsInputPaused = paused;
+
+        if (paused)
+        {
+            ClearPresses();
+            _hoveredIndex = -1;
+            if (_layer != null) _layer.SetHighlighted(-1);
+        }
+        else
+        {
+            _unpausedFrame = Time.frameCount;
+        }
+    }
+
+    public bool IsInputPaused { get; private set; }
+
     /// <summary>모드를 나온다. 취소·설치 확정·강제 종료가 모두 이 한 곳을 지난다. 여러 번 불려도 한 번만 동작한다.</summary>
     public void Exit()
     {
@@ -179,6 +211,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
         _onConfirm = null;
         _onPick = null;
         _hoveredIndex = _pressedIndex = -1;
+        IsInputPaused = false;
 
         // 씬을 내릴 때는 레이어가 먼저 파괴됐을 수 있다(Unity null 검사).
         if (_layer != null)
@@ -229,7 +262,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
 
     private void Update()
     {
-        if (!IsActive) return;
+        if (!IsActive || IsInputPaused) return;
 
         if (IsCarrying) UpdateGhost();
         else UpdatePicking();
@@ -241,8 +274,9 @@ public sealed class DecorationPlacementController : MonoBehaviour
     {
         Mouse mouse = Mouse.current;
         Keyboard keyboard = Keyboard.current;
+        bool record = Time.frameCount != _unpausedFrame;
 
-        if (mouse != null)
+        if (mouse != null && record)
         {
             if (mouse.leftButton.wasPressedThisFrame)
             {
@@ -253,7 +287,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
             if (mouse.rightButton.wasPressedThisFrame) _rightPressedInMode = true;
         }
         // 포커스가 없을 때의 ESC는 다른 앱의 것이다(UIManager와 같은 원칙).
-        if (keyboard != null && Application.isFocused && keyboard.escapeKey.wasPressedThisFrame) _escPressedInMode = true;
+        if (record && keyboard != null && Application.isFocused && keyboard.escapeKey.wasPressedThisFrame) _escPressedInMode = true;
 
         if (_rightPressedInMode && mouse != null && mouse.rightButton.wasReleasedThisFrame) { Exit(); return; }
         if (_escPressedInMode && keyboard != null && keyboard.escapeKey.wasReleasedThisFrame) { Exit(); return; }

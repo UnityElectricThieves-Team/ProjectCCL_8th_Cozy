@@ -10,7 +10,8 @@ using System.Collections.Generic;
 /// key는 <see cref="ShopItemDefinition.id"/> — 이름이나 파일 경로가 아니라 손으로 정한 안정적 식별자다.
 /// 정의 에셋의 이름을 바꾸거나 폴더를 옮겨도 저장된 소유가 날아가지 않아야 하기 때문이다.
 ///
-/// 화면에 놓인 장식은 <see cref="placed"/>에 따로 적는다. <see cref="ownedCounts"/>는 그대로 "산 개수 전체"이고,
+/// 화면에 놓인 장식은 <see cref="placed"/>에 따로 적는다. <see cref="ownedCounts"/>는 "가진 개수 전체"(놓인 것 + 인벤토리)이고
+/// 제거하면 준다. 0이 되면 키를 지운다.
 /// 놓인 장식을 뺀 잔여 개수는 저장하지 않고 둘에서 계산한다(<see cref="ShopSystem.GetUnplacedCount"/>).
 /// 이 필드가 없던 옛 파일은 빈 목록으로 읽힌다.
 /// </summary>

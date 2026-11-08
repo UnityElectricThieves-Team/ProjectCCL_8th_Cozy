@@ -171,7 +171,7 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
-        if (IsSuspended || _open.Count == 0) return;
+        if (_open.Count == 0) return;
         BringPressedPanelToFront();
         CloseTopOnEscape();
     }
@@ -179,8 +179,11 @@ public class UIManager : MonoBehaviour
     // 왼쪽 버튼을 누른 프레임에만, 커서 아래 맨 앞 UI가 속한 열린 패널을 맨 앞으로 가져온다(ESC 대상이 된다).
     // 패널 루트에 IPointerDownHandler를 달면 버튼·탭이 이벤트를 먼저 가져가 본문 클릭을 놓친다.
     // 포커스는 보지 않는다 — 창 밖에서 들어온 첫 클릭 프레임엔 아직 포커스가 없을 수 있다.
+    // 패널을 숨기는 동안(장식 배치 모드·뷰포트 편집)에는 하지 않는다. 남은 패널(인벤토리·수량 팝업)은 하나뿐이거나 모달이라 앞뒤를 가릴 일이 없다.
     private void BringPressedPanelToFront()
     {
+        if (IsSuspended) return;
+
         var mouse = Mouse.current;
         var eventSystem = EventSystem.current;
         if (mouse == null || eventSystem == null || !mouse.leftButton.wasPressedThisFrame) return;
@@ -207,14 +210,18 @@ public class UIManager : MonoBehaviour
     }
 
     // ESC는 우리 창에 포커스가 있을 때만 — 다른 앱에서 누른 ESC를 가로채지 않게.
+    // 패널을 숨기는 동안의 ESC는 모드의 것이라 닫지 않는다. 예외는 그 모드에서도 보이는 모달(수량 팝업)이 맨 위일 때다 —
+    // 그 ESC는 팝업만 닫고 모드는 남는다(모드는 팝업이 떠 있는 동안 입력을 멈춘다).
     private void CloseTopOnEscape()
     {
         if (!Application.isFocused) return;
 
         var keyboard = Keyboard.current;
-        if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
-        {
-            Close(_open[_open.Count - 1]); // 최상단 패널 하나만 닫는다
-        }
+        if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
+
+        UIPanel top = _open[_open.Count - 1];
+        if (IsSuspended && (top == null || !top.IsModal || IsHidden(top))) return;
+
+        Close(top); // 최상단 패널 하나만 닫는다
     }
 }

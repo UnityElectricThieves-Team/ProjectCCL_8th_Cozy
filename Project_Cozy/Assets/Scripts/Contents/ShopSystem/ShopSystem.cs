@@ -39,7 +39,7 @@ public sealed class ShopSystem : MonoBehaviour
     private long _lastRecallOrder;
 
     /// <summary>
-    /// 산 개수나 놓인 목록이 바뀌었을 때 울린다(장식을 사서 놓았을 때, 놓인 장식을 회수했을 때). 바뀐 뒤에 울리므로,
+    /// 가진 개수나 놓인 목록이 바뀌었을 때 울린다(장식을 사서 놓았을 때, 놓인 장식을 회수·제거했을 때 등). 바뀐 뒤에 울리므로,
     /// 상점 슬롯(개수)·인벤토리(남은 개수)·장식 레이어(놓인 목록)가 같은 신호로 갱신한다.
     /// </summary>
     public event Action OwnedChanged;
@@ -73,14 +73,14 @@ public sealed class ShopSystem : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
-    /// <summary>이 장식을 몇 개 가지고 있는가. 산 적 없으면 0.</summary>
+    /// <summary>이 장식을 몇 개 가지고 있는가(놓인 것 + 인벤토리). 제거하면 준다. 산 적 없으면 0.</summary>
     public int GetCount(string id) => _inventory.ownedCounts.TryGetValue(id, out int count) ? count : 0;
 
     /// <summary>이 장식을 하나라도 가지고 있는가.</summary>
     public bool IsOwned(string id) => GetCount(id) > 0;
 
     /// <summary>
-    /// 이 장식 중 아직 화면에 놓지 않은 개수(산 개수 − 놓인 개수). 인벤토리가 보여 주는 개수다 —
+    /// 이 장식 중 아직 화면에 놓지 않은 개수(가진 개수 − 놓인 개수). 인벤토리가 보여 주는 개수다 —
     /// 기획(Figma 인벤토리)이 "이미 배치되어 있는 시설물은 인벤토리에 없음, 잔여 장식들만"이라고 정했다.
     /// </summary>
     public int GetUnplacedCount(string id)
@@ -94,7 +94,7 @@ public sealed class ShopSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// 화면에 놓인 장식 목록(놓은 순서). 개수(<see cref="GetCount"/>)와는 별개다 — 개수는 산 것 전체,
+    /// 화면에 놓인 장식 목록(놓은 순서). 개수(<see cref="GetCount"/>)와는 별개다 — 개수는 가진 것 전체,
     /// 이 목록은 그중 화면에 놓인 것이다.
     /// </summary>
     public IReadOnlyList<PlacedDecorationData> Placed => _inventory.placed;
@@ -122,7 +122,7 @@ public sealed class ShopSystem : MonoBehaviour
 
     /// <summary>
     /// 놓인 장식 중 <paramref name="shouldRecall"/>이 true인 것을 인벤토리로 회수한다 — 놓인 목록에서 빼고 회수 순번을 찍어 저장한다.
-    /// 산 개수는 그대로라, 빠진 만큼 남은 개수(<see cref="GetUnplacedCount"/>)가 는다. 하트는 돌려주지 않는다(산 것을 거두는 것뿐이다).
+    /// 가진 개수는 그대로라, 빠진 만큼 남은 개수(<see cref="GetUnplacedCount"/>)가 는다. 하트는 돌려주지 않는다(산 것을 거두는 것뿐이다).
     /// 회수한 것이 있으면 <see cref="OwnedChanged"/>를 울리고 개수를 돌려준다.
     /// </summary>
     public int RecallPlaced(Predicate<PlacedDecorationData> shouldRecall)
@@ -159,6 +159,45 @@ public sealed class ShopSystem : MonoBehaviour
         Save();
         OwnedChanged?.Invoke();
         return true;
+    }
+
+    /// <summary>
+    /// 놓인 목록의 칸 번호 placedIndex에 있는 장식 하나를 영구히 없앤다. 제거 모드에서 놓인 장식을 고른 순간에 부른다.
+    /// 놓인 목록에서 빼고 가진 개수를 하나 줄인 뒤 저장하고 <see cref="OwnedChanged"/>를 울린다. 하트는 돌려주지 않는다(기획).
+    /// 범위 밖이면 아무것도 바꾸지 않고 false.
+    /// </summary>
+    public bool RemovePlacedAt(int placedIndex)
+    {
+        if (placedIndex < 0 || placedIndex >= _inventory.placed.Count) return false;
+
+        string id = _inventory.placed[placedIndex].itemId;
+        _inventory.placed.RemoveAt(placedIndex);
+        DecreaseCount(id, 1);
+        Save();
+        OwnedChanged?.Invoke();
+        return true;
+    }
+
+    /// <summary>
+    /// 인벤토리(아직 놓지 않은 것)에서 이 장식을 count개 영구히 없앤다. 제거 모드에서 인벤토리 슬롯을 고른 순간에 부른다.
+    /// 1 ≤ count ≤ <see cref="GetUnplacedCount"/>가 아니면 아무것도 바꾸지 않고 false. 하트는 돌려주지 않는다.
+    /// </summary>
+    public bool RemoveUnplaced(string id, int count)
+    {
+        if (count < 1 || count > GetUnplacedCount(id)) return false;
+
+        DecreaseCount(id, count);
+        Save();
+        OwnedChanged?.Invoke();
+        return true;
+    }
+
+    // 0 이하가 되면 키를 지운다. 손으로 고친 파일처럼 놓인 수가 가진 수보다 많아도 음수가 남지 않게 한다.
+    private void DecreaseCount(string id, int amount)
+    {
+        int left = GetCount(id) - amount;
+        if (left > 0) _inventory.ownedCounts[id] = left;
+        else _inventory.ownedCounts.Remove(id);
     }
 
     /// <summary>

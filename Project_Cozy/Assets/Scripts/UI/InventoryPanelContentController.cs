@@ -13,7 +13,10 @@ using UnityEngine;
 ///
 /// 보여주는 것은 산 장식 중 **아직 화면에 놓지 않은** 것(잔여 장식)과 그 개수다(<see cref="ShopSystem.GetUnplacedCount"/>).
 /// 기획(Figma 인벤토리)이 "이미 배치되어 있는 시설물은 인벤토리에 없음"이라고 정했다. 그래서 설치하면 칸이 줄고,
-/// 회수하면 다시 는다. '이동/회수/제거' 모드 버튼은 아직 없다.
+/// 회수하면 다시 는다.
+///
+/// 칸이 눌리면 <see cref="SlotClicked"/>로 알리기만 하고, 무엇을 할지는 이동·제거 모드를 맡은 <see cref="InventoryModeController"/>가 정한다.
+/// 칸의 호버 색을 켜도 되는지도 그쪽이 <see cref="SetSlotHoverAllowed"/>로 알려 주고, 여기서는 켜진 칸에 전하기만 한다.
 ///
 /// 패널은 CanvasGroup으로 숨기므로(SetActive 아님) 다시 열려도 <see cref="OnEnable"/>이 불리지 않는다.
 /// 그래서 화면을 여는 시점이 아니라 <see cref="ShopSystem.OwnedChanged"/>가 울릴 때 다시 그린다.
@@ -34,6 +37,24 @@ public sealed class InventoryPanelContentController : MonoBehaviour
 
     // 이번에 그릴 장식 목록. 다시 그릴 때마다 채워 쓰는 재사용 버퍼다.
     private readonly List<ShopItemDefinition> _owned = new();
+
+    /// <summary>칸이 눌렸다. 어떤 장식의 칸인지 넘긴다.</summary>
+    public event Action<ShopItemDefinition> SlotClicked;
+
+    private Action<ShopItemDefinition> _onSlotClicked;   // 칸마다 넘길 대리자. 한 번 만들어 둔다
+    private bool _slotHoverAllowed;
+
+    /// <summary>켜진 칸 전부에 호버 색을 켜도 되는지 알린다. 값을 기억해 다시 그릴 때(<see cref="Rebuild"/>)도 넘긴다.</summary>
+    public void SetSlotHoverAllowed(bool allowed)
+    {
+        _slotHoverAllowed = allowed;
+        for (int i = 0; i < _slots.Count; i++)
+        {
+            if (_slots[i].gameObject.activeSelf) _slots[i].SetHoverAllowed(allowed);
+        }
+    }
+
+    private void OnSlotClicked(ShopItemDefinition item) => SlotClicked?.Invoke(item);
 
     private void OnEnable()
     {
@@ -69,7 +90,7 @@ public sealed class InventoryPanelContentController : MonoBehaviour
 
             var slot = _slots[i];
             slot.gameObject.SetActive(true);
-            slot.Bind(_owned[i], shop.GetUnplacedCount(_owned[i].id));
+            slot.Bind(_owned[i], shop.GetUnplacedCount(_owned[i].id), _onSlotClicked, _slotHoverAllowed);
         }
 
         for (int i = _owned.Count; i < _slots.Count; i++) _slots[i].gameObject.SetActive(false);
@@ -106,7 +127,11 @@ public sealed class InventoryPanelContentController : MonoBehaviour
     // Sort에 메서드 그룹을 넘기면 부를 때마다 대리자가 새로 만들어지므로 한 번 만들어 둔다.
     private Comparison<ShopItemDefinition> _compareForDisplay;
 
-    private void Awake() => _compareForDisplay = CompareForDisplay;
+    private void Awake()
+    {
+        _compareForDisplay = CompareForDisplay;
+        _onSlotClicked = OnSlotClicked;
+    }
 
     // 문화권에 따라 결과가 달라지지 않도록 문자열 비교는 Ordinal로 한다.
     private int CompareForDisplay(ShopItemDefinition a, ShopItemDefinition b)
