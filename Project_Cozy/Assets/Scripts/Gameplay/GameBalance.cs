@@ -57,9 +57,8 @@ public static class GameBalance
     /// 테스트는 잡기까지가 답답하지 않게 줄였다. 2초가 맞는지는 기획에 다시 묻는 중이다(2026-11-08).</summary>
     public const float GrabHoldSeconds = UsesTestValues ? 0.25f : 2f;
 
-    /// <summary>이 시간(초) 동안 아무 입력이 없으면 잠든다. 화면 안 캐릭터의 수면과, 화면 밖(귀환한) 캐릭터의 시간 친밀도 정지에
-    /// 같이 쓴다. 기획 30분. 테스트는 30분을 기다려서는 수면을 시험할 수 없어 2분으로 줄였다 — 대가로 에디터에서
-    /// 2분만 손을 떼도 캐릭터가 잠든다.</summary>
+    /// <summary>이 시간(초) 동안 아무 입력이 없으면 잠든다. 기획 30분. 테스트는 30분을 기다려서는 수면을 시험할 수 없어
+    /// 2분으로 줄였다 — 대가로 에디터에서 2분만 손을 떼도 캐릭터가 잠든다.</summary>
     public const float SleepAfterIdleSeconds = UsesTestValues ? 120f : 1800f;
 
     // ===== 해금 =====

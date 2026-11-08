@@ -4,7 +4,6 @@ paths:
   - "Project_Cozy/Assets/Scripts/Character/CharacterInteractionRelay.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/AffinityHeartReward.cs"
   - "Project_Cozy/Assets/Scripts/Character/BaseCharacterController.cs"
-  - "Project_Cozy/Assets/Scripts/Platform/Input/UserInputClock.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/CharacterOwnership.cs"
   - "Project_Cozy/Assets/Scripts/Gameplay/CharacterOwnershipFileFormat.cs"
   - "Project_Cozy/Assets/Scripts/UI/CountLabel.cs"
@@ -30,16 +29,13 @@ Figma의 변신 조건은 "고양이 → 소녀 필요 친밀도 100 (게임 딱
 - 카운터는 누적값이 상한에 닿아도 계속 셉니다. 상한에 닿은 캐릭터도 동물로 돌아온 뒤 다시 변신할 수 있어야 하기 때문입니다.
 - 화면에 보이는 친밀도 수치는 누적값입니다. 카운터는 보여주지 않습니다. 예외는 설정의 [게임 초기화] 하나입니다. 사용자가 확인 팝업에서 직접 골라 모든 진행을 지우는 경우라, 캐릭터 기록과 함께 친밀도도 지웁니다([settings.md](settings.md)). 기획 사본(`Docs/Planning/UserSettings.md`)의 "친밀도 리셋" 옵션도 같은 이유로 근거 없음 표시가 붙어 있습니다.
 
-## 시간으로 오르는 친밀도는 보유한 캐릭터 모두가 받습니다
+## 시간으로 오르는 친밀도는 화면에 나와 있고 깨어 있는 캐릭터만 받습니다
 
-Figma는 "게임 실행 중, 깨어 있는 상태"에 1분당 +2를 주고, 대상을 "보유 중인 캐릭터에만 각각 누적(화면 표시 여부와 무관)"으로 정했습니다. 그래서 도감으로 귀환해 화면에 없는 캐릭터도 받습니다.
+1분당 +2는 화면에 나온 캐릭터가 자기 `Update`에서 셉니다. "깨어 있음"은 그 캐릭터가 Sleep 상태가 아닌 것입니다(기획의 "sleep 중 0").
 
-- **화면에 나온 캐릭터는 자기 `Update`에서 셉니다.** 잠든 상태(Sleep)면 세지 않습니다.
-- **화면에 없는 캐릭터는 `CharacterOwnership`이 시간만 흘려줍니다.** 숨긴 캐릭터는 오브젝트가 꺼져 `Update`가 돌지 않기 때문입니다. 세는 것은 같은 `AffinityModule`이라, 변신 카운터도 화면 밖에서 오른 몫을 셉니다. 켜진 캐릭터에는 흘려주지 않으므로 두 번 세지 않습니다.
-- 숨긴 캐릭터를 파괴하지 않는 이유는 [character-ownership.md](character-ownership.md)에 있습니다.
+**도감으로 귀환해 숨은 캐릭터는 받지 않습니다.** 오브젝트가 꺼져 `Update`가 돌지 않고, 대신 세 주는 곳도 두지 않습니다. 국기님 결정입니다(2026-11-08).
 
-잠든 동안은 시간을 세지 않습니다(기획의 "sleep 중 0"). 잠드는 기준(무입력 30분)은 캐릭터마다가 아니라 **사용자 입력 시계 하나로** 판정합니다(`StateModule.IsUserIdle`, [character-state-machine.md](character-state-machine.md) 수면 절). 화면 밖 캐릭터는 잠드는 모습이 없어서, "사용자가 마지막 입력 후 30분 안에 있는가"를 깨어 있음으로 봅니다(우리 판단, 기획 확인 중).
-
+- Figma 표에는 대상이 "보유 중인 캐릭터에만 각각 누적(화면 표시 여부와 무관, 보유만 하면 누적)"으로 적혀 있습니다. 귀환이라는 말은 없지만 글자 그대로 읽으면 귀환한 캐릭터도 받는다고 읽힐 수 있어, **이 결정은 Figma 문구와 다를 수 있습니다.** 기획에 확인 중입니다.
 ## 저장은 CharacterOwnership이 합니다
 
 친밀도는 캐릭터별 기록(`CharacterOwnership`의 레코드)에 함께 저장됩니다. 캐릭터 쪽 `AffinityModule`이 직접 저장하지 않는 이유는 둘입니다.

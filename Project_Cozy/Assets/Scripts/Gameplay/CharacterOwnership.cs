@@ -7,7 +7,7 @@ using Assets.Scripts.Contents.CollectionSystem.Model;
 /// <summary>
 /// "어떤 캐릭터를 가졌고, 그중 누가 화면에 나와 있어야 하는가"의 주인. 캐릭터별 기록(보유·배치·누적 친밀도)을
 /// 파일에 들고, 시작할 때 보유한 캐릭터를 모두 만들어(화면에 없어야 하는 것은 숨겨) 친밀도를 되돌린다.
-/// 숨긴 캐릭터는 Update가 돌지 않으므로 깨어 있는 시간의 친밀도를 이 클래스가 대신 흘려준다.
+/// 숨긴(도감으로 귀환한) 캐릭터는 꺼져 있어 시간 친밀도를 받지 않는다 — 국기님 결정(2026-11-08), .claude/rules/unity/character-affinity.md.
 /// 친밀도가 오르면 기록에 저장한 뒤 저장돼 있던 값과 비교해 오른 만큼 하트를 준다(<see cref="AffinityHeartReward"/>).
 /// 친밀도를 캐릭터(AffinityModule)가 직접 저장하지 않는 이유: Character 레이어는 저장소(Platform/Data)를
 /// 부르지 않고, 캐릭터 모듈은 캐릭터마다 따로 있어 파일 하나에 대응하지 않는다.
@@ -80,7 +80,7 @@ public class CharacterOwnership : MonoBehaviour
         public Action<int> onAffinityChanged;
     }
 
-    // 만든 캐릭터 전부 — 화면에 나온 것과 숨긴 것 모두. 구독 해제·초기화·화면 밖 시간 친밀도가 이 목록 하나를 돈다.
+    // 만든 캐릭터 전부 — 화면에 나온 것과 숨긴 것 모두. 구독 해제·초기화·귀환·소환이 이 목록 하나를 돈다.
     // 캐릭터가 몇 종뿐이라 선형 탐색으로 충분하다(FindRecord와 같은 판단).
     private readonly List<OwnedCharacter> _characters = new();
 
@@ -133,18 +133,6 @@ public class CharacterOwnership : MonoBehaviour
         UnsubscribeAll();
     }
 
-    // 화면에 없는(숨긴) 캐릭터는 Update가 돌지 않으므로, 깨어 있는 시간의 친밀도를 여기서 대신 흘려준다.
-    // 화면에 나온 캐릭터는 자기 Update가 센다 — TickWhileHidden이 켜진 캐릭터는 건너뛰므로 두 번 세지 않는다.
-    private void Update()
-    {
-        var dt = Time.deltaTime;
-        for (int i = 0; i < _characters.Count; i++)
-        {
-            var controller = _characters[i].controller;
-            if (controller != null && !controller.gameObject.activeSelf) controller.TickWhileHidden(dt);
-        }
-    }
-
     // ViewportConfirmed는 확정될 때마다 울리지만, 등장은 처음 한 번만 필요하다.
     private void OnFirstViewportConfirmed(RectInt _)
     {
@@ -167,9 +155,9 @@ public class CharacterOwnership : MonoBehaviour
 
     /// <summary>
     /// 보유한 캐릭터를 모두 만들고, 화면에 나와 있지 않아야 하는 것은 바로 숨긴다.
-    /// 숨긴 캐릭터도 오브젝트를 두는 이유: 친밀도·변신 카운터·소녀 상태가 오브젝트 안에 있어서, 파괴하면 잃는다.
-    /// 그리고 화면 밖 캐릭터도 깨어 있는 동안 시간 친밀도를 받는다(기획 "화면 표시 여부와 무관"). 꺼진 오브젝트는
-    /// Update·렌더·판정이 멈추고, 그림은 대응표가 프리팹을 참조해 원래부터 메모리에 있으므로 비용이 거의 없다.
+    /// 숨긴 캐릭터도 오브젝트를 두는 이유: 변신 카운터·소녀 상태·1분 미만 나머지 시간이 오브젝트 안에만 있어서, 파괴하면 잃는다.
+    /// 꺼진 오브젝트는 Update·렌더·판정이 멈추고(그래서 시간 친밀도도 오르지 않는다), 그림은 대응표가 프리팹을 참조해
+    /// 원래부터 메모리에 있으므로 비용이 거의 없다.
     /// </summary>
     private void SpawnAllOwned()
     {

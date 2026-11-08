@@ -74,11 +74,10 @@ public sealed class StateModule
     private IDisposable _anyButtonSubscription;
 
     /// <summary>
-    /// 사용자가 잠들 만큼 오래 입력하지 않았는가. 수면 정책의 판정식은 이것 하나다 — 화면 안 캐릭터가 잠드는 조건이자,
-    /// 화면 밖(도감으로 귀환한) 캐릭터의 시간 친밀도를 멈추는 조건이다. 둘이 같은 식을 써야 잠드는 조건이 바뀌어도 갈라지지 않는다.
+    /// 사용자가 잠들 만큼 오래 입력하지 않았는가. 수면 정책의 판정식은 이것 하나다.
     /// 입력을 캐릭터마다 세지 않고 <see cref="UserInputClock"/> 하나로 재는 이유는 그 클래스 주석.
     /// </summary>
-    public static bool IsUserIdle => UserInputClock.SecondsSinceLastInput >= GameBalance.SleepAfterIdleSeconds;
+    private static bool IsUserIdle => UserInputClock.SecondsSinceLastInput >= GameBalance.SleepAfterIdleSeconds;
 
     public float WalkSpeed => _walkSpeed;
     public float RunSpeed => _runSpeed;

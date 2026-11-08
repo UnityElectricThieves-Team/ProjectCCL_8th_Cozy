@@ -37,7 +37,7 @@ Windows 로그인 시 자동 실행.
 - `GlobalKeyInput.cs` — 전역 키 입력 소스. `WH_KEYBOARD_LL` + `InputSystem.onAnyButtonPress`를 단일 이벤트 `KeyPressed(Key)`로 추상화 — 포커스 유무에 따라 두 OS 경로가 상호 배타적으로 fire하지만 소비자는 그 차이를 모름. LL 훅 경로는 keydown마다 보고한다(**자동 반복 포함** — 누른 순간만 알린다는 platform.md 약속을 아직 따르지 않음). 모디파이어/조합키/keyup 미지원(필요 시 KeyEvent 형태로 확장). (이전 명칭: `GlobalKeyboardHook` — `[MovedFrom]`으로 prefab 호환)
 - `OutFocusKeyHook.cs` — 게임 창이 포커스를 잃은 상태에서 들어오는 키 입력만 **static 이벤트** `KeyPressed(Key)`로 방송(소비자는 참조 없이 구독). 누른 순간만 방송하고 자동 반복은 훅이 거른다. `WH_KEYBOARD_LL` 등록 + 메인 스레드에서 `Application.isFocused == false` 게이트. 키 매핑은 `Win32KeyMap`에 위임. *OutFocus 전용* 추상화 — 포커스 무관 통합 소스는 `GlobalKeyInput`.
 - `OutFocusMouseHook.cs` — OutFocus 마우스 버튼 down 3종(left/right/middle)을 **static 이벤트** `ButtonPressed(MouseButton)`로 방송. `WH_MOUSE_LL` 등록 + 동일 isFocused 게이트. 이동·휠·up·xbutton은 다루지 않는다.
-- `UserInputClock.cs` — 포커스 무관하게 마지막 버튼 입력(키·마우스) 시각만 드는 static 클래스. `SecondsSinceLastInput` 하나를 내준다. 무입력 판정(캐릭터 수면, 화면 밖 캐릭터의 시간 친밀도)은 이것을 쓴다. `GlobalKeyInput`과 달리 어떤 키인지는 알리지 않는다. 관리자 모드로 거르지 않는다.
+- `UserInputClock.cs` — 포커스 무관하게 마지막 버튼 입력(키·마우스) 시각만 드는 static 클래스. `SecondsSinceLastInput` 하나를 내준다. 캐릭터 수면의 무입력 판정은 이것을 쓴다. `GlobalKeyInput`과 달리 어떤 키인지는 알리지 않는다. 관리자 모드로 거르지 않는다.
 - `Win32KeyMap.cs` — Win32 가상 키코드 → `UnityEngine.InputSystem.Key` 매핑. 순수 로직(`UnityEngine` 의존 없음 → EditMode 테스트 가능). LL 훅 경로에서 vkCode를 `Key`로 바꿀 때 쓴다.
 - `InputSystem_Actions.inputactions` — Unity New Input System 액션 매핑 에셋. 입력 처리 코드와 함께 두기 위해 `Assets/` 루트에서 이쪽으로 이동.
 
