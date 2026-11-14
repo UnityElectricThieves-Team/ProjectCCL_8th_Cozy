@@ -112,7 +112,7 @@ public class ViewportScreenSettings : MonoBehaviour
     public event Action<bool> EditModeChanged;
 
     /// <summary>화면이 저장한 상태가 된 직후, 지금 적용된 뷰포트로 울린다 — 그래픽 탭의 [저장](<see cref="Commit"/>)과
-    /// 미저장 뷰포트를 버렸을 때(<see cref="DiscardPendingViewport"/>). 뷰포트를 줄였든 줌을 키웠든,
+    /// 그래픽 탭의 미저장 변경을 버렸을 때(<see cref="DiscardPendingViewport"/>, 줌만 미저장이어도). 뷰포트를 줄였든 줌을 키웠든,
     /// 사용자가 저장한 화면 밖에 남은 장식을 회수하는 지점이다(DecorationBinder).</summary>
     public event Action<RectInt> Committed;
 
@@ -360,16 +360,19 @@ public class ViewportScreenSettings : MonoBehaviour
     }
 
     /// <summary>
-    /// 미저장 뷰포트를 버린다(그래픽 탭 미저장 확인). 화면을 저장한 뷰포트로 되돌려 <see cref="ViewportConfirmed"/>를 울리고,
-    /// 이어서 <see cref="Committed"/>도 울린다 — 미저장 동안 넓혀진 곳에 놓은 장식이 저장한 화면 밖에 남지 않게 회수하려는 것이다.
-    /// 되돌린 화면도 사용자가 저장한 화면이므로 [저장]과 같은 신호를 쓴다. 회수 판정이 되돌린 줌으로 되도록, 크기 단계를 먼저 되돌린 뒤 부른다(settings.md).
+    /// 그래픽 탭의 미저장 변경을 버렸을 때 부른다(미저장 확인). 미저장 뷰포트가 있으면 저장한 뷰포트로 되돌려 <see cref="ViewportConfirmed"/>를 울린다.
+    /// 그다음 미저장 뷰포트가 없어도 <see cref="Committed"/>를 울린다 — 미저장 동안 넓혀진 곳(뷰포트를 넓혔든 줌을 낮췄든)에 놓은 장식이
+    /// 저장한 화면 밖에 남지 않게 회수하려는 것이다. 줌만 미저장이었으면 되돌린 줌은 SetZoom이 이미 적용했으므로 여기서는 신호만 울린다.
+    /// 되돌린 화면도 사용자가 저장한 화면이므로 [저장](<see cref="Commit"/>)과 같은 모양이다. 회수 판정이 되돌린 줌으로 되도록, 크기 단계를 먼저 되돌린 뒤 부른다(settings.md).
     /// </summary>
     public void DiscardPendingViewport()
     {
-        if (!_hasPendingViewport) return;
-        _hasPendingViewport = false;
-        RefreshEffectiveViewport();
-        PublishViewportConfirmed();
+        if (_hasPendingViewport)
+        {
+            _hasPendingViewport = false;
+            RefreshEffectiveViewport();
+            PublishViewportConfirmed();
+        }
         Committed?.Invoke(_effectiveViewport);
     }
 
