@@ -37,7 +37,7 @@ public sealed class InventoryModeController : MonoBehaviour
     private Action<int> _onRemovePlaced;
     private Action<ShopItemDefinition> _onSlotClicked;
     private Action<DecorationMode> _onModeChanged;
-    private Action<int, float> _onMovePlaced;
+    private Action<int, DecorationSpot> _onMovePlaced;
     private Action<bool> _onCarryingChanged;
 
     private bool IsInMode => _mode != DecorationMode.None;
@@ -148,10 +148,10 @@ public sealed class InventoryModeController : MonoBehaviour
         else if (_mode == DecorationMode.Move) CarryFromInventory(item);
     }
 
-    private void MovePlaced(int placedIndex, float baseX)
+    private void MovePlaced(int placedIndex, DecorationSpot spot)
     {
         if (_mode != DecorationMode.Move) return;
-        ShopSystem.Instance?.MovePlacedAt(placedIndex, baseX);
+        ShopSystem.Instance?.MovePlacedAt(placedIndex, spot);
     }
 
     // 인벤토리 장식을 들어 화면에 놓는다. 하트 없이 놓인 목록에만 더한다. 칸은 놓는 순간에 줄어든다.
@@ -164,9 +164,9 @@ public sealed class InventoryModeController : MonoBehaviour
         }
 
         string id = item.id;
-        _placement.CarryFromInventory(item.decorationPrefab, baseX =>
+        _placement.CarryFromInventory(item.decorationPrefab, item.placementKind, spot =>
         {
-            if (_mode == DecorationMode.Move) ShopSystem.Instance?.PlaceFromInventory(id, baseX);
+            if (_mode == DecorationMode.Move) ShopSystem.Instance?.PlaceFromInventory(id, spot);
         });
     }
 

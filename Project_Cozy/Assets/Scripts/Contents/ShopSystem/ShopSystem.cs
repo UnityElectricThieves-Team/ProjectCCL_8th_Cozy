@@ -100,11 +100,12 @@ public sealed class ShopSystem : MonoBehaviour
     public IReadOnlyList<PlacedDecorationData> Placed => _inventory.placed;
 
     /// <summary>
-    /// 장식을 사서 baseX(베이스 공간 px, 그림의 가로 중앙) 자리에 놓는다. 설치 모드에서 자리를 확정한 순간에 부른다.
+    /// 장식을 사서 spot 자리(가로 위치와 지면 위 높이, <see cref="DecorationSpot"/>)에 놓는다. 설치 모드에서 자리를 확정한 순간에 부른다.
+    /// 받은 값을 그대로 적는다 — 장식 종류(바닥/자유)는 모른다. 바닥 장식의 높이는 읽는 쪽(바인더)이 0으로 정리한다.
     /// 하트 차감, 개수 증가, 놓인 목록 추가, 저장을 한 번에 하고 마지막에 <see cref="OwnedChanged"/>를 울린다 —
     /// 지불과 인도가 함께 파일에 남아야 거래가 성립한다. 잔액이 모자라면 아무것도 바꾸지 않고 false.
     /// </summary>
-    public bool TryBuyAndPlace(ShopItemDefinition item, float baseX)
+    public bool TryBuyAndPlace(ShopItemDefinition item, DecorationSpot spot)
     {
         if (item == null) return false;
         if (HeartSystem.Instance == null || !HeartSystem.Instance.TrySpend(item.price))
@@ -114,7 +115,7 @@ public sealed class ShopSystem : MonoBehaviour
         }
 
         _inventory.ownedCounts[item.id] = GetCount(item.id) + 1;
-        _inventory.placed.Add(new PlacedDecorationData { itemId = item.id, x = baseX });
+        _inventory.placed.Add(new PlacedDecorationData { itemId = item.id, x = spot.BaseX, elevation = spot.ElevationPx });
         Save();
         OwnedChanged?.Invoke();
         return true;
@@ -162,28 +163,29 @@ public sealed class ShopSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// 놓인 목록의 칸 번호 placedIndex에 있는 장식을 baseX(베이스 공간 px, 그림의 가로 중앙)로 옮긴다. 이동 모드에서 새 자리를 확정한 순간에 부른다.
+    /// 놓인 목록의 칸 번호 placedIndex에 있는 장식을 spot 자리(가로 위치와 지면 위 높이)로 옮긴다. 이동 모드에서 새 자리를 확정한 순간에 부른다.
     /// 저장하고 <see cref="OwnedChanged"/>를 울린다. 범위 밖이면 아무것도 바꾸지 않고 false.
     /// </summary>
-    public bool MovePlacedAt(int placedIndex, float baseX)
+    public bool MovePlacedAt(int placedIndex, DecorationSpot spot)
     {
         if (placedIndex < 0 || placedIndex >= _inventory.placed.Count) return false;
 
-        _inventory.placed[placedIndex].x = baseX;
+        _inventory.placed[placedIndex].x = spot.BaseX;
+        _inventory.placed[placedIndex].elevation = spot.ElevationPx;
         Save();
         OwnedChanged?.Invoke();
         return true;
     }
 
     /// <summary>
-    /// 인벤토리(아직 놓지 않은 것)에 있는 이 장식 하나를 baseX 자리에 놓는다. 이동 모드에서 인벤토리 장식을 놓은 순간에 부른다.
+    /// 인벤토리(아직 놓지 않은 것)에 있는 이 장식 하나를 spot 자리에 놓는다. 이동 모드에서 인벤토리 장식을 놓은 순간에 부른다.
     /// 이미 가진 것을 놓는 것이라 하트·개수는 그대로이고 놓인 목록에만 더한다. 남은 것이 없으면 false.
     /// </summary>
-    public bool PlaceFromInventory(string id, float baseX)
+    public bool PlaceFromInventory(string id, DecorationSpot spot)
     {
         if (GetUnplacedCount(id) <= 0) return false;
 
-        _inventory.placed.Add(new PlacedDecorationData { itemId = id, x = baseX });
+        _inventory.placed.Add(new PlacedDecorationData { itemId = id, x = spot.BaseX, elevation = spot.ElevationPx });
         Save();
         OwnedChanged?.Invoke();
         return true;

@@ -16,11 +16,21 @@ using UnityEngine;
 /// 그래픽 탭의 [저장]으로 화면을 저장하거나 저장하지 않은 변경(뷰포트·줌)을 버리면(<see cref="ViewportScreenSettings.Committed"/>) 지금 뷰포트에 온전히 들어가지 않는 장식을
 /// 인벤토리로 회수한다. 뷰포트를 줄인 경우와 전체 크기(줌)를 키운 경우가 모두 여기로 온다. 판정에 장식 그림의 크기가 필요한데, 상품 id를 프리팹으로 바꾸는 곳이 여기라 여기서 한다.
 /// 판정 상자는 설치 모드와 같은 그림 전체(투명 여백 포함)다. 확인 팝업은 띄우지 않는다.
+///
+/// 장식의 지면 위 높이는 여기 <see cref="ElevationOf"/> 한 곳에서 정리한다 — 상품이 바닥 장식이면 저장 값과 상관없이 0이다.
+/// 종류의 주인은 저장 값이 아니라 상품 정의라서, 종류를 바닥으로 되돌린 상품이 떠 있게 그려지면 안 된다.
+/// 그래서 레이어는 정리된 높이만 받아 종류를 보지 않고(종류는 이동 모드가 집을 때 돌려주려고 들고만 있다),
+/// 회수 판정도 높이는 같은 정리를 거친다. <see cref="ShopSystem"/>은 종류를 모른다.
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(DecorationLayer))]
 public sealed class DecorationBinder : MonoBehaviour
 {
+    // 회수 판정의 위쪽 비교에만 두는 여유(베이스 px). 놓을 때는 월드 실수로, 회수할 때는 베이스 px로 계산해서
+    // 뷰포트 위쪽 끝에 딱 붙여 초록으로 놓은 장식이 뷰포트를 바꾸지 않고 [저장]만 눌러도 회수되는 일을 막는다.
+    // "밖으로 이만큼 더 나가야 회수"하는 쪽이다. 자유 장식의 위쪽에만 둔다 — 좌우 비교와 바닥 장식의 회수 경계는 여유 없이 그대로다.
+    private const float TOP_RECALL_MARGIN_PX = 0.5f;
+
     private readonly List<PlacedDecoration> _buffer = new();
 
     private DecorationLayer _layer;
@@ -72,7 +82,8 @@ public sealed class DecorationBinder : MonoBehaviour
         _system.RecallPlaced(_isOutsideSavedViewport);
     }
 
-    // 그림의 가로 중앙이 저장된 x이고, 아래 끝은 지면(뷰포트 아래 변)에 붙는다. 그래서 가로는 양 끝을, 세로는 높이만 본다.
+    // 그림의 가로 중앙이 저장된 x이고, 아래 끝은 지면(뷰포트 아래 변)에서 높이(ElevationOf)만큼 위다.
+    // 그래서 가로는 양 끝을, 세로는 "지면 위 높이 + 그림 높이"가 뷰포트 높이를 넘는지만 본다(아래로는 지면 밑에 놓이지 않는다).
     private bool IsOutsideSavedViewport(PlacedDecorationData placed)
     {
         // 지금 그리지 않는 장식(상점에 없는 id, 빈 프리팹)은 크기를 알 수 없어 그대로 둔다 — 그리는 쪽과 같은 판단.
@@ -88,10 +99,16 @@ public sealed class DecorationBinder : MonoBehaviour
         float halfWidthPx = size.x * Mathf.Abs(scale.x) * ppu * 0.5f;
         float heightPx = size.y * Mathf.Abs(scale.y) * ppu;
 
+        float topMarginPx = item.placementKind == DecorationPlacementKind.Floor ? 0f : TOP_RECALL_MARGIN_PX;
         return placed.x - halfWidthPx < _savedViewport.xMin
             || placed.x + halfWidthPx > _savedViewport.xMax
-            || heightPx > _savedViewport.height;
+            || ElevationOf(item, placed) + heightPx > _savedViewport.height + topMarginPx;
     }
+
+    // 지면 위 높이를 정리하는 단 한 곳. 바닥 장식은 저장 값과 상관없이 0이다(클래스 주석).
+    // 손으로 고친 파일(음수·NaN)은 막지 않는다 — 게임이 그런 값을 쓰지 않는다.
+    private static float ElevationOf(ShopItemDefinition item, PlacedDecorationData placed)
+        => item.placementKind == DecorationPlacementKind.Floor ? 0f : placed.elevation;
 
     private void Apply()
     {
@@ -102,7 +119,8 @@ public sealed class DecorationBinder : MonoBehaviour
             ShopItemDefinition item = FindItem(placed[i].itemId);
             if (item == null || item.decorationPrefab == null) continue;
             // 저장 목록의 칸 번호를 함께 싣는다. 건너뛴 칸이 있으면 레이어의 칸 번호와 달라지기 때문이다.
-            _buffer.Add(new PlacedDecoration(item.decorationPrefab, placed[i].x, i));
+            var spot = new DecorationSpot(placed[i].x, ElevationOf(item, placed[i]));
+            _buffer.Add(new PlacedDecoration(item.decorationPrefab, spot, item.placementKind, i));
         }
         _layer.SetDecorations(_buffer);
     }

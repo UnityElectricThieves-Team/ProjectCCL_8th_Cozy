@@ -2,29 +2,35 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 화면에 놓인 장식 하나를 그리는 데 필요한 것 — 어떤 프리팹을, 베이스 공간 px의 어느 가로 위치에.
+/// 화면에 놓인 장식 하나를 그리는 데 필요한 것 — 어떤 프리팹을, 어느 자리(<see cref="DecorationSpot"/>: 가로 위치와 지면 위 높이)에.
 /// 상점 데이터(<c>PlacedDecorationData</c>)를 직접 받지 않으려고 따로 둔다. 상품 id를 프리팹으로 바꾸는 일은 바인더가 한다.
 ///
 /// <see cref="PlacedIndex"/>는 저장 목록에서의 칸 번호다. 배치 모드가 놓인 장식을 고르면 이 번호를 밖으로 돌려준다.
 /// 바인더가 그릴 수 없는 장식을 건너뛰므로 레이어의 칸 번호와 저장 목록의 칸 번호가 다를 수 있어서 따로 싣는다.
+///
+/// <see cref="Kind"/>는 그리기에 쓰지 않는다. 이동 모드가 이 장식을 집을 때 바닥/자유 중 어느 쪽으로 움직일지 돌려주려고 든다.
+/// 높이는 바인더가 이미 정리해 넣는다(바닥 장식은 0).
 /// </summary>
 public readonly struct PlacedDecoration
 {
     public readonly GameObject Prefab;
-    public readonly float BaseX;
+    public readonly DecorationSpot Spot;
+    public readonly DecorationPlacementKind Kind;
     public readonly int PlacedIndex;
 
-    public PlacedDecoration(GameObject prefab, float baseX, int placedIndex)
+    public PlacedDecoration(GameObject prefab, DecorationSpot spot, DecorationPlacementKind kind, int placedIndex)
     {
         Prefab = prefab;
-        BaseX = baseX;
+        Spot = spot;
+        Kind = kind;
         PlacedIndex = placedIndex;
     }
 }
 
 /// <summary>
 /// 화면에 놓인 장식들을 그린다. 받은 목록대로 장식 프리팹을 만들어, 그림의 가로 중앙을 저장된 x에,
-/// 그림의 아래 끝을 지면(적용된 뷰포트의 아래 변, 편집 중이면 프리뷰의 아래 변)에 맞춘다.
+/// 그림의 아래 끝을 지면(적용된 뷰포트의 아래 변, 편집 중이면 프리뷰의 아래 변) + 저장 높이에 맞춘다.
+/// 바닥 장식은 바인더가 높이 0을 주므로 지면에 붙는다. 이 레이어는 종류(바닥/자유)를 보지 않는다.
 ///
 /// 이 컴포넌트는 <b>상점을 모른다</b> — 무엇을 어디에 놓을지는 밖에서 <see cref="SetDecorations"/>로 넣어 준다
 /// (배경의 <see cref="BackgroundStage"/>와 같은 자리). 그래야 이동·회수·제거 모드가 같은 레이어를 그대로 쓸 수 있다.
@@ -40,7 +46,7 @@ public readonly struct PlacedDecoration
 /// 배치는 뷰포트가 적용될 때(<see cref="ViewportScreenSettings.ViewportConfirmed"/>), 편집 중 프리뷰가 바뀔 때
 /// (<see cref="ViewportScreenSettings.PreviewChanged"/>), 목록이 바뀔 때만 다시 계산한다. 평소에 매 프레임 하는 일은 없다.
 /// 프리뷰를 따라가는 것은 배경과 같은 판단이다 — 배경만 따라가면 장식이 옛 지면에 남아 배경 바닥과 어긋나 보인다.
-/// 장식은 마스크로 자르지 않으므로, 프리뷰 밖에 걸친 장식도 보이다가 [저장] 때 회수된다.
+/// 장식은 마스크로 자르지 않으므로, 프리뷰 밖에 걸친 장식도 보이다가 [저장]하거나 저장하지 않은 변경을 버릴 때 회수된다.
 ///
 /// 지면 맞춤은 transform 위치가 아니라 그림의 아래 끝으로 한다. 장식마다 그림의 피벗이 달라서다(가구는 아래 끝, 임시 그림은 가운데).
 /// 장식에는 콜라이더를 달지 않는다 — 이유는 .claude/rules/unity/decoration-placement.md.
@@ -198,12 +204,15 @@ public sealed class DecorationLayer : MonoBehaviour
         Relayout();
     }
 
-    /// <summary>저장 목록 칸 번호 placedIndex의 장식을 그린 프리팹. 이동 모드가 같은 장식을 들고 다니려고 쓴다.</summary>
-    public bool TryGetPrefab(int placedIndex, out GameObject prefab)
+    /// <summary>
+    /// 저장 목록 칸 번호 placedIndex의 장식(프리팹·자리·종류). 이동 모드가 같은 장식을 같은 종류로 들고 다니려고 쓴다.
+    /// 프리팹이 없으면 false.
+    /// </summary>
+    public bool TryGetPlaced(int placedIndex, out PlacedDecoration placed)
     {
         int i = FindInstanceIndex(placedIndex);
-        prefab = i >= 0 ? _decorations[i].Prefab : null;
-        return prefab != null;
+        placed = i >= 0 ? _decorations[i] : default;
+        return placed.Prefab != null;
     }
 
     private int CurrentSortingOrder => _broughtForward ? BROUGHT_FORWARD_SORTING_ORDER : SORTING_ORDER;
@@ -292,11 +301,14 @@ public sealed class DecorationLayer : MonoBehaviour
             Vector3 center = renderer.transform.TransformPoint(local.center);
             Vector3 bottom = renderer.transform.TransformPoint(new Vector3(local.center.x, local.min.y, 0f));
 
-            float targetX = _cameraFitter.BaseXToWorldX(_decorations[i].BaseX, _viewportSettings.BaseSpaceSize);
+            // 높이는 위치가 아니라 지면에서 잰 길이라 앵커를 거치지 않고 PPU로만 나눈다(viewport-coordinates.md).
+            DecorationSpot spot = _decorations[i].Spot;
+            float targetX = _cameraFitter.BaseXToWorldX(spot.BaseX, _viewportSettings.BaseSpaceSize);
+            float targetBottomY = _area.yMin + spot.ElevationPx / _cameraFitter.PixelsPerUnit;
             Transform root = FindInstanceRoot(renderer.transform);
             Vector3 pos = root.position;
             pos.x += targetX - center.x;
-            pos.y += _area.yMin - bottom.y;
+            pos.y += targetBottomY - bottom.y;
             root.position = pos;
 
             renderer.enabled = _decorations[i].PlacedIndex != _hiddenIndex;

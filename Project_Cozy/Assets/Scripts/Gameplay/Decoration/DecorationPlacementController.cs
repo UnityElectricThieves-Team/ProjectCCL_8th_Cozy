@@ -9,13 +9,14 @@ using UnityEngine.InputSystem;
 ///
 /// 모드는 두 단계로 움직인다.
 /// - <b>고르기</b>: 커서 아래의 놓인 장식을 붉게 강조하고, 좌클릭하면 그 장식을 대상으로 삼는다. 회수·제거·이동.
-/// - <b>들고 다니기</b>: 장식 하나(고스트)를 커서를 따라 지면 위로 움직이며 놓을 수 있는지를 초록/빨강으로 보여주고, 좌클릭으로 놓는다. 설치·이동.
+/// - <b>들고 다니기</b>: 장식 하나(고스트)를 커서를 따라 움직이며 놓을 수 있는지를 초록/빨강으로 보여주고, 좌클릭으로 놓는다. 설치·이동.
+///   바닥 장식은 지면 위로만, 자유 장식(<see cref="DecorationPlacementKind.Anywhere"/>)은 메뉴창 빼고 어디든 움직인다 — 아래 끝은 지면에서 멈춘다.
 /// 설치는 들고 다니기만 하고 한 번 놓으면 모드가 끝난다. 회수·제거는 고르기만 하고, 한 번 처리한 뒤에도 고르기 단계에 남는다.
 /// 이동은 고르기 → 들고 다니기(원본은 감춤) → 놓으면 다시 고르기다. 인벤토리 장식도 고르기 단계에서 들어 올 수 있다.
 /// 우클릭·ESC는 언제나 모드 전체를 끝낸다. 들고 있던 것은 그대로 남고, 이미 확정한 것은 되돌리지 않는다.
 ///
-/// <b>상점을 모른다.</b> 무엇을 놓을지(프리팹)와 확정했을 때 할 일(콜백)을 진입 메서드로 받는다.
-/// 콜백에는 놓을 자리의 가로 위치(베이스 공간 px)나 고른 장식의 저장 목록 칸 번호만 넘긴다 — 하트·저장은 호출한 쪽의 일이다.
+/// <b>상점을 모른다.</b> 무엇을 놓을지(프리팹·종류)와 확정했을 때 할 일(콜백)을 진입 메서드로 받는다.
+/// 콜백에는 놓을 자리(<see cref="DecorationSpot"/>)나 고른 장식의 저장 목록 칸 번호만 넘긴다 — 하트·저장은 호출한 쪽의 일이다.
 ///
 /// 모드 동안 두 가지를 건다. 둘 다 자신을 소유자로 걸고, <see cref="Exit"/>와 OnDisable에서 반드시 푼다.
 /// - 창의 클릭 통과 정지: 투명한 곳에서도 클릭이 우리 창에 와야 그 자리에 놓거나 장식을 고를 수 있다.
@@ -74,9 +75,12 @@ public sealed class DecorationPlacementController : MonoBehaviour
     private Material _ghostMaterial;
     private GameObject _ghost;
     private SpriteRenderer _ghostRenderer;
-    private Action<float> _onConfirm;
-    private Rect _area;                 // 확정 뷰포트의 월드 사각형(지면 = 아래 변)
-    private float _ghostBaseX;          // 지금 고스트 자리의 가로 위치(베이스 공간 px)
+    private Action<DecorationSpot> _onConfirm;
+    private Rect _area;                 // 적용된 뷰포트의 월드 사각형(지면 = 아래 변)
+    private DecorationPlacementKind _carryKind; // 들고 있는 장식의 종류. 들고 있는 동안에만 뜻이 있고, StartCarry가 늘 새로 쓴다
+    // 지금 고스트 자리. UpdateGhost가 매 프레임 통째로 새로 쓴다 — 바닥 장식이면 높이 0이 매번 다시 들어가,
+    // 앞서 든 자유 장식의 높이가 남지 않는다.
+    private DecorationSpot _ghostSpot;
     private bool _isValid;
     private bool _hasColor;             // 색을 한 번이라도 칠했는가(첫 프레임은 무조건 칠한다)
 
@@ -100,8 +104,8 @@ public sealed class DecorationPlacementController : MonoBehaviour
     private PointerEventData _pointerData;
 
     // 이동
-    private Action<int, float> _onMovePlaced;
-    private Action<float> _confirmMovePlaced;   // 들고 있는 놓인 장식을 확정할 때. Awake에서 한 번 만든다
+    private Action<int, DecorationSpot> _onMovePlaced;
+    private Action<DecorationSpot> _confirmMovePlaced;   // 들고 있는 놓인 장식을 확정할 때. Awake에서 한 번 만든다
     private int _carriedIndex = -1;             // 들고 있는 놓인 장식의 저장 목록 칸 번호(인벤토리 장식이면 -1)
 
     private void Awake()
@@ -158,17 +162,17 @@ public sealed class DecorationPlacementController : MonoBehaviour
     }
 
     /// <summary>
-    /// 설치 모드에 들어간다. 확정하면 onConfirm(놓을 자리의 가로 위치, 베이스 공간 px)을 부르고 모드를 나온다.
+    /// 설치 모드에 들어간다. kind대로 움직이고, 확정하면 onConfirm(놓을 자리)을 부르고 모드를 나온다.
     /// 들어가지 못하면 경고만 남기고 false — 프리팹이 없거나, 이미 모드 중이거나, 뷰포트 편집 중이거나, 뷰포트 준비 전일 때.
     /// </summary>
-    public bool EnterInstall(GameObject prefab, Action<float> onConfirm)
+    public bool EnterInstall(GameObject prefab, DecorationPlacementKind kind, Action<DecorationSpot> onConfirm)
     {
         if (prefab == null) return Refuse("장식 프리팹이 비어 있습니다");
         if (!CanEnter()) return false;
         if (!TryCreateGhost(prefab)) return false;
 
         Begin(DecorationMode.Install);
-        StartCarry(onConfirm);
+        StartCarry(kind, onConfirm);
         return true;
     }
 
@@ -184,11 +188,11 @@ public sealed class DecorationPlacementController : MonoBehaviour
     public bool EnterRemove(Action<int> onRemove) => EnterPicking(DecorationMode.Remove, onRemove);
 
     /// <summary>
-    /// 이동 모드에 들어간다. 놓인 장식을 고르면 그 장식을 들고 다니고(원본은 감춤), 새 자리에서 좌클릭하면
-    /// onMovePlaced(저장 목록 칸 번호, 새 가로 위치 베이스 px)를 부른 뒤 고르기 단계로 돌아간다.
+    /// 이동 모드에 들어간다. 놓인 장식을 고르면 그 장식을 그 종류대로 들고 다니고(원본은 감춤), 새 자리에서 좌클릭하면
+    /// onMovePlaced(저장 목록 칸 번호, 새 자리)를 부른 뒤 고르기 단계로 돌아간다.
     /// 들고 있는 중 우클릭·ESC면 모드가 끝나고 원본은 원래 자리에 그대로다. 인벤토리 장식은 <see cref="CarryFromInventory"/>로 든다.
     /// </summary>
-    public bool EnterMove(Action<int, float> onMovePlaced)
+    public bool EnterMove(Action<int, DecorationSpot> onMovePlaced)
     {
         if (!CanEnter()) return false;
 
@@ -198,16 +202,16 @@ public sealed class DecorationPlacementController : MonoBehaviour
     }
 
     /// <summary>
-    /// 이동 모드의 고르기 단계에서 인벤토리 장식 하나를 들고 다니기 시작한다. 놓으면 onConfirm(가로 위치, 베이스 px)을 부르고 고르기 단계로 돌아간다.
+    /// 이동 모드의 고르기 단계에서 인벤토리 장식 하나를 kind대로 들고 다니기 시작한다. 놓으면 onConfirm(놓을 자리)을 부르고 고르기 단계로 돌아간다.
     /// 이동 모드가 아니거나, 이미 들고 있거나, 입력을 멈춘 중이거나, 그림이 없는 프리팹이면 false.
     /// </summary>
-    public bool CarryFromInventory(GameObject prefab, Action<float> onConfirm)
+    public bool CarryFromInventory(GameObject prefab, DecorationPlacementKind kind, Action<DecorationSpot> onConfirm)
     {
         if (Mode != DecorationMode.Move || IsCarrying || IsInputPaused) return false;
         if (prefab == null) return Refuse("장식 프리팹이 비어 있습니다");
         if (!TryCreateGhost(prefab)) return false;
 
-        StartCarry(onConfirm);
+        StartCarry(kind, onConfirm);
         return true;
     }
 
@@ -376,22 +380,22 @@ public sealed class DecorationPlacementController : MonoBehaviour
         else _onPick?.Invoke(index);
     }
 
-    // 고른 놓인 장식을 들고 다니기 시작한다. 원본은 감추고 같은 프리팹으로 고스트를 만든다.
+    // 고른 놓인 장식을 들고 다니기 시작한다. 원본은 감추고 같은 프리팹·같은 종류로 고스트를 만든다.
     // 감춘 원본은 겹침 판정에서도 빠져, 원래 자리 근처에 다시 놓을 수 있다.
     private void StartMovePlaced(int placedIndex)
     {
-        if (_layer == null || !_layer.TryGetPrefab(placedIndex, out GameObject prefab)) return;
-        if (!TryCreateGhost(prefab)) return;
+        if (_layer == null || !_layer.TryGetPlaced(placedIndex, out PlacedDecoration placed)) return;
+        if (!TryCreateGhost(placed.Prefab)) return;
 
         _layer.SetHighlighted(-1); // 감추기 전에 강조를 벗긴다 — 감춘 렌더러에 강조 머티리얼이 남지 않게
         _layer.SetHidden(placedIndex);
         _carriedIndex = placedIndex;
-        StartCarry(_confirmMovePlaced);
+        StartCarry(placed.Kind, _confirmMovePlaced);
     }
 
-    private void ConfirmMovePlaced(float baseX)
+    private void ConfirmMovePlaced(DecorationSpot spot)
     {
-        if (_carriedIndex >= 0) _onMovePlaced?.Invoke(_carriedIndex, baseX);
+        if (_carriedIndex >= 0) _onMovePlaced?.Invoke(_carriedIndex, spot);
     }
 
     // ── 들고 다니기 ────────────────────────────────────────
@@ -411,10 +415,14 @@ public sealed class DecorationPlacementController : MonoBehaviour
         return true;
     }
 
-    // 만들어 둔 고스트를 들고 다니기 시작한다. 판정에 쓸 뷰포트·금지 영역·다른 장식은 이때 한 번 모은다.
-    private void StartCarry(Action<float> onConfirm)
+    // 만들어 둔 고스트를 들고 다니기 시작한다. 진입로 셋(설치·인벤토리 꺼내 놓기·놓인 장식 집기)이 모두 여기서 종류를 넘긴다 —
+    // 종류를 받는 곳이 하나라야 진입로가 늘어도 빠뜨리지 않는다.
+    // 판정에 쓸 뷰포트·금지 영역·다른 장식은 들기 시작할 때마다 다시 모은다. 이동 모드는 ESC까지 남아 여러 번 들고 놓으므로,
+    // 그 사이 바뀐 지면·장애물을 써야 한다(자유 장식의 높이도 그때의 지면 기준이다). 한 번만 모으도록 줄이지 않는다.
+    private void StartCarry(DecorationPlacementKind kind, Action<DecorationSpot> onConfirm)
     {
         _onConfirm = onConfirm;
+        _carryKind = kind;
         _area = _cameraFitter.BaseRectToWorld(_viewportSettings.Viewport, _viewportSettings.BaseSpaceSize);
         CollectBlockedAreas();
         if (_layer != null)
@@ -435,11 +443,11 @@ public sealed class DecorationPlacementController : MonoBehaviour
     {
         if (!_isValid) return; // 놓을 수 없는 자리에서는 무반응
 
-        Action<float> confirm = _onConfirm;
-        float baseX = _ghostBaseX;
+        Action<DecorationSpot> confirm = _onConfirm;
+        DecorationSpot spot = _ghostSpot;
         try
         {
-            confirm?.Invoke(baseX);
+            confirm?.Invoke(spot);
         }
         finally
         {
@@ -469,24 +477,33 @@ public sealed class DecorationPlacementController : MonoBehaviour
         _ghostRenderer = null;
     }
 
-    // 고스트를 커서 가로 위치로 옮겨 지면에 앉히고, 놓을 수 있는지 판정해 색을 칠한다.
+    // 고스트를 커서로 옮기고, 놓을 수 있는지 판정해 색을 칠한다.
+    // 바닥 장식은 가로만 커서를 따르고 아래 끝은 지면에 붙는다. 자유 장식은 그림 가운데가 커서를 따르되,
+    // 아래 끝은 지면 밑으로 내려가지 않는다(커서를 바닥 쪽으로 내리면 바닥에 선 채로 따라온다). 위·옆으로는 막지 않고 빨강으로 보여 준다.
     private void UpdateGhost()
     {
         Vector2 screen = ReadCursorScreen();
         Vector3 cursorWorld = _camera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, 0f));
 
-        // 그림의 가로 중앙을 커서 x에, 아래 끝을 지면에 맞춘다. 피벗이 장식마다 달라 그림 기준으로 맞춘다.
+        // 피벗이 장식마다 달라 transform이 아니라 그림 기준으로 맞춘다. 목표 아래 끝은 옮기기 전 값으로 구한다.
         Bounds local = _ghostRenderer.sprite.bounds;
         Transform rt = _ghostRenderer.transform;
         Vector3 center = rt.TransformPoint(local.center);
         Vector3 bottom = rt.TransformPoint(new Vector3(local.center.x, local.min.y, 0f));
+        float targetBottomY = _carryKind == DecorationPlacementKind.Floor
+            ? _area.yMin
+            : Mathf.Max(_area.yMin, bottom.y + (cursorWorld.y - center.y));
         Vector3 pos = _ghost.transform.position;
         pos.x += cursorWorld.x - center.x;
-        pos.y += _area.yMin - bottom.y;
+        pos.y += targetBottomY - bottom.y;
         _ghost.transform.position = pos;
 
+        // 높이는 길이라 PPU로만 곱한다. 0 아래로 자르는 것은 실수 오차로 −1e-5 같은 값이 파일에 남지 않게 하려는 것이다.
         Bounds b = _ghostRenderer.bounds;
-        _ghostBaseX = _cameraFitter.WorldXToBaseX(b.center.x, _viewportSettings.BaseSpaceSize);
+        float elevationPx = _carryKind == DecorationPlacementKind.Floor
+            ? 0f
+            : Mathf.Max(0f, (targetBottomY - _area.yMin) * _cameraFitter.PixelsPerUnit);
+        _ghostSpot = new DecorationSpot(_cameraFitter.WorldXToBaseX(b.center.x, _viewportSettings.BaseSpaceSize), elevationPx);
 
         _cursorOverUi = IsPointerOverUI(screen);
         bool valid = IsInsideViewport(b) && !OverlapsAny(b) && !_cursorOverUi;
@@ -499,6 +516,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
     }
 
     // 뷰포트 안에 온전히 들어와야 한다. 저장할 때 걸친 장식은 인벤토리로 회수되는 기획과 맞추려는 것이다.
+    // 아래 변은 보지 않는다 — 고스트가 지면에서 멈추게 막아 늘 참이고, 넣으면 실수 오차로 바닥 장식이 빨강이 될 수 있다.
     private bool IsInsideViewport(Bounds b)
         => b.min.x >= _area.xMin && b.max.x <= _area.xMax && b.max.y <= _area.yMax;
 
@@ -575,7 +593,8 @@ public sealed class DecorationPlacementController : MonoBehaviour
     [ContextMenu("Test: Enter")]
     private void TestEnter()
     {
-        EnterInstall(_testPrefab, baseX => Debug.Log($"[{nameof(DecorationPlacementController)}] 테스트 확정: x = {baseX:F1} (베이스 px)", this));
+        EnterInstall(_testPrefab, DecorationPlacementKind.Floor,
+            spot => Debug.Log($"[{nameof(DecorationPlacementController)}] 테스트 확정: x = {spot.BaseX:F1}, 높이 = {spot.ElevationPx:F1} (베이스 px)", this));
     }
 #endif
 }
