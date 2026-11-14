@@ -18,7 +18,8 @@ using UnityEngine.Serialization;
 ///
 /// 구름은 뷰포트 안에서만 산다. 확정 뷰포트(<see cref="ViewportScreenSettings.ViewportConfirmed"/>)를 받을 때마다
 /// 그림이 온전히 들어가는 범위를 다시 구해, 드래그는 그 경계에서 멈추게 하고, 이미 밖에 있으면 안쪽 랜덤 위치로 옮긴다.
-/// 기획이 "구름 스폰: 새 화면 안에 랜덤 재배치"로 정했다. 편집 중 프리뷰에는 따라가지 않는다(캐릭터·장식과 같은 판단).
+/// 기획이 "구름 스폰: 새 화면 안에 랜덤 재배치"로 정했다. 편집 중 프리뷰에는 따라가지 않고 [완료] 때 옮긴다(캐릭터와 같은 판단) —
+/// 프리뷰마다 확정 신호를 울리면 끄는 동안 매 프레임 재배치된다. 배경·장식은 그림이라 프리뷰를 따로 듣는다.
 /// </summary>
 public sealed class CloudController : MonoBehaviour, IClickable
 {

@@ -20,10 +20,11 @@ using UnityEngine;
 ///              잘라내지도 않는다. 캐릭터가 살 수 있는 영역이자 지면·회수 판정의 기준이다.
 ///              사용자가 고른 값(_viewport)과 지금 적용된 값(Viewport — 보이는 영역 안으로 맞춘 것)을 따로 든다.
 ///              줌이나 작업 영역이 바뀌어 잘려도 고른 값은 그대로라, 되돌리면 원래 뷰포트가 돌아온다.
-/// 편집:        조정값은 프리뷰일 뿐이다(PreviewChanged로 UI가 경계·딤·회수 예정 시각화).
-/// 미저장:      편집은 [완료]로 나와도 확정하지 않는다(EndEditKeepPreview).
-///              조정한 사각형을 미저장 뷰포트로 들고 있다가, 그래픽 탭의 [저장]이 확정하고(Commit)
-///              미저장 확인 팝업이 버린다(DiscardPendingViewport). 그동안 월드는 확정 뷰포트 그대로다.
+/// 편집:        끄는 동안의 조정값은 프리뷰다(PreviewChanged). 핸들 UI와 배경·장식이 듣고 따라간다.
+///              캐릭터·구름은 프리뷰를 듣지 않고 편집이 끝날 때의 ViewportConfirmed로 옮겨진다.
+/// 미저장:      편집은 [완료]로 나오면 조정한 사각형을 화면에 적용하되 저장하지 않는다(EndEditKeepPreview).
+///              미저장 뷰포트로 들고 있다가, 그래픽 탭의 [저장]이 파일에 남기고(Commit)
+///              미저장 확인 팝업이 버려 저장한 뷰포트로 되돌린다(DiscardPendingViewport).
 ///
 /// 이 모델을 고른 이유는 Docs/Development/WindowViewportUIArchitecture.md.
 ///
@@ -53,11 +54,11 @@ public class ViewportScreenSettings : MonoBehaviour
     [SerializeField, Tooltip("시작 뷰포트. 크기가 0이면 베이스 공간 전체(기본값)로 시작")]
     private RectInt _viewport = new RectInt(0, 0, 0, 0);   // 사용자가 고른 뷰포트. 보이는 영역보다 클 수 있다
 
-    private RectInt _effectiveViewport;        // 지금 적용된 뷰포트 = _viewport를 보이는 영역 안으로 맞춘 것
+    private RectInt _effectiveViewport;        // 지금 적용된 뷰포트 = 미저장 뷰포트(없으면 _viewport)를 보이는 영역 안으로 맞춘 것
     private float _zoom = 1f;                  // 전체 크기. 1 이상
     private RectInt _visibleRect;              // 카메라가 비추는 베이스 공간의 오른쪽 아래 부분
     private RectInt _previewViewport;
-    private RectInt _pendingViewport;          // [완료]로 나왔지만 아직 [저장]하지 않은 뷰포트
+    private RectInt _pendingViewport;          // [완료]로 나왔지만 아직 [저장]하지 않은 뷰포트. _viewport처럼 보이는 영역보다 클 수 있다
     private bool _hasPendingViewport;
     private RectInt _baseSpaceScreenRect;     // 작업 영역을 스크린 좌표(화면 px, Y 아래)로 표현한 것 — 창 배치용
     private Vector2Int _baseSpaceSize;         // 베이스 공간 크기(마스터 캔버스 기준 px) — 폭은 항상 MasterCanvasWidthPx
@@ -75,7 +76,8 @@ public class ViewportScreenSettings : MonoBehaviour
     private RectInt _pendingWorkAreaPx;
     private bool _hasPendingWorkAreaPx;
 
-    /// <summary>지금 적용된 뷰포트(베이스 공간 px, 원점=좌하단). 확정한 뷰포트를 보이는 영역 안으로 맞춘 값이다.</summary>
+    /// <summary>지금 적용된 뷰포트(베이스 공간 px, 원점=좌하단). 저장하지 않은 뷰포트가 있으면 그것을, 없으면 저장한 뷰포트를
+    /// 보이는 영역 안으로 맞춘 값이다.</summary>
     public RectInt Viewport => _effectiveViewport;
 
     /// <summary>편집 중 프리뷰 뷰포트. 편집 중이 아니면 Viewport와 동일.</summary>
@@ -97,7 +99,8 @@ public class ViewportScreenSettings : MonoBehaviour
     /// 종횡비를 따른다. 화면 px가 아니다 — 화면 px로 바꾸려면 Screen 크기와의 비율을 곱한다.</summary>
     public Vector2Int BaseSpaceSize => _baseSpaceSize;
 
-    /// <summary>편집 중 프리뷰 변경 — UI가 경계 핸들·바깥 딤·회수 예정 표시를 갱신하는 지점.</summary>
+    /// <summary>편집 중 프리뷰 변경 — 값이 실제로 바뀔 때만 울린다. 배경(BackgroundStage)·장식(DecorationLayer)이 듣고 따라간다.
+    /// 캐릭터·구름은 듣지 않는다 — 끄는 동안 매 프레임 재배치하지 않고, 편집이 끝날 때의 ViewportConfirmed로 옮긴다.</summary>
     public event Action<RectInt> PreviewChanged;
 
     /// <summary>저장 확정 — ViewportSaveBinder가 구독해 영속화하는 지점.
@@ -108,11 +111,13 @@ public class ViewportScreenSettings : MonoBehaviour
     /// <summary>편집 모드 진입(true)/이탈(false) — 편집 UI 표시 토글 지점.</summary>
     public event Action<bool> EditModeChanged;
 
-    /// <summary>그래픽 탭의 [저장]이 끝난 직후, 지금 적용된 뷰포트로 울린다(<see cref="Commit"/>).
-    /// 뷰포트를 줄였든 줌을 키웠든, 사용자가 확정한 화면 밖에 남은 장식을 회수하는 지점이다(DecorationBinder).</summary>
+    /// <summary>화면이 저장한 상태가 된 직후, 지금 적용된 뷰포트로 울린다 — 그래픽 탭의 [저장](<see cref="Commit"/>)과
+    /// 미저장 뷰포트를 버렸을 때(<see cref="DiscardPendingViewport"/>). 뷰포트를 줄였든 줌을 키웠든,
+    /// 사용자가 저장한 화면 밖에 남은 장식을 회수하는 지점이다(DecorationBinder).</summary>
     public event Action<RectInt> Committed;
 
-    /// <summary>뷰포트가 확정된 직후 — 시작 시 초기 적용, SetViewport, 편집 이탈, 미저장 뷰포트 확정, 창 재조정, 줌 변경 때마다 울린다.
+    /// <summary>뷰포트가 화면에 적용된 직후 — 시작 시 초기 적용, SetViewport, 편집 이탈([완료]), 미저장 뷰포트 저장·버리기, 창 재조정, 줌 변경 때마다 울린다.
+    /// 실린 값은 저장하지 않은 뷰포트일 수 있다. 파일에 남았는지는 <see cref="ViewportSaved"/>가 알린다.
     /// 한 번만 울리는 "준비 완료" 신호가 아니다. 첫 확정이 이미 지났는지는 <see cref="IsReady"/>로 본다.
     /// 거주 영역(ViewportLivingAreaBinder)·배경 띠·장식 레이어가 구독한다.</summary>
     public event Action<RectInt> ViewportConfirmed;
@@ -173,8 +178,8 @@ public class ViewportScreenSettings : MonoBehaviour
 
     // ===== 외부 API =====
 
-    /// <summary>확정 뷰포트를 직접 설정(로드 경로). 보이는 영역 밖으로 나가는 부분은 적용할 때 맞춘다.
-    /// 편집 중이면 확정 값만 갱신하고 반영은 편집을 벗어날 때까지 미룬다.</summary>
+    /// <summary>저장한 뷰포트를 직접 설정(로드 경로). 보이는 영역 밖으로 나가는 부분은 적용할 때 맞춘다.
+    /// 편집 중이면 값만 갱신하고 반영은 편집을 벗어날 때까지 미룬다. 저장하지 않은 뷰포트가 있으면 화면에는 그쪽이 적용된다.</summary>
     public void SetViewport(RectInt viewport)
     {
         // 뒤에 온 베이스 px 값이 이긴다 — 앞서 보류된 작업 영역 px 값을 Start가 또 환산해 덮지 않게.
@@ -248,19 +253,18 @@ public class ViewportScreenSettings : MonoBehaviour
     }
 
     // 창·카메라를 다시 놓고 뷰포트를 맞춘다. 작업 영역이 줄었으면 뷰포트가 보이는 영역을 넘칠 수 있다.
-    // 적용하는 값만 줄이고 고른 값은 그대로 둔다(큰 모니터로 돌아가면 저장된 원래 크기가 복원되어야 한다).
+    // 적용하는 값만 줄이고 고른 값과 미저장 값은 그대로 둔다(큰 모니터로 돌아가면 원래 크기가 복원되어야 한다).
     private void Relayout()
     {
         ApplyScreenLayout();
         RefreshEffectiveViewport();
-        if (_hasPendingViewport) _pendingViewport = ClampToVisible(_pendingViewport);
         PublishViewportConfirmed();
     }
 
     /// <summary>
     /// 전체 크기(줌)를 바꾼다. 1 미만은 1로 올린다 — 마스터 캔버스(아트 기준) 밖이 보이면 안 되기 때문이다.
     /// 카메라가 비추는 범위를 오른쪽 아래 기준으로 1/zoom로 줄이고, 뷰포트를 그 안으로 맞춰 <see cref="ViewportConfirmed"/>를 울린다.
-    /// 줄어든 뷰포트는 저장하지 않는다 — 줌을 되돌리면 고른 뷰포트가 그대로 돌아온다(작업 영역이 바뀔 때와 같은 규칙).
+    /// 줄어든 뷰포트는 저장하지 않는다 — 줌을 되돌리면 고른 뷰포트(미저장 뷰포트 포함)가 그대로 돌아온다(작업 영역이 바뀔 때와 같은 규칙).
     /// 값을 넣는 쪽은 Gameplay의 WorldZoomApplier다 — 이 클래스는 설정을 모른다.
     /// ready 전에 불리면 값만 들고 있다가 Start의 첫 적용에 쓴다.
     /// </summary>
@@ -274,7 +278,6 @@ public class ViewportScreenSettings : MonoBehaviour
         RefreshVisibleRect();
         FrameCamera();
         RefreshEffectiveViewport();
-        if (_hasPendingViewport) _pendingViewport = ClampToVisible(_pendingViewport);
         if (_isEditing)
         {
             _previewViewport = ClampToVisible(_previewViewport);
@@ -296,8 +299,9 @@ public class ViewportScreenSettings : MonoBehaviour
             return;
         }
         _isEditing = true;
-        // 저장하지 않은 조정이 있으면 거기서 이어 간다 — [완료] 뒤 다시 [조정]을 눌러도 손댄 것이 남아 있게.
-        _previewViewport = _hasPendingViewport ? ClampToVisible(_pendingViewport) : _effectiveViewport;
+        // 지금 화면에 적용된 뷰포트에서 시작한다. 저장하지 않은 조정이 있으면 그것이 적용돼 있으므로,
+        // [완료] 뒤 다시 [조정]을 눌러도 손댄 것이 남아 있다.
+        _previewViewport = _effectiveViewport;
 
         if (_windowManager != null)
         {
@@ -311,24 +315,30 @@ public class ViewportScreenSettings : MonoBehaviour
         PreviewChanged?.Invoke(_previewViewport);
     }
 
-    /// <summary>편집 중 프리뷰 갱신(핸들 드래그·슬라이더). 이벤트만 발행한다.</summary>
+    /// <summary>편집 중 프리뷰 갱신(핸들 드래그·슬라이더). 이벤트만 발행한다.
+    /// 핸들은 버튼을 누르고 있는 동안 매 프레임 부르므로, 값이 바뀌지 않았으면 울리지 않는다 — 듣는 배경·장식이 헛돌지 않게.</summary>
     public void SetPreviewViewport(RectInt viewport)
     {
         if (!_isEditing) return;
-        _previewViewport = ClampToVisible(viewport);
+        RectInt clamped = ClampToVisible(viewport);
+        if (clamped.Equals(_previewViewport)) return;
+        _previewViewport = clamped;
         PreviewChanged?.Invoke(_previewViewport);
     }
 
     /// <summary>
-    /// 편집 화면의 [완료]·ESC. 편집에서 나가 정지·잠금을 풀되, 조정한 사각형은 확정하지 않고 미저장 뷰포트로 남긴다.
-    /// 확정은 설정 그래픽 탭의 [저장]이 한다(Figma "그래픽은 [저장]으로 최종 확정").
+    /// 편집 화면의 [완료]·ESC. 편집에서 나가 정지·잠금을 풀고, 조정한 사각형을 화면에 적용하되 저장하지 않고 미저장 뷰포트로 남긴다.
+    /// 파일에 남기는 것은 설정 그래픽 탭의 [저장]이 한다(Figma "변경 즉시 실시간 동기화되어 보이다가 '저장' 버튼 누르면 최종 확정").
     /// 편집을 열어 둔 채 패널로 돌아가면 그동안 바탕화면 전체가 클릭을 받지 않으므로, 편집 자체는 여기서 끝낸다.
     /// </summary>
     public void EndEditKeepPreview()
     {
         if (!_isEditing) return;
         _pendingViewport = _previewViewport;
-        _hasPendingViewport = !_previewViewport.Equals(_effectiveViewport); // 손댔다가 원래대로 돌려 놓았으면 미저장이 아니다
+        // 손댔다가 저장한 값으로 돌려 놓았으면 미저장이 아니다. 지금 적용된 값(_effectiveViewport)은 앞선 미저장 값일 수 있어
+        // 그것과 비교하면, 다시 [조정]해 손대지 않고 [완료]할 때 앞서 손댄 것이 미저장으로 잡히지 않는다.
+        _hasPendingViewport = !_previewViewport.Equals(ClampToVisible(_viewport));
+        RefreshEffectiveViewport();
         ExitEdit();
     }
 
@@ -349,8 +359,19 @@ public class ViewportScreenSettings : MonoBehaviour
         Committed?.Invoke(_effectiveViewport);
     }
 
-    /// <summary>미저장 뷰포트를 버린다(그래픽 탭 미저장 확인). 월드는 처음부터 확정 뷰포트였으므로 알릴 것이 없다.</summary>
-    public void DiscardPendingViewport() => _hasPendingViewport = false;
+    /// <summary>
+    /// 미저장 뷰포트를 버린다(그래픽 탭 미저장 확인). 화면을 저장한 뷰포트로 되돌려 <see cref="ViewportConfirmed"/>를 울리고,
+    /// 이어서 <see cref="Committed"/>도 울린다 — 미저장 동안 넓혀진 곳에 놓은 장식이 저장한 화면 밖에 남지 않게 회수하려는 것이다.
+    /// 되돌린 화면도 사용자가 저장한 화면이므로 [저장]과 같은 신호를 쓴다. 회수 판정이 되돌린 줌으로 되도록, 크기 단계를 먼저 되돌린 뒤 부른다(settings.md).
+    /// </summary>
+    public void DiscardPendingViewport()
+    {
+        if (!_hasPendingViewport) return;
+        _hasPendingViewport = false;
+        RefreshEffectiveViewport();
+        PublishViewportConfirmed();
+        Committed?.Invoke(_effectiveViewport);
+    }
 
     // ===== 내부 =====
 
@@ -423,9 +444,10 @@ public class ViewportScreenSettings : MonoBehaviour
         _visibleRect = new RectInt(_baseSpaceSize.x - w, 0, w, h);
     }
 
-    private void RefreshEffectiveViewport() => _effectiveViewport = ClampToVisible(_viewport);
+    private void RefreshEffectiveViewport()
+        => _effectiveViewport = ClampToVisible(_hasPendingViewport ? _pendingViewport : _viewport);
 
-    /// <summary>확정 뷰포트가 적용됐음을 알린다. 창·카메라는 건드리지 않는다 —
+    /// <summary>지금 적용된 뷰포트(미저장 값일 수 있다)를 알린다. 창·카메라는 건드리지 않는다 —
     /// 뷰포트는 렌더링이 아니라 게임플레이 규칙의 기준이기 때문이다.</summary>
     private void PublishViewportConfirmed() => ViewportConfirmed?.Invoke(_effectiveViewport);
 

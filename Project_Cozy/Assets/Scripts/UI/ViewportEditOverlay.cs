@@ -5,8 +5,8 @@ using UnityEngine.InputSystem;
 /// 뷰포트 편집 화면의 안내 문구와 [완료] 버튼. 설정 그래픽 탭의 화면 크기 [조정]으로 들어온 편집을 끝내는 길이다.
 /// 핸들과 딤은 <see cref="ViewportEditHandles"/>가 IMGUI로 그리고, 번역해야 하는 글자와 버튼만 여기 UGUI로 둔다.
 ///
-/// [완료]와 ESC는 편집을 끝내되 확정하지 않는다(<see cref="ViewportScreenSettings.EndEditKeepPreview"/>).
-/// 확정은 그래픽 탭의 [저장]이 한다. 편집 동안 열린 패널은 UIManager가 숨기므로, 이 오버레이는 패널(UIPanel)이 아니다 —
+/// [완료]와 ESC는 편집을 끝내고 조정한 뷰포트를 화면에 적용하되 저장하지 않는다(<see cref="ViewportScreenSettings.EndEditKeepPreview"/>).
+/// 저장은 그래픽 탭의 [저장]이 한다. 편집 동안 열린 패널은 UIManager가 숨기므로, 이 오버레이는 패널(UIPanel)이 아니다 —
 /// 패널이면 자기도 숨는다.
 ///
 /// <see cref="ViewportScreenSettings.EditModeChanged"/>를 듣고 켜고 끈다 — 편집 쪽이 이 컴포넌트를 부르지 않는다.
