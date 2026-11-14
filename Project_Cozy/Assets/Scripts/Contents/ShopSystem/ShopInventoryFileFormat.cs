@@ -31,9 +31,12 @@ public class ShopInventoryFileFormat
 }
 
 /// <summary>
-/// 화면에 놓인 장식 하나. 지금은 모든 장식이 바닥에 붙으므로 가로 위치만 저장하고, 세로는 불러올 때마다 지면에 맞춘다.
+/// 화면에 놓인 장식 하나.
 /// x는 베이스 공간 px(마스터 캔버스 기준 px)이고 장식 그림의 가로 중앙이다 — 월드 좌표로 저장하지 않는 이유는
 /// .claude/rules/unity/viewport-coordinates.md의 저장 단위 규약을 따른다.
+/// elevation은 그림 아래 끝이 지면(뷰포트 아래 변)에서 몇 베이스 px 위에 있는가다. 위치가 아니라 지면에서 잰 길이다.
+/// 이 필드가 없던 옛 파일은 0으로 읽혀 바닥에 놓인 그대로다. 바닥 장식은 저장 값과 상관없이 바인더가 0으로 읽는다
+/// (종류의 주인은 상품 정의다 — <see cref="DecorationBinder"/>).
 ///
 /// <c>Vector2</c>로 담지 않는다. 저장 직렬화(Newtonsoft)가 <c>Vector2.normalized</c> 같은 자기 참조 속성을 따라가다
 /// 예외를 낸다.
@@ -43,4 +46,5 @@ public class PlacedDecorationData
 {
     public string itemId;
     public float x;
+    public float elevation;
 }

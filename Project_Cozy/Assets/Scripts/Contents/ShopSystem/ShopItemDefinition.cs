@@ -38,16 +38,6 @@ public class ShopItemDefinition : ScriptableObject
     [Tooltip("장식 전용. 설치하면 화면에 놓이는 프리팹(Resources/Decorations/<이름>/decoration.prefab). 배경은 비워 둔다.")]
     public GameObject decorationPrefab;
 
-    [Tooltip("장식 전용. 어디에 놓을 수 있는 장식인가.")]
+    [Tooltip("장식 전용. Floor = 바닥에 붙음, Anywhere = 우측 메뉴창 빼고 어디든. 기준은 기획자 아이템 리스트의 '바닥 부착 여부'(.claude/rules/unity/decoration-placement.md).")]
     public DecorationPlacementKind placementKind = DecorationPlacementKind.Floor;
-}
-
-/// <summary>
-/// 장식을 어디에 놓을 수 있는가. 지금은 바닥에 붙는 장식만 있다.
-/// Figma에는 바닥 전용이 아닌 장식도 적혀 있지만 그런 장식이 실제로 있는지 기획 확인을 기다리는 중이라,
-/// 값은 하나만 두고 저장 형식이 그 구분을 받을 자리만 마련해 둔다.
-/// </summary>
-public enum DecorationPlacementKind
-{
-    Floor,
 }
