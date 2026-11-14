@@ -5,10 +5,9 @@ paths:
 
 # ProjectSettings 작업 규칙
 
-## 절대 금지
+## 누가 고치는가
 
-- **Claude는 `ProjectSettings/*.asset` 파일을 직접 텍스트 편집하지 않는다.** Unity 내부 직렬화 포맷이며 잘못 손대면 프로젝트가 열리지 않을 수 있다.
-- 변경이 필요하면 Unity Editor에서 사용자가 직접 수정하도록 안내한다.
+ProjectSettings는 사용자가 Unity에서 고친다. 예외는 사용자가 올리자고 할 때의 게임 버전 한 줄뿐이다. 이유와 절차는 [asset-editing.md](asset-editing.md)가 정본이다.
 
 ## 동시 작업 위험
 
@@ -21,7 +20,7 @@ paths:
 다른 작업을 한 뒤에도 `ProjectSettings/` 파일들이 변경되어 있는 경우가 있다 (Editor가 자동으로 건드림).
 
 - 커밋 전 `git status`로 의도치 않은 ProjectSettings 변경 확인.
-- 의도하지 않은 변경이면 `git checkout -- Project_Cozy/ProjectSettings/<file>`로 되돌릴 것.
+- 의도하지 않은 변경이면 `git checkout -- Project_Cozy/ProjectSettings/<file>`로 되돌릴 것. 되돌리기는 asset-editing.md의 되돌리기 절차(허락·사전작업)대로 한다.
 
 ## 자주 변하는 파일
 

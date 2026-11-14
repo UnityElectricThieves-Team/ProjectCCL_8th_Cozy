@@ -25,6 +25,10 @@ paths:
 - 불필요한 `Debug.Log`는 빌드에서 제거하거나 `[Conditional]`로 가드.
 - 항상 떠 있어야 하므로 메모리 누수에 특히 주의. 이벤트 구독은 반드시 해제.
 
+## 저장·에셋이 기대는 코드를 바꿀 때
+
+직렬화 필드·저장 형식 필드·enum·UnityEvent가 부르는 메서드·이름 짝·경로 상수의 이름이나 순서를 바꾸거나, MonoBehaviour·ScriptableObject의 클래스·파일 이름을 바꾸거나 옮길 때는 [asset-editing.md](asset-editing.md)의 C# 절을 따른다. 컴파일은 통과하는데 프리팹 값이나 저장값이 조용히 사라지는 변경이라서다.
+
 ## 테스트 가능성
 
 - Unity API 의존 없이 풀 수 있는 순수 로직(좌표 계산, 상태 머신 등)은 `UnityEngine` 의존을 빼서 EditMode 테스트가 가능하게.

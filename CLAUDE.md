@@ -35,7 +35,7 @@
 
 **프리팹으로 옮기는 것만으로는 부족합니다. 씬 인스턴스에 override를 남기지 않아야 효과가 있습니다.** 지금 씬은 대부분이 UI이고 프리팹화된 패널들조차 override가 씬에 눌러앉아 있어서, 앵커 하나를 손볼 때마다 씬 파일이 더러워집니다. 값을 고칠 일이 있으면 씬 인스턴스가 아니라 프리팹에서 고칩니다.
 
-현재 씬 상태의 실측치와 이관 순서는 `Docs/Development/`에 있습니다. 씬 파일을 직접 다룰 때의 규칙은 [.claude/rules/unity/scenes.md](.claude/rules/unity/scenes.md), 프리팹을 어디에 둘지는 [.claude/rules/unity/prefabs.md](.claude/rules/unity/prefabs.md)를 봅니다.
+현재 씬 상태의 실측치와 이관 순서는 `Docs/Development/`에 있습니다. 씬 파일을 직접 다룰 때의 규칙은 [.claude/rules/unity/scenes.md](.claude/rules/unity/scenes.md), 누가 어떤 Unity 파일을 고치는지는 [.claude/rules/unity/asset-editing.md](.claude/rules/unity/asset-editing.md), 프리팹을 어디에 둘지는 [.claude/rules/unity/prefabs.md](.claude/rules/unity/prefabs.md)를 봅니다.
 
 **새 캐릭터 프리팹은 루트가 곧 발이어야 합니다** — Visual 자식을 올려 스프라이트 아래 끝을 루트 원점에 맞춥니다. 이유와 나머지 지면 규약은 [.claude/rules/unity/character-ground.md](.claude/rules/unity/character-ground.md)에 있는데, 그 파일은 기존 파일을 열 때만 로드되어 *새로 만드는* 순간에는 발화하지 않으므로 여기 한 줄 둡니다.
 
@@ -59,17 +59,21 @@
 
 **새 TMP 폰트 에셋은 Multi Atlas Textures를 켭니다** — Dynamic 아틀라스가 한 장뿐이면 꽉 찬 뒤 처음 나오는 글자가 네모(□)가 되고, 한글 UI는 빌드에서도 한 번 실행 중에 한계를 넘습니다. 이유와 메모리 비용은 [.claude/rules/unity/localization.md](.claude/rules/unity/localization.md)의 폰트 절에 있고, 새 에셋을 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다.
 
+**Unity 파일은 고장 날 가능성으로 나눠 다룹니다** — 프리팹의 크기·위치·정렬·Raycast 같은 단순 설정은 사전작업 확인 뒤 Claude가 고치고, 구조·참조·씬은 사용자가 Unity에서 고칩니다. 새 YAML 에셋·`.meta`는 손으로 만들지 않고, Unity 에셋은 사용자가 Unity에서 옮깁니다(옮기기 전에 경로에 기대는 곳을 찾아 알림). C# 파일은 `.meta`와 함께 옮기되 Editor·Plugins 폴더 경계를 넘기지 않습니다. 등급표에 없는 Unity 파일 종류는 사용자가 고치는 쪽으로 봅니다. 정본은 [.claude/rules/unity/asset-editing.md](.claude/rules/unity/asset-editing.md)이고, 새로 만들기·옮기기처럼 파일을 열지 않는 순간에는 발화하지 않아 여기 한 줄 둡니다.
+
 ---
 
 ## 3. 코드 스타일
 
-정본은 [.claude/rules/unity/csharp.md](.claude/rules/unity/csharp.md)입니다. 이 문서에 규칙을 복사해두지 않습니다 — 두 곳에 적으면 반드시 갈라집니다.
+코드 스타일의 정본은 [.claude/rules/unity/csharp.md](.claude/rules/unity/csharp.md)이고, 저장·에셋이 기대는 코드를 바꾸는 조건은 [.claude/rules/unity/asset-editing.md](.claude/rules/unity/asset-editing.md)입니다. 이 문서에 규칙을 복사해두지 않습니다 — 두 곳에 적으면 반드시 갈라집니다.
 
 프로젝트 전체에 걸리는 제약 하나만 여기 적습니다. **이 게임은 바탕화면에 항상 떠 있으므로, 매 프레임 할당과 메모리 누수가 곧 사용자 경험을 깎습니다.** §1의 최우선 가치가 코드에 드러나는 지점입니다.
 
 **밸런스 수치(친밀도·하트·해금 기운·소녀 유지 시간 등)는 프리팹이나 인스펙터가 아니라 `GameBalance` 한 곳에 출시 값과 테스트 값을 함께 둡니다** — 에디터와 Development Build는 테스트 값을, 나머지 빌드는 출시 값(Figma)을 씁니다. 프리팹 값은 코드 기본값을 덮어써서 기획 값이 어디 있는지 흩어지기 때문입니다. 새 수치를 만드는 순간에는 발화할 규칙이 없어 여기 한 줄 둡니다.
 
 **화면에 보이는 문장은 프리팹·코드에 직접 넣지 않고 키로 찾아 씁니다** — 다섯 개 언어로 번역되기 때문입니다. 나머지 규약은 [.claude/rules/unity/localization.md](.claude/rules/unity/localization.md)에 있습니다. 새 UI 스크립트나 새 로컬라이제이션 코드를 만들 때는 그 파일이 발화하지 않을 수 있어 여기 한 줄 둡니다.
+
+**저장·에셋이 이름·순서·경로로 기대는 코드를 바꿀 때는 옛 데이터를 살릴지 버릴지 먼저 정합니다** — 직렬화 필드, 저장 형식 필드, enum 순서, UnityEvent가 부르는 메서드, Animator·셰이더·믹서와 글자가 같아야 하는 이름, 경로 상수, 번역 키가 여기에 듭니다. 그냥 바꾸면 컴파일은 통과하는데 프리팹 값이나 사용자 저장값이 조용히 사라집니다. 절차는 [.claude/rules/unity/asset-editing.md](.claude/rules/unity/asset-editing.md)의 C# 절에 있고, csharp.md는 Editor 스크립트와 Strings.json에서 발화하지 않아 여기 한 줄 둡니다.
 
 ---
 
@@ -101,6 +105,7 @@
 - `figma.md` — `paths` 없음, 항상 로드. 기획 원본인 Figma 파일을 어떤 도구로 읽는지. **Figma MCP는 쓰지 않고, 사용자 브라우저(`mcp__claude-in-chrome__*`)로만 읽는다**
 - `docs-conventions.md` — 문서·CLAUDE.md·rules를 쓸 때
 - `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/ui-panels.md`, `unity/platform.md`, `unity/project-settings.md` — 해당 파일을 열 때
+- `unity/asset-editing.md` — 누가 어떤 Unity 파일을 고치는가(고장 날 가능성 기준의 세 등급, 사전작업 확인, 저장·에셋이 기대는 C# 바꾸기, 파일 옮기기, git 되돌리기, 게임 버전·TMP 폰트 예외). Assets 아래 YAML 에셋·`.meta`, ProjectSettings를 열 때
 - `unity/character-ground.md` — 캐릭터 지면·발 규약. Character 스크립트·캐릭터 프리팹·캐릭터 스프라이트 임포트 설정을 열 때
 - `unity/character-ownership.md` — 캐릭터 보유·배치 기록 규약(캐릭터는 씬에 두지 않음, 보유한 캐릭터는 모두 만들고 귀환은 파괴가 아니라 숨기기, id는 저장 키라 불변, 첫 실행은 빈 화면이 정상, 등장은 뷰포트 확정 후, 해금은 구름 클릭·기준은 도감 정의, 도감은 `CharacterId`로 기록을 읽고, 귀환·소환은 `CharacterOwnership`의 메서드로만). `CharacterOwnership`·`CharacterManager`·`CloudController`, 도감 컨트롤러·도감 데이터 모델, GameScene, 캐릭터·구름 프리팹을 열 때
 - `unity/character-affinity.md` — 캐릭터 친밀도 규약(누적값 하나·줄지 않음, 저장은 CharacterOwnership이 쓰담마다, 복원은 이벤트 없이, 하트는 저장된 친밀도 기준). 친밀도 모듈·하트 지급·캐릭터 기록·상태 글자 스크립트를 열 때
