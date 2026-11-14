@@ -12,7 +12,7 @@ paths:
 
 새 패널을 씬에 직접 만들지 않고, `Assets/Prefabs/UIPanels/UIPanel_Base.prefab`의 배리언트로 만듭니다. 베이스가 들고 있는 것은 이렇습니다.
 
-- `Area_Header` — 제목과 닫기 버튼. 여기를 잡아 패널을 끕니다.
+- `Area_Header` — 제목과 닫기 버튼. 여기를 잡아 패널을 끕니다. 띠 어디를 잡아도 끌리도록 `Area_Header`에 투명 Image(Raycast Target 켬)가 붙어 있습니다. 이 Image를 지우면 제목 상자와 X 버튼 위에서만 끌립니다. 끌기 영역을 넓히려고 패널 루트에 끌기 핸들러를 달지 않습니다 — 본문의 스크롤·슬롯 드래그와 겹칩니다.
 - `Area_TabSelection` — 탭이 있는 패널만 씁니다.
 - `Area_Content` — 패널의 본체.
 - `Area_Footer` — 하단 영역. 탭이 있는 패널에서는 모든 탭이 함께 쓰므로, 한 탭에만 쓰는 버튼(설정 그래픽 탭의 [저장]·[초기화])은 빈 오브젝트로 묶어 그 탭에서만 켭니다.
