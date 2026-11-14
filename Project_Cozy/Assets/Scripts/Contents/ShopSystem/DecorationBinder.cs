@@ -13,7 +13,7 @@ using UnityEngine;
 /// 부팅 복원은 <see cref="ShopSystem"/>이 이벤트를 쏘지 않으므로, Start에서 현재 목록을 한 번 직접 읽는다.
 /// 장식 레이어 프리팹 루트에 <see cref="DecorationLayer"/>와 함께 붙는다.
 ///
-/// 그래픽 탭의 [저장]으로 화면이 확정되면(<see cref="ViewportScreenSettings.Committed"/>) 지금 뷰포트에 온전히 들어가지 않는 장식을
+/// 그래픽 탭의 [저장]으로 화면을 저장하거나 저장하지 않은 변경(뷰포트·줌)을 버리면(<see cref="ViewportScreenSettings.Committed"/>) 지금 뷰포트에 온전히 들어가지 않는 장식을
 /// 인벤토리로 회수한다. 뷰포트를 줄인 경우와 전체 크기(줌)를 키운 경우가 모두 여기로 온다. 판정에 장식 그림의 크기가 필요한데, 상품 id를 프리팹으로 바꾸는 곳이 여기라 여기서 한다.
 /// 판정 상자는 설치 모드와 같은 그림 전체(투명 여백 포함)다. 확인 팝업은 띄우지 않는다.
 /// </summary>

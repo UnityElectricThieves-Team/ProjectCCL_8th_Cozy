@@ -167,6 +167,7 @@ public sealed class GraphicsTabController : MonoBehaviour
         return false;
     }
 
+    // 크기 단계를 먼저 되돌린다 — 버릴 때(줌만 미저장이어도) 화면 밖 장식을 회수하는데, 그 판정이 되돌린 줌으로 되어야 한다(settings.md).
     private void DiscardUnsaved()
     {
         if (_settings != null) _settings.RevertGraphics();

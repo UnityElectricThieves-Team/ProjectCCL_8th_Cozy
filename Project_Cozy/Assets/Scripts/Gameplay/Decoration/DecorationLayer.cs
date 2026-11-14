@@ -24,7 +24,7 @@ public readonly struct PlacedDecoration
 
 /// <summary>
 /// 화면에 놓인 장식들을 그린다. 받은 목록대로 장식 프리팹을 만들어, 그림의 가로 중앙을 저장된 x에,
-/// 그림의 아래 끝을 지면(확정 뷰포트의 아래 변)에 맞춘다.
+/// 그림의 아래 끝을 지면(적용된 뷰포트의 아래 변, 편집 중이면 프리뷰의 아래 변)에 맞춘다.
 ///
 /// 이 컴포넌트는 <b>상점을 모른다</b> — 무엇을 어디에 놓을지는 밖에서 <see cref="SetDecorations"/>로 넣어 준다
 /// (배경의 <see cref="BackgroundStage"/>와 같은 자리). 그래야 이동·회수·제거 모드가 같은 레이어를 그대로 쓸 수 있다.
@@ -37,8 +37,10 @@ public readonly struct PlacedDecoration
 /// 렌더러가 새로 생기므로, 상태를 두 클래스가 나눠 가지면 재생성 때 어긋난다. 강조·숨김은 다시 만들면 비우고, 앞으로 당기기는 지킨다.
 /// 뷰포트가 다시 확정돼 자리를 다시 잡을 때(<see cref="Relayout"/>)도 숨김을 지킨다 — 들고 다니는 중에 원본이 나타나거나 장애물로 잡히지 않게.
 ///
-/// 배치는 뷰포트가 확정될 때(<see cref="ViewportScreenSettings.ViewportConfirmed"/>)와 목록이 바뀔 때만 다시 계산한다.
-/// 매 프레임 하는 일은 없다. 편집 중 프리뷰에는 따라가지 않는다(배경과 같은 판단).
+/// 배치는 뷰포트가 적용될 때(<see cref="ViewportScreenSettings.ViewportConfirmed"/>), 편집 중 프리뷰가 바뀔 때
+/// (<see cref="ViewportScreenSettings.PreviewChanged"/>), 목록이 바뀔 때만 다시 계산한다. 평소에 매 프레임 하는 일은 없다.
+/// 프리뷰를 따라가는 것은 배경과 같은 판단이다 — 배경만 따라가면 장식이 옛 지면에 남아 배경 바닥과 어긋나 보인다.
+/// 장식은 마스크로 자르지 않으므로, 프리뷰 밖에 걸친 장식도 보이다가 [저장] 때 회수된다.
 ///
 /// 지면 맞춤은 transform 위치가 아니라 그림의 아래 끝으로 한다. 장식마다 그림의 피벗이 달라서다(가구는 아래 끝, 임시 그림은 가운데).
 /// 장식에는 콜라이더를 달지 않는다 — 이유는 .claude/rules/unity/decoration-placement.md.
@@ -69,7 +71,7 @@ public sealed class DecorationLayer : MonoBehaviour
     private ViewportScreenSettings _viewportSettings;
     private BaseSpaceCameraFitter _cameraFitter;
 
-    private Rect _area;      // 확정 뷰포트의 월드 사각형
+    private Rect _area;      // 지금 따르는 뷰포트(적용된 뷰포트 또는 편집 프리뷰)의 월드 사각형
     private bool _hasArea;
 
     private void Start()
@@ -86,15 +88,20 @@ public sealed class DecorationLayer : MonoBehaviour
             return;
         }
 
-        _viewportSettings.ViewportConfirmed += OnViewportConfirmed;
+        _viewportSettings.ViewportConfirmed += OnViewportChanged;
+        _viewportSettings.PreviewChanged += OnViewportChanged;
 
         // 초기 적용이 이미 끝난 뒤에 이 컴포넌트가 붙었을 수 있다(첫 확정 신호는 이미 지나갔으면 다시 오지 않는다).
-        if (_viewportSettings.IsReady) OnViewportConfirmed(_viewportSettings.Viewport);
+        if (_viewportSettings.IsReady) OnViewportChanged(_viewportSettings.PreviewViewport);
     }
 
     private void OnDestroy()
     {
-        if (_viewportSettings != null) _viewportSettings.ViewportConfirmed -= OnViewportConfirmed;
+        if (_viewportSettings != null)
+        {
+            _viewportSettings.ViewportConfirmed -= OnViewportChanged;
+            _viewportSettings.PreviewChanged -= OnViewportChanged;
+        }
     }
 
     /// <summary>놓인 장식 목록을 통째로 바꾼다. 넘긴 목록은 복사해 두므로 호출한 쪽이 다시 써도 된다.</summary>
@@ -219,7 +226,7 @@ public sealed class DecorationLayer : MonoBehaviour
         return -1;
     }
 
-    private void OnViewportConfirmed(RectInt viewportPx)
+    private void OnViewportChanged(RectInt viewportPx)
     {
         _area = _cameraFitter.BaseRectToWorld(viewportPx, _viewportSettings.BaseSpaceSize);
         _hasArea = true;
