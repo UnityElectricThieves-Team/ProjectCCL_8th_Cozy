@@ -11,6 +11,7 @@ using UnityEngine;
 ///
 /// 손으로 수십 개를 만들지 않으려고 둔다. 여러 번 눌러도 이미 상품이 있는 폴더는 건드리지 않는다 —
 /// "상품이 있다"는 그 폴더의 프리팹을 가리키는 상품이 있다는 뜻이라, 옛 이름(shop_item_N_...)의 상품도 그대로 남는다.
+/// 예외는 비어 있는 아이콘 하나다. 썸네일이 상품보다 늦게 오면 폴더에 넣고 다시 누르기만 하면 채워진다. 채워 둔 아이콘은 바꾸지 않는다.
 ///
 /// 새 상품의 id는 <c>deco_</c>/<c>bg_</c> + 폴더 이름 소문자다. id는 저장 키라 한번 만들면 바꾸지 않는다.
 /// 이름은 번역 표에서 이 id로 찾으므로(<see cref="ShopItemDefinition.NameKey"/>), 새 폴더를 받으면 번역 표에도 그 줄을 넣어야 한다.
@@ -46,6 +47,8 @@ public static class ShopItemGenerator
             else if (item.decorationPrefab != null) { decorations.Add(item); usedPrefabs.Add(item.decorationPrefab); }
         }
 
+        int iconsFilled = FillMissingIcons(decorations) + FillMissingIcons(backgrounds);
+
         int created = 0;
         // 에셋을 하나 만들 때마다 임포트하지 않고 끝에서 한 번에 한다.
         AssetDatabase.StartAssetEditing();
@@ -69,7 +72,7 @@ public static class ShopItemGenerator
 
         bool sceneChanged = AssignToScene<ShopSystem>(catalog) | AssignToScene<BackgroundSystem>(catalog);
 
-        Debug.Log($"[{nameof(ShopItemGenerator)}] 새 상품 {created}개를 만들었습니다. 목록: 장식 {catalog.decorations.Length}개, 배경 {catalog.backgrounds.Length}개." +
+        Debug.Log($"[{nameof(ShopItemGenerator)}] 새 상품 {created}개를 만들고, 빈 아이콘 {iconsFilled}개를 채웠습니다. 목록: 장식 {catalog.decorations.Length}개, 배경 {catalog.backgrounds.Length}개." +
                   (sceneChanged ? " 씬의 시스템에 목록을 걸었습니다 — 씬을 저장하세요." : ""), catalog);
     }
 
@@ -81,6 +84,29 @@ public static class ShopItemGenerator
         catalog = ScriptableObject.CreateInstance<ShopCatalog>();
         AssetDatabase.CreateAsset(catalog, CATALOG_PATH);
         return catalog;
+    }
+
+    // 아이콘이 빈 상품마다 프리팹 폴더의 store_thumbnail.png를 찾아 넣는다. 채운 개수를 돌려준다.
+    private static int FillMissingIcons(List<ShopItemDefinition> items)
+    {
+        int filled = 0;
+        foreach (var item in items)
+        {
+            if (item.icon != null) continue;
+            GameObject prefab = item.backgroundPrefab != null ? item.backgroundPrefab : item.decorationPrefab;
+            string folder = Path.GetDirectoryName(AssetDatabase.GetAssetPath(prefab)).Replace('\\', '/');
+            var icon = AssetDatabase.LoadAssetAtPath<Sprite>(folder + "/store_thumbnail.png");
+            if (icon == null)
+            {
+                Debug.LogWarning($"[{nameof(ShopItemGenerator)}] '{folder}'에 store_thumbnail.png가 없어 '{item.id}'의 아이콘이 비어 있습니다. 아트에 요청하세요.", item);
+                continue;
+            }
+
+            item.icon = icon;
+            EditorUtility.SetDirty(item);
+            filled++;
+        }
+        return filled;
     }
 
     // root 아래 폴더마다 prefabName이 있고 아직 그 프리팹을 가리키는 상품이 없으면 상품을 만든다. 만든 개수를 돌려준다.
