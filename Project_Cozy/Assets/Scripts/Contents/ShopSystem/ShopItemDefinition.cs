@@ -20,10 +20,10 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Cozy/Shop/Shop Item")]
 public class ShopItemDefinition : ScriptableObject
 {
-    [Tooltip("저장·조회에 쓰는 안정적 식별자. 예: shop_item_1_flowerpot. 한번 정하면 바꾸지 않는다.")]
+    [Tooltip("저장·조회에 쓰는 안정적 식별자. 예: deco_wallclock. 한번 정하면 바꾸지 않는다.")]
     public string id;
 
-    /// <summary>번역 표에서 상품 이름을 찾는 stringID. 예: UIShop.item.shop_item_1_flowerpot</summary>
+    /// <summary>번역 표에서 상품 이름을 찾는 stringID. 예: UIShop.item.deco_wallclock</summary>
     public string NameKey => "UIShop.item." + id;
 
     [Tooltip("상품 아이콘(png import된 Sprite).")]
