@@ -36,10 +36,17 @@ public sealed class ShopItemSlot : MonoBehaviour
     private ShopItemDefinition _item;
     private Action<ShopItemDefinition> _onBuy;
     private LocalizationManager _localization;
+    private float _previewMaxSide; // 프리팹이 정한 그림 칸에 들어가는 정사각형의 한 변
 
     // 상품 이름이 언어를 따르므로, 언어가 바뀌면 이름(과 개수)을 다시 그린다.
     private void Awake()
     {
+        if (_preview != null)
+        {
+            Rect frame = _preview.rectTransform.rect;
+            _previewMaxSide = Mathf.Min(frame.width, frame.height);
+        }
+
         _localization = LocalizationManager.Instance;
         if (_localization != null) _localization.LanguageChanged += RefreshOwned;
     }
@@ -58,12 +65,38 @@ public sealed class ShopItemSlot : MonoBehaviour
         RefreshOwned();
         if (_buttonLabel != null) _buttonLabel.text = item.price.ToString();
         if (_preview != null && item.icon != null) _preview.sprite = item.icon;
+        ApplyRealSize(item);
 
         if (_button != null)
         {
             _button.onClick.RemoveListener(HandleBuyClicked); // 재바인딩 시 중복 방지
             _button.onClick.AddListener(HandleBuyClicked);
         }
+    }
+
+    /// <summary>
+    /// 그림을 화면에 놓였을 때와 같은 크기(1:1)로 줄인다. 칸보다 크면 칸에 맞춘다.
+    /// UI 1px가 베이스 공간 1px와 같아서(CanvasScaler 기준 폭 = 마스터 캔버스 폭) 장식의 px 크기를 그대로 쓴다.
+    /// 썸네일은 정사각형에 물체의 긴 변이 꽉 차게 그려져 있으므로, 정사각형 한 변을 실제 긴 변으로 둔다.
+    /// 크기는 <see cref="DecorationBinder"/>가 놓인 장식의 크기를 판정하는 식과 같다 — 한쪽을 바꾸면 다른 쪽도 맞춘다.
+    /// 피벗은 프리팹이 가운데로 두어, 칸 가운데를 중심으로 줄어든다.
+    /// 그림이나 장식 프리팹이 없으면 건드리지 않아 지금처럼 칸을 채운다.
+    /// </summary>
+    private void ApplyRealSize(ShopItemDefinition item)
+    {
+        if (_preview == null || item.icon == null || item.decorationPrefab == null) return;
+        SpriteRenderer renderer = item.decorationPrefab.GetComponentInChildren<SpriteRenderer>();
+        if (renderer == null || renderer.sprite == null) return;
+
+        Vector3 size = renderer.sprite.bounds.size;
+        Vector3 scale = renderer.transform.lossyScale;
+        float longSidePx = Mathf.Max(size.x * Mathf.Abs(scale.x), size.y * Mathf.Abs(scale.y))
+                           * BaseSpaceCameraFitter.PIXELS_PER_UNIT;
+        float side = Mathf.Min(longSidePx, _previewMaxSide);
+
+        RectTransform rt = _preview.rectTransform;
+        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, side);
+        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, side);
     }
 
     /// <summary>구매 가능 여부에 따라 가격 글씨색과 버튼 스프라이트(구매가능/불가)를 바꾼다.</summary>
