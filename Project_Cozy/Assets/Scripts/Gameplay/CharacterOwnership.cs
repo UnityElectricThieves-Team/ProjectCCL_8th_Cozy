@@ -430,11 +430,11 @@ public class CharacterOwnership : MonoBehaviour
     /// </summary>
     public void ResetProgress()
     {
-        // 파괴할 캐릭터의 친밀도 모듈을 붙든 구독을 먼저 끊는다.
+        // 지울 캐릭터의 친밀도 모듈을 붙든 구독을 먼저 끊는다.
         UnsubscribeAll();
 
-        // 숨긴 캐릭터는 살아있는 목록에 없으므로 자기 목록으로도 파괴한다. 씬에 직접 놓은 테스트 캐릭터는
-        // 자기 목록에 없으므로 살아있는 목록으로도 파괴한다. 둘에 같이 든 것을 두 번 Destroy해도 괜찮다.
+        // 숨긴 캐릭터는 살아있는 목록에 없으므로 자기 목록으로도 지운다. 씬에 직접 놓은 테스트 캐릭터는
+        // 자기 목록에 없으므로 살아있는 목록으로도 지운다. 둘에 같이 든 것을 두 번 지워도 괜찮다.
         for (int i = 0; i < _characters.Count; i++)
             if (_characters[i].controller != null) Destroy(_characters[i].controller.gameObject);
         _characters.Clear();
