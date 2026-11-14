@@ -44,9 +44,9 @@ public class ViewportEditHandles : MonoBehaviour
     [Header("시각")]
     [SerializeField, Tooltip("레퍼런스 사양 — 주황")]
     private Color _accent = new Color(1f, 0.58f, 0.10f, 0.95f);
-    [SerializeField] private Color _dim = new Color(0.05f, 0.07f, 0.10f, 0.55f);
+    [SerializeField] private Color _dim = new Color(0.05f, 0.07f, 0.10f, 0.35f);
     [SerializeField, Range(0f, 0.9f), Tooltip("편집 중 카메라 클리어 알파(창 전체 반투명 딤). 1.0 금지 — 데스크톱이 안 보이게 됨")]
-    private float _editBackdropAlpha = 0.45f;
+    private float _editBackdropAlpha = 0.25f;
     [SerializeField, Tooltip("모서리 원형 핸들 지름(px)")]
     private int _cornerHandlePx = 28;
 

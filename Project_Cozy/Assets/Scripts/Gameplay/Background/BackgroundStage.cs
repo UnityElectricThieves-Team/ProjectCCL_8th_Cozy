@@ -12,9 +12,10 @@ using UnityEngine;
 /// 뷰포트 밖 바탕화면 위에도 배경이 그려진다. 그래서 뷰포트 크기의 SpriteMask를 하나 두고, 프리팹의 렌더러(파티클 포함)를
 /// 그 안에서만 보이게 한다. 마스크 그림은 에셋으로 두지 않고 흰 텍스처로 만든다.
 ///
-/// 배치는 뷰포트가 확정될 때(<see cref="ViewportScreenSettings.ViewportConfirmed"/>)와 프리팹이 바뀔 때만
-/// 다시 계산한다. 편집 중 프리뷰에는 따라가지 않는다(<see cref="ViewportLivingAreaBinder"/>와 같은 판단).
-/// 이 컴포넌트가 매 프레임 하는 일은 없다(프리팹 안의 파티클은 제 갈 길을 간다).
+/// 배치는 뷰포트가 적용될 때(<see cref="ViewportScreenSettings.ViewportConfirmed"/>), 편집 중 프리뷰가 바뀔 때
+/// (<see cref="ViewportScreenSettings.PreviewChanged"/>), 프리팹이 바뀔 때만 다시 계산한다. 프리뷰를 따라가는 것은
+/// 기획 요청이다("뷰포트를 옮기는 즉시 배경도 같이") — 끄는 동안 저장했을 때의 배경을 미리 보여 준다.
+/// 평소에 매 프레임 하는 일은 없다(프리팹 안의 파티클은 제 갈 길을 간다).
 ///
 /// 콜라이더를 붙이지 않는다. <see cref="WindowManager"/>가 커서 아래 콜라이더 유무로 클릭 통과를 끄기 때문에,
 /// 콜라이더가 있으면 배경 전체에서 바탕화면 클릭이 막힌다.
@@ -35,7 +36,7 @@ public sealed class BackgroundStage : MonoBehaviour
     private Transform _inactiveHolder; // 프리팹을 꺼진 채로 만들기 위한 꺼진 부모
     private GameObject _instance;
 
-    private Rect _area;      // 확정 뷰포트의 월드 사각형
+    private Rect _area;      // 지금 따르는 뷰포트(적용된 뷰포트 또는 편집 프리뷰)의 월드 사각형
     private bool _hasArea;
 
     private void Awake()
@@ -69,15 +70,20 @@ public sealed class BackgroundStage : MonoBehaviour
             return;
         }
 
-        _viewportSettings.ViewportConfirmed += OnViewportConfirmed;
+        _viewportSettings.ViewportConfirmed += OnViewportChanged;
+        _viewportSettings.PreviewChanged += OnViewportChanged;
 
         // 초기 적용이 이미 끝난 뒤에 이 컴포넌트가 붙었을 수 있다(첫 확정 신호는 이미 지나갔으면 다시 오지 않는다).
-        if (_viewportSettings.IsReady) OnViewportConfirmed(_viewportSettings.Viewport);
+        if (_viewportSettings.IsReady) OnViewportChanged(_viewportSettings.PreviewViewport);
     }
 
     private void OnDestroy()
     {
-        if (_viewportSettings != null) _viewportSettings.ViewportConfirmed -= OnViewportConfirmed;
+        if (_viewportSettings != null)
+        {
+            _viewportSettings.ViewportConfirmed -= OnViewportChanged;
+            _viewportSettings.PreviewChanged -= OnViewportChanged;
+        }
         if (_mask != null) Destroy(_mask.sprite); // 코드로 만든 스프라이트는 씬과 함께 정리되지 않는다
     }
 
@@ -132,7 +138,7 @@ public sealed class BackgroundStage : MonoBehaviour
         Relayout();
     }
 
-    private void OnViewportConfirmed(RectInt viewportPx)
+    private void OnViewportChanged(RectInt viewportPx)
     {
         _area = _cameraFitter.BaseRectToWorld(viewportPx, _viewportSettings.BaseSpaceSize);
         _hasArea = true;
