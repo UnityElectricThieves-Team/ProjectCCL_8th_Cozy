@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 /// <summary>
 /// 상점에서 산 장식의 저장 데이터 컨테이너. <see cref="HeartFileFormat"/>과 같은 패턴.
@@ -31,12 +32,17 @@ public class ShopInventoryFileFormat
 }
 
 /// <summary>
-/// 화면에 놓인 장식 하나.
-/// x는 베이스 공간 px(마스터 캔버스 기준 px)이고 장식 그림의 가로 중앙이다 — 월드 좌표로 저장하지 않는 이유는
-/// .claude/rules/unity/viewport-coordinates.md의 저장 단위 규약을 따른다.
-/// elevation은 그림 아래 끝이 지면(뷰포트 아래 변)에서 몇 베이스 px 위에 있는가다. 위치가 아니라 지면에서 잰 길이다.
-/// 이 필드가 없던 옛 파일은 0으로 읽혀 바닥에 놓인 그대로다. 바닥 장식은 저장 값과 상관없이 바인더가 0으로 읽는다
-/// (종류의 주인은 상품 정의다 — <see cref="DecorationBinder"/>).
+/// 화면에 놓인 장식 하나. 자리는 둘 다 기준점에서 잰 길이(베이스 공간 px)로 저장한다 — 배경 그림도 같은 기준(가로는 방 가운데,
+/// 아래 끝은 뷰포트 아래 변)에 맞춰 놓이므로 장식이 배경과 함께 움직인다. 뷰포트를 통째로 옮기면 함께 따라가고, 크기를 바꾸면 제자리다.
+/// 월드 좌표로 저장하지 않는 이유는 .claude/rules/unity/viewport-coordinates.md의 저장 단위 규약을 따른다.
+/// - xFromRoomCenter: 그림 가로 중앙이 방 가운데(<see cref="ViewportScreenSettings.RoomCenterX"/>)에서 몇 px 떨어졌는가(오른쪽 +).
+/// - elevation: 그림 아래 끝이 지면(뷰포트 아래 변)에서 몇 px 위에 있는가. 이 필드가 없던 옛 파일은 0으로 읽혀 바닥에 놓인 그대로다.
+///   바닥 장식은 저장 값과 상관없이 바인더가 0으로 읽는다(종류의 주인은 상품 정의다 — <see cref="DecorationBinder"/>).
+///
+/// 예전에는 가로를 베이스 공간의 절대 위치로 저장했다(파일 키 "x"). 그 값은 <see cref="legacyAbsoluteX"/>로 읽기만 하고,
+/// 업데이트 뒤 뷰포트가 처음 준비될 때 바인더가 그 순간의 방 가운데를 기준으로 한 번 <see cref="xFromRoomCenter"/>로 바꾼다
+/// (<see cref="ShopSystem.ConvertLegacyAbsoluteX"/>). 바꾸기 전 항목(<see cref="IsLegacyX"/>)은 그리지도 회수하지도 않아,
+/// 뷰포트 준비 전 잠깐 인벤토리에도 화면에도 보이지 않는다. 상점 파일은 버전 칸을 두지 않고 "새 필드가 비었는가"로 옛 항목을 가린다.
 ///
 /// <c>Vector2</c>로 담지 않는다. 저장 직렬화(Newtonsoft)가 <c>Vector2.normalized</c> 같은 자기 참조 속성을 따라가다
 /// 예외를 낸다.
@@ -45,6 +51,13 @@ public class ShopInventoryFileFormat
 public class PlacedDecorationData
 {
     public string itemId;
-    public float x;
+
+    /// <summary>옛 가로 위치(베이스 공간 절대 위치). 변환 전 파일에서만 뜻이 있고, 새 코드는 쓰지 않는다.</summary>
+    [JsonProperty("x")] public float legacyAbsoluteX;
+
+    public float? xFromRoomCenter;
     public float elevation;
+
+    /// <summary>가로 위치를 아직 방 가운데 기준으로 바꾸지 않은 항목인가. 판정은 이 한 곳에서 한다.</summary>
+    [JsonIgnore] public bool IsLegacyX => xFromRoomCenter == null;
 }

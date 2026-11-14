@@ -77,6 +77,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
     private SpriteRenderer _ghostRenderer;
     private Action<DecorationSpot> _onConfirm;
     private Rect _area;                 // 적용된 뷰포트의 월드 사각형(지면 = 아래 변)
+    private float _roomCenterBaseX;     // 들기 시작할 때의 방 가운데(베이스 공간 px) — 가로 자리의 기준
     private DecorationPlacementKind _carryKind; // 들고 있는 장식의 종류. 들고 있는 동안에만 뜻이 있고, StartCarry가 늘 새로 쓴다
     // 지금 고스트 자리. UpdateGhost가 매 프레임 통째로 새로 쓴다 — 바닥 장식이면 높이 0이 매번 다시 들어가,
     // 앞서 든 자유 장식의 높이가 남지 않는다.
@@ -424,6 +425,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
         _onConfirm = onConfirm;
         _carryKind = kind;
         _area = _cameraFitter.BaseRectToWorld(_viewportSettings.Viewport, _viewportSettings.BaseSpaceSize);
+        _roomCenterBaseX = _viewportSettings.RoomCenterX; // 편집 중에는 들어오지 않으므로 레이어가 쓰는 방과 같다
         CollectBlockedAreas();
         if (_layer != null)
         {
@@ -503,7 +505,9 @@ public sealed class DecorationPlacementController : MonoBehaviour
         float elevationPx = _carryKind == DecorationPlacementKind.Floor
             ? 0f
             : Mathf.Max(0f, (targetBottomY - _area.yMin) * _cameraFitter.PixelsPerUnit);
-        _ghostSpot = new DecorationSpot(_cameraFitter.WorldXToBaseX(b.center.x, _viewportSettings.BaseSpaceSize), elevationPx);
+        // 가로는 방 가운데에서 잰 길이(레이어 Relayout의 역식). 배경과 같은 기준이라 뷰포트를 옮기면 함께 움직이고, 크기를 바꾸면 제자리다.
+        float xFromRoomCenterPx = _cameraFitter.WorldXToBaseX(b.center.x, _viewportSettings.BaseSpaceSize) - _roomCenterBaseX;
+        _ghostSpot = new DecorationSpot(xFromRoomCenterPx, elevationPx);
 
         _cursorOverUi = IsPointerOverUI(screen);
         bool valid = IsInsideViewport(b) && !OverlapsAny(b) && !_cursorOverUi;
@@ -594,7 +598,7 @@ public sealed class DecorationPlacementController : MonoBehaviour
     private void TestEnter()
     {
         EnterInstall(_testPrefab, DecorationPlacementKind.Floor,
-            spot => Debug.Log($"[{nameof(DecorationPlacementController)}] 테스트 확정: x = {spot.BaseX:F1}, 높이 = {spot.ElevationPx:F1} (베이스 px)", this));
+            spot => Debug.Log($"[{nameof(DecorationPlacementController)}] 테스트 확정: 방 가운데에서 x = {spot.XFromRoomCenterPx:F1}, 높이 = {spot.ElevationPx:F1} (베이스 px)", this));
     }
 #endif
 }

@@ -49,21 +49,26 @@ public class ViewportSaveBinder : MonoBehaviour
     {
         ViewportFileFormat data = UserDataSaveIO.Load<ViewportFileFormat>(GameDataPaths.Viewport);
 
-        // 크기가 0이면 첫 실행이거나 파일이 손상된 경우다(UserDataSaveIO가 손상 시 빈 값을 준다).
-        // 주입하지 않고 넘기면 Start가 "베이스 공간 전체"라는 기본값으로 채운다 — 두 경우가 같은
-        // 안전한 경로를 타게 된다.
+        // 방 가운데는 크기를 보기 전에 넣는다 — version 2에서는 크기 0인 파일에도 방 값이 있다(기본 뷰포트를 쓰고 방만 저장한 경우).
+        // version 2보다 옛 파일이면 넣지 않는다. 그러면 정책 쪽 Start가 그 순간의 화면으로 방 값을 정해 곧바로 저장하게 한다.
+        if (data.version >= 2) _settings.SetRoomCenterX(data.roomCenterX);
+
+        // 크기가 0이면 첫 실행이거나 파일이 손상된 경우다(UserDataSaveIO가 손상 시 빈 값을 준다). version 2에서는
+        // "기본 뷰포트를 쓴다(방 값만 있음)"도 뜻한다. 주입하지 않고 넘기면 Start가 "베이스 공간 전체"라는 기본값으로 채운다 —
+        // 모든 경우가 같은 안전한 경로를 타게 된다.
         if (data.width <= 0 || data.height <= 0) return;
 
         var rect = new RectInt(data.x, data.y, data.width, data.height);
 
-        // 파일 버전을 아는 곳은 여기뿐이다. 옛 파일(작업 영역 px)은 단위 이름으로 된 입구에 넣고,
-        // 정책 쪽은 버전이 아니라 단위만 보고 환산한다. 파일은 다음 저장 때 새 단위로 다시 써진다.
-        if (data.version < ViewportFileFormat.FormatVersion)
+        // 파일 버전을 아는 곳은 여기뿐이다. 옛 파일(version 0, 작업 영역 px)은 단위 이름으로 된 입구에 넣고,
+        // 정책 쪽은 버전이 아니라 단위만 보고 환산한다. version 1 이상은 베이스 px다. 파일은 다음 저장 때 새 형식으로 다시 써진다.
+        if (data.version == 0)
             _settings.SetViewportFromWorkAreaPx(rect);
         else
             _settings.SetViewport(rect);
     }
 
+    // 방 가운데는 신호가 울릴 때 이미 정책 쪽에 들어 있다(ViewportSaved 주석). 크기 0인 사각형도 그대로 쓴다 — "기본 뷰포트를 쓴다".
     private void OnViewportSaved(RectInt viewport)
     {
         UserDataSaveIO.Save(GameDataPaths.Viewport, new ViewportFileFormat
@@ -73,6 +78,7 @@ public class ViewportSaveBinder : MonoBehaviour
             y = viewport.y,
             width = viewport.width,
             height = viewport.height,
+            roomCenterX = _settings.RoomCenterX,
         });
     }
 }

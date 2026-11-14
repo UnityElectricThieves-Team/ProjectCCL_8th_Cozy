@@ -12,12 +12,14 @@ using System;
 /// 맞춰 클램프한 뒤 쓴다.
 ///
 /// version 0(필드가 없던 옛 파일)은 작업 영역의 절대 px 단위다. 이 값을 읽는 쪽은 현재 배율로 환산한다.
+/// version 1은 베이스 공간 px이고 방 가운데가 없다. version 2부터 <see cref="roomCenterX"/>(배경·장식의 가로 기준점,
+/// 베이스 공간 px)가 함께 들어간다. version 2에서 크기가 0이면 "기본 뷰포트(그 순간의 베이스 공간 전체)를 쓰고 방 값만 저장했다"는 뜻이다.
 /// </summary>
 [Serializable]
 public class ViewportFileFormat
 {
-    /// <summary>현재 저장 단위의 버전. 1 = 베이스 공간 px(마스터 캔버스 기준).</summary>
-    public const int FormatVersion = 1;
+    /// <summary>현재 저장 형식의 버전. 1 = 베이스 공간 px(마스터 캔버스 기준), 2 = 그에 방 가운데를 더함.</summary>
+    public const int FormatVersion = 2;
 
     // 일부러 초기화하지 않는다. 형제 FileFormat의 "필드 초기화 = 옛 파일의 기본값" 관례와 반대인데,
     // 여기서는 필드가 없던 옛 파일이 0으로 읽혀야 단위를 구분할 수 있기 때문이다. `= FormatVersion`으로
@@ -27,4 +29,7 @@ public class ViewportFileFormat
     public int y;
     public int width;
     public int height;
+
+    /// <summary>방 가운데(베이스 공간 px). version 2부터 뜻이 있다 — 그보다 옛 파일에서는 0으로 읽히므로 버전으로 가린다.</summary>
+    public float roomCenterX;
 }
