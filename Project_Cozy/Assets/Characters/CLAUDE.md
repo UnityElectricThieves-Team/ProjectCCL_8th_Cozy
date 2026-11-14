@@ -24,7 +24,8 @@ Characters/
 
 1. **시트 임포트 설정을 맞춘다.** PPU는 100 그대로 두고, 칸 단위 격자로 자르고, Read/Write를 켠다. Read/Write는 마우스 판정이 픽셀을 읽기 때문에 필요하다([Interaction/CLAUDE.md](../Scripts/Interaction/CLAUDE.md)의 `OpaqueHoverable`). 피벗은 같은 프리팹의 다른 폼과 발 위치가 맞게 넣는다([character-ground.md](../../../.claude/rules/unity/character-ground.md)).
 2. **오버라이드 컨트롤러를 만든다.** 베이스는 `BaseCharacterAnimatorController`이고, 그 캐릭터에 있는 클립만 채운다. 클립이 없는 칸은 비워 둔다. 다른 캐릭터의 클립으로 채우면 그 상태에서 다른 캐릭터 그림이 튀어나온다.
-3. **프리팹은 `Character.prefab`의 배리언트로 만든다.** 구조(Visual·판정·앵커)는 물려받고, 오버라이드·시작 폼·기본 스프라이트·모션 시간처럼 캐릭터마다 다른 값만 바꾼다. 크기 배율(Base Scale)은 바꾸지 않는다 — 지금 베이스 프리팹에 들어 있는 배율은 모든 캐릭터에 거는 임시 축소다([character-ground.md](../../../.claude/rules/unity/character-ground.md)).
+   예외로, 동물 폼 그림이 아직 없는 캐릭터(지금은 치즈·헤라)는 동물 오버라이드를 덮지 않아 베이스의 흰 고양이 클립으로 나온다. 흰 고양이가 튀어나오는 것을 알고 둔 임시 상태이고, 그림이 오면 그 캐릭터의 동물 오버라이드를 만들어 바꾼다.
+3. **프리팹은 `Character.prefab`의 배리언트로 만든다.** 구조(Visual·판정·앵커)는 물려받고, 오버라이드·기본 스프라이트·모션 시간처럼 캐릭터마다 다른 값만 바꾼다. **시작 폼은 덮지 않는다** — 베이스 값(동물)을 그대로 둔다. 기획이 "켜면 고양이"로 정했고, 폼을 저장하지 않는 대신 재시작하면 동물로 돌아온다는 규칙([character-ownership.md](../../../.claude/rules/unity/character-ownership.md))이 이것에 기댄다. 동물 그림이 없다고 소녀로 시작하게 두면, 소녀 유지 시간이 게임을 켤 때부터 흘러 몇 분(테스트 값) 뒤 동물로 바뀐다. 크기 배율(Base Scale)은 바꾸지 않는다 — 지금 베이스 프리팹에 들어 있는 배율은 모든 캐릭터에 거는 임시 축소다([character-ground.md](../../../.claude/rules/unity/character-ground.md)).
 4. **모션 시간을 실제 재생 시간에 맞춘다.** 쓰담·특수 대기는 클립이 끝나는 시점이 아니라 프리팹 인스펙터의 시간 값으로 끝난다. 재생 시간은 클립 길이 ÷ 상태 Speed라서, 클립의 프레임 수나 fps를 바꿀 때뿐 아니라 아래의 재생 속도를 바꿀 때도 이 값을 함께 바꾼다.
 
 ## 재생 속도
