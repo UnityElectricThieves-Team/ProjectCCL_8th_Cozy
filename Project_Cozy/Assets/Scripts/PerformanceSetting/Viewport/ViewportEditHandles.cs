@@ -156,8 +156,11 @@ public class ViewportEditHandles : MonoBehaviour
 
         int dx = mouse.x - _dragStartMouse.x;
         int dy = mouse.y - _dragStartMouse.y;
-        _viewportSettings.SetPreviewViewport(
-            ApplyDrag(_dragStartRect, _dragZone, dx, dy, _viewportSettings.VisibleRect, _viewportSettings.MinViewportSize));
+        RectInt next = ApplyDrag(_dragStartRect, _dragZone, dx, dy, _viewportSettings.VisibleRect, _viewportSettings.MinViewportSize);
+        // 통째로 옮길 때만 방(배경·장식의 가로 기준)이 따라간다. 크기 조절은 방을 그대로 두고 보이는 범위만 바꾼다.
+        // 사각형만으로는 둘을 가를 수 없어(옮기기와 한쪽 변 끌기가 같은 모양일 수 있다) 여기서 갈라 부른다.
+        if (_dragZone == DragZone.Move) _viewportSettings.MovePreviewViewport(next);
+        else _viewportSettings.SetPreviewViewport(next);
     }
 
     private bool IsPointerOverUI(Vector2 screenPos)

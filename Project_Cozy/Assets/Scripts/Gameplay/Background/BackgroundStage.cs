@@ -3,7 +3,9 @@ using UnityEngine;
 
 /// <summary>
 /// 배경 프리팹 하나를 뷰포트 아래 변에 깐다. 아트가 만든 배경 프리팹을 크기를 바꾸지 않고 그대로 쓰며,
-/// 그림 전체의 아래 끝을 뷰포트 아래 변에, 가로 가운데를 뷰포트 가운데에 맞춘다.
+/// 그림 전체의 아래 끝을 뷰포트 아래 변에, 가로 가운데를 <b>방 가운데</b>(<see cref="ViewportScreenSettings.RoomCenterX"/>)에 맞춘다.
+/// 방 가운데는 뷰포트를 통째로 옮길 때만 따라가므로, 변을 끌어 크기를 바꾸면 그림은 제자리이고 마스크(창)만 바뀌어
+/// 보이는 범위가 넓어지거나 좁아진다. 놓인 장식도 같은 방 가운데를 기준으로 놓여 함께 움직인다.
 ///
 /// 이 컴포넌트는 <b>배치만</b> 책임진다 — 어떤 프리팹을 깔지는 밖에서 <see cref="SetPrefab"/>으로 넣어 준다(상점·배경 시스템을 모른다).
 /// 프리팹이 없으면 아무것도 그리지 않아 바탕화면이 그대로 비친다.
@@ -15,6 +17,7 @@ using UnityEngine;
 /// 배치는 뷰포트가 적용될 때(<see cref="ViewportScreenSettings.ViewportConfirmed"/>), 편집 중 프리뷰가 바뀔 때
 /// (<see cref="ViewportScreenSettings.PreviewChanged"/>), 프리팹이 바뀔 때만 다시 계산한다. 프리뷰를 따라가는 것은
 /// 기획 요청이다("뷰포트를 옮기는 즉시 배경도 같이") — 끄는 동안 저장했을 때의 배경을 미리 보여 준다.
+/// 마스크는 프리뷰 뷰포트를, 그림의 가로는 프리뷰 방 가운데(<see cref="ViewportScreenSettings.PreviewRoomCenterX"/>)를 따른다.
 /// 평소에 매 프레임 하는 일은 없다(프리팹 안의 파티클은 제 갈 길을 간다).
 ///
 /// 콜라이더를 붙이지 않는다. <see cref="WindowManager"/>가 커서 아래 콜라이더 유무로 클릭 통과를 끄기 때문에,
@@ -36,7 +39,8 @@ public sealed class BackgroundStage : MonoBehaviour
     private Transform _inactiveHolder; // 프리팹을 꺼진 채로 만들기 위한 꺼진 부모
     private GameObject _instance;
 
-    private Rect _area;      // 지금 따르는 뷰포트(적용된 뷰포트 또는 편집 프리뷰)의 월드 사각형
+    private Rect _area;      // 지금 따르는 뷰포트(적용된 뷰포트 또는 편집 프리뷰)의 월드 사각형 — 마스크와 아래 끝
+    private float _roomCenterWorldX; // 지금 따르는 방 가운데의 월드 x — 그림의 가로 가운데
     private bool _hasArea;
 
     private void Awake()
@@ -141,6 +145,8 @@ public sealed class BackgroundStage : MonoBehaviour
     private void OnViewportChanged(RectInt viewportPx)
     {
         _area = _cameraFitter.BaseRectToWorld(viewportPx, _viewportSettings.BaseSpaceSize);
+        // 방 가운데는 위치라 앵커를 거친다. 신호가 울릴 때는 이미 새 값이다(ViewportScreenSettings). 장식 레이어도 같은 속성을 읽는다.
+        _roomCenterWorldX = _cameraFitter.BaseXToWorldX(_viewportSettings.PreviewRoomCenterX, _viewportSettings.BaseSpaceSize);
         _hasArea = true;
         Relayout();
     }
@@ -186,7 +192,7 @@ public sealed class BackgroundStage : MonoBehaviour
             if (minY != float.MaxValue)
             {
                 Vector3 pos = _instance.transform.position;
-                pos.x += _area.center.x - (minX + maxX) * 0.5f;
+                pos.x += _roomCenterWorldX - (minX + maxX) * 0.5f;
                 pos.y += _area.yMin - minY;
                 _instance.transform.position = pos;
             }

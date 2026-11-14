@@ -100,7 +100,7 @@ public sealed class ShopSystem : MonoBehaviour
     public IReadOnlyList<PlacedDecorationData> Placed => _inventory.placed;
 
     /// <summary>
-    /// 장식을 사서 spot 자리(가로 위치와 지면 위 높이, <see cref="DecorationSpot"/>)에 놓는다. 설치 모드에서 자리를 확정한 순간에 부른다.
+    /// 장식을 사서 spot 자리(방 가운데에서 잰 가로 거리와 지면 위 높이, <see cref="DecorationSpot"/>)에 놓는다. 설치 모드에서 자리를 확정한 순간에 부른다.
     /// 받은 값을 그대로 적는다 — 장식 종류(바닥/자유)는 모른다. 바닥 장식의 높이는 읽는 쪽(바인더)이 0으로 정리한다.
     /// 하트 차감, 개수 증가, 놓인 목록 추가, 저장을 한 번에 하고 마지막에 <see cref="OwnedChanged"/>를 울린다 —
     /// 지불과 인도가 함께 파일에 남아야 거래가 성립한다. 잔액이 모자라면 아무것도 바꾸지 않고 false.
@@ -115,10 +115,33 @@ public sealed class ShopSystem : MonoBehaviour
         }
 
         _inventory.ownedCounts[item.id] = GetCount(item.id) + 1;
-        _inventory.placed.Add(new PlacedDecorationData { itemId = item.id, x = spot.BaseX, elevation = spot.ElevationPx });
+        _inventory.placed.Add(new PlacedDecorationData { itemId = item.id, xFromRoomCenter = spot.XFromRoomCenterPx, elevation = spot.ElevationPx });
         Save();
         OwnedChanged?.Invoke();
         return true;
+    }
+
+    /// <summary>
+    /// 가로 위치가 옛 절대 위치로만 남은 항목(<see cref="PlacedDecorationData.IsLegacyX"/>)을 방 가운데 기준으로 한 번 바꾼다.
+    /// 업데이트 뒤 뷰포트가 처음 준비될 때 바인더가 그 순간의 방 가운데(roomCenterBaseX, 베이스 공간 px)로 부른다 —
+    /// 그 직전까지 장식은 절대 위치에, 배경은 그 순간의 방 가운데(=그때 적용된 뷰포트 가운데)에 그려졌으므로 화면이 그대로다.
+    /// 이 시스템은 뷰포트를 모르고 숫자 하나만 받는다. 바꾼 것이 있으면 저장하고 <see cref="OwnedChanged"/>를 울린다.
+    /// </summary>
+    public void ConvertLegacyAbsoluteX(float roomCenterBaseX)
+    {
+        bool changed = false;
+        for (int i = 0; i < _inventory.placed.Count; i++)
+        {
+            PlacedDecorationData placed = _inventory.placed[i];
+            if (!placed.IsLegacyX) continue;
+
+            placed.xFromRoomCenter = placed.legacyAbsoluteX - roomCenterBaseX;
+            changed = true;
+        }
+        if (!changed) return;
+
+        Save();
+        OwnedChanged?.Invoke();
     }
 
     /// <summary>
@@ -163,14 +186,14 @@ public sealed class ShopSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// 놓인 목록의 칸 번호 placedIndex에 있는 장식을 spot 자리(가로 위치와 지면 위 높이)로 옮긴다. 이동 모드에서 새 자리를 확정한 순간에 부른다.
+    /// 놓인 목록의 칸 번호 placedIndex에 있는 장식을 spot 자리(방 가운데에서 잰 가로 거리와 지면 위 높이)로 옮긴다. 이동 모드에서 새 자리를 확정한 순간에 부른다.
     /// 저장하고 <see cref="OwnedChanged"/>를 울린다. 범위 밖이면 아무것도 바꾸지 않고 false.
     /// </summary>
     public bool MovePlacedAt(int placedIndex, DecorationSpot spot)
     {
         if (placedIndex < 0 || placedIndex >= _inventory.placed.Count) return false;
 
-        _inventory.placed[placedIndex].x = spot.BaseX;
+        _inventory.placed[placedIndex].xFromRoomCenter = spot.XFromRoomCenterPx;
         _inventory.placed[placedIndex].elevation = spot.ElevationPx;
         Save();
         OwnedChanged?.Invoke();
@@ -185,7 +208,7 @@ public sealed class ShopSystem : MonoBehaviour
     {
         if (GetUnplacedCount(id) <= 0) return false;
 
-        _inventory.placed.Add(new PlacedDecorationData { itemId = id, x = spot.BaseX, elevation = spot.ElevationPx });
+        _inventory.placed.Add(new PlacedDecorationData { itemId = id, xFromRoomCenter = spot.XFromRoomCenterPx, elevation = spot.ElevationPx });
         Save();
         OwnedChanged?.Invoke();
         return true;

@@ -25,6 +25,13 @@ using UnityEngine;
 /// 미저장:      편집은 [완료]로 나오면 조정한 사각형을 화면에 적용하되 저장하지 않는다(EndEditKeepPreview).
 ///              미저장 뷰포트로 들고 있다가, 그래픽 탭의 [저장]이 파일에 남기고(Commit)
 ///              미저장 확인 팝업이 버려 저장한 뷰포트로 되돌린다(DiscardPendingViewport).
+/// 방 가운데:   뷰포트와 별도로 드는 가로 기준점(베이스 공간 px, RoomCenterX). 배경 그림의 가로 가운데와 놓인 장식의 가로 위치가
+///              이것을 기준으로 놓인다. **뷰포트를 통째로 옮길 때(MovePreviewViewport)만 같은 만큼 따라 움직이고**, 변을 끌어 크기를
+///              바꾸거나 줌·창 다시 맞추기로 적용값이 잘릴 때는 그대로다 — 크기를 바꾸면 방은 제자리에 있고 보이는 범위만 바뀌게 하려는 것이다
+///              (2026-11-14 수정요청 시트 4행 후속, .claude/rules/unity/viewport-coordinates.md). 사각형만으로는 "옮겼다"와 "한쪽 변을 끌었다"를
+///              가를 수 없어 핸들이 옮김 여부를 메서드로 알린다. 뷰포트와 같은 미저장·저장·버리기를 타고, 미저장 판정에도 든다.
+///              저장한 방 값이 없으면(옛 파일·파일 없음) Start가 그 순간 적용값의 가운데로 정해 곧바로 저장하게 한다.
+///              이벤트를 울릴 때 RoomCenterX/PreviewRoomCenterX는 늘 이미 새 값이다 — 소비자는 이벤트 때 이 속성을 읽는다.
 ///
 /// 이 모델을 고른 이유는 Docs/Development/WindowViewportUIArchitecture.md.
 ///
@@ -59,7 +66,13 @@ public class ViewportScreenSettings : MonoBehaviour
     private RectInt _visibleRect;              // 카메라가 비추는 베이스 공간의 오른쪽 아래 부분
     private RectInt _previewViewport;
     private RectInt _pendingViewport;          // [완료]로 나왔지만 아직 [저장]하지 않은 뷰포트. _viewport처럼 보이는 영역보다 클 수 있다
-    private bool _hasPendingViewport;
+    private bool _hasPendingViewport;          // 미저장 뷰포트 또는 미저장 방 가운데가 있는가 — 둘이 플래그 하나를 함께 쓴다(방만 바뀐 [저장]도 빠지지 않게)
+
+    // 방 가운데(베이스 공간 px). 뷰포트의 저장·미저장·프리뷰와 짝을 이룬다.
+    private float _roomCenterX;
+    private float _pendingRoomCenterX;
+    private float _previewRoomCenterX;
+    private bool _hasRoomCenterX;              // 저장한 방 값을 받았거나 Start가 정했는가
     private RectInt _baseSpaceScreenRect;     // 작업 영역을 스크린 좌표(화면 px, Y 아래)로 표현한 것 — 창 배치용
     private Vector2Int _baseSpaceSize;         // 베이스 공간 크기(마스터 캔버스 기준 px) — 폭은 항상 MasterCanvasWidthPx
     private bool _isEditing;
@@ -89,7 +102,13 @@ public class ViewportScreenSettings : MonoBehaviour
 
     public bool IsEditing => _isEditing;
 
-    /// <summary>조정했지만 아직 저장하지 않은 뷰포트가 있는가. 설정 그래픽 탭의 미저장 판정에 들어간다.</summary>
+    /// <summary>지금 적용된 방 가운데(베이스 공간 px). 저장하지 않은 값이 있으면 그것, 없으면 저장한 값이다. 배경·장식의 가로 기준.</summary>
+    public float RoomCenterX => _hasPendingViewport ? _pendingRoomCenterX : _roomCenterX;
+
+    /// <summary>편집 중 프리뷰 방 가운데. 편집 중이 아니면 RoomCenterX와 동일 — PreviewViewport와 같은 짝.</summary>
+    public float PreviewRoomCenterX => _isEditing ? _previewRoomCenterX : RoomCenterX;
+
+    /// <summary>조정했지만 아직 저장하지 않은 뷰포트(또는 방 가운데)가 있는가. 설정 그래픽 탭의 미저장 판정에 들어간다.</summary>
     public bool HasPendingViewport => _hasPendingViewport;
 
     /// <summary>초기 적용 완료 여부. false 동안 EnterEdit/ReadjustWindow는 거부된다 — UI는 이걸로 버튼을 잠글 것.</summary>
@@ -103,9 +122,11 @@ public class ViewportScreenSettings : MonoBehaviour
     /// 캐릭터·구름은 듣지 않는다 — 끄는 동안 매 프레임 재배치하지 않고, 편집이 끝날 때의 ViewportConfirmed로 옮긴다.</summary>
     public event Action<RectInt> PreviewChanged;
 
-    /// <summary>저장 확정 — ViewportSaveBinder가 구독해 영속화하는 지점.
-    /// 사용자가 설정 그래픽 탭에서 명시적으로 저장했을 때만 발행한다. 클램프로 값이 줄어든 것은
-    /// 사용자의 뜻이 아니므로 발행하지 않는다 — 작은 화면에 한 번 열었다고 설정이 깎이면 안 된다.</summary>
+    /// <summary>저장 확정 — ViewportSaveBinder가 구독해 영속화하는 지점. 실린 값은 사용자가 고른 뷰포트이고, 방 가운데는
+    /// 울릴 때 이미 <see cref="RoomCenterX"/>에 들어 있다.
+    /// 사용자가 설정 그래픽 탭에서 명시적으로 저장했을 때와, 방 시작값을 정한 실행(옛 파일·파일 없음)에 한 번 발행한다.
+    /// 그 한 번에 실린 사각형은 사용자가 고른 값이 있었으면 그 값, 기본값으로 채웠으면 크기 0("기본 뷰포트를 쓴다")이다.
+    /// 클램프로 값이 줄어든 것은 사용자의 뜻이 아니므로 발행하지 않는다 — 작은 화면에 한 번 열었다고 설정이 깎이면 안 된다.</summary>
     public event Action<RectInt> ViewportSaved;
 
     /// <summary>편집 모드 진입(true)/이탈(false) — 편집 UI 표시 토글 지점.</summary>
@@ -153,10 +174,25 @@ public class ViewportScreenSettings : MonoBehaviour
 
         // 크기 0 = "베이스 공간 전체" 기본값 (§2.1.1 뷰포트 기본값).
         // 저장된 값이 Awake에 주입돼 있으면(ViewportSaveBinder) 그 값이 살아남는다.
+        bool usedDefaultViewport = false;
         if (_viewport.width <= 0 || _viewport.height <= 0)
+        {
             _viewport = new RectInt(0, 0, _baseSpaceSize.x, _baseSpaceSize.y);
+            usedDefaultViewport = true;
+        }
 
         RefreshEffectiveViewport();
+
+        // 저장한 방 값이 없으면(옛 파일·파일 없음) 지금 적용된 뷰포트의 가운데로 정한다 — 업데이트 전에는 배경이 그 자리에 놓였으므로
+        // 화면이 그대로다. 그 값은 줌·모니터에 따라 달라지므로 곧바로 저장해 고정한다. 기본값으로 채운 뷰포트는 크기 0으로 넘겨,
+        // 기본 뷰포트가 지금처럼 실행할 때마다 그 순간의 베이스 공간 전체를 따르게 둔다.
+        if (!_hasRoomCenterX)
+        {
+            _roomCenterX = _effectiveViewport.xMin + _effectiveViewport.width * 0.5f;
+            _hasRoomCenterX = true;
+            ViewportSaved?.Invoke(usedDefaultViewport ? new RectInt(0, 0, 0, 0) : _viewport);
+        }
+
         _ready = true;
         PublishViewportConfirmed();
     }
@@ -197,6 +233,19 @@ public class ViewportScreenSettings : MonoBehaviour
         if (_isEditing) return;
 
         PublishViewportConfirmed();
+    }
+
+    /// <summary>저장한 방 가운데(베이스 공간 px)를 넣는다 — ViewportSaveBinder의 로드 전용 입구.
+    /// ready 전에만 받는다. 받지 않았으면 Start가 정한다(옛 파일·파일 없음). ready 뒤 호출은 경고 후 무시한다.</summary>
+    public void SetRoomCenterX(float roomCenterX)
+    {
+        if (_ready)
+        {
+            Debug.LogWarning("[ViewportScreenSettings] 초기화 뒤 SetRoomCenterX 호출 — 무시. 로드 때만 부르세요.");
+            return;
+        }
+        _roomCenterX = roomCenterX;
+        _hasRoomCenterX = true;
     }
 
     /// <summary>작업 영역 px(옛 단위) 뷰포트를 설정한다. 베이스 px로 환산해 SetViewport와 같은 경로를 탄다.
@@ -302,6 +351,7 @@ public class ViewportScreenSettings : MonoBehaviour
         // 지금 화면에 적용된 뷰포트에서 시작한다. 저장하지 않은 조정이 있으면 그것이 적용돼 있으므로,
         // [완료] 뒤 다시 [조정]을 눌러도 손댄 것이 남아 있다.
         _previewViewport = _effectiveViewport;
+        _previewRoomCenterX = RoomCenterX;
 
         if (_windowManager != null)
         {
@@ -315,12 +365,27 @@ public class ViewportScreenSettings : MonoBehaviour
         PreviewChanged?.Invoke(_previewViewport);
     }
 
-    /// <summary>편집 중 프리뷰 갱신(핸들 드래그·슬라이더). 이벤트만 발행한다.
+    /// <summary>편집 중 프리뷰 갱신 — 변·모서리를 끌어 크기를 바꿀 때. 방 가운데는 그대로다. 이벤트만 발행한다.
     /// 핸들은 버튼을 누르고 있는 동안 매 프레임 부르므로, 값이 바뀌지 않았으면 울리지 않는다 — 듣는 배경·장식이 헛돌지 않게.</summary>
     public void SetPreviewViewport(RectInt viewport)
     {
         if (!_isEditing) return;
+        ApplyPreview(ClampToVisible(viewport));
+    }
+
+    /// <summary>편집 중 프리뷰 갱신 — 뷰포트를 통째로 옮길 때. 맞춘 뒤 실제로 옮겨진 가로 거리만큼 방 가운데도 함께 옮긴다.
+    /// 보이는 영역 끝에 걸려 창이 안 움직이면 방도 안 움직인다.</summary>
+    public void MovePreviewViewport(RectInt viewport)
+    {
+        if (!_isEditing) return;
         RectInt clamped = ClampToVisible(viewport);
+        _previewRoomCenterX += clamped.x - _previewViewport.x;
+        ApplyPreview(clamped);
+    }
+
+    // 두 프리뷰 입구의 공통 단계. 사각형이 같으면 옮긴 거리도 0이라 방만 바뀌고 신호가 빠지는 일은 없다.
+    private void ApplyPreview(RectInt clamped)
+    {
         if (clamped.Equals(_previewViewport)) return;
         _previewViewport = clamped;
         PreviewChanged?.Invoke(_previewViewport);
@@ -335,9 +400,12 @@ public class ViewportScreenSettings : MonoBehaviour
     {
         if (!_isEditing) return;
         _pendingViewport = _previewViewport;
+        _pendingRoomCenterX = _previewRoomCenterX;
         // 손댔다가 저장한 값으로 돌려 놓았으면 미저장이 아니다. 지금 적용된 값(_effectiveViewport)은 앞선 미저장 값일 수 있어
         // 그것과 비교하면, 다시 [조정]해 손대지 않고 [완료]할 때 앞서 손댄 것이 미저장으로 잡히지 않는다.
-        _hasPendingViewport = !_previewViewport.Equals(ClampToVisible(_viewport));
+        // 방 가운데도 함께 본다 — 옮긴 뒤 변을 끌어 사각형만 원래대로 돌려 놓으면 방만 바뀌어 있다.
+        // 방은 정수 거리만 더해지고 시작값은 x.5 단위라 float를 그대로 비교해도 된다.
+        _hasPendingViewport = !_previewViewport.Equals(ClampToVisible(_viewport)) || _previewRoomCenterX != _roomCenterX;
         RefreshEffectiveViewport();
         ExitEdit();
     }
@@ -350,7 +418,9 @@ public class ViewportScreenSettings : MonoBehaviour
     {
         if (_hasPendingViewport)
         {
+            // 방 가운데를 먼저 바꾼다 — 아래 신호를 듣는 저장 바인더·배경·장식이 RoomCenterX로 새 값을 읽는다.
             _viewport = _pendingViewport;
+            _roomCenterX = _pendingRoomCenterX;
             _hasPendingViewport = false;
             ViewportSaved?.Invoke(_viewport);
             RefreshEffectiveViewport();

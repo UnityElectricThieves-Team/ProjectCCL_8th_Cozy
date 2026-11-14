@@ -28,8 +28,9 @@ public readonly struct PlacedDecoration
 }
 
 /// <summary>
-/// 화면에 놓인 장식들을 그린다. 받은 목록대로 장식 프리팹을 만들어, 그림의 가로 중앙을 저장된 x에,
-/// 그림의 아래 끝을 지면(적용된 뷰포트의 아래 변, 편집 중이면 프리뷰의 아래 변) + 저장 높이에 맞춘다.
+/// 화면에 놓인 장식들을 그린다. 받은 목록대로 장식 프리팹을 만들어, 그림의 가로 중앙을 방 가운데 + 저장 거리에,
+/// 그림의 아래 끝을 지면 + 저장 높이에 맞춘다. 기준은 적용된 뷰포트·방 가운데이고, 편집 중이면 프리뷰다 — 배경(<see cref="BackgroundStage"/>)과
+/// 같은 속성(<see cref="ViewportScreenSettings.PreviewViewport"/>·<see cref="ViewportScreenSettings.PreviewRoomCenterX"/>)을 읽어 함께 움직인다.
 /// 바닥 장식은 바인더가 높이 0을 주므로 지면에 붙는다. 이 레이어는 종류(바닥/자유)를 보지 않는다.
 ///
 /// 이 컴포넌트는 <b>상점을 모른다</b> — 무엇을 어디에 놓을지는 밖에서 <see cref="SetDecorations"/>로 넣어 준다
@@ -77,7 +78,8 @@ public sealed class DecorationLayer : MonoBehaviour
     private ViewportScreenSettings _viewportSettings;
     private BaseSpaceCameraFitter _cameraFitter;
 
-    private Rect _area;      // 지금 따르는 뷰포트(적용된 뷰포트 또는 편집 프리뷰)의 월드 사각형
+    private Rect _area;      // 지금 따르는 뷰포트(적용된 뷰포트 또는 편집 프리뷰)의 월드 사각형 — 지면(아래 변)
+    private float _roomCenterWorldX; // 지금 따르는 방 가운데의 월드 x — 가로 기준
     private bool _hasArea;
 
     private void Start()
@@ -238,6 +240,8 @@ public sealed class DecorationLayer : MonoBehaviour
     private void OnViewportChanged(RectInt viewportPx)
     {
         _area = _cameraFitter.BaseRectToWorld(viewportPx, _viewportSettings.BaseSpaceSize);
+        // 방 가운데는 위치라 앵커를 거친다. 신호가 울릴 때는 이미 새 값이다. 배경과 같은 속성을 읽어야 함께 움직인다.
+        _roomCenterWorldX = _cameraFitter.BaseXToWorldX(_viewportSettings.PreviewRoomCenterX, _viewportSettings.BaseSpaceSize);
         _hasArea = true;
         Relayout();
     }
@@ -301,10 +305,12 @@ public sealed class DecorationLayer : MonoBehaviour
             Vector3 center = renderer.transform.TransformPoint(local.center);
             Vector3 bottom = renderer.transform.TransformPoint(new Vector3(local.center.x, local.min.y, 0f));
 
-            // 높이는 위치가 아니라 지면에서 잰 길이라 앵커를 거치지 않고 PPU로만 나눈다(viewport-coordinates.md).
+            // 저장 거리·높이는 길이라 PPU로만 나눈다. 기준점(방 가운데·지면)만 위치라 앵커를 거쳐 월드로 옮겨 두었다(viewport-coordinates.md).
+            // 역식은 배치 컨트롤러의 UpdateGhost에 있다.
             DecorationSpot spot = _decorations[i].Spot;
-            float targetX = _cameraFitter.BaseXToWorldX(spot.BaseX, _viewportSettings.BaseSpaceSize);
-            float targetBottomY = _area.yMin + spot.ElevationPx / _cameraFitter.PixelsPerUnit;
+            float ppu = _cameraFitter.PixelsPerUnit;
+            float targetX = _roomCenterWorldX + spot.XFromRoomCenterPx / ppu;
+            float targetBottomY = _area.yMin + spot.ElevationPx / ppu;
             Transform root = FindInstanceRoot(renderer.transform);
             Vector3 pos = root.position;
             pos.x += targetX - center.x;
