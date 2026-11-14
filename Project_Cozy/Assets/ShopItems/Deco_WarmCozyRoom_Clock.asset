@@ -17,4 +17,4 @@ MonoBehaviour:
   price: 10
   backgroundPrefab: {fileID: 0}
   decorationPrefab: {fileID: 373260152833561116, guid: 61e5bccca625ed34faa3e518fa7117b8, type: 3}
-  placementKind: 0
+  placementKind: 1
