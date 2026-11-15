@@ -33,11 +33,11 @@
 
 ## 2. 씬 관리 전략
 
-**`GameScene`(메인 씬)의 오브젝트 구조는 최대한 얇게 씁니다.** UI와 시스템은 프리팹으로 빼서 씬에는 인스턴스만 남깁니다. 목적은 여러 작업을 병렬로 진행할 수 있게 하는 것입니다 — `.unity`는 자동 머지가 안 되므로 씬이 두꺼울수록 동시 작업이 손으로 푸는 충돌로 이어집니다.
+**`GameScene`(메인 씬)의 오브젝트 구조는 최대한 얇게 씁니다.** UI와 시스템은 프리팹으로 빼서 씬에는 인스턴스만 남깁니다. 목적은 여러 작업을 병렬로 진행할 수 있게 하는 것입니다 — `.unity`는 자동 머지가 안 되므로 씬이 두꺼울수록 동시 작업이 손으로 푸는 충돌로 이어집니다. 지금 GameScene의 UIRoot·EventSystem·매니저 오브젝트는 아직 씬에 직접 만들어져 있습니다. 새 UI와 시스템은 프리팹으로 만들고, 씬에 직접 만드는 오브젝트를 늘리지 않습니다.
 
-**프리팹으로 옮기는 것만으로는 부족합니다. 씬 인스턴스에 override를 남기지 않아야 효과가 있습니다.** 지금 씬은 대부분이 UI이고 프리팹화된 패널들조차 override가 씬에 눌러앉아 있어서, 앵커 하나를 손볼 때마다 씬 파일이 더러워집니다. 값을 고칠 일이 있으면 씬 인스턴스가 아니라 프리팹에서 고칩니다.
+**프리팹으로 옮기는 것만으로는 부족합니다. 씬 인스턴스에 override를 남기지 않아야 효과가 있습니다.** 지금 씬은 대부분이 UI이고 프리팹화된 패널들조차 override가 씬에 눌러앉아 있어서, 앵커 하나를 손볼 때마다 씬 파일이 더러워집니다. 값을 고칠 일이 있으면 씬 인스턴스가 아니라 프리팹에서 고칩니다. 다만 씬 diff의 override가 모두 정리 대상은 아닙니다. 레이아웃이 크기를 정하는 오브젝트의 0값 override는 Unity가 저장할 때마다 다시 쓰는 것이라 정상이고, 정리할 것은 지워진 오브젝트를 가리키는 Unused overrides입니다. 구분법은 [.claude/rules/unity/ui-panels.md](.claude/rules/unity/ui-panels.md)의 "씬의 패널 인스턴스에 레이아웃 값이 기록되는 것은 정상이다" 절에 있습니다.
 
-현재 씬 상태의 실측치와 이관 순서는 `Docs/Development/`에 있습니다. 씬 파일을 직접 다룰 때의 규칙은 [.claude/rules/unity/scenes.md](.claude/rules/unity/scenes.md), 누가 어떤 Unity 파일을 고치는지는 [.claude/rules/unity/asset-editing.md](.claude/rules/unity/asset-editing.md), 프리팹을 어디에 둘지는 [.claude/rules/unity/prefabs.md](.claude/rules/unity/prefabs.md)를 봅니다.
+씬 파일을 직접 다룰 때의 규칙은 [.claude/rules/unity/scenes.md](.claude/rules/unity/scenes.md), 누가 어떤 Unity 파일을 고치는지는 [.claude/rules/unity/asset-editing.md](.claude/rules/unity/asset-editing.md), 프리팹을 어디에 둘지는 [.claude/rules/unity/prefabs.md](.claude/rules/unity/prefabs.md)를 봅니다.
 
 **새 캐릭터 프리팹은 루트가 곧 발이어야 합니다** — Visual 자식을 올려 스프라이트 아래 끝을 루트 원점에 맞춥니다. 이유와 나머지 지면 규약은 [.claude/rules/unity/character-ground.md](.claude/rules/unity/character-ground.md)에 있는데, 그 파일은 기존 파일을 열 때만 로드되어 *새로 만드는* 순간에는 발화하지 않으므로 여기 한 줄 둡니다.
 
