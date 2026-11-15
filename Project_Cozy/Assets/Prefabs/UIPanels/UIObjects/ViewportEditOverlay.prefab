@@ -525,6 +525,6 @@ MonoBehaviour:
   _edgeGrabPx: 18
   _edgeInsetPx: 12
   _accent: {r: 1, g: 0.58, b: 0.1, a: 0.95}
-  _dim: {r: 0.05, g: 0.07, b: 0.1, a: 0.55}
-  _editBackdropAlpha: 0.45
+  _dim: {r: 0.05, g: 0.07, b: 0.1, a: 0.35}
+  _editBackdropAlpha: 0.25
   _cornerHandlePx: 28
