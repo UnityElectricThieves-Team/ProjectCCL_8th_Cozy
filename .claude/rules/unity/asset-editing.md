@@ -43,7 +43,7 @@ Claude가 직접 고쳐도 되는 것과 사용자가 Unity에서 고칠 것을 
 ## 1등급: 그냥 고칩니다
 
 - 대상: C# 코드와 코드 안의 수치(`GameBalance` 등), 문서, `.claude/` 규칙, `Localization/Strings.json`.
-- 내용 규약은 그대로 지킵니다. `Docs/Planning/`은 고치지 않습니다(루트 CLAUDE.md §1). Strings.json의 문장은 [localization.md](localization.md)대로 기획(Figma)에 확인한 뒤 고칩니다. `GameBalance` 출시 값의 정본도 Figma입니다.
+- 내용 규약은 그대로 지킵니다. `Docs/Planning/`은 고치지 않습니다(루트 AI_INSTRUCTIONS.md §1). Strings.json의 문장은 [localization.md](localization.md)대로 기획(Figma)에 확인한 뒤 고칩니다. `GameBalance` 출시 값의 정본도 Figma입니다.
 
 ### C#에서 저장·에셋이 기대는 것을 바꿀 때
 
@@ -114,7 +114,7 @@ ProjectSettings의 게임 버전 한 줄은 사용자가 "버전을 올리자"�
 
 - **1등급 파일**(C#, 문서, Strings.json 등)은 Claude가 `.meta`와 함께 옮깁니다. 경로 문자열로 기대는 곳은 grep으로 찾아 함께 고칩니다. C# 파일은 Editor·Plugins 경계를 넘기지 않습니다.
 - **Unity 에셋**(프리팹, ScriptableObject, 그림·오디오, 씬, Animator, 설정 에셋 등, 그 에셋이 든 폴더 포함)은 사용자가 Unity의 Project 창에서 옮기거나 이름을 바꿉니다. Unity가 `.meta`와 빌드 목록을 함께 챙기기 때문입니다.
-  - 옮기기 전에 Claude가 그 경로·파일 이름·폴더 이름에 기대는 곳을 grep으로 찾아 알립니다. Unity에서 옮겨도 이런 문자열은 따라오지 않습니다. 대상은 코드, `.claude/rules`의 paths와 CLAUDE.md 링크(경로가 바뀌면 그 규칙이 오류 없이 더는 로드되지 않습니다), ProjectSettings의 경로 문자열(예: Preset Manager의 BGM 폴더 필터 — 고치는 일은 3등급이라 값만 안내)입니다.
+  - 옮기기 전에 Claude가 그 경로·파일 이름·폴더 이름에 기대는 곳을 grep으로 찾아 알립니다. Unity에서 옮겨도 이런 문자열은 따라오지 않습니다. 대상은 코드, `.claude/rules`의 paths와 `AI_INSTRUCTIONS.md`·`AGENTS.md`·CLAUDE.md 링크(경로가 바뀌면 그 규칙이 오류 없이 더는 로드되지 않습니다), ProjectSettings의 경로 문자열(예: Preset Manager의 BGM 폴더 필터 — 고치는 일은 3등급이라 값만 안내)입니다.
   - 예: 상품 생성 메뉴는 장식·배경 폴더와 상품 목록 에셋의 경로, 폴더 안 파일 이름을 상수로 들고 있습니다. 목록 에셋을 옮기면 메뉴가 옛 경로에 두 번째 목록을 새로 만들고, 씬은 옮긴 목록을 계속 가리켜, 이후 새 상품이 상점에서 조용히 빠집니다.
   - 기대는 코드는 1등급이라 Claude가 함께 고치고, 저장 키가 바뀌는 경우가 생기면 위의 "살릴지 버릴지"를 따릅니다.
   - 오디오를 BGM 폴더로 옮겨도 Streaming 프리셋은 처음 임포트할 때만 걸립니다(audio.md).

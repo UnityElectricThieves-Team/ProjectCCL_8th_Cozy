@@ -1,6 +1,6 @@
 # Figma 기획 읽는 법
 
-기획의 정답은 Figma에 있습니다 (루트 [CLAUDE.md](../../CLAUDE.md) §1). 이 문서는 *왜 Figma가 정본인지*가 아니라, **그걸 어떤 도구로 어떻게 읽는지**만 다룹니다.
+기획의 정답은 Figma에 있습니다 (루트 [AI_INSTRUCTIONS.md](../../AI_INSTRUCTIONS.md) §1). 이 문서는 *왜 Figma가 정본인지*가 아니라, **그걸 어떤 도구로 어떻게 읽는지**만 다룹니다.
 
 ## 대상 파일
 

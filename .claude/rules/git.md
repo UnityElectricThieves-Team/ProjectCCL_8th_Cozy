@@ -34,7 +34,7 @@ Claude 세션을 여러 개 동시에 돌릴 때는 **세션마다 워크트리�
 | 변경 종류 | 시작점 | 흐름 |
 |---|---|---|
 | 코드 (기능/리팩터) | `develop`에서 직접, 또는 `feature/*`로 격리 | (`feature/*` →) `develop` → `main` |
-| 개발 문서 (`Docs/Development/`, `CLAUDE.md`, `.claude/rules/`) | 코드와 같이 `develop` | `develop` → `main` |
+| 개발 문서 (`Docs/Development/`, `AI_INSTRUCTIONS.md`, `CLAUDE.md`, `AGENTS.md`, `.claude/rules/`) | 코드와 같이 `develop` | `develop` → `main` |
 | 급한 수정 | `hotfix/*` | 상황에 맞게 빠르게 |
 
 **기획·디자인 문서는 저장소에서 다루지 않아요.** 기획은 Figma와 Notion에서 작업하고 그쪽이 정답이에요.
