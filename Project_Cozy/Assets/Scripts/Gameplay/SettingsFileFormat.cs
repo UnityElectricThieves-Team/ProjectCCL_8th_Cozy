@@ -66,7 +66,7 @@ public class SettingsFileFormat
     public bool administratorMode = false;
     public bool girlTransformBanned = false;
 
-    // ===== 소리 탭. 볼륨은 0~1 슬라이더 값 그대로(데시벨 변환은 BgmPlayer가 한다). =====
+    // ===== 소리 탭. 볼륨은 0~1 슬라이더 값 그대로(데시벨 변환은 AudioVolumeApplier가 한다). =====
     public float masterVolume = 1f;
     public float musicVolume = 1f;
     public float sfxVolume = 1f;

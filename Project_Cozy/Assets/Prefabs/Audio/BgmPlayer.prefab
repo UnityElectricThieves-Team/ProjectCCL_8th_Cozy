@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1913016260429827475}
   - component: {fileID: 5925050937364451949}
   - component: {fileID: 1472954853330071658}
+  - component: {fileID: 7095511270088282697}
   m_Layer: 0
   m_Name: BgmPlayer
   m_TagString: Untagged
@@ -142,5 +143,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a451eb35cbd9ae45a5bdec56dc49c66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BgmPlayer
-  _mixer: {fileID: 24100000, guid: c9a6739e81d477c4c842869cdded2a9c, type: 2}
   _catalog: {fileID: 11400000, guid: 1261dd49c983ffa45996fb3688387b1c, type: 2}
+--- !u!114 &7095511270088282697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3691723648561765358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46bd9dcf7eca09f49958b009412e802f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioVolumeApplier
+  _mixer: {fileID: 24100000, guid: c9a6739e81d477c4c842869cdded2a9c, type: 2}
