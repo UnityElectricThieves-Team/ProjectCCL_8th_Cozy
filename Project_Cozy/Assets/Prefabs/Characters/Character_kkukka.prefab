@@ -12,8 +12,6 @@ GameObject:
   - component: {fileID: 3006926096313057090}
   - component: {fileID: 6641026816306123103}
   - component: {fileID: 5278008911444764584}
-  - component: {fileID: 6159019188825564112}
-  - component: {fileID: 8227738767149179167}
   m_Layer: 0
   m_Name: Character_kkukka
   m_TagString: Untagged
@@ -154,34 +152,3 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.32, y: 0.32}
   m_Direction: 0
---- !u!114 &6159019188825564112
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3665602860445646210}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fce9be83a49d4f2baefa56e1a35bb3de, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterAffinity2D
-  _animator: {fileID: 6641026816306123103}
-  _spriteRenderer: {fileID: 3006926096313057090}
-  _visualStateParameter: VisualState
-  _walkSpeed: 0.2
-  _idleDurationRange: {x: 1, y: 2}
-  _walkDurationRange: {x: 3, y: 5}
---- !u!114 &8227738767149179167
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3665602860445646210}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d3a9c2e1b0f4a8e9c5d7123456789ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InputInteractionTestProbe
-  logPrefix: Test

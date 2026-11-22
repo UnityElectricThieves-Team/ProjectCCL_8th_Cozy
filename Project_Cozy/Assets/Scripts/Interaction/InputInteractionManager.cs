@@ -22,7 +22,6 @@ public class InputInteractionManager : MonoBehaviour
     [SerializeField] private Camera targetCamera;
     [SerializeField] private LayerMask interactableLayerMask = ~0;
     [SerializeField] private int maxOverlapHits = 5;
-    [SerializeField] private bool debugLogs;
     [Tooltip("When enabled, skips Physics2D overlap while the mouse pixel position is unchanged and no mouse button was pressed this frame. Turn off if interactables can move under a stationary cursor.")]
     [SerializeField] private bool _skipRescanWhenPointerUnchanged = true;
     [Tooltip("호버 좌표 소스. 빌드의 투명 클릭-통과 창에선 Mouse.current가 freeze되므로 OS 커서 기반 좌표를 쓴다. 비우면 Awake에서 자동 탐색, 없으면 Mouse.current 폴백.")]
@@ -168,11 +167,6 @@ public class InputInteractionManager : MonoBehaviour
             currentHover?.OnHoverExit();
             currentHover = nextHover;
             currentHover?.OnHoverEnter();
-
-            if (debugLogs)
-            {
-                Debug.Log($"[InputInteractionManager] Hover target changed: {(currentHover == null ? "none" : currentHover.ToString())}");
-            }
         }
 
         currentClickable = nextClickable;

@@ -158,11 +158,9 @@ public class ViewportScreenSettings : MonoBehaviour
 
         ApplyScreenLayout();
 
-        // 창 배치가 Screen 크기에 반영되는 것은 다음 프레임이라, 진단 로그는 한 프레임 뒤에 찍는다.
-        // 부팅 1회뿐이라 영구로 둔다 — 해상도·DPI 문제 보고를 받았을 때 Player.log에서 바로 읽는 값이다.
+        // 창 배치가 Screen 크기에 반영되는 것은 다음 프레임이다. 원래는 진단 로그를 찍으려고 둔 한 프레임이지만,
+        // 뒤의 확정 신호가 이 한 프레임 늦게 울리는 데 기대는 곳이 없는지 확인하지 않아 타이밍을 그대로 둔다.
         yield return null;
-        Debug.Log($"[ViewportScreenSettings] 작업 영역 {_baseSpaceScreenRect} / 화면 {Screen.width}x{Screen.height} / " +
-                  $"베이스 공간 {_baseSpaceSize} / 베이스 px당 화면 px {ScreenPxPerBasePx:F4}");
 
         // 작업 영역 px 단위로 들어온 옛 값은 배율을 안 지금 환산한다. 클램프보다 먼저여야 한다 —
         // 클램프 뒤에 환산하면 다른 해상도에서 저장한 값이 베이스 공간을 넘칠 수 있다.

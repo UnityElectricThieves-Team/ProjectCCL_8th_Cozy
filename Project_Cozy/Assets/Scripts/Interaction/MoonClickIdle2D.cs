@@ -92,7 +92,6 @@ public sealed class MoonClickIdle2D : MonoBehaviour, IClickable
     {
         SpawnNextPrefabInList();
         _animator.SetInteger(_stateHash, StateIdle);
-        Debug.Log($"[{name}] Active(1) → Idle(0) (click)", this);
     }
 
     private void SpawnNextPrefabInList()

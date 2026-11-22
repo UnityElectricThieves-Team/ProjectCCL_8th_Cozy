@@ -93,8 +93,6 @@ public abstract class OutFocusLowLevelHook : MonoBehaviour
         _proc = HookCallback; // GC 방지 보관
         _hookThread = new Thread(HookThreadMain) { IsBackground = true, Name = GetType().Name };
         _hookThread.Start();
-#else
-        Debug.Log($"[{GetType().Name}] Editor 모드: LL 훅 스킵 (Editor 자체 입력이 망가지므로)");
 #endif
     }
 
@@ -124,7 +122,6 @@ public abstract class OutFocusLowLevelHook : MonoBehaviour
 
         var module = System.Diagnostics.Process.GetCurrentProcess().MainModule;
         _hookId = SetWindowsHookEx(HookId, _proc, GetModuleHandle(module.ModuleName), 0);
-        Debug.Log($"[{GetType().Name}] LL 훅 등록(전용 스레드). hookId=" + _hookId);
 
         while (GetMessage(out MSG msg, IntPtr.Zero, 0, 0) > 0)
         {
@@ -137,7 +134,6 @@ public abstract class OutFocusLowLevelHook : MonoBehaviour
             UnhookWindowsHookEx(_hookId);
             _hookId = IntPtr.Zero;
         }
-        Debug.Log($"[{GetType().Name}] LL 훅 해제(전용 스레드 종료)");
     }
 #endif
 

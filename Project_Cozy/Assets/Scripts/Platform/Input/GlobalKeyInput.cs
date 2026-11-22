@@ -67,9 +67,6 @@ public class GlobalKeyInput : MonoBehaviour
 #if !UNITY_EDITOR
         _proc   = HookCallback;
         _hookId = SetHook(_proc);
-        Debug.Log("[GlobalKeyInput] LL 훅 등록 완료. hookId=" + _hookId);
-#else
-        Debug.Log("[GlobalKeyInput] Editor 모드: LL 훅 스킵 (Input System 경로는 Editor에서도 동작)");
 #endif
 
         // InputSystem.onAnyButtonPress.Call(action)은 IDisposable을 반환한다.
@@ -107,7 +104,6 @@ public class GlobalKeyInput : MonoBehaviour
         {
             UnhookWindowsHookEx(_hookId);
             _hookId = IntPtr.Zero;
-            Debug.Log("[GlobalKeyInput] 훅 해제 완료");
         }
 #endif
     }

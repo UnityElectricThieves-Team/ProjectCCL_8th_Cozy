@@ -61,9 +61,6 @@ public sealed class StateModule
 
     // 잠드는 무입력 시간(기획 30분)도 GameBalance에 있다. 마지막 입력 시각은 캐릭터마다 들지 않고 UserInputClock 하나가 든다.
 
-    [Header("Debug")]
-    [SerializeField] private bool _logStateChanges = true;
-
     private const float MIN_PHASE_SECONDS = 0.05f;
 
     private BaseCharacterController _owner;
@@ -296,9 +293,6 @@ public sealed class StateModule
         _current = state;
         _current.OnEnter(_stateOwner);
         StateChanged?.Invoke(nextId);
-
-        if (_logStateChanges && _owner != null)
-            Debug.Log($"[StateModule] {_owner.name} → {_current.Name}", _owner);
     }
 
     // 창 밖에서 들어온 입력은 정의상 캐릭터를 향한 것이 아니다 — 언제나 기상 입력이다.

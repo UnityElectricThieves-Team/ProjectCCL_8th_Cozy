@@ -63,9 +63,6 @@ public class WindowManager : MonoBehaviour
     [Tooltip("폴링에 사용할 카메라. 비워두면 Camera.main을 lazy하게 사용.")]
     [SerializeField] private Camera _pollingCamera;
 
-    [Header("Debug")]
-    [SerializeField] private bool _debugLogs;
-
     // ===== 핫존 수치 공개 (시각 안내용) =====
     // 안내 UI(WindowMoveResizeGuide)가 같은 값을 따로 들고 있으면 한쪽만 바뀔 때
     // "보이는 곳 ≠ 잡히는 곳"이 되므로, 핫존의 주인이 값을 읽기 전용으로 노출한다.
@@ -208,15 +205,9 @@ public class WindowManager : MonoBehaviour
         if (_maximizeToWorkArea) StartCoroutine(ApplyMaximizeAfterReady());
 
         bool wantResizable = _resizable && !_maximizeToWorkArea;
-        if (_resizable && _maximizeToWorkArea && _debugLogs)
-            Debug.LogWarning("[WindowManager] resizable + maximizeToWorkArea 동시 ON — resizable 무시");
 
         _sAlwaysOnTopForExitSizeMove = _alwaysOnTop;
         if (wantResizable) InstallWndProc();
-
-        if (_debugLogs) Debug.Log("[WindowManager] 적용 완료");
-#else
-        if (_debugLogs) Debug.Log("[WindowManager] Editor 모드: 모든 Win32 호출 스킵");
 #endif
     }
 
@@ -314,10 +305,7 @@ public class WindowManager : MonoBehaviour
         IntPtr monitor = MonitorFromWindow(_hwnd, MONITOR_DEFAULT_TO_NEAREST);
         MONITORINFO mi = new MONITORINFO { cbSize = Marshal.SizeOf(typeof(MONITORINFO)) };
         if (!GetMonitorInfo(monitor, ref mi))
-        {
-            if (_debugLogs) Debug.LogWarning("[WindowManager] GetMonitorInfo 실패 — maximize 스킵");
             return;
-        }
 
         int x = mi.rcWork.Left;
         int y = mi.rcWork.Top;

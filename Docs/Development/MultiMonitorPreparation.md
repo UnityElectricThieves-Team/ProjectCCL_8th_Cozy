@@ -109,7 +109,6 @@ Platform이 게임 설정을 모르고, Gameplay 적용자가 Platform을 부르
 - `SettingsManager`가 `DefaultExecutionOrder(-100)`의 `Awake`에서 저장값을 읽고, `MonitorApplier.Start`가 첫 `Apply`로
   목표 작업 영역을 넣습니다. `ViewportScreenSettings.Start`는 10프레임 뒤에 첫 배치를 하므로, 처음부터 고른 모니터에
   놓입니다. 순서 숫자를 새로 박지 않았습니다(실행 순서 하드코딩 정리 TODO와 별개).
-- 부팅 진단 로그(`ViewportScreenSettings.Start`)가 작업 영역·화면 크기·베이스 공간·배율을 `Player.log`에 한 번 찍습니다.
 
 ### 2.6 "화면 다시 맞추기"
 
