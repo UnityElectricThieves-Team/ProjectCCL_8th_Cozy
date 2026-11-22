@@ -142,7 +142,6 @@ Platform이 게임 설정을 모르고, Gameplay 적용자가 Platform을 부르
 - `TryGetMonitorRect`는 여전히 호출자가 없습니다. 모니터 rect는 `MonitorList`가 줍니다.
 - `TryGetWindowRect`는 `VerifyWindowRect`가 옮긴 뒤 창 크기를 확인하는 데 씁니다.
 - GameScene의 `WindowManager`는 `_resizable: 0`이라 WndProc가 설치되지 않습니다. 모니터 기능은 WndProc 없이 동작합니다(§5).
-- 옛 `WindowAspectFitter`·`BorderlessWindow`는 같은 HWND를 만지므로 함께 켜지 않습니다.
 
 ### 3.3 ViewportScreenSettings
 

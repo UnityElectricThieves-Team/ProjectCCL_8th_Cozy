@@ -14,12 +14,11 @@ Always-on-Top, borderless + resize, 클릭 투과, 비포커스 키/마우스 �
 ### Window/
 Windows 창의 외형, 입력 통과, 이동·리사이즈를 관리한다.
 
-- `Core/WindowManager.cs` — HWND와 WndProc의 단일 소유자. DWM 투명화, Topmost, 클릭 통과, 영역 적용을 담당. Topmost는 유저 설정이 정한다 — 게임 쪽 적용자(`Gameplay/DesktopIntegrationApplier`)가 `SetTopmost`로 걸고, 인스펙터 값은 그 전까지의 부팅 기본값이다
+- `Core/WindowManager.cs` — HWND와 WndProc의 단일 소유자. 사용 조건: 한 실행에서 하나만, 한 번만 만든다(동시에 둘 두거나 씬을 다시 불러 새로 만들지 않는다) — 창 프로시저 칸이 static이고 설치할 때마다 새 델리게이트를 만든다. DWM 투명화, Topmost, 클릭 통과, 영역 적용을 담당. Topmost는 유저 설정이 정한다 — 게임 쪽 적용자(`Gameplay/DesktopIntegrationApplier`)가 `SetTopmost`로 걸고, 인스펙터 값은 그 전까지의 부팅 기본값이다
 - `Input/WindowsCursorToUnityScreen.cs` — 클릭 통과 중에도 OS 커서를 Unity 화면 좌표로 제공
 - `HitTesting/HitTestCalculator.cs` — 마우스 좌표 → `ResizeHitZone` 판정 (순수 C#, EditMode 테스트 가능)
 - `HitTesting/ResizeHitZone.cs` — Caption 이동 + 8방향 리사이즈 판정값과 Win32 NCHITTEST 매핑
 - `Registry/`와 `Editor/` — 선택적 서비스 등록 데이터와 편집 도구. 현행 핵심 부팅 경로에서는 미사용
-- `Core/BorderlessWindow.cs`, `Input/ClickThroughProbe.cs` — 구 프로토타입, 제거 대기
 
 ### Startup/
 Windows 로그인 시 자동 실행.
@@ -34,17 +33,17 @@ Windows 로그인 시 자동 실행.
 ### Input/
 포커스 상태와 무관한 입력 수집.
 
-- `GlobalKeyInput.cs` — 전역 키 입력 소스. `WH_KEYBOARD_LL` + `InputSystem.onAnyButtonPress`를 단일 이벤트 `KeyPressed(Key)`로 추상화 — 포커스 유무에 따라 두 OS 경로가 상호 배타적으로 fire하지만 소비자는 그 차이를 모름. LL 훅 경로는 keydown마다 보고한다(**자동 반복 포함** — 누른 순간만 알린다는 platform.md 약속을 아직 따르지 않음). 모디파이어/조합키/keyup 미지원(필요 시 KeyEvent 형태로 확장). (이전 명칭: `GlobalKeyboardHook` — `[MovedFrom]`으로 prefab 호환)
-- `OutFocusKeyHook.cs` — 게임 창이 포커스를 잃은 상태에서 들어오는 키 입력만 **static 이벤트** `KeyPressed(Key)`로 방송(소비자는 참조 없이 구독). 누른 순간만 방송하고 자동 반복은 훅이 거른다. `WH_KEYBOARD_LL` 등록 + 메인 스레드에서 `Application.isFocused == false` 게이트. 키 매핑은 `Win32KeyMap`에 위임. *OutFocus 전용* 추상화 — 포커스 무관 통합 소스는 `GlobalKeyInput`.
-- `OutFocusMouseHook.cs` — OutFocus 마우스 버튼 down 3종(left/right/middle)을 **static 이벤트** `ButtonPressed(MouseButton)`로 방송. `WH_MOUSE_LL` 등록 + 동일 isFocused 게이트. 이동·휠·up·xbutton은 다루지 않는다.
+- `GlobalKeyInput.cs` — 전역 키 입력 소스. `WH_KEYBOARD_LL` + `InputSystem.onAnyButtonPress`를 단일 이벤트 `KeyPressed(Key)`로 추상화 — 포커스 유무에 따라 두 OS 경로가 상호 배타적으로 fire하지만 소비자는 그 차이를 모름. LL 훅 경로는 keydown마다 보고한다(**자동 반복 포함** — 누른 순간만 알린다는 platform.md 약속을 아직 따르지 않음). 모디파이어/조합키/keyup 미지원(필요 시 KeyEvent 형태로 확장). (이전 명칭: `GlobalKeyboardHook` — `[MovedFrom]`으로 prefab 호환) 사용 조건: 콜백 보관 칸이 static이다 — 동시에 켜진 인스턴스를 둘 이상 두지 않는다(소비자마다 붙이지 않는다).
+- `OutFocusKeyHook.cs` — 게임 창이 포커스를 잃은 상태에서 들어오는 키 입력만 **static 이벤트** `KeyPressed(Key)`로 방송(소비자는 참조 없이 구독). 누른 순간만 방송하고 자동 반복은 훅이 거른다. `WH_KEYBOARD_LL` 등록 + 메인 스레드에서 `Application.isFocused == false` 게이트. 키 매핑은 `Win32KeyMap`에 위임. *OutFocus 전용* 추상화 — 포커스 무관 통합 소스는 `GlobalKeyInput`. 사용 조건: 실행 중에 컴포넌트나 그 GameObject를 껐다 켜지 않는다 — 끌 때 훅 종료 대기가 시간을 넘기면 옛 훅이 남을 수 있고, 그 뒤 다시 켜면 옛 훅의 칸이 덮인다.
+- `OutFocusMouseHook.cs` — OutFocus 마우스 버튼 down 3종(left/right/middle)을 **static 이벤트** `ButtonPressed(MouseButton)`로 방송. `WH_MOUSE_LL` 등록 + 동일 isFocused 게이트. 이동·휠·up·xbutton은 다루지 않는다. 사용 조건: 실행 중에 컴포넌트나 그 GameObject를 껐다 켜지 않는다 — 끌 때 훅 종료 대기가 시간을 넘기면 옛 훅이 남을 수 있고, 그 뒤 다시 켜면 옛 훅의 칸이 덮인다.
 - `UserInputClock.cs` — 포커스 무관하게 마지막 버튼 입력(키·마우스) 시각만 드는 static 클래스. `SecondsSinceLastInput` 하나를 내준다. 캐릭터 수면의 무입력 판정은 이것을 쓴다. `GlobalKeyInput`과 달리 어떤 키인지는 알리지 않는다. 관리자 모드로 거르지 않는다.
 - `Win32KeyMap.cs` — Win32 가상 키코드 → `UnityEngine.InputSystem.Key` 매핑. 순수 로직(`UnityEngine` 의존 없음 → EditMode 테스트 가능). LL 훅 경로에서 vkCode를 `Key`로 바꿀 때 쓴다.
 - `InputSystem_Actions.inputactions` — Unity New Input System 액션 매핑 에셋. 입력 처리 코드와 함께 두기 위해 `Assets/` 루트에서 이쪽으로 이동.
 
 ## 작성 컨벤션
 
-- **Editor 보호.** Win32 호출은 반드시 `#if !UNITY_EDITOR` 가드 안에서. Editor에서 실행하면 Unity Editor 자체의 창/입력이 망가진다.
-- **델리게이트 GC 방지.** OS에 함수 포인터로 넘기는 콜백(`WndProc`, `LowLevelKeyboardProc` 등)은 **static 필드**에 보관. 인스턴스 필드만 두면 GC 수거 후 OS가 함수 호출 시점에 액세스 위반.
+- **Editor 보호.** Win32 호출은 Editor에서 절대 실행되지 않게 막는다. Editor에서 실행하면 Unity Editor 자체의 창/입력이 망가진다. 막는 두 방식과 어느 쪽을 쓸지는 [.claude/rules/unity/platform.md](../../../../.claude/rules/unity/platform.md)의 "Editor 보호"가 정본이다.
+- **델리게이트 GC 방지.** OS에 넘긴 콜백 델리게이트는 하나마다 칸 하나에 붙잡아 두고, OS가 더는 부를 수 없을 때까지 그 칸을 덮어쓰지 않는다. static/인스턴스 선택과 이유는 [.claude/rules/unity/platform.md](../../../../.claude/rules/unity/platform.md)의 "델리게이트 GC 방지"가 정본이다.
 - **콜백 스레드 주의.** WndProc / LL 훅 콜백은 메시지 펌프 스레드에서 호출될 수 있다. `UnityEngine` API 직접 호출 금지 — `ConcurrentQueue`로 enqueue → 메인 스레드 `Update`에서 dequeue.
 - **창 동작 정지는 소유자별로 걸고 푼다.** `WindowManager`의 클릭 통과 정지와 가장자리 리사이즈 정지는 `Acquire…Suspend(owner)` / `Release…Suspend(owner)`로 쓴다. owner는 보통 호출하는 컴포넌트 자신(`this`)이다. 여러 곳(뷰포트 편집, 장식 배치, 구름 드래그 등)이 동시에 걸 수 있어서, 한쪽이 풀어도 다른 쪽이 건 정지는 유지되고 모든 소유자가 풀어야 재개된다. 개수 카운터가 아니라 소유자 집합인 이유는 같은 owner의 중복 걸기·중복 풀기를 한 번으로 쳐서 짝이 어긋나도 영구히 꼬이지 않게 하기 위해서다. 정지를 건 컴포넌트는 `OnDisable`에서도 반드시 자기 것을 푼다 — 클릭 통과 정지가 남으면 창이 바탕화면의 모든 클릭을 흡수하고, 사용자에게는 복구 수단이 없다. 리사이즈 쪽 집합은 메인 스레드에서만 고치고, WndProc은 "비었는가"를 미러한 volatile bool만 읽는다.
 - **순수 로직은 `UnityEngine` 의존 없이.** `HitTestCalculator`처럼 좌표 계산만 하는 헬퍼는 `using UnityEngine`을 빼서 EditMode 테스트가 가능하게.

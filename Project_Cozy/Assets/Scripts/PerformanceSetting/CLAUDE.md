@@ -4,8 +4,8 @@
 
 ## 책임
 
-- 프레임 레이트, 윈도우 크기·종횡비·도킹 등 *프로그램 전체*에 적용되는 정책 컴포넌트.
-- 데스크톱 펫이 다른 프로그램과 *공존*해야 한다는 제약에서 출발 — 백그라운드 시 점유 낮추기, 화면 한 줄에만 띠 모양으로 살기 등 [README.md](../../../../README.md) §3 가이드의 실현.
+- 프레임 레이트, 뷰포트 등 *프로그램 전체*에 적용되는 정책 컴포넌트.
+- 데스크톱 펫이 다른 프로그램과 *공존*해야 한다는 제약에서 출발 — 백그라운드 시 점유 낮추기 등 [README.md](../../../../README.md) §3 가이드의 실현.
 - 게임 로직과 무관. *정책*과 *인프라*를 분리한다. Platform/은 OS 기능을 *어떻게* 수행할지, PerformanceSetting/은 *무엇을* 적용할지 결정한다. 신규 P/Invoke는 반드시 `Platform/`에 둔다.
 
 ## 현재 들어 있는 것
@@ -16,20 +16,17 @@
   편집은 설정 그래픽 탭의 화면 크기 [조정]으로 들어가고, 편집 화면의 [완료]·ESC(`UI/ViewportEditOverlay`)로 나온다. 나오면 화면에는 적용하되 저장하지 않고 **미저장 뷰포트**로 들고 있다가, 그래픽 탭의 [저장]이 파일에 남기고 미저장 확인이 버려 저장한 뷰포트로 되돌린다(`EndEditKeepPreview`/`Commit`/`DiscardPendingViewport`). `Commit`은 줌만 바꿔 저장해도 `Committed`를 울려 화면 밖 장식을 회수하게 하고, 미저장 확인에서 버릴 때도 울린다(줌만 미저장이어도). 끄는 동안의 프리뷰(`PreviewChanged`)는 배경·장식만 듣는다. 편집을 열어 둔 채 패널로 돌아가지 않는 것은, 편집 중에 거는 클릭 통과 정지 때문에 그동안 바탕화면 전체가 클릭을 받지 않기 때문이다.
 - `Viewport/ViewportEditHandles.cs` — 편집 중 뷰포트 이동·8방향 크기 조절 UI. 통째로 옮길 때는 `MovePreviewViewport`, 크기를 바꿀 때는 `SetPreviewViewport`를 부른다(방 가운데가 옮기기에만 따라가야 해서 — viewport-coordinates.md). 번역할 글자와 버튼은 그리지 않는다(위 오버레이 몫). 화면 좌표는 보이는 영역 기준으로 환산한다(줌이면 원점이 0이 아님).
 - `Viewport/WindowMoveResizeGuide.cs` — 평시 창 이동 그립과 리사이즈 영역의 시각 안내.
-- `WindowAspectFitter.cs` — 구 구현. Win32로 HWND를 직접 만져 창을 띠 모양으로 도킹한다. 후속은 `Platform/`의 `WindowManager`이며(`Viewport/` 스택이 아니다), `PerformanceSystemScene.unity:149`에서 아직 쓰이고 있어 남아 있다. 신규 코드에서 사용 금지.
 
 ## 컨벤션
 
 - **씬에 1개씩.** 매니저성 컴포넌트지만 싱글톤은 아님 — 씬에 매니저 GameObject 1개. 다중 씬 전환이 생기면 `DontDestroyOnLoad` 또는 각 씬에 다시 두는 방식 중 결정.
-- **Win32 충돌 주의.** 구 `WindowAspectFitter`와 `BorderlessWindow`는 현행 `WindowManager`와 같은 HWND를 만진다. 본편 통합 씬에서는 함께 활성화하지 않는다.
 - **월드 PPU는 `BaseSpaceCameraFitter`의 코드 상수 100이다.** 인스펙터로 바꿀 수 없다. 예전에는 옛 카메라 배치를 보존하려고 씬 값을 낮춰 두었는데, 그 배율로 월드 단위 값(발 정렬·중력·이동 속도·월드 글자·씬 위치)을 모두 환산해 100으로 옮겼다. 그림의 임포트 PPU도 전부 100이다. 규칙과 이유는 [viewport-coordinates.md](../../../../.claude/rules/unity/viewport-coordinates.md).
 - **창 동작 정지는 자기 것만 걸고 푼다.** `ViewportScreenSettings`는 편집에 들어갈 때 자신을 소유자로 클릭 통과·리사이즈 정지를 걸고, 편집을 나갈 때와 `OnDisable`에서 자기 정지만 푼다. 다른 기능(장식 배치 등)이 같은 정지를 걸고 있어도 건드리지 않기 위해서다. 규칙의 정본은 [Platform/CLAUDE.md](../Platform/CLAUDE.md)의 "창 동작 정지" 항목.
 - **편집 중에는 월드 입력도 잠근다.** `ViewportScreenSettings`는 같은 자리(편집 진입·이탈, `OnDisable`)에서 자신을 소유자로 `WorldInputLock`을 걸고 푼다. 편집 핸들(`ViewportEditHandles`)은 IMGUI로 그려 EventSystem에 잡히지 않아서, 캐릭터·구름의 "UI 위면 무시" 가드가 핸들을 못 본다. 잠그지 않으면 핸들을 잡는 클릭이 뒤의 캐릭터로 새어 쓰담·잡기가 일어날 수 있다. 잠금 규칙의 정본은 [Interaction/CLAUDE.md](../Interaction/CLAUDE.md).
-- **에디터 보호.** Win32 호출은 [Platform/CLAUDE.md](../Platform/CLAUDE.md)와 동일 원칙 — `#if !UNITY_EDITOR` 가드 또는 에디터에서 안전한 분기. 에디터에서 호출하면 Unity Editor 창 자체가 망가질 수 있다.
+- **이 폴더는 Win32를 직접 부르지 않는다.** OS 호출은 `Platform/`의 wrapper를 거친다. Editor 보호 규칙은 [.claude/rules/unity/platform.md](../../../../.claude/rules/unity/platform.md)에 있다.
 - 그 외 네이밍 규칙은 [Scripts/CLAUDE.md](../CLAUDE.md) + [.claude/rules/unity/csharp.md](../../../../.claude/rules/unity/csharp.md) 참조.
 
 ## 추후 후보 (지금은 만들지 않음)
 
 - 환경설정 UI에서 직접 fps 조절 — 현재 인스펙터 노출 필드를 외부 ScriptableObject로 빼고 UI 바인딩.
 - Boss Key 모드 — README §3. 어디에 둘지(이 폴더 또는 `Gameplay/`)는 구현 시점에.
-- `WindowAspectFitter`를 `Platform/`의 `WindowManager`로 대체하고, `PerformanceSystemScene`의 참조를 정리한 뒤 제거.

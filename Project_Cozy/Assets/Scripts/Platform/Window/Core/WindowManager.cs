@@ -167,7 +167,6 @@ public class WindowManager : MonoBehaviour
     static int  _sMinW, _sMinH, _sMaxW, _sMaxH;
     static bool _sAlwaysOnTopForExitSizeMove;
     static volatile bool _sResizeSuspended; // _resizeSuspendOwners가 비어 있지 않은가의 미러 — 메인 스레드만 쓴다
-    static volatile bool _sSizeMoveEnded;   // 메시지 스레드 → 메인 스레드 신호 (WM_EXITSIZEMOVE)
 
     // ===== 런타임 상태 =====
     IntPtr _hwnd             = IntPtr.Zero;
@@ -183,15 +182,7 @@ public class WindowManager : MonoBehaviour
 
     void Awake()
     {
-#if !UNITY_EDITOR
-        _hwnd = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
-        _hwndStatic = _hwnd;
-
-        if (_hwnd == IntPtr.Zero)
-        {
-            Debug.LogError("[WindowManager] HWND 획득 실패 — 윈도우 설정 스킵");
-            return;
-        }
+        if (!TryAcquireHwnd()) return;
 
         if (_borderless) ApplyBorderless();
 
@@ -201,34 +192,39 @@ public class WindowManager : MonoBehaviour
         if (_alwaysOnTop) ApplyAlwaysOnTop();
 
         // Maximize는 윈도우가 실제로 표시된 뒤 적용해야 안정적이라 코루틴으로 지연.
-        // (WindowAspectFitter의 경험적 노하우 — 즉시 호출 시 위치/크기가 잡히지 않는 케이스 있음.)
+        // (즉시 호출하면 위치/크기가 잡히지 않는 경우가 있다.)
         if (_maximizeToWorkArea) StartCoroutine(ApplyMaximizeAfterReady());
 
         bool wantResizable = _resizable && !_maximizeToWorkArea;
 
         _sAlwaysOnTopForExitSizeMove = _alwaysOnTop;
         if (wantResizable) InstallWndProc();
+    }
+
+    /// <summary>
+    /// Editor 보호의 유일한 컴파일 분기. HWND는 빌드에서만 잡고, Editor에서는 늘 false다.
+    /// 나머지 Win32 경로는 전부 `_hwnd == IntPtr.Zero`면 멈추므로 따로 #if를 두지 않는다.
+    /// 그래서 인스펙터 토글을 읽는 판단 코드는 Editor에서도 컴파일되어(실행은 안 됨) 빌드와 같은 코드가 검사된다.
+    /// </summary>
+    bool TryAcquireHwnd()
+    {
+#if UNITY_EDITOR
+        return false;
+#else
+        _hwnd = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+        _hwndStatic = _hwnd;
+
+        if (_hwnd == IntPtr.Zero)
+        {
+            Debug.LogError("[WindowManager] HWND 획득 실패 — 윈도우 설정 스킵");
+            return false;
+        }
+        return true;
 #endif
     }
 
-    /// <summary>사용자가 창을 드래그(이동/리사이즈)한 직후 메인 스레드에서 발행.
-    ///
-    /// ⚠️ **구독자가 없다.** 창이 작업 영역에 고정된 뒤로 사용자가 창을 끄는 경로가 사라졌고
-    /// (_resizable이 꺼져 있으면 WndProc 자체가 설치되지 않아 발행도 되지 않는다),
-    /// 예전에 이 이벤트를 받아 "창 rect를 새 뷰포트로 수용"하던 역동기화는 제거됐다.
-    /// 되살리면 사용자가 창을 끌 때마다 뷰포트 설정이 덮어써진다.</summary>
-    public event Action WindowRectChangedByUser;
-
     void Update()
     {
-#if !UNITY_EDITOR
-        // WndProc(메시지 스레드 가능)에서 세운 플래그를 메인 스레드에서 이벤트로 변환.
-        if (_sSizeMoveEnded)
-        {
-            _sSizeMoveEnded = false;
-            WindowRectChangedByUser?.Invoke();
-        }
-
         if (!_hoverAwareClickThrough || _clickThroughSuspendOwners.Count > 0 || _hwnd == IntPtr.Zero) return;
 
         // Camera.main이 씬 로드 직후엔 null일 수 있어 lazy로 가져옴.
@@ -239,7 +235,6 @@ public class WindowManager : MonoBehaviour
         }
 
         PollClickThrough();
-#endif
     }
 
     void OnDestroy()         => UninstallWndProc();
@@ -286,11 +281,9 @@ public class WindowManager : MonoBehaviour
     {
         _alwaysOnTop = topmost;
         _sAlwaysOnTopForExitSizeMove = topmost;
-#if !UNITY_EDITOR
         if (_hwnd == IntPtr.Zero) return;
         SetWindowPos(_hwnd, topmost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0,
             SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-#endif
     }
 
     // ===== Maximize To Work Area =====
@@ -317,7 +310,7 @@ public class WindowManager : MonoBehaviour
     }
 
     // ===== 런타임 영역 API (뷰포트 정책용) =====
-    // _hwnd는 빌드에서만 획득되므로(Awake의 #if) Editor에서는 전부 자연 no-op — 별도 #if 불필요.
+    // _hwnd는 빌드에서만 획득되므로(TryAcquireHwnd) Editor에서는 전부 자연 no-op — 별도 #if 불필요.
 
     /// <summary>창을 지정 스크린 좌표 rect로 배치. 평시 "창 = 뷰포트" 적용 경로.</summary>
     public void ApplyRegion(int x, int y, int width, int height)
@@ -547,7 +540,6 @@ public class WindowManager : MonoBehaviour
 
     void UninstallWndProc()
     {
-#if !UNITY_EDITOR
         if (!_wndProcInstalled || _originalProc == IntPtr.Zero || _hwndStatic == IntPtr.Zero) return;
 
         SetWindowLongPtr(_hwndStatic, GWLP_WNDPROC, _originalProc);
@@ -555,7 +547,6 @@ public class WindowManager : MonoBehaviour
         // _originalProc/_newProcDelegate는 의도적으로 유지 — 원복 이후에도 이미 디스패치된
         // 메시지가 우리 프로시저로 들어올 수 있어, Zero화하면 CallWindowProc(Zero)로
         // 종료 시 간헐 액세스 위반이 난다 (리뷰 합의). 프로세스 종료가 정리를 맡는다.
-#endif
     }
 
     // ---- 이하 static. 메시지 펌프 스레드에서 호출될 수 있으므로 인스턴스 멤버 접근 금지. ----
@@ -573,8 +564,6 @@ public class WindowManager : MonoBehaviour
                 break;
 
             case WM_EXITSIZEMOVE:
-                // 메인 스레드(Update)가 WindowRectChangedByUser 이벤트로 변환 — 뷰포트 역동기화용.
-                _sSizeMoveEnded = true;
                 // 리사이즈 종료 후 드물게 Topmost가 풀리는 케이스 보정.
                 // (invariant의 주인이 직접 보정 — 단일 클래스 안이라 책임 누수 아님.)
                 if (_sAlwaysOnTopForExitSizeMove)
