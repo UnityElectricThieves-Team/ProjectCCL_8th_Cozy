@@ -7,6 +7,10 @@ using UnityEngine;
 /// 방 가운데는 뷰포트를 통째로 옮길 때만 따라가므로, 변을 끌어 크기를 바꾸면 그림은 제자리이고 마스크(창)만 바뀌어
 /// 보이는 범위가 넓어지거나 좁아진다. 놓인 장식도 같은 방 가운데를 기준으로 놓여 함께 움직인다.
 ///
+/// 예외는 아트가 Draw Mode를 <b>Sliced</b>로 고른 층이다. 아트가 9-slice 테두리로 늘일 곳을 정해 둔 그림이라,
+/// 그 층의 가로 크기(<see cref="SpriteRenderer.size"/>의 x)만 뷰포트 폭에 맞춰 양 끝을 뷰포트 변에 붙인다. 세로는 아트 값 그대로다.
+/// Sliced 층이 있는 프리팹은 가로 가운데를 방 가운데가 아니라 뷰포트 가운데에 맞춘다.
+///
 /// 이 컴포넌트는 <b>배치만</b> 책임진다 — 어떤 프리팹을 깔지는 밖에서 <see cref="SetPrefab"/>으로 넣어 준다(상점·배경 시스템을 모른다).
 /// 프리팹이 없으면 아무것도 그리지 않아 바탕화면이 그대로 비친다.
 ///
@@ -32,6 +36,7 @@ public sealed class BackgroundStage : MonoBehaviour
     private const int MASK_SPRITE_SIZE = 4;
 
     private readonly List<SpriteRenderer> _spriteRenderers = new();
+    private readonly List<SpriteRenderer> _slicedRenderers = new(); // 가로를 뷰포트 폭에 맞출 층(_spriteRenderers에도 들어 있다)
 
     private ViewportScreenSettings _viewportSettings;
     private BaseSpaceCameraFitter _cameraFitter;
@@ -97,6 +102,7 @@ public sealed class BackgroundStage : MonoBehaviour
         if (_instance != null) Destroy(_instance);
         _instance = null;
         _spriteRenderers.Clear();
+        _slicedRenderers.Clear();
 
         if (prefab != null)
         {
@@ -118,6 +124,7 @@ public sealed class BackgroundStage : MonoBehaviour
                 {
                     sprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                     _spriteRenderers.Add(sprite);
+                    if (sprite.drawMode == SpriteDrawMode.Sliced) _slicedRenderers.Add(sprite);
                 }
                 else if (renderers[i] is ParticleSystemRenderer particle)
                 {
@@ -166,38 +173,71 @@ public sealed class BackgroundStage : MonoBehaviour
         Vector3 parentScale = transform.lossyScale;
         _mask.transform.localScale = new Vector3(_area.width / parentScale.x, _area.height / parentScale.y, 1f);
 
+        // Sliced 층은 월드 폭이 뷰포트 폭과 같아지도록 가로 크기만 바꾼다. 배율로 나눠야 월드 폭이 된다.
+        for (int i = 0; i < _slicedRenderers.Count; i++)
+        {
+            SpriteRenderer sliced = _slicedRenderers[i];
+            float scaleX = Mathf.Abs(sliced.transform.lossyScale.x);
+            if (scaleX <= 0f) continue;
+            sliced.size = new Vector2(_area.width / scaleX, sliced.size.y);
+        }
+
         // 그림 전체(스프라이트들의 합)의 가로 범위와 아래 끝이 지금 월드 어디에 있는지 구해, 그만큼 인스턴스 루트를 옮긴다.
         // 파티클은 범위에 넣지 않는다 — 떠다니는 것이라 바닥의 기준이 될 수 없다.
-        // renderer.bounds 대신 스프라이트의 로컬 bounds를 쓰는 이유: 꺼진 오브젝트에서도 같은 값을 얻기 위해서다.
+        // Sliced 층이 있으면 가로는 그 층들의 범위를 뷰포트 가운데에 맞춘다(폭이 뷰포트와 같으므로 양 끝이 뷰포트 변에 붙는다).
+        // renderer.bounds 대신 로컬 사각형을 직접 구하는 이유: 꺼진 오브젝트에서도 같은 값을 얻기 위해서다.
         if (_spriteRenderers.Count > 0)
         {
+            bool alignToViewport = _slicedRenderers.Count > 0;
             float minX = float.MaxValue, maxX = float.MinValue, minY = float.MaxValue;
             for (int i = 0; i < _spriteRenderers.Count; i++)
             {
                 SpriteRenderer renderer = _spriteRenderers[i];
                 if (renderer.sprite == null) continue;
+                bool countsForX = !alignToViewport || renderer.drawMode == SpriteDrawMode.Sliced;
 
                 // 층이 돌아가 있으면 min·max 두 점만으로는 범위가 틀리므로 네 모서리를 모두 옮긴다.
-                Bounds local = renderer.sprite.bounds;
+                Rect local = LocalRect(renderer);
                 for (int c = 0; c < 4; c++)
                 {
-                    var corner = new Vector3((c & 1) == 0 ? local.min.x : local.max.x, (c & 2) == 0 ? local.min.y : local.max.y, 0f);
+                    var corner = new Vector3((c & 1) == 0 ? local.xMin : local.xMax, (c & 2) == 0 ? local.yMin : local.yMax, 0f);
                     Vector3 p = renderer.transform.TransformPoint(corner);
-                    minX = Mathf.Min(minX, p.x);
-                    maxX = Mathf.Max(maxX, p.x);
+                    if (countsForX)
+                    {
+                        minX = Mathf.Min(minX, p.x);
+                        maxX = Mathf.Max(maxX, p.x);
+                    }
                     minY = Mathf.Min(minY, p.y);
                 }
             }
 
             if (minY != float.MaxValue)
             {
+                float targetCenterX = alignToViewport ? _area.center.x : _roomCenterWorldX;
                 Vector3 pos = _instance.transform.position;
-                pos.x += _roomCenterWorldX - (minX + maxX) * 0.5f;
+                pos.x += targetCenterX - (minX + maxX) * 0.5f;
                 pos.y += _area.yMin - minY;
                 _instance.transform.position = pos;
             }
         }
 
         _instance.SetActive(true);
+    }
+
+    // 렌더러가 실제로 그리는 사각형(렌더러 로컬 좌표). Simple은 스프라이트 크기 그대로이고,
+    // Sliced·Tiled는 renderer.size만큼 그리므로 sprite.bounds를 쓰면 원본 그림 크기로 잘못 잡힌다.
+    private static Rect LocalRect(SpriteRenderer renderer)
+    {
+        Sprite sprite = renderer.sprite;
+        if (renderer.drawMode == SpriteDrawMode.Simple)
+        {
+            Bounds b = sprite.bounds;
+            return new Rect(b.min.x, b.min.y, b.size.x, b.size.y);
+        }
+
+        // 피벗은 그림 안의 비율 위치라, 늘린 크기에도 같은 비율로 걸린다.
+        Vector2 size = renderer.size;
+        Vector2 pivot = new Vector2(sprite.pivot.x / sprite.rect.width, sprite.pivot.y / sprite.rect.height);
+        return new Rect(-pivot.x * size.x, -pivot.y * size.y, size.x, size.y);
     }
 }
