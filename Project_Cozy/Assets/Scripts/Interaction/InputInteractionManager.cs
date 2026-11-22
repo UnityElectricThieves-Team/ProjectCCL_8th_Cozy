@@ -116,7 +116,14 @@ public class InputInteractionManager : MonoBehaviour
             var mouseWorld = targetCamera.ScreenToWorldPoint(mouseScreen);
             var point2D = new Vector2(mouseWorld.x, mouseWorld.y);
 
-            var hitCount = Physics2D.OverlapPointNonAlloc(point2D, hitBuffer, interactableLayerMask);
+            // 인터랙터블 레이어만, 트리거 포함 여부는 전역 Physics2D 설정을 따른다. 구조체라 할당이 없다.
+            var filter = new ContactFilter2D
+            {
+                useLayerMask = true,
+                layerMask = interactableLayerMask,
+                useTriggers = Physics2D.queriesHitTriggers
+            };
+            var hitCount = Physics2D.OverlapPoint(point2D, filter, hitBuffer);
             nextHover = null;
             nextClickable = null;
             nextShiftRightClickable = null;

@@ -12,7 +12,7 @@
 
 - `InteractionInterfaces.cs` — `IHoverable` / `IClickable` / `IRightClickable` / `IShiftRightClickable` 4개 계약. 모든 인터랙터블은 이 중 필요한 것만 구현하면 매니저가 자동 라우팅.
 - `WorldInputLock.cs` — "지금은 월드 오브젝트가 마우스에 반응하면 안 된다"를 거는 공용 잠금(static). 뷰포트 편집 모드와 장식 배치 모드(설치·이동·회수·제거)가 건다. `Acquire(owner)` / `Release(owner)` / `IsLocked`.
-- `InputInteractionManager.cs` — 마우스 위치 → 월드좌표 → `Physics2D.OverlapPointNonAlloc` → sortingLayer/sortingOrder가 가장 높은 콜라이더에 라우팅. 마우스 픽셀 변화 없으면 재스캔 스킵하는 최적화 내장(`_skipRescanWhenPointerUnchanged`).
+- `InputInteractionManager.cs` — 마우스 위치 → 월드좌표 → `Physics2D.OverlapPoint`(ContactFilter2D + 미리 잡은 배열) → sortingLayer/sortingOrder가 가장 높은 콜라이더에 라우팅. 마우스 픽셀 변화 없으면 재스캔 스킵하는 최적화 내장(`_skipRescanWhenPointerUnchanged`).
 - `MoonClickIdle2D.cs` — 구름(가제) 컴포넌트. `K`키로 Active 진입 → 클릭 시 prefab 리스트의 다음 1개 스폰 → 다시 Idle. 한 번 다 쓰면 더 이상 스폰 안 함. 같은 GameObject에 `DraggableObject2D`가 있으면 스폰은 mouse up 시점·드래그 아니었을 때에만 발생 — 매니저가 mouse down에서 `OnClick`을 호출하는 구조에서 클릭과 드래그를 분리하기 위한 협력.
 - `DraggableObject2D.cs` — 마우스 좌클릭 드래그로 transform 위치를 갱신. 매니저 라우팅 대신 자체로 `Mouse.current`를 폴링하고 자기 `Collider2D.OverlapPoint`로 press 시작을 판정. `PressEnded(bool wasDrag)` 이벤트로 드래그/클릭 분리 신호를 같은 GameObject의 `IClickable` 측에 공급. `SetBounds`로 영역을 받으면 그 경계에서 멈춘다(구름은 뷰포트 안). 누르는 동안 `WindowManager`의 클릭 통과를 자기 소유로 멈춘다 — 경계에 걸려 커서가 투명한 곳에서 버튼을 떼도 드래그가 끝나게 하려는 것이다.
 - `OpaqueHoverable.cs` — `IHoverable`을 받아 sprite 픽셀 알파를 검사한 뒤, *불투명 영역에서만* UnityEvent(`_onOpaqueHoverEnter` / `_onOpaqueHoverExit`)로 다시 발사. 사용 조건은 같은 GameObject에 `Collider2D` + sprite 텍스처의 `Read/Write Enabled = true`. 이벤트를 구독하지 않고 *지금 호버 중인가*만 필요한 쪽을 위해 `IsOpaqueHovered`도 노출한다.
