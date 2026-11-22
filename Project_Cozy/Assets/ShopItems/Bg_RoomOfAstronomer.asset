@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Bg_RoomOfAstronomer
   m_EditorClassIdentifier: Assembly-CSharp::ShopItemDefinition
   id: bg_roomofastronomer
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 45ce7627d56bba34eb68ef11a6843a26, type: 3}
   price: 10
   backgroundPrefab: {fileID: 5417030308556501544, guid: c393e1c1c991cbb439a36baca1c2eadd, type: 3}
   decorationPrefab: {fileID: 0}
