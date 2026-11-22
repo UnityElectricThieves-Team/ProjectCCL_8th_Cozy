@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// "지금은 월드 오브젝트(캐릭터·별 등)가 마우스 입력에 반응하면 안 된다"를 거는 공용 잠금.
+/// "지금은 월드 오브젝트(캐릭터·구름 등)가 마우스 입력에 반응하면 안 된다"를 거는 공용 잠금.
 /// 뷰포트 편집처럼 화면 전체를 다른 조작이 차지하는 모드가 건다.
 ///
 /// 월드 마우스 입력은 한 곳이 아니라 여러 폴러(<see cref="InputInteractionManager"/>,

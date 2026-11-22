@@ -270,6 +270,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfc9857575b9a8945bab1b964cd25ffe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPanel
+  _isModal: 0
+  _visibleDuringInventoryModes: 0
 --- !u!1 &6500381129581671500
 GameObject:
   m_ObjectHideFlags: 0
@@ -391,8 +393,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6945044792770771492}
-  - component: {fileID: 581054583035807689}
+  - component: {fileID: 7546885471011839290}
+  - component: {fileID: 3556799467267910432}
   - component: {fileID: 8196469000761749448}
+  - component: {fileID: 581054583035807689}
   m_Layer: 5
   m_Name: Area_Header
   m_TagString: Untagged
@@ -421,7 +425,15 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
---- !u!114 &581054583035807689
+--- !u!222 &7546885471011839290
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7064793527151371339}
+  m_CullTransparentMesh: 1
+--- !u!114 &3556799467267910432
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -430,9 +442,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 7064793527151371339}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a773ae9bdc951d42bb8c0b0da566be4, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DraggablePanel
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!114 &8196469000761749448
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -453,6 +483,18 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &581054583035807689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7064793527151371339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a773ae9bdc951d42bb8c0b0da566be4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DraggablePanel
 --- !u!1 &7217916780344512872
 GameObject:
   m_ObjectHideFlags: 0

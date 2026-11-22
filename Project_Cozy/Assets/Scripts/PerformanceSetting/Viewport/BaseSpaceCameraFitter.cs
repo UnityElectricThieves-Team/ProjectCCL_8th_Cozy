@@ -11,8 +11,9 @@ using UnityEngine;
 ///
 /// 이 클래스의 식은 px가 어떤 단위인지 모른다 — 앵커와 PPU로 px를 월드 길이로 바꿀 뿐이다.
 /// 프레이밍 영역의 높이(베이스 px)를 orthoSize에 맞추면, 화면 높이가 작업 영역 높이이므로
-/// 베이스 px 하나는 자동으로 (작업 영역 폭 / 마스터 캔버스 폭) 화면 px가 된다. camera.rect/aspect를 만질
-/// 필요가 없다. 정적 창 모델에서는 **창 = 작업 영역, 프레이밍 영역 = 베이스 공간 전체**다.
+/// 베이스 px 하나는 자동으로 (작업 영역 폭 / 프레이밍 영역 폭) 화면 px가 된다. camera.rect/aspect를 만질
+/// 필요가 없다. 정적 창 모델에서는 **창 = 작업 영역, 프레이밍 영역 = 보이는 영역**이다
+/// (ViewportScreenSettings.VisibleRect — 줌 1이면 베이스 공간 전체, 줌 z면 그 오른쪽 아래 1/z).
 ///
 /// 그래서 이 클래스가 보증하는 것은 정확히 이것이다 —
 /// **화면상 위치·크기는 작업 영역의 우하단 모서리에 고정되고, 작업 영역 폭에 비례해 줄어든다.**
@@ -27,7 +28,8 @@ public class BaseSpaceCameraFitter : MonoBehaviour
 {
     // 1 월드 유닛이 몇 베이스 공간 픽셀인가. Unity 기본 임포트 PPU(100)와 같아서,
     // 임포트 PPU를 그대로 둔 스프라이트는 그림 1px = 베이스(마스터 캔버스) 1px가 된다.
-    private const float PIXELS_PER_UNIT = 100f;
+    // 인스턴스 없이 px 길이를 월드로 바꿔야 하는 곳(구름 둥둥 등)을 위해 공개한다.
+    public const float PIXELS_PER_UNIT = 100f;
 
     [Header("Master Canvas (design)")]
     [SerializeField, Tooltip("마스터 캔버스 우하단 모서리의 월드 좌표. 모든 프레이밍의 앵커")]

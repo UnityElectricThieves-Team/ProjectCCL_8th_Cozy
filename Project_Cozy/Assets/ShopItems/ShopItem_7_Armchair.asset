@@ -16,6 +16,5 @@ MonoBehaviour:
   displayName: "\uC548\uB77D\uC758\uC790"
   icon: {fileID: 21300000, guid: 7366225909f9ec64ca577363dd188683, type: 3}
   price: 2
-  backgroundSprite: {fileID: 0}
   decorationPrefab: {fileID: 496522293083197305, guid: 91b019a551dd3514bb4b0d43544c6b60, type: 3}
   placementKind: 0

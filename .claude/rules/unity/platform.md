@@ -26,9 +26,24 @@ OS 의존 코드(Win32, WinAPI, DwmApi, LL Hook 등) 격리 레이어.
 - 콜백 내부에서 `UnityEngine` API 직접 호출 금지.
 - 패턴: 콜백에서 `ConcurrentQueue`로 enqueue → 메인 스레드 `Update`에서 dequeue.
 
+### 입력 소스는 누른 순간만 알린다
+
+- 키 입력을 방송하는 소스는 "안 눌림→눌림"일 때만 알린다. 키를 꾹 눌러 생기는 OS 자동 반복은 보내지 않는다.
+- 이유: 기획(Figma 스폰 기운 표)이 "꾹 눌러도 1회"이고, 창 안 경로(`InputSystem.onAnyButtonPress`)와 마우스 훅이 이미 누른 순간만 알린다. 소스 하나만 반복을 섞으면 같은 "눌림" 이벤트가 경로마다 다른 뜻이 된다.
+- 반복은 소비자가 아니라 출처(훅)에서 거른다. 소비자마다 거르면 한 곳이 빠진다.
+- LL 훅은 받은 메시지에 반복 표시가 없으므로 눌린 키 상태를 직접 들고, 그 상태는 훅 스레드에서만 고친다. keyup을 놓치면 그 키를 1회 덜 셀 수 있지만 덜 세는 쪽으로만 틀리므로 받아들인다.
+- 아직 이 약속을 따르지 않는 소스가 있다 — [Platform/CLAUDE.md](../../../Project_Cozy/Assets/Scripts/Platform/CLAUDE.md)의 Input 절 참조.
+
+### OutFocus 훅의 static 이벤트는 `BeforeSceneLoad` 이후에 구독한다
+
+- OutFocus 훅(`OutFocusKeyHook`·`OutFocusMouseHook`)은 도메인 리로드를 끈 에디터를 위해 `SubsystemRegistration` 단계에서 자기 static 이벤트를 비운다.
+- 그래서 `[RuntimeInitializeOnLoadMethod]`로 구독하는 static 클래스는 `BeforeSceneLoad` 이후 단계에서 구독한다. 같은 `SubsystemRegistration`에서 구독하면 클래스끼리의 실행 순서가 정해져 있지 않아, 훅이 나중에 돌면 구독이 지워진다.
+- 이 실수는 빌드에서만 드러난다. 에디터에서는 훅 자체가 꺼져 있어(Editor 보호) 창 밖 입력이 원래 들어오지 않기 때문이다. 자기 상태의 초기화(지난 구독 정리 등)는 `SubsystemRegistration`에서 해도 된다.
+- 컴포넌트가 `OnEnable`에서 구독하는 것은 이 문제와 무관하다.
+
 ### 책임 경계
 
-- 게임 로직(별 클릭, 친밀도, 변신 등)이 **P/Invoke를 직접 호출하면 안 된다.** Platform/ 안에서 wrapper API를 노출하고, 게임 로직은 wrapper만 호출.
+- 게임 로직(구름 클릭, 친밀도, 변신 등)이 **P/Invoke를 직접 호출하면 안 된다.** Platform/ 안에서 wrapper API를 노출하고, 게임 로직은 wrapper만 호출.
 - Steam SDK 같은 외부 서비스는 Platform/에 두지 않는다 — OS가 아닌 서비스이므로 별도 모듈.
 
 ## 테스트 가능성

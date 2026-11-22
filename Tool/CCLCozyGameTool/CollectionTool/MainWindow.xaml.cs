@@ -123,6 +123,7 @@ namespace CollectionTool
             EditOverlay.Visibility = Visibility.Collapsed;
 
             NameTextBox.Text = _selected.Name;
+            BreedTextBox.Text = _selected.Breed;
             HobbyTextBox.Text = _selected.Hobby;
             AgeTextBox.Text = _selected.Age == 0 ? string.Empty : _selected.Age.ToString();
             HeightTextBox.Text = _selected.Height == 0 ? string.Empty : _selected.Height.ToString();
@@ -194,6 +195,7 @@ namespace CollectionTool
             StopSaveButtonBlink();
 
             _selected.Name = NameTextBox.Text;
+            _selected.Breed = BreedTextBox.Text.Trim();
             _selected.Hobby = HobbyTextBox.Text;
             _selected.Age = int.TryParse(AgeTextBox.Text, out var age) ? age : 0;
             _selected.Height = int.TryParse(HeightTextBox.Text, out var height) ? height : 0;

@@ -17,10 +17,8 @@ using UnityEngine.InputSystem;
 [DisallowMultipleComponent]
 public sealed class HoldClickEvent : MonoBehaviour
 {
-    [Tooltip("좌클릭을 이만큼 누르고 있으면 홀드로 판정해 On Hold Reached를 1회 쏜다(초).\n" +
-             "이 시간 전에 떼면 On Press Start만 발생한 채로 끝난다.\n" +
-             "기획 확정값은 2초지만 잡기까지가 길게 느껴져 1초로 줄였다.")]
-    [SerializeField] private float _holdSeconds = 1f;
+    // 홀드로 판정하는 시간은 인스펙터가 아니라 GameBalance.GrabHoldSeconds에 있다 — 출시 빌드(기획 2초)와
+    // 테스트 빌드의 값이 다르다. 그 전에 떼면 On Press Start만 발생한 채로 끝난다.
 
     [Tooltip("알파 검사를 맡길 컴포넌트. 지정하면 불투명 픽셀 위에서 누른 것만 인정한다.\n" +
              "비우면 같은 GameObject에서 자동 탐색하고, 그래도 없으면 콜라이더 안이기만 하면 인정한다.")]
@@ -37,7 +35,7 @@ public sealed class HoldClickEvent : MonoBehaviour
     [Tooltip("캐릭터 위에서 좌클릭을 누른 순간 1회 발사. 쓰담은 여기서 시작한다.")]
     [SerializeField] private UnityEvent _onPressStart;
 
-    [Tooltip("누른 채로 Hold Seconds에 도달한 순간 1회 발사. 잡기는 여기서 시작한다.")]
+    [Tooltip("누른 채로 잡기 홀드 시간(GameBalance)에 도달한 순간 1회 발사. 잡기는 여기서 시작한다.")]
     [SerializeField] private UnityEvent _onHoldReached;
 
     private Collider2D _collider;
@@ -81,7 +79,7 @@ public sealed class HoldClickEvent : MonoBehaviour
         if (!_pressActive) return;
 
         // 커서가 도중에 캐릭터를 벗어나도 홀드는 유지된다 — 잡으려고 누른 손을 놓지 않았기 때문이다.
-        if (!_holdFired && Time.time - _pressStartedAt >= _holdSeconds)
+        if (!_holdFired && Time.time - _pressStartedAt >= GameBalance.GrabHoldSeconds)
         {
             _holdFired = true;
             _onHoldReached?.Invoke();

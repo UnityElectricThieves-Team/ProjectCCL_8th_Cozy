@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6111ad88a1bd97647bb7ebdd01ee283e, type: 3}
+  m_Name: Deco_OldFashionedTheater_Popcorn
+  m_EditorClassIdentifier: Assembly-CSharp::ShopItemDefinition
+  id: deco_oldfashionedtheater_popcorn
+  icon: {fileID: 21300000, guid: 52f9cc1c518563c4faa2ece28eb6380b, type: 3}
+  price: 10
+  backgroundPrefab: {fileID: 0}
+  decorationPrefab: {fileID: 1265776871577839028, guid: a96f5ad951ea3964682ee2b3dbc9bd6a, type: 3}
+  placementKind: 0

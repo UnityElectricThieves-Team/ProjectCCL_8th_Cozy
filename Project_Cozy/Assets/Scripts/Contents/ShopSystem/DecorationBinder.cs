@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,17 +12,50 @@ using UnityEngine;
 ///
 /// 부팅 복원은 <see cref="ShopSystem"/>이 이벤트를 쏘지 않으므로, Start에서 현재 목록을 한 번 직접 읽는다.
 /// 장식 레이어 프리팹 루트에 <see cref="DecorationLayer"/>와 함께 붙는다.
+///
+/// 그래픽 탭의 [저장]으로 화면을 저장하거나 저장하지 않은 변경(뷰포트·줌)을 버리면(<see cref="ViewportScreenSettings.Committed"/>) 지금 뷰포트에 온전히 들어가지 않는 장식을
+/// 인벤토리로 회수한다. 뷰포트를 줄인 경우와 전체 크기(줌)를 키운 경우가 모두 여기로 온다. 판정에 장식 그림의 크기가 필요한데, 상품 id를 프리팹으로 바꾸는 곳이 여기라 여기서 한다.
+/// 판정 상자는 설치 모드와 같은 그림 전체(투명 여백 포함)다. 확인 팝업은 띄우지 않는다.
+///
+/// 장식의 지면 위 높이는 여기 <see cref="ElevationOf"/> 한 곳에서 정리한다 — 상품이 바닥 장식이면 저장 값과 상관없이 0이다.
+/// 종류의 주인은 저장 값이 아니라 상품 정의라서, 종류를 바닥으로 되돌린 상품이 떠 있게 그려지면 안 된다.
+/// 그래서 레이어는 정리된 높이만 받아 종류를 보지 않고(종류는 이동 모드가 집을 때 돌려주려고 들고만 있다),
+/// 회수 판정도 높이는 같은 정리를 거친다. <see cref="ShopSystem"/>은 종류를 모른다.
+///
+/// 자리는 둘 다 기준점에서 잰 길이다 — 가로는 방 가운데(<see cref="ViewportScreenSettings.RoomCenterX"/>)에서, 높이는 지면(뷰포트 아래 변)에서.
+/// 배경도 같은 기준으로 놓여, 뷰포트를 통째로 옮기면 함께 따라가고 크기를 바꾸면 함께 제자리다.
+///
+/// 옛 파일은 가로를 베이스 공간의 절대 위치로 저장했다. 뷰포트가 처음 준비될 때(이미 준비됐으면 Start에서, 아니면 첫
+/// <see cref="ViewportScreenSettings.ViewportConfirmed"/>에서) 그 순간의 방 가운데를 기준으로 한 번 바꾸게 한다
+/// (<see cref="ShopSystem.ConvertLegacyAbsoluteX"/>). 방 가운데는 그보다 먼저 정해진다(뷰포트 정책의 Start). 그래서 Start에는 회수용 <c>Committed</c> 구독과 별개로,
+/// 첫 확정에서 한 번만 쓰고 푸는 구독이 있다. 바꾸기 전 항목은 그리지도 회수하지도 않는다.
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(DecorationLayer))]
 public sealed class DecorationBinder : MonoBehaviour
 {
+    // 회수 판정의 위쪽 비교에만 두는 여유(베이스 px). 놓을 때는 월드 실수로, 회수할 때는 베이스 px로 계산해서
+    // 뷰포트 위쪽 끝에 딱 붙여 초록으로 놓은 장식이 뷰포트를 바꾸지 않고 [저장]만 눌러도 회수되는 일을 막는다.
+    // "밖으로 이만큼 더 나가야 회수"하는 쪽이다. 자유 장식의 위쪽에만 둔다 — 좌우 비교와 바닥 장식의 회수 경계는 여유 없이 그대로다.
+    private const float TOP_RECALL_MARGIN_PX = 0.5f;
+
     private readonly List<PlacedDecoration> _buffer = new();
 
     private DecorationLayer _layer;
     private ShopSystem _system;
+    private ViewportScreenSettings _viewportSettings;
+    private BaseSpaceCameraFitter _cameraFitter;
 
-    private void Awake() => _layer = GetComponent<DecorationLayer>();
+    private RectInt _savedViewport;   // 회수 판정 중인 새 뷰포트(베이스 공간 px)
+    private Predicate<PlacedDecorationData> _isOutsideSavedViewport;
+    private Action<RectInt> _onFirstViewportConfirmed;
+
+    private void Awake()
+    {
+        _layer = GetComponent<DecorationLayer>();
+        _isOutsideSavedViewport = IsOutsideSavedViewport;
+        _onFirstViewportConfirmed = OnFirstViewportConfirmed;
+    }
 
     private void Start()
     {
@@ -34,14 +68,82 @@ public sealed class DecorationBinder : MonoBehaviour
             return;
         }
 
+        // 프리팹이라 씬 오브젝트를 인스펙터로 잇지 못한다 — DecorationLayer와 같이 Start에서 한 번 찾는다.
+        _viewportSettings = FindFirstObjectByType<ViewportScreenSettings>();
+        _cameraFitter = FindFirstObjectByType<BaseSpaceCameraFitter>();
+
         _system.OwnedChanged += Apply;
         Apply();
+
+        if (_viewportSettings != null)
+        {
+            // 옛 가로 위치 변환은 뷰포트가 준비된 뒤에만 한다 — 그 전에는 방 가운데가 아직 정해지지 않아 엉뚱한 기준으로 바뀐다.
+            if (_viewportSettings.IsReady) ConvertLegacyX();
+            else _viewportSettings.ViewportConfirmed += _onFirstViewportConfirmed;
+        }
+
+        if (_viewportSettings != null && _cameraFitter != null)
+            _viewportSettings.Committed += OnViewportCommitted;
+        else
+            Debug.LogWarning($"[{nameof(DecorationBinder)}] ViewportScreenSettings/BaseSpaceCameraFitter 없음 — 뷰포트를 줄여도 장식을 회수하지 않습니다.", this);
     }
 
     private void OnDestroy()
     {
         if (_system != null) _system.OwnedChanged -= Apply;
+        if (_viewportSettings != null)
+        {
+            _viewportSettings.Committed -= OnViewportCommitted;
+            _viewportSettings.ViewportConfirmed -= _onFirstViewportConfirmed;
+        }
     }
+
+    private void OnFirstViewportConfirmed(RectInt viewport)
+    {
+        _viewportSettings.ViewportConfirmed -= _onFirstViewportConfirmed;
+        ConvertLegacyX();
+    }
+
+    // 지금 적용된 방 가운데를 기준으로 옛 항목을 바꾼다. 배경·레이어가 그리는 기준과 같은 값이다.
+    private void ConvertLegacyX() => _system.ConvertLegacyAbsoluteX(_viewportSettings.RoomCenterX);
+
+    private void OnViewportCommitted(RectInt viewport)
+    {
+        _savedViewport = viewport;
+        _system.RecallPlaced(_isOutsideSavedViewport);
+    }
+
+    // 그림의 가로 중앙은 방 가운데에서 xFromRoomCenter만큼, 아래 끝은 지면(뷰포트 아래 변)에서 높이(ElevationOf)만큼 떨어져 있다.
+    // 그래서 가로는 절대 위치로 되돌려 뷰포트 양 끝과, 세로는 "지면 위 높이 + 그림 높이"가 뷰포트 높이를 넘는지만 본다.
+    // Committed가 울릴 때 RoomCenterX는 이미 저장한 방이다(ViewportScreenSettings).
+    private bool IsOutsideSavedViewport(PlacedDecorationData placed)
+    {
+        if (placed.IsLegacyX) return false; // 변환은 뷰포트가 처음 준비될 때 끝나므로 실제로는 오지 않는다
+
+        // 지금 그리지 않는 장식(상점에 없는 id, 빈 프리팹)은 크기를 알 수 없어 그대로 둔다 — 그리는 쪽과 같은 판단.
+        ShopItemDefinition item = FindItem(placed.itemId);
+        if (item == null || item.decorationPrefab == null) return false;
+
+        SpriteRenderer renderer = item.decorationPrefab.GetComponentInChildren<SpriteRenderer>();
+        if (renderer == null || renderer.sprite == null) return false;
+
+        Vector3 size = renderer.sprite.bounds.size;
+        Vector3 scale = renderer.transform.lossyScale;
+        float ppu = _cameraFitter.PixelsPerUnit;
+        float halfWidthPx = size.x * Mathf.Abs(scale.x) * ppu * 0.5f;
+        float heightPx = size.y * Mathf.Abs(scale.y) * ppu;
+
+        float centerX = _viewportSettings.RoomCenterX + placed.xFromRoomCenter.Value;
+        float topMarginPx = item.placementKind == DecorationPlacementKind.Floor ? 0f : TOP_RECALL_MARGIN_PX;
+        return centerX - halfWidthPx < _savedViewport.xMin
+            || centerX + halfWidthPx > _savedViewport.xMax
+            || ElevationOf(item, placed) + heightPx > _savedViewport.height + topMarginPx;
+    }
+
+    // 지면 위 높이를 정리하는 단 한 곳. 바닥 장식은 저장 값과 상관없이 0이다(클래스 주석).
+    // 손으로 고친 파일(음수·NaN)은 막지 않는다 — 게임이 그런 값을 쓰지 않는다.
+    private static float ElevationOf(ShopItemDefinition item, PlacedDecorationData placed)
+        => item.placementKind == DecorationPlacementKind.Floor ? 0f : placed.elevation;
 
     private void Apply()
     {
@@ -51,7 +153,10 @@ public sealed class DecorationBinder : MonoBehaviour
         {
             ShopItemDefinition item = FindItem(placed[i].itemId);
             if (item == null || item.decorationPrefab == null) continue;
-            _buffer.Add(new PlacedDecoration(item.decorationPrefab, placed[i].x));
+            if (placed[i].IsLegacyX) continue; // 뷰포트가 준비돼 옛 가로 위치를 바꾼 뒤에 그린다(바꾸면 OwnedChanged로 다시 온다)
+            // 저장 목록의 칸 번호를 함께 싣는다. 건너뛴 칸이 있으면 레이어의 칸 번호와 달라지기 때문이다.
+            var spot = new DecorationSpot(placed[i].xFromRoomCenter.Value, ElevationOf(item, placed[i]));
+            _buffer.Add(new PlacedDecoration(item.decorationPrefab, spot, item.placementKind, i));
         }
         _layer.SetDecorations(_buffer);
     }

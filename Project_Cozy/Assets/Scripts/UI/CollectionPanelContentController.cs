@@ -16,8 +16,9 @@ using UnityEngine.UI;
 /// <c>CharacterId</c>가 빈 항목은 잠글 근거가 없어 해금된 것처럼 보여준다.
 ///
 /// 항목 그림은 에셋이 아니라 Base64 문자열이라 런타임에 디코드해야 한다(<see cref="PhotoSprite"/>).
-/// 좌측 썸네일과 중앙 일러스트가 같은 그림을 쓰므로 사진당 한 장만 만들어 돌려쓰고,
-/// 만든 스프라이트는 <see cref="OnDestroy"/>에서 텍스처까지 함께 정리한다.
+/// 툴의 "메인" 사진은 중앙 일러스트, "서브" 사진은 좌측 썸네일(얼굴)이다. 서브가 없으면 썸네일도 메인을 쓴다.
+/// 같은 사진은 한 장만 만들어 돌려쓰고, 만든 스프라이트는 <see cref="OnDestroy"/>에서 텍스처까지 함께 정리한다.
+/// 사진이 없거나 깨지면 프리팹에 넣어 둔 그림을 기본 그림으로 보여 준다.
 ///
 /// 패널 루트에 붙는다. 패널은 CanvasGroup으로 숨기므로(SetActive 아님) 이 컴포넌트는 계속 살아 있다 —
 /// 목록은 <see cref="Awake"/>에서 한 번만 만들고 여닫을 때 다시 만들지 않는다.
@@ -29,13 +30,22 @@ public sealed class CollectionPanelContentController : MonoBehaviour
     [SerializeField] private CollectionEntrySlot _slotPrefab;
 
     [Header("우측 상세")]
-    [Tooltip("중앙 풀 일러스트.")]
+    [Tooltip("중앙 풀 일러스트. 프리팹에 넣어 둔 그림은 사진이 없거나 깨진 항목에 보여 줄 기본 그림이 된다.")]
     [SerializeField] private Image _illustration;
     [SerializeField] private TMP_Text _nameText;
-    [Tooltip("나이·키·생일·취미를 여러 줄로 보여줄 텍스트.")]
+    [Tooltip("도감 프로필 여러 줄(UICollection.profile 틀)을 보여줄 텍스트.")]
     [SerializeField] private TMP_Text _infoText;
     [Tooltip("누적 친밀도. 캐릭터 기록에서 읽는다.")]
     [SerializeField] private TMP_Text _affinityText;
+
+    [Header("귀환·소환")]
+    [Tooltip("도감 [귀환]/[소환] 버튼(Button_귀환). 버튼 하나가 상태에 따라 귀환·소환으로 바뀐다. 고른 캐릭터를 보유했을 때만 켠다.\n" +
+             "OnClick에는 ToggleFieldSelected를 건다.")]
+    [SerializeField] private GameObject _fieldButton;
+    [Tooltip("그 버튼의 글자. 상태에 따라 코드가 넣으므로 LocalizedText를 붙이지 않는다(붙이면 언어를 바꿀 때 서로 덮어쓴다).")]
+    [SerializeField] private TMP_Text _fieldButtonLabel;
+    [Tooltip("그 버튼의 호버 말풍선. 키는 코드가 상태에 따라 넣는다(SetStringId). 비어 있으면 말풍선 없이 동작한다.")]
+    [SerializeField] private HoverTooltipSource _fieldButtonTooltip;
 
     [Header("잠금")]
     [Tooltip("해금된 항목의 상세 화면(Right_Character_Info). 잠긴 항목을 고르면 통째로 꺼진다.")]
@@ -45,15 +55,25 @@ public sealed class CollectionPanelContentController : MonoBehaviour
     [Tooltip("잠긴 화면 안의 안내 문구. 항목마다 필요한 기운이 달라 코드가 채운다.")]
     [SerializeField] private TMP_Text _lockedMessage;
 
+    // 귀환·소환 버튼의 글자와 말풍선 키. 화면에 나와 있으면 귀환, 없으면 소환.
+    private const string RecallLabelKey = "UICollection.button.return";
+    private const string SummonLabelKey = "UICollection.button.summon";
+    private const string RecallTooltipKey = "UICollection.tooltip.return";
+    private const string SummonTooltipKey = "UICollection.tooltip.summon";
+
     // 사진별 그림 캐시. 값이 null이면 "깨진 사진"이라는 뜻이라 다시 디코드하지 않는다.
     private readonly Dictionary<PhotoData, Sprite> _pictures = new();
     private readonly List<CollectionEntrySlot> _slots = new();
     private CollectionEntrySlot _selected;
     private LocalizationManager _localization;
     private CharacterOwnership _ownership;
+    private Sprite _defaultIllustration;
 
     private void Awake()
     {
+        // 사진으로 덮기 전에 프리팹의 그림을 기본 그림으로 잡아 둔다.
+        if (_illustration != null) _defaultIllustration = _illustration.sprite;
+
         // CharacterOwnership은 실행 순서가 앞서(-99) 이 시점에 Instance와 기록이 준비돼 있다.
         _ownership = CharacterOwnership.Instance;
         if (_ownership != null) _ownership.RecordChanged += OnRecordChanged;
@@ -111,6 +131,8 @@ public sealed class CollectionPanelContentController : MonoBehaviour
             if (entry == null) continue;
             if (string.IsNullOrEmpty(entry.CharacterId))
                 Debug.LogWarning($"[{nameof(CollectionPanelContentController)}] 도감 항목 '{entry.Name}'에 CharacterId가 없어 잠그지 않고 친밀도도 보여주지 않습니다.", this);
+            if (entry.ProfilePictureBase64_Main == null)
+                Debug.LogWarning($"[{nameof(CollectionPanelContentController)}] 도감 항목 '{entry.Name}'에 공개-메인 사진이 없습니다.", this);
 
             var slot = Instantiate(_slotPrefab, _listContent);
             slot.Bind(entry, GetThumbnail(entry), Select);
@@ -124,8 +146,17 @@ public sealed class CollectionPanelContentController : MonoBehaviour
     private bool IsUnlocked(CollectionData entry) =>
         _ownership == null || string.IsNullOrEmpty(entry.CharacterId) || _ownership.IsOwned(entry.CharacterId);
 
+    // 서브(얼굴)가 없으면 메인으로 대신한다. 둘 다 없으면 null이고, 슬롯이 기본 그림을 보여 준다.
     private Sprite GetThumbnail(CollectionData entry) =>
-        GetPicture(IsUnlocked(entry) ? entry.ProfilePictureBase64_Main : entry.ProfilePictureBase64_Main_Hidden);
+        IsUnlocked(entry)
+            ? GetPicture(entry.ProfilePictureBase64_Sub, entry.ProfilePictureBase64_Main)
+            : GetPicture(entry.ProfilePictureBase64_Sub_Hidden, entry.ProfilePictureBase64_Main_Hidden);
+
+    private Sprite GetPicture(PhotoData first, PhotoData second)
+    {
+        var picture = GetPicture(first);
+        return picture != null ? picture : GetPicture(second);
+    }
 
     /// <summary>사진을 처음 필요할 때 디코드해 캐시한다. 사진이 없으면 null.</summary>
     private Sprite GetPicture(PhotoData photo)
@@ -161,16 +192,23 @@ public sealed class CollectionPanelContentController : MonoBehaviour
         if (!unlocked)
         {
             if (_lockedMessage != null)
-                LocalizationManager.SetText(_lockedMessage, "UICollection.locked_hint", ("ENERGY", entry.RequiredSpawnEnergy));
+            {
+                // 실제 해금 기준은 CharacterOwnership이 든다(테스트 빌드에서는 정의 값과 다르다).
+                var energy = _ownership != null
+                    ? _ownership.GetRequiredSpawnEnergy(entry.CharacterId, entry.RequiredSpawnEnergy)
+                    : entry.RequiredSpawnEnergy;
+                LocalizationManager.SetText(_lockedMessage, "UICollection.locked_hint", ("ENERGY", energy));
+            }
             return;
         }
 
         if (_illustration != null)
         {
             var picture = GetPicture(entry.ProfilePictureBase64_Main);
-            _illustration.sprite = picture;
-            _illustration.enabled = picture != null;
+            _illustration.sprite = picture != null ? picture : _defaultIllustration;
         }
+
+        ShowFieldButton(entry);
 
         if (_nameText != null) _nameText.text = entry.Name;
         if (_infoText != null)
@@ -187,6 +225,37 @@ public sealed class CollectionPanelContentController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 귀환·소환 버튼의 OnClick(인스펙터에서 건다). 고른 캐릭터가 화면에 있으면 도감으로 들여보내고, 없으면 내보낸다.
+    /// 기록을 고치는 것은 <see cref="CharacterOwnership"/>이 하고, 그쪽이 울리는 RecordChanged로 버튼이 다시 그려진다.
+    /// </summary>
+    public void ToggleFieldSelected()
+    {
+        if (_ownership == null || _selected == null) return;
+        var id = _selected.Entry.CharacterId;
+        if (string.IsNullOrEmpty(id) || !_ownership.IsOwned(id)) return;
+
+        if (_ownership.IsPlaced(id)) _ownership.Recall(id);
+        else _ownership.Summon(id);
+    }
+
+    // 버튼 하나의 글자·말풍선을 상태에 맞춘다. 패널을 CanvasGroup으로 숨겨도 이 컴포넌트는 살아 있어서,
+    // 닫혀 있는 동안의 귀환·소환·해금도 RecordChanged → ShowDetail로 따라간다(OnEnable에 기대지 않는다).
+    // 언어가 바뀌어도 ShowDetail이 다시 불려 글자가 새 언어로 바뀐다.
+    private void ShowFieldButton(CollectionData entry)
+    {
+        if (_fieldButton == null) return;
+
+        var id = entry.CharacterId;
+        var owned = _ownership != null && !string.IsNullOrEmpty(id) && _ownership.IsOwned(id);
+        _fieldButton.SetActive(owned);
+        if (!owned) return;
+
+        var placed = _ownership.IsPlaced(id);
+        if (_fieldButtonLabel != null) LocalizationManager.SetText(_fieldButtonLabel, placed ? RecallLabelKey : SummonLabelKey);
+        if (_fieldButtonTooltip != null) _fieldButtonTooltip.SetStringId(placed ? RecallTooltipKey : SummonTooltipKey);
+    }
+
     // 단위와 날짜 표기도 언어마다 달라서 조각마다 번역 표의 문장을 쓴다. 값이 없으면 "-".
     private static string BuildInfo(CollectionData entry)
     {
@@ -195,9 +264,10 @@ public sealed class CollectionPanelContentController : MonoBehaviour
         var birthday = entry.Birthday == DateTime.MinValue
             ? "-"
             : LocalizationManager.Localize("UICollection.birthday_value", ("MONTH", entry.Birthday.Month), ("DAY", entry.Birthday.Day));
+        var breed = string.IsNullOrEmpty(entry.Breed) ? "-" : entry.Breed;
         var hobby = string.IsNullOrEmpty(entry.Hobby) ? "-" : entry.Hobby;
 
-        return LocalizationManager.Localize("UICollection.profile", ("AGE", age), ("HEIGHT", height), ("BIRTHDAY", birthday), ("HOBBY", hobby));
+        return LocalizationManager.Localize("UICollection.profile", ("BREED", breed), ("AGE", age), ("HEIGHT", height), ("BIRTHDAY", birthday), ("HOBBY", hobby));
     }
 
 #if UNITY_EDITOR

@@ -8,7 +8,9 @@ using UnityEngine;
 ///
 /// - 무엇을 스폰할지(prefab)는 호출자가 인자로 넘긴다. 총량 캡(<see cref="_maxCount"/>)은
 ///   prefab 종류와 무관하게 공통 적용된다.
-/// - 캐릭터가 Destroy되면 슬롯이 비어 재스폰 가능.
+/// - 캐릭터가 Destroy되면 슬롯이 비어 재스폰 가능. 파괴하지 않고 숨기는 캐릭터(도감으로 귀환)는 <see cref="Unregister"/>로
+///   목록에서 뺀다 — 들어오는 문은 <see cref="Register"/>, 나가는 문은 파괴 또는 <see cref="Unregister"/>.
+///   그래서 살아있는 목록과 동시 존재 상한은 "화면에 나온" 캐릭터만 센다.
 /// - **추적 목록에 들어오는 문은 <see cref="Register"/> 하나다.** 스폰이든 씬 배치든 여기를 지나므로,
 ///   "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 새는 경로가 없다.
 /// - 씬 배치 캐릭터도 시작 시 찾아 <see cref="Register"/>를 지나므로 규칙에서 빠지지 않는다.
@@ -65,9 +67,14 @@ public class CharacterManager : MonoBehaviour
 
     private void Start()
     {
-        // 유저 설정 중 캐릭터에 거는 것(소녀 변신 금지)을 따라간다. 등록 시점에는 Register가 직접 건다.
+        // 유저 설정 중 캐릭터에 거는 것(소녀 변신 금지, 캐릭터 크기)을 따라간다. 등록 시점에는 Register가 직접 건다.
+        // 캐릭터 크기는 그래픽 탭 값이라 저장 전 미리보기도 따라가야 해서 GraphicsChanged를 따로 듣는다.
         _settings = SettingsManager.Instance;
-        if (_settings != null) _settings.Changed += ApplyUserSettingsToAll;
+        if (_settings != null)
+        {
+            _settings.Changed += ApplyUserSettingsToAll;
+            _settings.GraphicsChanged += ApplyUserSettingsToAll;
+        }
 
         // 씬에 미리 배치된 캐릭터는 Spawn을 거치지 않아 추적 목록에 없다. 먼저 찾아서 등록한다.
         // 빠뜨리면 "살아있는 캐릭터 전부에 거는 규칙"(뷰포트 거주 영역 등)이 그 캐릭터만 비껴가고,
@@ -78,7 +85,11 @@ public class CharacterManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_settings != null) _settings.Changed -= ApplyUserSettingsToAll;
+        if (_settings != null)
+        {
+            _settings.Changed -= ApplyUserSettingsToAll;
+            _settings.GraphicsChanged -= ApplyUserSettingsToAll;
+        }
         if (Instance == this) Instance = null;
     }
 
@@ -95,6 +106,14 @@ public class CharacterManager : MonoBehaviour
         Registered?.Invoke(character);
     }
 
+    /// <summary>추적 목록에서 뺀다. 파괴하지 않고 화면에서 숨길 때(도감 귀환) 부른다. 다시 보일 때는 <see cref="Register"/>를
+    /// 다시 부르면 된다 — 그때 유저 설정과 거주 영역(<see cref="Registered"/>)이 다시 걸려 숨어 있는 동안 바뀐 것을 따라잡는다.</summary>
+    public void Unregister(GameObject character)
+    {
+        if (character == null) return;
+        _alive.Remove(character);
+    }
+
     /// <summary>설정이 바뀔 때 살아있는 캐릭터 전부에 다시 건다. 어느 항목이 바뀌었는지는 모르지만,
     /// 캐릭터 쪽 setter가 같은 값이면 아무 일도 하지 않아서 전부 다시 걸어도 괜찮다.</summary>
     private void ApplyUserSettingsToAll()
@@ -109,7 +128,9 @@ public class CharacterManager : MonoBehaviour
         var settings = SettingsManager.Instance;
         if (settings == null) return;
         var controller = character.GetComponent<BaseCharacterController>();
-        if (controller != null) controller.SetGirlTransformBanned(settings.GirlTransformBanned);
+        if (controller == null) return;
+        controller.SetGirlTransformBanned(settings.GirlTransformBanned);
+        controller.SetUserScale(GraphicsScaleSteps.Character.ToScale(settings.CharacterScaleStep));
     }
 
     /// <summary>

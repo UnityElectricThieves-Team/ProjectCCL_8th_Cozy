@@ -42,6 +42,16 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     // 거주 영역과 같은 방식이다 — 캐릭터는 이 값이 유저 설정에서 왔다는 것을 모른다.
     private bool _girlTransformBanned;
 
+    // 소녀가 된 시각(Time.time). 소녀일 때만 의미가 있다.
+    // 폼은 저장하지 않으므로 재시작하면 언제나 동물로 시작한다 — 기획의 "2시간 전에 껐다 켜도 동물로 복귀"가 이것으로 성립한다.
+    private float _girlSince;
+
+    // Start가 한 번 돌았는가. 숨었다 다시 켜질 때(도감 소환)의 OnEnable과, 처음 켜질 때의 OnEnable을 가른다.
+    private bool _started;
+
+    // 다시 켜진 뒤 첫 Update에서 그림 상태를 다시 넣어야 하는가. 이유는 OnEnable 주석.
+    private bool _resyncVisual;
+
     /// <summary>거주 영역이 아직 안 들어온 씬에서 쓰는 지면 높이. 인스펙터로 열지 않는다 —
     /// 조절 가능한 바닥이 있으면 그게 다른 오차(발 위치 어긋남 등)의 보정값 노릇을 하다가,
     /// 지면 정의가 바뀌는 순간 보정이 통째로 사라진다. 실제로 그렇게 어긋난 전례가 있다.</summary>
@@ -110,25 +120,49 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     {
         _visual.ApplyStartup();
         _state.StartUp();
+        _started = true;
     }
 
     protected virtual void OnEnable()
     {
         _state.Subscribe();
         _scale.Subscribe();
+
+        // 숨었다 다시 켜지는 것은 도감 소환뿐이고, 소환은 언제나 위에서 떨어진다. 그래서 같은 상태여도 낙하로 다시 들어간다.
+        // "지면 위면 낙하, 아니면 대기"로 고르지 않는 이유: 그 판정은 아직 숨기 전의 거주 영역(옛 지면)으로 하게 된다.
+        // 상태는 여기서 바로 바꾼다 — 곧이어 등록될 때 접지 강제가 돌아도 낙하는 세로를 스스로 쥐어 바닥으로 끌려가지 않는다.
+        // 그림은 다음 Update로 미룬다 — Animator는 자식에 있어 루트의 OnEnable보다 늦게 켜지고, 그 사이 넣은 값은 지워질 수 있다.
+        // 처음 켜질 때는 Start(StartUp)가 시작 상태를 고른다.
+        if (_started)
+        {
+            _resyncVisual = true; // 먼저 켠다 — 아래 상태 전환이 아직 안 켜진 Animator에 값을 넣지 않게(OnStateChanged)
+            _state.ForceEnter(CharacterState.Fall);
+        }
     }
 
     protected virtual void Update()
     {
+        if (_resyncVisual)
+        {
+            _resyncVisual = false;
+            _visual.CancelOneShot();
+            _visual.Play(_state.CurrentStateId);
+        }
+
         var dt = Time.deltaTime;
         _state.Tick(dt);
         _visual.Tick(dt);
+        _affinity.TickAwake(dt, _state.CurrentStateId == CharacterState.Sleep);
+
+        // 소녀 유지 시간이 지나면 동물로 돌아간다(시간은 GameBalance). 요청이 거부되면(수면·낙하 등) 다음 프레임에
+        // 다시 요청한다. 받아들여지면 변신 중 잠금으로 조용해지고, 폼이 동물로 바뀌는 순간 이 조건이 꺼진다.
+        if (_visual.CurrentForm == CharacterForm.Girl && Time.time - _girlSince >= GameBalance.GirlFormSeconds)
+            RequestRevertToAnimal();
     }
 
     protected virtual void OnDisable()
     {
         _state.Unsubscribe();
-        _scale.Unsubscribe();
     }
 
     protected virtual void OnDestroy()
@@ -142,6 +176,8 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
 
     private void OnStateChanged(CharacterState state)
     {
+        // 다시 켜진 직후에는 그림을 다음 Update에서 한꺼번에 맞춘다(OnEnable 주석).
+        if (_resyncVisual) return;
         _visual.Play(state);
     }
 
@@ -165,13 +201,23 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public void RequestPet() => _state.RequestPet();
     public void RequestGrab() => _state.RequestGrab();
 
-    /// <summary>우클릭 변신 토글. 동물→소녀는 친밀도 만점 필요, 소녀→동물은 언제든. CharacterInteractionRelay.OnRightClick에서 호출.</summary>
+    /// <summary>동물 → 소녀 변신 요청. 친밀도가 변신 임계 이상일 때만 받는다(AILogic.md §Transform).
+    /// 이미 소녀면 무시한다 — 기획은 우클릭을 동물 → 소녀, Shift+우클릭을 소녀 → 동물로 나눴다.
+    /// CharacterInteractionRelay.OnRightClick에서 호출.</summary>
     public void RequestTransform()
     {
         // 금지 중에는 변신 시스템 자체를 끈다(UserSettings.md). 소녀는 금지를 거는 순간 동물로 돌아가 있다.
         if (_girlTransformBanned) return;
-        // 동물 → 소녀: 친밀도가 변신 임계 이상일 때만 (AILogic.md §Transform). 소녀 → 동물: 무조건 허용.
-        if (_visual.CurrentForm == CharacterForm.Animal && !_affinity.CanHumanTransform) return;
+        if (_visual.CurrentForm != CharacterForm.Animal) return;
+        if (!_affinity.CanHumanTransform) return;
+        _state.RequestTransform();
+    }
+
+    /// <summary>소녀 → 동물 변신 요청. 조건 없이 받는다(잠금·공중·수면 중이면 StateModule이 거부한다).
+    /// 이미 동물이면 무시한다. CharacterInteractionRelay.OnShiftRightClick에서 호출.</summary>
+    public void RequestRevertToAnimal()
+    {
+        if (_visual.CurrentForm != CharacterForm.Girl) return;
         _state.RequestTransform();
     }
 
@@ -221,17 +267,21 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     /// 캐릭터는 이 사각형이 무엇에서 왔는지 모른다 — 월드 좌표로 환산된 결과만 받는다.
     /// 뷰포트에서 환산해 걸어주는 것은 <c>Gameplay/Viewport/ViewportLivingAreaBinder</c>다.
     ///
-    /// 지금 밖에 있으면 즉시 안으로 끌어들인다(뷰포트를 캐릭터 밑에서 줄인 경우).
+    /// 발이 지금 밖에 있으면 영역 안의 랜덤한 가로 위치 지면으로 옮긴다(뷰포트를 캐릭터 밑에서 줄인 경우).
+    /// 기획이 "새 화면 안에 랜덤 재배치"로 정했다. 파괴·재생성이 아니라 위치만 옮기므로 친밀도 등 상태는 그대로다.
     /// </summary>
     public void SetLivingArea(Rect worldArea)
     {
         _livingArea = worldArea;
         _hasLivingArea = true;
 
-        // 가로만 여기서 넣는다.
         Vector3 p = transform.position;
-        p.x = Mathf.Clamp(p.x, _livingArea.xMin, _livingArea.xMax);
-        transform.position = p;
+        if (p.x < _livingArea.xMin || p.x > _livingArea.xMax)
+        {
+            p.x = Random.Range(_livingArea.xMin, _livingArea.xMax);
+            p.y = _livingArea.yMin;
+            transform.position = p;
+        }
 
         // 세로는 접지 규칙이 정한다 — 공중에 있는 캐릭터를 바닥으로 끌어내리면 안 되고, 그 판정은 상태가 안다.
         // 다음 Update까지 미루지 않고 여기서 부른다. 미루면 뷰포트가 바뀐 그 프레임 동안
@@ -288,6 +338,9 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
         // 동물→소녀 변신 도중에 금지가 걸리면, 이펙트 중간의 폼 스왑이 소녀를 되살린다. 여기서 막는다.
         if (form == CharacterForm.Girl && _girlTransformBanned) return;
         _visual.SetForm(form);
+        // 폼 스왑이 실제로 일어났을 때만 잰다 — 애니메이터 오버라이드가 비어 있으면 VisualModule이 스왑을 건너뛴다.
+        if (form == CharacterForm.Girl && _visual.CurrentForm == CharacterForm.Girl) _girlSince = Time.time;
+        if (form == CharacterForm.Animal && _visual.CurrentForm == CharacterForm.Animal) _affinity.RestartTransformCount();
     }
 
     /// <summary>
@@ -298,8 +351,18 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public void SetGirlTransformBanned(bool banned)
     {
         _girlTransformBanned = banned;
-        if (banned && _visual.CurrentForm == CharacterForm.Girl) _visual.SetForm(CharacterForm.Animal);
+        if (banned && _visual.CurrentForm == CharacterForm.Girl)
+        {
+            _visual.SetForm(CharacterForm.Animal);
+            _affinity.RestartTransformCount();
+        }
     }
+
+    /// <summary>
+    /// 유저 설정의 캐릭터 크기 배율을 건다. 루트 스케일이라 발(루트)은 제자리에 남는다.
+    /// 유저 설정에서 값을 읽어 걸어주는 것은 <see cref="CharacterManager"/>다.
+    /// </summary>
+    public void SetUserScale(float multiplier) => _scale.UserMultiplier = multiplier;
 
     // ===== IStateOwner: Ground =====
 
