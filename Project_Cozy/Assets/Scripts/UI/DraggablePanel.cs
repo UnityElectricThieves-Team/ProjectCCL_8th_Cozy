@@ -61,7 +61,10 @@ public class DraggablePanel : MonoBehaviour, IDragHandler
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (GetComponentInParent<UIPanel>() == null)
+        // 프리팹 에셋을 임포트할 때도 OnValidate가 불리는데, 그때는 씬 밖이라 부모 검색이 비어 오탐이 난다.
+        // 씬이나 Prefab Mode에 열려 있을 때만 검사한다. 꺼진 부모도 찾도록 includeInactive를 켠다.
+        if (!gameObject.scene.IsValid()) return;
+        if (GetComponentInParent<UIPanel>(true) == null)
             Debug.LogWarning($"[{nameof(DraggablePanel)}] 부모에 UIPanel이 없습니다. 패널의 Area_Header에 붙여야 합니다.", this);
     }
 #endif
