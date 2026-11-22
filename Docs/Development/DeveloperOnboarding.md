@@ -4,7 +4,7 @@ Project Cozy에 처음 합류한 개발자가 거쳐야 할 환경 셋업 단계
 
 ## 1. 사전 요구사항
 
-- Unity Hub + **Unity 6000.3.10f1** ([ProjectVersion.txt](../../Project_Cozy/ProjectSettings/ProjectVersion.txt) 참조)
+- Unity Hub + **Unity 6000.3.29f1** ([ProjectVersion.txt](../../Project_Cozy/ProjectSettings/ProjectVersion.txt) 참조)
 - Git 2.30+
 - Git LFS
 - 코드 에디터: Visual Studio 또는 Rider
@@ -45,7 +45,7 @@ git lfs ls-files
 
 ```powershell
 git config merge.unityyamlmerge.name "Unity SmartMerge"
-git config merge.unityyamlmerge.driver '"<Unity 설치 경로\Editor\Data\Tools\UnityYAMLMerge.exe, 예시: C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Data\Tools\UnityYAMLMerge.exe>" merge -p --force --fallback none %O %B %A %A'
+git config merge.unityyamlmerge.driver '"<Unity 설치 경로\Editor\Data\Tools\UnityYAMLMerge.exe, 예시: C:\Program Files\Unity\Hub\Editor\6000.3.29f1\Editor\Data\Tools\UnityYAMLMerge.exe>" merge -p --force --fallback none %O %B %A %A'
 git config merge.unityyamlmerge.recursive binary
 ```
 
@@ -53,7 +53,7 @@ git config merge.unityyamlmerge.recursive binary
 
 ```bash
 git config merge.unityyamlmerge.name "Unity SmartMerge"
-git config merge.unityyamlmerge.driver '<Unity 설치 경로/Contents/Tools/UnityYAMLMerge, 예시: /Applications/Unity/Hub/Editor/6000.3.10f1/Unity.app/Contents/Tools/UnityYAMLMerge> merge -p --force --fallback none %O %B %A %A'
+git config merge.unityyamlmerge.driver '<Unity 설치 경로/Contents/Tools/UnityYAMLMerge, 예시: /Applications/Unity/Hub/Editor/6000.3.29f1/Unity.app/Contents/Tools/UnityYAMLMerge> merge -p --force --fallback none %O %B %A %A'
 git config merge.unityyamlmerge.recursive binary
 ```
 

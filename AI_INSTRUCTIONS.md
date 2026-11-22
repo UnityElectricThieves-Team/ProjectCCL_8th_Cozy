@@ -20,9 +20,9 @@
 
 | 항목 | 값 |
 |---|---|
-| Engine | Unity **6000.3.10f1** (Unity 6) |
+| Engine | Unity **6000.3.29f1** (Unity 6) |
 | Render Pipeline | URP 2D (17.3) |
-| Input | New Input System (1.18) |
+| Input | New Input System (1.20) |
 | 주요 2D 패키지 | 2D Animation, Aseprite Importer, PSD Importer, SpriteShape, Tilemap Extras |
 | 비동기 | UniTask 2.5.11 (로컬 패키지) |
 | 빌드 타겟 | Windows x86_64 (추후 확장 가능) |
