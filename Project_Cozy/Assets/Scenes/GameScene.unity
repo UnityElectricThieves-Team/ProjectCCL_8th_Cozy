@@ -767,7 +767,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ComponentVersion: 2
+  m_ComponentVersion: 3
   m_LightType: 4
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
@@ -1096,7 +1096,6 @@ MonoBehaviour:
   _captionHeightPx: 28
   _captionWidthPx: 220
   _pollingCamera: {fileID: 788830926}
-  _debugLogs: 0
 --- !u!114 &319457227
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1221,6 +1220,10 @@ MonoBehaviour:
     prefab: {fileID: 6540613743082825958, guid: 2e7fe18474d1e2c4a8fcbc54bf659f5f, type: 3}
   - id: character_hera
     prefab: {fileID: 2054637248899578007, guid: 4036eb76dfac34749992a52cded7f9be, type: 3}
+  - id: character_maid
+    prefab: {fileID: 8081338107326962153, guid: 5226161b24d811e4faff9b972509985d, type: 3}
+  - id: character_sickly
+    prefab: {fileID: 5004385423305317641, guid: 9399dd6a983dcfa4c8b195428a992873, type: 3}
   _dropHeight: 1.08
 --- !u!1 &355942831
 GameObject:
@@ -1376,7 +1379,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   maxOverlapHits: 5
-  debugLogs: 0
   _skipRescanWhenPointerUnchanged: 1
   _cursorSource: {fileID: 0}
 --- !u!4 &371633014

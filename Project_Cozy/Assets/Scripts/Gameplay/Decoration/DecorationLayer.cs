@@ -61,7 +61,7 @@ public sealed class DecorationLayer : MonoBehaviour
     // 장식끼리는 겹치게 놓을 수 없어 서로의 앞뒤가 드러나지 않으므로 값 하나로 둔다.
     private const int SORTING_ORDER = -50;
 
-    // 이동·회수·제거 모드 동안의 Order in Layer. 캐릭터(지금 10~12)보다 앞, 들고 다니는 고스트(100)보다 뒤.
+    // 이동·회수·제거 모드 동안의 Order in Layer. 캐릭터(각 캐릭터 프리팹의 Order in Layer)보다 앞, 들고 다니는 고스트(100)보다 뒤.
     // 캐릭터가 앞에서 알짱대 장식을 못 알아보는 일을 막는다(Figma 이동/회수/제거 모드 설명). 캐릭터 쪽 값은 건드리지 않는다.
     private const int BROUGHT_FORWARD_SORTING_ORDER = 50;
 

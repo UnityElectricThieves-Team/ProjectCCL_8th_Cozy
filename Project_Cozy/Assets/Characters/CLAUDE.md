@@ -15,18 +15,22 @@ Characters/
 | 무엇 | 어디 | 누가 만든다 |
 |---|---|---|
 | 스프라이트 시트·클립 | `Assets/Art/<이름>/` (`Image/`, `Clip/`) | 아트 |
-| 오버라이드 컨트롤러 (폼별 클립 세트) | `Assets/Assets/Animations/AnimationSystem/<이름>_Override` | 개발 |
+| 오버라이드 컨트롤러 (폼별 클립 세트), 개발이 만든 임시 대체 클립 | `Assets/Assets/Animations/AnimationSystem/<이름>_Override`, `<이름>_Girl_Placeholder` | 개발 |
 | 프리팹 | `Assets/Prefabs/Characters/Character_<이름>.prefab` | 개발 |
+
+아트 폴더 이름은 아트가 정해서 캐릭터 이름과 다를 수 있다(예: `Art/CheeseCat`, `Art/MaidGirl`). 오버라이드·프리팹의 `<이름>`은 대응표 id의 이름 부분을 PascalCase로 쓴다(`character_maid` → `Maid_Override`, `Character_Maid`).
 
 아트 폴더 안의 개별 `.controller`(`AnimatorController/`)는 아트 테스트 씬에서 미리 보기용으로 쓰는 것이라 본편에서는 쓰지 않는다.
 
 ## 새 캐릭터를 붙이는 순서
 
-1. **시트 임포트 설정을 맞춘다.** PPU는 100 그대로 두고, 칸 단위 격자로 자르고, Read/Write를 켠다. Read/Write는 마우스 판정이 픽셀을 읽기 때문에 필요하다([Interaction/CLAUDE.md](../Scripts/Interaction/CLAUDE.md)의 `OpaqueHoverable`). 피벗은 같은 프리팹의 다른 폼과 발 위치가 맞게 넣는다([character-ground.md](../../../.claude/rules/unity/character-ground.md)).
+1. **시트 임포트 설정을 맞춘다.** PPU는 100 그대로 두고, Max Size는 시트 긴 변 이상으로 두고([viewport-coordinates.md](../../../.claude/rules/unity/viewport-coordinates.md)), Read/Write를 켠다. Read/Write는 마우스 판정이 픽셀을 읽기 때문에 필요하다([Interaction/CLAUDE.md](../Scripts/Interaction/CLAUDE.md)의 `OpaqueHoverable`). 잘려 오지 않은 시트만 칸 단위 격자로 자른다. 피벗은 같은 프리팹의 다른 폼과 발 위치가 맞게 넣는다. 이미 클립이 걸린 채 온 시트의 피벗을 바꾸는 법은 [character-ground.md](../../../.claude/rules/unity/character-ground.md)의 "폼이 둘이면 피벗에서 발까지의 거리를 맞춥니다" 절을 따른다.
 2. **오버라이드 컨트롤러를 만든다.** 베이스는 `BaseCharacterAnimatorController`이고, 그 캐릭터에 있는 클립만 채운다. 클립이 없는 칸은 비워 둔다. 다른 캐릭터의 클립으로 채우면 그 상태에서 다른 캐릭터 그림이 튀어나온다.
-   예외로, 동물 폼 그림이 아직 없는 캐릭터(지금은 치즈·헤라)는 동물 오버라이드를 덮지 않아 베이스의 흰 고양이 클립으로 나온다. 흰 고양이가 튀어나오는 것을 알고 둔 임시 상태이고, 그림이 오면 그 캐릭터의 동물 오버라이드를 만들어 바꾼다.
-3. **프리팹은 `Character.prefab`의 배리언트로 만든다.** 구조(Visual·판정·앵커)는 물려받고, 오버라이드·기본 스프라이트·모션 시간처럼 캐릭터마다 다른 값만 바꾼다. **시작 폼은 덮지 않는다** — 베이스 값(동물)을 그대로 둔다. 기획이 "켜면 고양이"로 정했고, 폼을 저장하지 않는 대신 재시작하면 동물로 돌아온다는 규칙([character-ownership.md](../../../.claude/rules/unity/character-ownership.md))이 이것에 기댄다. 동물 그림이 없다고 소녀로 시작하게 두면, 소녀 유지 시간이 게임을 켤 때부터 흘러 몇 분(테스트 값) 뒤 동물로 바뀐다. 크기 배율(Base Scale)은 바꾸지 않는다 — 지금 베이스 프리팹에 들어 있는 배율은 모든 캐릭터에 거는 임시 축소다([character-ground.md](../../../.claude/rules/unity/character-ground.md)).
+   예외로, 동물 폼 그림이 아직 없는 캐릭터(지금은 치즈·헤라·메이드·병약)는 동물 오버라이드를 덮지 않아 베이스의 흰 고양이 클립으로 나온다. 흰 고양이가 튀어나오는 것을 알고 둔 임시 상태이고, 그림이 오면 그 캐릭터의 동물 오버라이드를 만들어 바꾼다.
+   또 하나의 예외로, 소녀 폼 동작이 일부만 온 병약은 없는 칸(걷기·잠·들기·낙하·특수 대기)을 자기 idle 0번 그림 한 장짜리 클립(`Sickly_Girl_Placeholder`)으로 채운다. 국기님이 "일단"으로 정한 임시 상태이고(2026-11-22), 그림이 오면 그 칸을 진짜 클립으로 바꾸고 이 클립을 지운다. 자기 그림이라 위에서 막으려는 "다른 캐릭터 그림이 튀어나옴"이 생기지 않는다. 아트 폴더가 아니라 `AnimationSystem/`에 두는 것은, 아트가 진짜 클립을 같은 폴더에 넣을 때 개발이 만든 임시 클립과 섞이지 않게 하려는 것이다.
+3. **프리팹은 `Character.prefab`의 배리언트로 만든다.** 다른 캐릭터 배리언트를 원본으로 고르지 않는다. 구조(Visual·판정·앵커)는 물려받고, 오버라이드·기본 스프라이트·Order in Layer·모션 시간처럼 캐릭터마다 다른 값만 바꾼다. Order in Layer는 베이스 프리팹의 그림자(Shadow)보다 크고 머리 위 글자보다 작게 둔다. 값은 프리팹에서 확인한다. **시작 폼은 덮지 않는다** — 베이스 값(동물)을 그대로 둔다. 기획이 "켜면 고양이"로 정했고, 폼을 저장하지 않는 대신 재시작하면 동물로 돌아온다는 규칙([character-ownership.md](../../../.claude/rules/unity/character-ownership.md))이 이것에 기댄다. 동물 그림이 없다고 소녀로 시작하게 두면, 소녀 유지 시간이 게임을 켤 때부터 흘러 몇 분(테스트 값) 뒤 동물로 바뀐다. 크기 배율(Base Scale)은 바꾸지 않는다 — 지금 베이스 프리팹에 들어 있는 배율은 모든 캐릭터에 거는 임시 축소다([character-ground.md](../../../.claude/rules/unity/character-ground.md)).
 4. **모션 시간을 실제 재생 시간에 맞춘다.** 쓰담·특수 대기는 클립이 끝나는 시점이 아니라 프리팹 인스펙터의 시간 값으로 끝난다. 재생 시간은 클립 길이 ÷ 상태 Speed라서, 클립의 프레임 수나 fps를 바꿀 때뿐 아니라 아래의 재생 속도를 바꿀 때도 이 값을 함께 바꾼다. 시간 값은 폼 구분이 없어 두 폼에 함께 걸린다. 맞추는 기준은 그 캐릭터 고유 클립(지금은 소녀)이다 — 빌려 쓰는 흰 고양이 클립에 맞춰 되돌리지 않는다.
+5. **씬에 놓지 않고 `CharacterOwnership`의 대응표에 id와 프리팹을 등록한다.** id는 저장 키라 한번 정하면 바꾸지 않는다. 이유는 [character-ownership.md](../../../.claude/rules/unity/character-ownership.md).
 
 ## 재생 속도
 
@@ -40,7 +44,6 @@ Characters/
 
 - 클립 전체가 아니라 상태별로 조금씩 더 빠르게·느리게 하고 싶으면 `BaseCharacterAnimatorController`의 상태 Speed를 쓴다. 오버라이드는 클립만 갈아 끼우므로 모든 캐릭터와 두 폼에 함께 걸린다.
 - 재생 속도를 바꾸면 위 4번의 모션 시간 값과 걷기·달리기 속도를 같이 본다. 걷기 클립만 빨라지고 이동 속도가 그대로면 발이 미끄러져 보인다. 치즈는 걷기 속도를 일부러 그대로 두었다(발 미끄러짐 감수, 기획 확인 대상).
-5. **씬에 놓지 않고 `CharacterOwnership`의 대응표에 id와 프리팹을 등록한다.** id는 저장 키라 한번 정하면 바꾸지 않는다. 이유는 [character-ownership.md](../../../.claude/rules/unity/character-ownership.md).
 
 캐릭터 코드(컨트롤러 / AI / 친밀도)는 [Scripts/Character/](../Scripts/Character/CLAUDE.md)에 있다. 아트 폴더에 스크립트를 두지 않는다.
 
