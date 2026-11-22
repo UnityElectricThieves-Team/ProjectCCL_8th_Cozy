@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6111ad88a1bd97647bb7ebdd01ee283e, type: 3}
-  m_Name: ShopItem_7_Armchair
+  m_Name: Deco_WarmCozyRoom_Fireplace
   m_EditorClassIdentifier: Assembly-CSharp::ShopItemDefinition
-  id: shop_item_7_armchair
-  displayName: "\uC548\uB77D\uC758\uC790"
-  icon: {fileID: 21300000, guid: 7366225909f9ec64ca577363dd188683, type: 3}
-  price: 2
-  decorationPrefab: {fileID: 496522293083197305, guid: 91b019a551dd3514bb4b0d43544c6b60, type: 3}
+  id: deco_warmcozyroom_fireplace
+  displayName: "\uBCBD\uB09C\uB85C"
+  icon: {fileID: 21300000, guid: 60d9b832f48fa944aa1b6c2b03b13db4, type: 3}
+  price: 5
+  decorationPrefab: {fileID: 8470878808703054549, guid: b6526974249de5745b1abc05f26165cc, type: 3}
   placementKind: 0

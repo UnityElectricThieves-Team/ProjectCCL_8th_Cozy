@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6111ad88a1bd97647bb7ebdd01ee283e, type: 3}
-  m_Name: ShopItem_8_Bookcase
+  m_Name: Deco_WarmCozyRoom_Sofa
   m_EditorClassIdentifier: Assembly-CSharp::ShopItemDefinition
-  id: shop_item_8_bookcase
-  displayName: "\uCC45\uC7A5"
-  icon: {fileID: 21300000, guid: 1fe4a886760bbbf498996064ea9299f7, type: 3}
-  price: 3
-  decorationPrefab: {fileID: 1081490545118823315, guid: bd0065951cb3edc48bb11e982f4dc245, type: 3}
+  id: deco_warmcozyroom_sofa
+  displayName: "\uC18C\uD30C"
+  icon: {fileID: 21300000, guid: bdb07af49d32c6449bcbb3641b4d47b6, type: 3}
+  price: 4
+  decorationPrefab: {fileID: 3678818803861714705, guid: ac64b743cd2eb2542a0ffd85d58e3e67, type: 3}
   placementKind: 0
