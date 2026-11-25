@@ -61,6 +61,11 @@ public sealed class AffinityModule
     /// 누적 친밀도는 건드리지 않는다.</summary>
     public void RestartTransformCount() => _gainedSinceAnimal = 0;
 
+    /// <summary>튜토리얼 전용. 변신 조건(동물이 된 뒤 쌓인 양)을 임계까지 채워 바로 변신할 수 있게 한다.
+    /// 튜토리얼은 누적 친밀도 90에서 시작해 10만 올리므로, 이것 없이는 변신 조건에 닿지 않는다.
+    /// 누적 친밀도는 건드리지 않는다 — 친밀도를 바꾸는 경로가 아니다. 규약은 character-affinity.md.</summary>
+    public void MarkHumanTransformReady() => _gainedSinceAnimal = GameBalance.AffinityToTransform;
+
     // 친밀도를 올리는 단 하나의 경로. 누적값은 하드 상한에서 멈춘다.
     private void Add(int amount)
     {
@@ -79,7 +84,8 @@ public sealed class AffinityModule
     }
 
     /// <summary>
-    /// 저장된 친밀도를 되돌린다. 스폰 직후 한 번만 부른다.
+    /// 저장된 친밀도를 되돌린다. 보통 스폰 직후 한 번 부른다. 예외로 튜토리얼이 기록의 친밀도를 시작값까지 올린 뒤
+    /// 화면의 값을 맞출 때도 부른다(<c>CharacterOwnership.EnsureAffinityAtLeast</c> — 그쪽이 RecordChanged를 대신 울린다).
     /// <see cref="AffinityChanged"/>를 울리지 않는다 — 값이 바뀐 것이 아니라 되돌린 것이라, 울리면 기록 쪽이 같은 값을
     /// 다시 저장하고 표시 쪽을 괜히 다시 그린다. 구독자는 자기 Start에서 현재 값을 읽는다.
     /// </summary>

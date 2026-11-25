@@ -70,4 +70,15 @@ public static class GameBalance
     /// (기획 20 / 1,000 / 3,000 / 7,000 / 15,000).
     /// </summary>
     public static readonly int[] TestUnlockEnergy = UsesTestValues ? new[] { 20, 100, 150, 200, 250 } : null;
+
+    // ===== 튜토리얼 =====
+
+    /// <summary>튜토리얼에서 구름을 이만큼 좌클릭하면 우클릭 안내로 넘어간다. 기획 10번.
+    /// 테스트도 같은 값이다 — 스폰 기운이 아니라 튜토리얼 클릭 수로 세므로 테스트 해금 기운과 무관하고, 10번은 금방 끝난다.</summary>
+    public const int TutorialCloudClicks = 10;
+
+    /// <summary>튜토리얼로 해금한 첫 캐릭터의 시작 친밀도. 기획 90(쓰담 10번으로 변신 임계 100에 닿는다).
+    /// 테스트도 같은 값이다 — 테스트는 쓰담 증가량이 커서 한두 번에 닿는데, 그것으로 충분히 빠르다.
+    /// 하트를 주지 않는 출발점이다(character-affinity.md).</summary>
+    public const int TutorialStartAffinity = 90;
 }

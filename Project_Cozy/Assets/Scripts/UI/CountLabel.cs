@@ -35,6 +35,14 @@ public sealed class CountLabel : MonoBehaviour
     private CountVisibility _visibility = CountVisibility.AutoHide;
     private int _shownValue = -1;
 
+    /// <summary>켜 있는 동안 모든 수치를 숨긴다. 튜토리얼이 자기 카운터와 숫자가 겹쳐 보이지 않게 건다.
+    /// 설정값은 건드리지 않고, 매 프레임 보이기 판정에서 함께 본다.</summary>
+    public static bool Suppressed { get; set; }
+
+    // 도메인 리로드 없이 Play에 들어가므로 정적 값은 Play 시작마다 비운다(WorldInputLock과 같은 이유).
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics() => Suppressed = false;
+
     private void Awake()
     {
         if (_label == null) _label = GetComponent<TMP_Text>();
@@ -82,7 +90,7 @@ public sealed class CountLabel : MonoBehaviour
     {
         if (_visibility == CountVisibility.Hidden) return;
 
-        bool show = _visibility == CountVisibility.Always || IsCursorOverBox();
+        bool show = !Suppressed && (_visibility == CountVisibility.Always || IsCursorOverBox());
         _label.enabled = show;
         if (!show) return;
 

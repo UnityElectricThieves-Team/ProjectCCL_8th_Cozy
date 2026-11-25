@@ -5,13 +5,16 @@ using UnityEngine.Serialization;
 /// 구름(스폰 포인트)의 중앙 컨트롤러 — <see cref="BaseCharacterController"/>에 대응하는 구름 버전.
 ///
 /// - 누적 스폰 기운(<see cref="SpawnPointManager.CumulativeEnergy"/>)으로 해금할 수 있는 캐릭터가 남아 있으면 Activated,
-///   아니면 Idle인 2상태 머신. 상태가 바뀔 때만 그림 연출(<see cref="CloudVisual"/>)에 알린다 — Activated면 반짝인다.
+///   아니면 Idle인 2상태 머신. 단 밖에서 <see cref="SetForcedIdle"/>로 묶으면 기운과 무관하게 Idle이다(튜토리얼).
+///   상태가 바뀔 때만 그림 연출(<see cref="CloudVisual"/>)에 알린다 — Activated면 반짝인다.
 ///   둥둥·반짝임을 어떻게 그리는지는 CloudVisual이 맡고, 여기는 상태와 드래그 중인지만 넘긴다.
 /// - 클릭(드래그가 아니었을 때) 시 다음 캐릭터 하나를 해금한다. 어떤 캐릭터가 얼마에 열리는지, 기록과 등장은
 ///   <see cref="CharacterOwnership"/>이 맡는다. 구름은 "지금 눌러도 되는가"와 "눌렸다"만 안다.
 ///   해금해도 기운은 차감하지 않는다.
 /// - 프리팹을 직접 스폰하지 않는다. 기록을 거치지 않은 캐릭터는 재시작하면 사라지고, 1종류당 1개라는 제약도 깨진다
 ///   (.claude/rules/unity/character-ownership.md의 구름 항목).
+/// - 밖으로는 "눌렀다 뗐다(끌기 아님)"(<see cref="ClickReleased"/>)와 "우클릭했다"(<see cref="RightClicked"/>)를 알린다.
+///   구름은 누가 듣는지 모른다 — 튜토리얼이 구독해 센다.
 ///
 /// 같은 GameObject에 <see cref="Collider2D"/>가 있어야 <see cref="InputInteractionManager"/>가 클릭을 라우팅한다.
 /// 같은 GameObject에 <see cref="DraggableObject2D"/>가 있으면 드래그가 아니었을 때(mouse up 시점)에만 스폰한다.
@@ -21,8 +24,14 @@ using UnityEngine.Serialization;
 /// 기획이 "구름 스폰: 새 화면 안에 랜덤 재배치"로 정했다. 편집 중 프리뷰에는 따라가지 않고 [완료] 때 옮긴다(캐릭터와 같은 판단) —
 /// 프리뷰마다 확정 신호를 울리면 끄는 동안 매 프레임 재배치된다. 배경·장식은 그림이라 프리뷰를 따로 듣는다.
 /// </summary>
-public sealed class CloudController : MonoBehaviour, IClickable
+public sealed class CloudController : MonoBehaviour, IClickable, IRightClickable
 {
+    /// <summary>구름을 눌렀다 뗐을 때(끌기가 아니었을 때) 울린다. 해금 여부와 무관하다.</summary>
+    public event System.Action ClickReleased;
+
+    /// <summary>구름을 우클릭했을 때 울린다. 구름 자신은 우클릭에 아무것도 하지 않는다.</summary>
+    public event System.Action RightClicked;
+
     private enum CloudState { Idle = 0, Activated = 1 }
 
     [Header("Refs")]
@@ -36,6 +45,7 @@ public sealed class CloudController : MonoBehaviour, IClickable
     private CloudState _current;
     private DraggableObject2D _draggable;
     private bool _unlockPending;
+    private bool _forcedIdle;
 
     private ViewportScreenSettings _viewportSettings;
     private BaseSpaceCameraFitter _cameraFitter;
@@ -134,9 +144,15 @@ public sealed class CloudController : MonoBehaviour, IClickable
         if (desired != _current) ApplyState(desired);
     }
 
-    // 해금 가능(=Activated) 여부. 눌러서 해금하면 다음 단계의 기운이 찰 때까지 Idle로 돌아간다.
-    private bool IsReady() => _spawnPoint != null && CharacterOwnership.Instance != null
+    // 해금 가능(=Activated) 여부. 눌러서 해금하면 다음 단계의 기운이 찰 때까지 Idle로 돌아간다. 묶여 있으면 늘 false.
+    private bool IsReady() => !_forcedIdle && _spawnPoint != null && CharacterOwnership.Instance != null
         && CharacterOwnership.Instance.HasUnlockable(_spawnPoint.CumulativeEnergy);
+
+    /// <summary>
+    /// 구름을 Idle로 묶거나 푼다. 묶여 있는 동안은 클릭 해금과 활성 반짝임이 멈추고, 둥둥·끌기·재배치는 그대로다.
+    /// 튜토리얼이 건다 — 튜토리얼 클릭으로 쌓인 스폰 기운이 해금 기운에 닿아도 평소 해금이 일어나지 않게.
+    /// </summary>
+    public void SetForcedIdle(bool forced) => _forcedIdle = forced;
 
     /// <summary>현재 Activated(해금 가능) 상태인가. 디버그 표시 등 외부 노출용.</summary>
     public bool IsActivated => IsReady();
@@ -151,6 +167,7 @@ public sealed class CloudController : MonoBehaviour, IClickable
             _unlockPending = true;
             return;
         }
+        ClickReleased?.Invoke();
         RequestUnlock();
     }
 
@@ -159,14 +176,18 @@ public sealed class CloudController : MonoBehaviour, IClickable
         if (!_unlockPending) return;
         _unlockPending = false;
         if (wasDrag) return;
+        ClickReleased?.Invoke();
         RequestUnlock();
     }
 
+    public void OnRightClick() => RightClicked?.Invoke();
+
     /// <summary>해금할 수 있는 캐릭터가 있으면 하나를 해금한다. 없으면(Idle) 아무 일도 하지 않는다.
+    /// 묶여 있으면(<see cref="SetForcedIdle"/>) 해금하지 않는다 — 상태 계산만 막으면 클릭이 상태를 보지 않고 해금한다.
     /// 해금된 캐릭터는 CharacterOwnership이 뷰포트 안 랜덤 위치에서 떨어뜨린다.</summary>
     private void RequestUnlock()
     {
-        if (_spawnPoint == null || CharacterOwnership.Instance == null) return;
+        if (_forcedIdle || _spawnPoint == null || CharacterOwnership.Instance == null) return;
         CharacterOwnership.Instance.TryUnlockNext(_spawnPoint.CumulativeEnergy);
     }
 

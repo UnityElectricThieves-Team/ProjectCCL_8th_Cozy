@@ -32,6 +32,9 @@ public class CharacterManager : MonoBehaviour
     private readonly List<GameObject> _alive = new List<GameObject>();
     private SettingsManager _settings;
 
+    // 튜토리얼 동안 소녀 변신 금지를 잠시 푸는 플래그. static으로 두지 않는다 — 도메인 리로드 없는 Play에서 값이 남지 않게.
+    private bool _girlTransformBanSuspended;
+
     /// <summary>현재 살아있는 캐릭터 수.</summary>
     public int AliveCount { get { Prune(); return _alive.Count; } }
 
@@ -114,6 +117,18 @@ public class CharacterManager : MonoBehaviour
         _alive.Remove(character);
     }
 
+    /// <summary>
+    /// 튜토리얼 동안 유저 설정의 소녀 변신 금지를 잠시 푼다. 켜 있는 동안은 금지를 거는 모든 길이 금지를 false로 건다.
+    /// 켤 때도 끌 때도 살아 있는 캐릭터 전부에 곧바로 다시 건다 — 튜토리얼보다 먼저 등록된 캐릭터에는 이미 금지가 걸려 있다.
+    /// 이유는 character-ownership.md.
+    /// </summary>
+    public void SetGirlTransformBanSuspended(bool suspended)
+    {
+        if (_girlTransformBanSuspended == suspended) return;
+        _girlTransformBanSuspended = suspended;
+        ApplyUserSettingsToAll();
+    }
+
     /// <summary>설정이 바뀔 때 살아있는 캐릭터 전부에 다시 건다. 어느 항목이 바뀌었는지는 모르지만,
     /// 캐릭터 쪽 setter가 같은 값이면 아무 일도 하지 않아서 전부 다시 걸어도 괜찮다.</summary>
     private void ApplyUserSettingsToAll()
@@ -123,13 +138,13 @@ public class CharacterManager : MonoBehaviour
     }
 
     /// <summary>캐릭터 하나에 유저 설정을 건다. 캐릭터는 설정을 모르므로 여기서 값을 읽어 밀어넣는다.</summary>
-    private static void ApplyUserSettings(GameObject character)
+    private void ApplyUserSettings(GameObject character)
     {
         var settings = SettingsManager.Instance;
         if (settings == null) return;
         var controller = character.GetComponent<BaseCharacterController>();
         if (controller == null) return;
-        controller.SetGirlTransformBanned(settings.GirlTransformBanned);
+        controller.SetGirlTransformBanned(settings.GirlTransformBanned && !_girlTransformBanSuspended);
         controller.SetUserScale(GraphicsScaleSteps.Character.ToScale(settings.CharacterScaleStep));
     }
 

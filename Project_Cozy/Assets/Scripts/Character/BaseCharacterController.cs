@@ -42,6 +42,10 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     // 거주 영역과 같은 방식이다 — 캐릭터는 이 값이 유저 설정에서 왔다는 것을 모른다.
     private bool _girlTransformBanned;
 
+    // 잡기(2초 홀드) 막기. 밖에서 SetGrabBlocked로 주입한다(기본은 허용). 튜토리얼이 쓰담 장면 동안 건다 —
+    // 쓰담하다 잡히면 낙하가 되어 우클릭 변신이 거부되기 때문이다. 쓰담은 막지 않는다.
+    private bool _grabBlocked;
+
     // 소녀가 된 시각(Time.time). 소녀일 때만 의미가 있다.
     // 폼은 저장하지 않으므로 재시작하면 언제나 동물로 시작한다 — 기획의 "2시간 전에 껐다 켜도 동물로 복귀"가 이것으로 성립한다.
     private float _girlSince;
@@ -199,7 +203,11 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
     public void RequestWakeUp() => _state.RequestWakeUp();
     public void RequestFall() => _state.RequestFall();
     public void RequestPet() => _state.RequestPet();
-    public void RequestGrab() => _state.RequestGrab();
+    public void RequestGrab()
+    {
+        if (_grabBlocked) return;
+        _state.RequestGrab();
+    }
 
     /// <summary>동물 → 소녀 변신 요청. 친밀도가 변신 임계 이상일 때만 받는다(AILogic.md §Transform).
     /// 이미 소녀면 무시한다 — 기획은 우클릭을 동물 → 소녀, Shift+우클릭을 소녀 → 동물로 나눴다.
@@ -357,6 +365,12 @@ public class BaseCharacterController : MonoBehaviour, IStateOwner
             _affinity.RestartTransformCount();
         }
     }
+
+    /// <summary>잡기(2초 홀드)를 막거나 푼다. 쓰담은 그대로 받는다. 튜토리얼이 건다.</summary>
+    public void SetGrabBlocked(bool blocked) => _grabBlocked = blocked;
+
+    /// <summary>튜토리얼 전용. 변신 조건을 채워 다음 우클릭에 바로 변신할 수 있게 한다. 누적 친밀도는 바뀌지 않는다.</summary>
+    public void MarkHumanTransformReady() => _affinity.MarkHumanTransformReady();
 
     /// <summary>
     /// 유저 설정의 캐릭터 크기 배율을 건다. 루트 스케일이라 발(루트)은 제자리에 남는다.

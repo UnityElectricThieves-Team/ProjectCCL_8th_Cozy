@@ -78,6 +78,9 @@ public class CharacterOwnership : MonoBehaviour
         public string id;
         public BaseCharacterController controller;
         public Action<int> onAffinityChanged;
+        // 실제로 스폰한 프리팹(대응표 것이든 튜토리얼이 넘긴 것이든). 저장하지 않는다 —
+        // EnsureSpawnedWithPrefab이 "이미 그 프리팹 판이면 아무것도 안 함"을 가리는 데만 쓴다.
+        public GameObject prefab;
     }
 
     // 만든 캐릭터 전부 — 화면에 나온 것과 숨긴 것 모두. 구독 해제·초기화·귀환·소환이 이 목록 하나를 돈다.
@@ -192,31 +195,107 @@ public class CharacterOwnership : MonoBehaviour
     /// 캐릭터를 해금한다. 보유 기록을 만들고 화면에 내보낸다 — 기획상 처음 해금된 캐릭터는 바로 떨어지며 등장한다.
     /// 대응표에 없는 id는 기록하지 않는다. 기록하면 지울 방법 없이 시작할 때마다 경고가 남는다.
     /// 이미 보유한 캐릭터면 아무 일도 하지 않는다 — 도감으로 귀환해 둔 캐릭터를 해금 경로(테스트 메뉴 등)가 다시 불러내지 않게.
+    /// 시작 친밀도는 기록을 만들 때 넣는다. 만든 뒤에 넣으면 스폰 때 이미 0으로 복원되어, 첫 쓰담이 기록을 1로 덮어 친밀도가 줄어든다.
+    /// <paramref name="prefab"/>이 있으면 대응표 대신 그 프리팹으로 스폰한다(튜토리얼 전용). 새 기록을 만들었으면 true.
     /// </summary>
-    private void Unlock(string id)
+    private bool Unlock(string id, int startAffinity = 0, GameObject prefab = null)
     {
         if (FindPrefab(id) == null)
         {
             Debug.LogWarning($"[{nameof(CharacterOwnership)}] 대응표에 없는 캐릭터 id '{id}'라 해금하지 않았습니다.", this);
-            return;
+            return false;
         }
 
-        if (FindRecord(id) != null) return;
-        _data.records.Add(new CharacterRecord { id = id, placed = false });
-        if (Summon(id)) return;
+        if (FindRecord(id) != null) return false;
+        _data.records.Add(new CharacterRecord
+        {
+            id = id,
+            placed = false,
+            cumulativeAffinity = Mathf.Clamp(startAffinity, 0, GameBalance.MaxAffinity),
+        });
+        if (Summon(id, prefab)) return true;
 
         // 화면 상한에 걸려 소환이 거절돼도 해금 기록은 남긴다(Summon은 거절하면 저장하지 않는다).
         // 그 캐릭터는 다음 실행에 숨은 채로 만들어지고, 도감에서 소환할 수 있다.
         Save();
         RecordChanged?.Invoke(id);
+        return true;
     }
+
+    /// <summary>
+    /// 튜토리얼 전용 — 대응표 밖 프리팹, 도감 해금 순서 예외. 보유하지 않은 캐릭터를 <paramref name="startAffinity"/>의 친밀도로 해금하고
+    /// 대응표의 프리팹 대신 <paramref name="prefab"/>으로 떨어뜨린다. 시작 친밀도는 기록의 초기값이라 하트를 주지 않는다.
+    /// 새 기록을 만들었으면 true — 화면 상한으로 소환이 거절돼 기록만 남아도 true다. 이미 보유했거나 대응표에 없는 id면 false.
+    /// 규약은 character-ownership.md.
+    /// </summary>
+    public bool UnlockWithAffinity(string id, int startAffinity, GameObject prefab)
+        => Unlock(id, startAffinity, prefab);
+
+    /// <summary>
+    /// 이미 나와 있는 오브젝트만 이 프리팹 판으로 바꾼다. 없으면 만들지 않고 false. 튜토리얼 전용.
+    /// 기록이 화면에 나와 있지 않거나(placed가 아님) 지울 오브젝트가 없으면 false — 기록과 화면을 어긋나게 하지 않고,
+    /// 곧이어 시작 등장이 보통 프리팹을 또 만들어 두 마리가 되지 않게 한다. 이미 그 프리팹으로 스폰된 것이면 아무것도 하지 않고 true.
+    /// 갈아 끼우면 저장하지 않는 실행 중 상태(변신 카운터 등)는 사라진다. 기록(친밀도)은 스폰 때 되돌린다.
+    /// 스폰이 상한에 걸려 실패해도 false.
+    /// </summary>
+    public bool EnsureSpawnedWithPrefab(string id, GameObject prefab)
+    {
+        if (prefab == null || !IsViewportReady) return false;
+        var record = FindRecord(id);
+        if (record == null || !record.placed) return false;
+        var owned = FindCharacter(id);
+        if (owned == null || owned.controller == null) return false;
+        if (owned.prefab == prefab) return true;
+
+        var go = owned.controller.gameObject;
+        owned.controller.Affinity.AffinityChanged -= owned.onAffinityChanged;
+        CharacterManager.Instance.Unregister(go);
+        _characters.Remove(owned);
+        Destroy(go);
+
+        return SpawnCharacter(id, prefab) != null;
+    }
+
+    /// <summary>
+    /// 튜토리얼 전용. 기록의 친밀도가 <paramref name="minimum"/>보다 낮을 때만 그 값으로 맞춰 저장하고, 화면의 캐릭터에도 넣는다.
+    /// 줄이는 경로가 아니다. 하트는 주지 않는다 — 튜토리얼이 정한 출발점이지 쓰담으로 오른 것이 아니다(시작 친밀도와 같은 판단).
+    /// 기록 객체를 친밀도 콜백이 잡고 있어, 다음 쓰담의 하트 기준도 맞춘 값이 된다. 바뀌었으면 true.
+    /// </summary>
+    public bool EnsureAffinityAtLeast(string id, int minimum)
+    {
+        var record = FindRecord(id);
+        var target = Mathf.Min(minimum, GameBalance.MaxAffinity);
+        if (record == null || record.cumulativeAffinity >= target) return false;
+
+        record.cumulativeAffinity = target;
+        Save();
+        RecordChanged?.Invoke(id);
+
+        var owned = FindCharacter(id);
+        if (owned != null && owned.controller != null) owned.controller.Affinity.Restore(target);
+        return true;
+    }
+
+    /// <summary>이 캐릭터의 오브젝트(숨겨져 있어도)를 찾는다. 아직 만들어지지 않았으면 false.</summary>
+    public bool TryGetController(string id, out BaseCharacterController controller)
+    {
+        var owned = FindCharacter(id);
+        controller = owned?.controller;
+        return controller != null;
+    }
+
+    /// <summary>캐릭터를 하나라도 보유했는가.</summary>
+    public bool HasAnyOwned => _data.records.Count > 0;
 
     /// <summary>
     /// 보유했지만 화면에 없는 캐릭터를 화면에 내보낸다(도감 [소환]). 이미 나와 있으면 아무 일도 하지 않는다 — 같은 캐릭터가 두 마리가 되지 않게.
     /// 화면에 나온 캐릭터의 동시 상한에 걸리면 기록을 바꾸지 않고 거절한다 — 기록과 화면이 어긋나지 않게.
     /// 바뀌었으면 true.
     /// </summary>
-    public bool Summon(string id)
+    public bool Summon(string id) => Summon(id, null);
+
+    // prefabIfMissing: 오브젝트가 없어 새로 만들 때 쓸 프리팹(null이면 대응표). 숨긴 오브젝트가 있으면 그것을 켤 뿐 쓰지 않는다.
+    private bool Summon(string id, GameObject prefabIfMissing)
     {
         var record = FindRecord(id);
         if (record == null || record.placed) return false;
@@ -232,7 +311,7 @@ public class CharacterOwnership : MonoBehaviour
         RecordChanged?.Invoke(id);
 
         // 뷰포트가 아직이면 기록만 해 둔다. 첫 확정 때 보유한 캐릭터 전부와 함께 만들어진다.
-        if (IsViewportReady) ShowOnField(id);
+        if (IsViewportReady) ShowOnField(id, prefabIfMissing);
         return true;
     }
 
@@ -260,13 +339,14 @@ public class CharacterOwnership : MonoBehaviour
     /// **켜기가 등록보다 먼저여야 한다.** 등록(<see cref="CharacterManager.Register"/>)이 거주 영역을 걸면서 접지를 강제하는데,
     /// 꺼진 채로는 숨기 전 상태(대기 등)라 바닥으로 끌어내려 낙하가 사라진다. 켜는 순간 캐릭터가 스스로 낙하로 다시 들어가고
     /// (BaseCharacterController.OnEnable), 낙하는 세로를 스스로 쥐어 끌려 내려가지 않는다.
+    /// <paramref name="prefabIfMissing"/>은 오브젝트가 없어 새로 만들 때만 쓴다(null이면 대응표).
     /// </summary>
-    private void ShowOnField(string id)
+    private void ShowOnField(string id, GameObject prefabIfMissing = null)
     {
         var owned = FindCharacter(id);
         if (owned == null || owned.controller == null)
         {
-            SpawnCharacter(id);
+            SpawnCharacter(id, prefabIfMissing);
             return;
         }
 
@@ -286,24 +366,26 @@ public class CharacterOwnership : MonoBehaviour
             0f);
     }
 
-    private void SpawnCharacter(string id)
+    // prefabOverride가 있으면 늘 그 프리팹으로 만들고, null이면 대응표의 프리팹을 쓴다(튜토리얼 치즈만 override를 넘긴다).
+    // 만든 컨트롤러를 돌려준다. 만들지 못했으면 null.
+    private BaseCharacterController SpawnCharacter(string id, GameObject prefabOverride = null)
     {
-        var prefab = FindPrefab(id);
+        var prefab = prefabOverride != null ? prefabOverride : FindPrefab(id);
         if (prefab == null)
         {
             // 저장 기록은 지우지 않는다. 대응표에 다시 등록되면 저절로 다시 나온다.
             Debug.LogWarning($"[{nameof(CharacterOwnership)}] 대응표에 없는 캐릭터 id '{id}'라 등장시키지 않았습니다.", this);
-            return;
+            return null;
         }
 
         var instance = CharacterManager.Instance.Spawn(prefab, RandomDropPosition());
         if (instance == null)
         {
             Debug.LogWarning($"[{nameof(CharacterOwnership)}] 동시 존재 상한에 걸려 '{id}'를 등장시키지 못했습니다.", this);
-            return;
+            return null;
         }
 
-        if (!instance.TryGetComponent(out BaseCharacterController controller)) return;
+        if (!instance.TryGetComponent(out BaseCharacterController controller)) return null;
 
         // 저장된 친밀도를 되돌리고, 오를 때마다 기록에 써서 바로 저장한 뒤 오른 만큼 하트를 준다.
         // 하트의 기준은 저장돼 있던 값이다 — 재시작해도 지난 하트를 다시 주지 않는다. 저장이 먼저인 이유는 AffinityHeartReward.Grant.
@@ -320,7 +402,8 @@ public class CharacterOwnership : MonoBehaviour
             RecordChanged?.Invoke(id);
         };
         affinity.AffinityChanged += onChanged;
-        _characters.Add(new OwnedCharacter { id = id, controller = controller, onAffinityChanged = onChanged });
+        _characters.Add(new OwnedCharacter { id = id, controller = controller, onAffinityChanged = onChanged, prefab = prefab });
+        return controller;
     }
 
     /// <summary>지금 누적 스폰 기운으로 해금할 수 있는데 아직 보유하지 않은 캐릭터가 있는가.
