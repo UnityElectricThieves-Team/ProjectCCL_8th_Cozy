@@ -18,7 +18,7 @@ paths:
 
 # Unity 파일을 누가, 어떻게 고치는가
 
-Claude가 직접 고쳐도 되는 것과 사용자가 Unity에서 고칠 것을 가르는 정본입니다. 씬·프리팹·ProjectSettings의 편집 규칙은 모두 여기로 모았습니다.
+Claude가 직접 고쳐도 되는 것과 사용자가 Unity에서 고칠 것을 가르는 정본입니다. 씬·프리팹·ProjectSettings의 편집 규칙과, `unity` CLI로 열린 에디터를 다룰 때의 범위는 모두 여기로 모았습니다.
 
 ## 원칙
 
@@ -110,6 +110,18 @@ ProjectSettings의 게임 버전 한 줄은 사용자가 "버전을 올리자"�
 2. 고친 뒤 편집 후 단계를 거치고, 사용자에게 Player Settings에 새 버전이 보이는지 확인을 부탁합니다. Unity가 켜진 채 밖에서 바뀐 ProjectSettings를 다시 읽는지는 확인되지 않았기 때문입니다.
 3. 안 보이면 Unity가 옛 값을 들고 있는 것이니, 사용자가 Player Settings에 직접 입력합니다.
 4. 커밋은 새 버전을 확인한 뒤에 하고, [project-settings.md](project-settings.md)대로 다른 작업과 분리합니다.
+
+## `unity` CLI로 열린 에디터 확인하기
+
+프로젝트에 `com.unity.pipeline` 패키지가 붙어 있어서(2026-11-25), Claude가 `unity` CLI로 열려 있는 에디터에 붙을 수 있습니다. 이 연결은 **확인용으로만** 씁니다.
+
+- **쓰는 것:** `unity status`(연결·Safe Mode 확인), `unity recompile`(컴파일 에러 확인), `unity command console`(콘솔 읽기), `editor.playmode`(Play 시작·정지), `capture`(스크린샷), `test`(테스트 실행).
+- **쓰지 않는 것:** `asset`·`scene`·`prefab`·`gameobject`·`component`·`settings`처럼 에셋·씬·설정을 바꾸는 명령. 이 명령들은 위 등급을 건너뛰고 3등급(구조·참조·씬·ProjectSettings)까지 Claude가 바꾸게 만들기 때문입니다. 에디터 안에서 바꾸면 디스크 덮어쓰기 위험은 없어지지만, 사용자가 Unity에서 보고 고친다는 3등급의 목적은 그대로 남습니다.
+- **`script eval`은 C#을 실행하므로 읽기에 쓸 때도 무엇을 실행할지 먼저 보여 줍니다.** 값을 바꾸는 코드는 실행하지 않습니다. 읽는 코드인지 바꾸는 코드인지가 명령 이름에 드러나지 않아서, 사용자가 보고 판단할 수 있게 하는 것입니다.
+- **Play 모드는 사용자가 에디터를 쓰고 있지 않을 때만 켭니다.** 저장하지 않은 씬이 있으면 먼저 묻습니다. Play 중에 사용자가 고친 값은 Play를 끝낼 때 사라지기 때문입니다.
+- **Project Settings → Pipeline → Runtime의 토글 두 개는 켜지 않습니다.** 켜면 같은 PC에서 접속하는 명령 서버와 Roslyn DLL(수 MB)이 빌드에 들어가고, Play 모드에서도 서버가 뜹니다. 꺼 두면 빌드에 들어가는 것은 작은 Attributes 어셈블리 하나뿐입니다. 데스크톱에 상주하는 게임이라 빌드에 불필요한 것을 넣지 않기 위해서입니다(루트 AI_INSTRUCTIONS.md §1).
+- **워크트리 세션에서는 `--project-path`로 메인 폴더(`Project_Cozy`)를 지정합니다.** 이때 붙는 에디터는 메인 폴더의 디스크를 보므로, 워크트리에서 바꾼 코드는 `develop`에 머지하기 전까지 확인되지 않습니다(git.md의 워크트리 절).
+- `unity status --until-ready`는 "Compiling Scripts" 진행창이 떠 있으면 기다리지 않고 바로 실패(`STATUS_BLOCKED_BY_DIALOG`)로 끝납니다. 컴파일이 끝나기를 기다리려면 `unity status`를 몇 초 간격으로 다시 부릅니다.
 
 ## 파일 옮기기
 

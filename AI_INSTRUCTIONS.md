@@ -65,6 +65,8 @@
 
 **Unity 파일은 고장 날 가능성으로 나눠 다룹니다** — 프리팹의 크기·위치·정렬·Raycast 같은 단순 설정은 사전작업 확인 뒤 Claude가 고치고, 구조·참조·씬은 사용자가 Unity에서 고칩니다. 새 YAML 에셋·`.meta`는 손으로 만들지 않고, Unity 에셋은 사용자가 Unity에서 옮깁니다(옮기기 전에 경로에 기대는 곳을 찾아 알림). C# 파일은 `.meta`와 함께 옮기되 Editor·Plugins 폴더 경계를 넘기지 않습니다. 등급표에 없는 Unity 파일 종류는 사용자가 고치는 쪽으로 봅니다. 정본은 [.claude/rules/unity/asset-editing.md](.claude/rules/unity/asset-editing.md)이고, 새로 만들기·옮기기처럼 파일을 열지 않는 순간에는 발화하지 않아 여기 한 줄 둡니다.
 
+**`unity` CLI로 열린 에디터에 붙는 것은 확인용(상태·컴파일·콘솔·Play·스크린샷·테스트)으로만 씁니다** — 에셋·씬·설정을 바꾸는 명령은 위 등급을 건너뛰므로 쓰지 않고, Pipeline 패키지의 Runtime 토글은 켜지 않습니다(빌드에 서버가 들어감). 이유와 나머지는 asset-editing.md의 "`unity` CLI로 열린 에디터 확인하기" 절에 있고, CLI를 부르는 순간에는 열 파일이 없어 발화하지 않으므로 여기 한 줄 둡니다.
+
 ---
 
 ## 3. 코드 스타일
@@ -111,7 +113,7 @@
 - `figma.md` — `paths` 없음, 항상 로드. 기획 원본인 Figma 파일을 어떤 도구로 읽는지. **Figma MCP는 쓰지 않고, 사용자 브라우저로만 읽는다**
 - `docs-conventions.md` — 문서·`AI_INSTRUCTIONS.md`·`CLAUDE.md`·`AGENTS.md`·rules를 쓸 때
 - `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/ui-panels.md`, `unity/platform.md`, `unity/project-settings.md` — 해당 파일을 열 때
-- `unity/asset-editing.md` — 누가 어떤 Unity 파일을 고치는가(고장 날 가능성 기준의 세 등급, 사전작업 확인, 저장·에셋이 기대는 C# 바꾸기, 파일 옮기기, git 되돌리기, 게임 버전·TMP 폰트 예외). Assets 아래 YAML 에셋·`.meta`, ProjectSettings를 열 때
+- `unity/asset-editing.md` — 누가 어떤 Unity 파일을 고치는가(고장 날 가능성 기준의 세 등급, 사전작업 확인, 저장·에셋이 기대는 C# 바꾸기, 파일 옮기기, git 되돌리기, 게임 버전·TMP 폰트 예외, `unity` CLI로 열린 에디터를 확인용으로만 쓰는 범위). Assets 아래 YAML 에셋·`.meta`, ProjectSettings를 열 때
 - `unity/character-ground.md` — 캐릭터 지면·발 규약. Character 스크립트·캐릭터 프리팹·캐릭터 스프라이트 임포트 설정을 열 때
 - `unity/character-ownership.md` — 캐릭터 보유·배치 기록 규약(캐릭터는 씬에 두지 않음, 보유한 캐릭터는 모두 만들고 귀환은 숨기기, id는 저장 키라 불변, 첫 실행은 빈 화면이 정상, 등장은 뷰포트 확정 후, 해금은 구름 클릭·기준은 도감 정의, 도감은 `CharacterId`로 기록을 읽고, 귀환·소환은 `CharacterOwnership`의 메서드로만). `CharacterOwnership`·`CharacterManager`·`CloudController`, 도감 컨트롤러·도감 데이터 모델, GameScene, 캐릭터·구름 프리팹을 열 때
 - `unity/character-affinity.md` — 캐릭터 친밀도 규약(누적값 하나·줄지 않음, 저장은 CharacterOwnership이 쓰담마다, 복원은 이벤트 없이, 하트는 저장된 친밀도 기준). 친밀도 모듈·하트 지급·캐릭터 기록·상태 글자 스크립트를 열 때
