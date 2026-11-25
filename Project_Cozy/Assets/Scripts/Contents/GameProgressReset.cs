@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// 설정 일반 탭의 [게임 초기화]. 게임 진행 내역을 처음 상태로 되돌린다 — 하트, 스폰 기운, 캐릭터 기록(해금·배치·친밀도),
-/// 장식(산 기록·놓인 장식), 배경(산 기록·사용 중인 배경). 설정과 화면 크기(뷰포트)는 진행이 아니라 사용자 환경이라 남긴다.
+/// 장식(산 기록·놓인 장식), 배경(산 기록·사용 중인 배경), 튜토리얼을 끝냈는지. 설정과 화면 크기(뷰포트)는 진행이 아니라
+/// 사용자 환경이라 남긴다. 튜토리얼은 그 자리에서 다시 시작하지 않고 다음 실행 때 시작한다.
 ///
 /// 저장 파일을 지우고 씬을 다시 불러오는 대신 각 시스템이 자기 값을 비운다(<c>ResetProgress</c>).
 /// 씬을 다시 불러오면 창을 바탕화면에 맞추는 초기화까지 다시 돌기 때문이다. 시스템마다 비우면 저장과 화면 갱신도
@@ -24,5 +25,6 @@ public static class GameProgressReset
         if (CharacterOwnership.Instance != null) CharacterOwnership.Instance.ResetProgress();
         if (ShopSystem.Instance != null) ShopSystem.Instance.ResetProgress();
         if (BackgroundSystem.Instance != null) BackgroundSystem.Instance.ResetProgress();
+        if (TutorialDirector.Instance != null) TutorialDirector.Instance.ResetProgress();
     }
 }

@@ -41,7 +41,7 @@
 
 **새 캐릭터 프리팹은 루트가 곧 발이어야 합니다** — Visual 자식을 올려 스프라이트 아래 끝을 루트 원점에 맞춥니다. 이유와 나머지 지면 규약은 [.claude/rules/unity/character-ground.md](.claude/rules/unity/character-ground.md)에 있는데, 그 파일은 기존 파일을 열 때만 로드되어 *새로 만드는* 순간에는 발화하지 않으므로 여기 한 줄 둡니다.
 
-**새 캐릭터는 씬에 놓지 않고 `CharacterOwnership`의 대응표에 id와 프리팹을 등록합니다** — 화면에 나오는 캐릭터는 저장 기록이 정합니다. id는 저장 키라 한번 정하면 바꾸지 않습니다. 이유는 [.claude/rules/unity/character-ownership.md](.claude/rules/unity/character-ownership.md)에 있고, 새 캐릭터를 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다.
+**새 캐릭터는 씬에 놓지 않고 `CharacterOwnership`의 대응표에 id와 프리팹을 등록합니다** — 화면에 나오는 캐릭터는 저장 기록이 정합니다. id는 저장 키라 한번 정하면 바꾸지 않습니다. 이유는 [.claude/rules/unity/character-ownership.md](.claude/rules/unity/character-ownership.md)에 있고, 새 캐릭터를 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다(튜토리얼 치즈는 예외 — [tutorial.md](.claude/rules/unity/tutorial.md)).
 
 **마우스로 만지는 새 월드 오브젝트의 판정은 `PolygonCollider2D` + `SpritePhysicsShapeSync`로 그림에서 가져옵니다** — 콜라이더 크기를 숫자로 적어 넣지 않습니다. 이유와 픽셀 검사와의 역할 분담은 [.claude/rules/unity/interaction-hit.md](.claude/rules/unity/interaction-hit.md)에 있고, 새 프리팹을 만드는 순간에는 발화하지 않아 여기 한 줄 둡니다.
 
@@ -115,8 +115,8 @@
 - `unity/csharp.md`, `unity/scenes.md`, `unity/prefabs.md`, `unity/ui-panels.md`, `unity/platform.md`, `unity/project-settings.md` — 해당 파일을 열 때
 - `unity/asset-editing.md` — 누가 어떤 Unity 파일을 고치는가(고장 날 가능성 기준의 세 등급, 사전작업 확인, 저장·에셋이 기대는 C# 바꾸기, 파일 옮기기, git 되돌리기, 게임 버전·TMP 폰트 예외, `unity` CLI로 열린 에디터를 확인용으로만 쓰는 범위). Assets 아래 YAML 에셋·`.meta`, ProjectSettings를 열 때
 - `unity/character-ground.md` — 캐릭터 지면·발 규약. Character 스크립트·캐릭터 프리팹·캐릭터 스프라이트 임포트 설정을 열 때
-- `unity/character-ownership.md` — 캐릭터 보유·배치 기록 규약(캐릭터는 씬에 두지 않음, 보유한 캐릭터는 모두 만들고 귀환은 숨기기, id는 저장 키라 불변, 첫 실행은 빈 화면이 정상, 등장은 뷰포트 확정 후, 해금은 구름 클릭·기준은 도감 정의, 도감은 `CharacterId`로 기록을 읽고, 귀환·소환은 `CharacterOwnership`의 메서드로만). `CharacterOwnership`·`CharacterManager`·`CloudController`, 도감 컨트롤러·도감 데이터 모델, GameScene, 캐릭터·구름 프리팹을 열 때
-- `unity/character-affinity.md` — 캐릭터 친밀도 규약(누적값 하나·줄지 않음, 저장은 CharacterOwnership이 쓰담마다, 복원은 이벤트 없이, 하트는 저장된 친밀도 기준). 친밀도 모듈·하트 지급·캐릭터 기록·상태 글자 스크립트를 열 때
+- `unity/character-ownership.md` — 캐릭터 보유·배치 기록 규약(캐릭터는 씬에 두지 않음, 보유한 캐릭터는 모두 만들고 귀환은 숨기기, id는 저장 키라 불변, 첫 실행은 캐릭터 없이 튜토리얼로 시작, 등장은 뷰포트 확정 후, 해금은 구름 클릭·기준은 도감 정의(튜토리얼 해금만 예외), 도감은 `CharacterId`로 기록을 읽고, 귀환·소환은 `CharacterOwnership`의 메서드로만, 튜토리얼 동안 소녀 변신 금지를 잠시 푸는 정본). `CharacterOwnership`·`CharacterManager`·`CloudController`, 도감 컨트롤러·도감 데이터 모델, GameScene, 캐릭터·구름 프리팹을 열 때
+- `unity/character-affinity.md` — 캐릭터 친밀도 규약(누적값 하나·줄지 않음, 오르는 경로의 정본 — 튜토리얼의 시작값·올리기 포함, 저장은 CharacterOwnership이 오를 때마다, 복원은 이벤트 없이, 하트는 저장된 친밀도 기준). 친밀도 모듈·하트 지급·캐릭터 기록·상태 글자 스크립트를 열 때
 - `unity/character-shadow.md` — 캐릭터 그림자 규약. `ShadowProjector`·캐릭터 프리팹을 열 때
 - `unity/character-state-machine.md` — 캐릭터 상태 전이 확정안. **캐릭터 행동 로직의 유일한 본.** Character 스크립트·캐릭터 프리팹·Animator 자산을 열 때
 - `unity/interaction-hit.md` — 월드 오브젝트의 마우스 판정 규약(판정은 그림 외곽선에서, 콜라이더와 픽셀 검사의 역할 분담, 콜라이더 위치, 구름 연출 — 그림만 둥둥·판정은 offset으로 따라감·활성은 뒤의 빛 테두리·수치는 컴포넌트에). Interaction 스크립트·`CloudController`·`CloudVisual`·캐릭터·구름 프리팹·캐릭터 그림 임포트 설정을 열 때
@@ -125,6 +125,7 @@
 - `unity/decoration-placement.md` — 장식 배치 모드(설치·이동·회수·제거)의 공통 골격, 고르기 판정, 설치 가능 판정과 색, 앞뒤 순서, 구매 시점과 저장, 회수 순번, 수량 팝업, 이동·회수·제거 모드의 패널 예외, 장식에 콜라이더를 달지 않는 이유, 인벤토리 갱신 시점, 상점 장식 칸의 실제 크기 표시, 자유 배치(배치 종류·지면 위 높이·분류의 정본인 기획자 리스트). 상점·인벤토리·장식 스크립트, 장식 프리팹, 장식 상품 에셋·상품 생성 메뉴를 열 때
 - `unity/audio.md` — 오디오 규약(음원은 Assets에·StreamingAssets 아님, `Assets/Audio/BGM/`의 Streaming 프리셋, 곡 목록 `BgmCatalog`가 드롭다운 이름·순서의 정본, 믹서 구성, 볼륨만 손 뗄 때 저장하는 이유). 오디오 폴더·오디오 스크립트·설정 스크립트·Preset Manager 설정을 열 때
 - `unity/settings.md` — 유저 설정 규약(값의 주인은 SettingsManager 하나·적용하는 쪽은 그것만 구독, 바뀐 값만 다시 건다, 기본값을 바꿀 때는 저장 키 이름도 바꾼다, OS 설정은 Gameplay 적용자가 Platform을 부른다). 설정 매니저·저장 형식·설정 UI 스크립트·설정 패널 프리팹·시작 프로그램 등록 코드를 열 때
+- `unity/tutorial.md` — 첫 실행 튜토리얼 규약(기존 시스템은 입구로만, 첫 실행 판정과 옛 플레이어 보호, 배선 누락과 진행 중 실패의 다른 처리, 튜토리얼 치즈는 치즈의 배리언트·대응표 밖, 안내 그림은 콜라이더 없는 월드 자식, 월드 딤과 메뉴 바 딤, 대사창·전면 클릭 판, 초기화 뒤 다음 실행에 시작). 튜토리얼 스크립트·튜토리얼 프리팹을 열 때
 - `unity/localization.md` — 다중 언어 규약(지원 언어 5개와 BCP 47 태그 저장, 번역 원본은 Figma, 키 기반 문자열·변수 이름 규칙, 번역 대상 범위, 미지원 언어 안내). UI·Contents 스크립트, 설정 스크립트, UI 패널 프리팹, 폰트를 열 때
 
 ---

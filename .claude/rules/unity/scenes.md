@@ -30,7 +30,7 @@ paths:
 
 ## UIRoot 아래 순서와 UI 입력 모듈
 
-- **호버 말풍선 층(`HoverTooltip`)은 UIRoot의 맨 뒤 형제로 둡니다.** 형제 순서가 그리기 순서라, 맨 뒤여야 패널과 메뉴 바 앞에 그려집니다. UIRoot 아래에 새 오버레이를 더할 때는 이 층 앞에 넣습니다.
+- **호버 말풍선 층(`HoverTooltip`)은 UIRoot의 맨 뒤 형제로 둡니다.** 형제 순서가 그리기 순서라, 맨 뒤여야 패널과 메뉴 바 앞에 그려집니다. UIRoot 아래에 새 오버레이를 더할 때는 이 층 앞에 넣습니다. 튜토리얼 오버레이는 MenuBar·Panels 뒤, 이 층 앞입니다 — 대사 장면의 전면 클릭 판이 메뉴 바와 패널을 덮어야 해서입니다([tutorial.md](tutorial.md)).
 - **EventSystem의 `InputSystemUIInputModule`에서 Send Pointer Hover To Parent를 끄지 않습니다.** 말풍선은 항목 루트에 한 번만 붙이고, 자식(토글·이름 글자)에 올린 호버가 부모로 올라오는 것에 기댑니다. 끄면 설정 행 등에서 말풍선이 뜨지 않습니다.
 - 씬 오브젝트(메뉴 바 버튼 등)에 말풍선을 달 때도 [ui-panels.md](ui-panels.md)의 말풍선 절을 따릅니다.
 

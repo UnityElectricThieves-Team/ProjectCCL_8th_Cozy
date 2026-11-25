@@ -12,7 +12,7 @@ paths:
 ```
 Assets/Prefabs/
 ├── Characters/
-│   ├── Character.prefab        # 캐릭터 베이스. 캐릭터별 프리팹은 이것의 배리언트
+│   ├── Character.prefab        # 캐릭터 베이스. 캐릭터별 프리팹은 이것의 배리언트 (튜토리얼 치즈는 치즈의 배리언트 — tutorial.md)
 │   ├── Character_Cheese.prefab
 │   └── Character_Hera.prefab
 ├── Cloud.prefab                # 나머지 게임 오브젝트는 여기 직하

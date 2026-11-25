@@ -35,4 +35,5 @@ public static class GameDataPaths
     public static string CharacterOwnership => Path.Combine(SaveRoot, "characterOwnership" + UserDataExtension);
     public static string Viewport => Path.Combine(SaveRoot, "viewport" + UserDataExtension);
     public static string Settings => Path.Combine(SaveRoot, "settings" + UserDataExtension);
+    public static string Tutorial => Path.Combine(SaveRoot, "tutorial" + UserDataExtension);
 }
